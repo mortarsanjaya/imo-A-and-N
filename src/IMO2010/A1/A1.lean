@@ -18,31 +18,28 @@ namespace IMO2010A1
 
 open function
 
-
-
 def fn_eq (f : ℝ → ℝ) := ∀ x y : ℝ, f (⌊x⌋ * y) = f x * ⌊f y⌋
 
 
 
-
-
-
-
-/- All functions satisying fn_eq are described here -/
+---- All functions satisying fn_eq are described here
 namespace answer
 
-lemma fn_answer1 : fn_eq 0 :=
+lemma fn_answer1 :
+  fn_eq 0 :=
 begin
   intros _ _; simp,
 end
 
-lemma fn_answer2 (C : ℝ) : ⌊C⌋ = 1 → fn_eq (const ℝ C) :=
+lemma fn_answer2 (C : ℝ) :
+  ⌊C⌋ = 1 → fn_eq (const ℝ C) :=
 begin
   intros h _ _; simp,
   rw h; simp,
 end
 
-theorem fn_answer (f : ℝ → ℝ) : (∃ C : ℝ, (C = 0 ∨ ⌊C⌋ = 1) ∧ const ℝ C = f) → fn_eq f :=
+theorem fn_answer (f : ℝ → ℝ) :
+  (∃ C : ℝ, (C = 0 ∨ ⌊C⌋ = 1) ∧ const ℝ C = f) → fn_eq f :=
 begin
   intros h,
   rcases h with ⟨C, h | h, h0⟩,
@@ -56,11 +53,7 @@ end answer
 
 
 
-
-
-
-
-/- We prove that there are no other functions satisfying fn_eq here -/
+---- We prove that there are no other functions satisfying fn_eq here
 namespace solution
 
 variable f : ℝ → ℝ
@@ -157,11 +150,7 @@ end solution
 
 
 
-
-
-
-
-/- Wrapper -/
+---- Wrapper
 theorem fn_all :
   set_of fn_eq = const ℝ '' ({0} ∪ set.Ico 1 2) :=
 begin
