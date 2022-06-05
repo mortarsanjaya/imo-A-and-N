@@ -1,29 +1,52 @@
 import
   IMO2017.A6.A6_general
-
-
+  algebra.char_p.basic
 
 /-
-2.  Solution for the case char(F) ≠ 2
+  Solution of 2017 A6 for the case char(F) ≠ 2
 -/
 
+namespace IMO2017A6
+
+universe u
+variable F : Type u
+variable [field F]
+variable [ring_char F ≠ 2]
+
+
+
+
+
+
+
+namespace case_char_ne_2
+
+open function
+
+variable f : F → F
+
 ---- Injectivity result and characterization result for char F ≠ 2
-lemma fn_lem2_1 : ∀ f : F → F, fn_eq F f → f 0 = 1 → ∀ x : F, f (x - 1) = f x + 1 :=
+lemma fn_lem1 (feq : fn_eq F f) : f 0 = 1 → ∀ x : F, f (x - 1) = f x + 1 :=
 begin
-  intros f h h0 x,
-  rw [← sub_eq_iff_eq_add, ← fn_lem4_1 F f h h0, sub_add_cancel],
+  intros h x,
+  rw [← sub_eq_iff_eq_add, ← general.fn_lem4_1 F f feq h, sub_add_cancel],
 end
 
-lemma fn_lem2_2 : ∀ f : F → F, fn_eq F f → f 0 = 1 → ∀ (x : F), f (f x * 2) + f x + 1 = f (-x) :=
+lemma fn_lem2 (feq : fn_eq F f) : f 0 = 1 → ∀ (x : F), f (f x * 2) + f x + 1 = f (-x) :=
 begin
-  intros f h h0 x,
+  intros h x,
   suffices : f (-1) = 2,
-  { have h1 := h x (-1),
-    rwa [← sub_eq_add_neg, fn_lem2_1 F f h h0, mul_neg_one, ← add_assoc, this] at h1, },
-  rw [← sub_left_inj, ← fn_lem4_1 F f h h0, neg_add_self, h0],
+  { have h0 := feq x (-1),
+    rwa [← sub_eq_add_neg] at h0,
+    rw fn_lem1 F at h0,
+    
+    
+    rw [fn_lem1 F f feq h, mul_neg_one, ← add_assoc, this] at h0, },
+  rw [← sub_left_inj, ← general.fn_lem4_1 F f h h0, neg_add_self, h0],
   norm_num,
 end
 
+/-
 lemma fn_lem2_3 : ∀ f : F → F, fn_eq F f → f 0 = 1 → ∀ x y : F, f x = f y → f (x - y) = f (-(x - y)) :=
 begin
   intros f h h0 x y h1,
@@ -107,3 +130,14 @@ begin
         have h4 := fn_thm2 F char_ne_2 (-f) h2 h3,
         rw [← neg_sub, ← h4, neg_neg], }, }, },
 end
+-/
+
+end case_char_ne_2
+
+
+
+
+
+
+
+end IMO2017A6
