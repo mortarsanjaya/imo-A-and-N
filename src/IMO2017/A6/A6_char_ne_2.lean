@@ -1,6 +1,6 @@
 import
   IMO2017.A6.A6_general
-  algebra.char_p.two
+  algebra.char_p.basic
   data.set.basic
 
 /-
@@ -75,19 +75,17 @@ begin
       general.fn_thm3 F f feq X, sub_eq_iff_eq_add'] at h1,
   have char_prop : 2 ≠ (0 : F),
   { intros h2,
-    have h3 : (-1 : F) = 1,
-    { calc (-1 : F) = 0 - 1 : by rw zero_sub
-      ... = 2 - 1 : by rw ← h2
-      ... = 1 : by norm_num, },
-    rw neg_one_eq_one_iff at h3,
-    contradiction, },
-  have h2 : f x = 1,
-  { calc f x = (f x * 2) / 2 : by rwa mul_div_cancel (f x) char_prop
-    ... = (1 + 1) / 2 : by rw h1
-    ... = 2 / 2 : by refl
-    ... = 1 : by rwa div_self, },
-  rwa [← sub_eq_zero, ← general.fn_lem4_1 F f feq h,
-       general.fn_thm3 F f feq X, add_left_eq_self] at h2,
+    apply char_ne_2,
+    apply char_p.ring_char_of_prime_eq_zero,
+    exact nat.prime_two,
+    simp; exact h2, },
+  suffices h2 : f x = 1,
+  { rwa [← sub_eq_zero, ← general.fn_lem4_1 F f feq h,
+         general.fn_thm3 F f feq X, add_left_eq_self] at h2, },
+  calc f x = (f x * 2) / 2 : by rwa mul_div_cancel (f x) char_prop
+  ... = (1 + 1) / 2 : by rw h1
+  ... = 2 / 2 : by refl
+  ... = 1 : by rwa div_self,
 end
 
 lemma fn_lem5 (feq : fn_eq F f) :
