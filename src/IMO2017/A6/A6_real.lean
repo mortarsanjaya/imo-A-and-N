@@ -1,5 +1,4 @@
 import
-  IMO2017.A6.A6
   IMO2017.A6.A6_char_ne_2
   data.real.basic
 

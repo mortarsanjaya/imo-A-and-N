@@ -1,6 +1,5 @@
 import
   IMO2017.A6.A6_general
-  algebra.char_p.basic
   algebra.char_p.two
   data.set.basic
 
@@ -23,8 +22,10 @@ variable [field F]
 namespace case_char_ne_2
 
 open function
+
 variable char_ne_2 : ring_char F ≠ 2
 include char_ne_2
+
 variable f : F → F
 
 
