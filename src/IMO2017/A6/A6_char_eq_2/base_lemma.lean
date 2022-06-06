@@ -2,6 +2,10 @@ import
   IMO2017.A6.A6_char_eq_2.basic
   algebra.char_p.pi
 
+/-
+  Base lemmas for the new FE system with char(F) = 2
+-/
+
 namespace IMO2017A6
 
 universe u
@@ -22,7 +26,6 @@ variable [char_p F 2]
 
 
 
----- Base lemmas for the new FE system with char(F) = 2
 namespace base_lemma
 
 variable f : F → F
