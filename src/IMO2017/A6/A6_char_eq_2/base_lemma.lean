@@ -24,7 +24,7 @@ variable [char_p F 2]
 
 ---- Solution for the new FE system with char(F) = 2
 ---- We will write partial progress; we have no real full solution yet
-namespace solution
+namespace base_lemma
 
 variable f : F → F
 variable feq1 : fn_eq1 F f
