@@ -57,8 +57,10 @@ end answer
 namespace solution
 
 variable f : ℝ → ℝ
+variable feq : fn_eq f
+include feq
 
-lemma fn_lem1 (feq : fn_eq f) :
+lemma fn_lem1 :
   f 0 ≠ 0 → ∀ y : ℝ, ⌊f y⌋ = 1 :=
 begin
   intros h y,
@@ -71,7 +73,7 @@ begin
   exact h1,
 end
 
-lemma fn_lem2 (feq : fn_eq f) :
+lemma fn_lem2 :
   f 0 ≠ 0 → ∃ C : ℝ, ⌊C⌋ = 1 ∧ f = const ℝ C :=
 begin
   intros h,
@@ -85,7 +87,7 @@ begin
   rwa h1,
 end
 
-lemma fn_lem4 (feq : fn_eq f) :
+lemma fn_lem3 :
   f 0 = 0 → f 2⁻¹ = 0 :=
 begin
   intros h,
@@ -106,12 +108,12 @@ begin
     exact h1, },
 end
 
-lemma fn_lem5 (feq : fn_eq f) :
+lemma fn_lem4 :
   f 0 = 0 → f 1 = 0 :=
 begin
   intros h,
   have h0 := feq 2 2⁻¹,
-  rw fn_lem4 f feq h at h0,
+  rw fn_lem3 f feq h at h0,
   have h1 : ⌊(2 : ℝ)⌋ = 2,
   { rw int.floor_eq_iff,
     norm_num, },
@@ -120,25 +122,25 @@ begin
   exact h0,
 end
 
-lemma fn_lem6 (feq : fn_eq f) :
+lemma fn_lem5 :
   f 0 = 0 → f = 0 :=
 begin
   intros h,
   apply funext,
   intros x,
   have h0 := feq 1 x,
-  rw fn_lem5 f feq h at h0,
+  rw fn_lem4 f feq h at h0,
   simp at h0,
   exact h0,
 end
 
-theorem fn_sol (feq : fn_eq f) :
+theorem fn_sol :
   ∃ C : ℝ, (C = 0 ∨ ⌊C⌋ = 1) ∧ const ℝ C = f :=
 begin
   by_cases h : (f 0 = 0),
   { use 0; split,
     left; refl,
-    rw fn_lem6 f feq h; simp, },
+    rw fn_lem5 f feq h; simp, },
   { have h0 := fn_lem2 f feq h,
     rcases h0 with ⟨C, h0, h1⟩,
     use C; split,

@@ -22,11 +22,13 @@ namespace general
 open function
 
 variable f : F → F
+variable feq : fn_eq F f
+include feq
 
 
 
 ---- Show that f satisfies the equation iff -f also satisfies the equation
-theorem fn_thm1 (feq : fn_eq F f) :
+theorem fn_thm1 :
   fn_eq F (-f) :=
 begin
   intros x y; simp,
@@ -36,7 +38,7 @@ end
 
 
 ---- Show that either f x = 0 → x = 1 or ∀ x, f x = 0
-lemma fn_lem2_1 (feq : fn_eq F f) :
+lemma fn_lem2_1 :
   (∃ x : F, x ≠ 1 ∧ f x = 0) → f 0 = 0 :=
 begin
   intros h,
@@ -54,7 +56,7 @@ begin
     rwa sub_ne_zero, },
 end
 
-lemma fn_lem2_2 (feq : fn_eq F f) :
+lemma fn_lem2_2 :
   f 0 = 0 → f = 0 :=
 begin
   intros h,
@@ -63,7 +65,7 @@ begin
   rwa [h, mul_zero, mul_zero, add_zero, h, zero_add] at h0,
 end
 
-theorem fn_thm2 (feq : fn_eq F f) :
+theorem fn_thm2 :
   (∃ x : F, x ≠ 1 ∧ f x = 0) → f = 0 :=
 begin
   intros h,
@@ -74,14 +76,14 @@ end
 
 
 ---- Now assume that f ≠ 0. Show that f x = 0 ↔ x = 1
-lemma fn_lem3_1 (feq : fn_eq F f) :
+lemma fn_lem3_1 :
   f (f 0 ^ 2) = 0 :=
 begin
   have h := feq 0 0,
   rwa [add_zero, mul_zero, add_left_eq_self, ← sq] at h,
 end
 
-lemma fn_lem3_2 (feq : fn_eq F f) :
+lemma fn_lem3_2 :
   f ≠ 0 → ∀ x : F, f x = 0 → x = 1 :=
 begin
   intros h x h0,
@@ -94,7 +96,7 @@ begin
     split; assumption, },
 end
 
-lemma fn_lem3_3 (feq : fn_eq F f) :
+lemma fn_lem3_3 :
   f ≠ 0 → f 0 ^ 2 = 1 :=
 begin
   intros h,
@@ -102,7 +104,7 @@ begin
   exact fn_lem3_1 F f feq,
 end
 
-lemma fn_lem3_4 (feq : fn_eq F f) :
+lemma fn_lem3_4 :
   f 1 = 0 :=
 begin
   by_cases h : f ≠ 0,
@@ -113,7 +115,7 @@ begin
     simp, },
 end
 
-theorem fn_thm3 (feq : fn_eq F f) :
+theorem fn_thm3 :
   f ≠ 0 → ∀ x : F, f x = 0 ↔ x = 1 :=
 begin
   intros h x,
@@ -126,7 +128,7 @@ end
 
 
 ---- If f is injective, we are done; plus some auxiliary lemmas
-lemma fn_lem4_1 (feq : fn_eq F f) :
+lemma fn_lem4_1 :
   f 0 = 1 → ∀ x : F, f (x + 1) = f x - 1 :=
 begin
   intros h x,
@@ -135,7 +137,7 @@ begin
   rw [← h0, add_sub_cancel'],
 end
 
-lemma fn_lem4_2 (feq : fn_eq F f) :
+lemma fn_lem4_2 :
   f 0 = 1 → ∀ x : F, f (f x) + f x = 1 :=
 begin
   intros h x,
@@ -143,7 +145,7 @@ begin
   rwa [mul_zero, h, mul_one, add_zero] at h0,
 end
 
-theorem fn_thm4 (feq : fn_eq F f) :
+theorem fn_thm4 :
   f 0 = 1 → injective f → f = 1 - id :=
 begin
   intros h h0,

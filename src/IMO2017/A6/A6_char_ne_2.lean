@@ -26,19 +26,23 @@ open function
 variable char_ne_2 : ring_char F ≠ 2
 include char_ne_2
 
-variable f : F → F
-
 
 
 ---- Injectivity result for char F ≠ 2
-lemma fn_lem1 (feq : fn_eq F f) :
+namespace solution
+
+variable f : F → F
+variable feq : fn_eq F f
+include feq
+
+lemma fn_lem1 :
   f 0 = 1 → ∀ x : F, f (x - 1) = f x + 1 :=
 begin
   intros h x,
   rw [← sub_eq_iff_eq_add, ← general.fn_lem4_1 F f feq h, sub_add_cancel],
 end
 
-lemma fn_lem2 (feq : fn_eq F f) :
+lemma fn_lem2 :
   f 0 = 1 → ∀ (x : F), f (f x * 2) + f x + 1 = f (-x) :=
 begin
   intros h x,
@@ -50,7 +54,7 @@ begin
   norm_num,
 end
 
-lemma fn_lem3 (feq : fn_eq F f) :
+lemma fn_lem3 :
   f 0 = 1 → ∀ x y : F, f x = f y → f (x - y) = f (-(x - y)) :=
 begin
   intros h x y h0,
@@ -61,7 +65,7 @@ begin
   rwa [sub_eq_add_neg, neg_add, neg_neg],
 end
 
-lemma fn_lem4 (feq : fn_eq F f) :
+lemma fn_lem4 :
   f 0 = 1 → ∀ x : F, f x = f (-x) → x = 0 :=
 begin
   intros h x h0,
@@ -88,7 +92,7 @@ begin
   ... = 1 : by rwa div_self,
 end
 
-lemma fn_lem5 (feq : fn_eq F f) :
+lemma fn_lem5 :
   f 0 = 1 → injective f :=
 begin
   intros h x y h0,
@@ -97,13 +101,15 @@ begin
   exact fn_lem3 F char_ne_2 f feq h x y h0,
 end
 
-theorem fn_thm2 (feq : fn_eq F f) :
+theorem fn_sol :
   f 0 = 1 → f = 1 - id :=
 begin
   intros h,
   apply general.fn_thm4 F f feq h,
   exact fn_lem5 F char_ne_2 f feq h,
 end
+
+end solution
 
 
 
@@ -121,11 +127,11 @@ begin
       have h1 := general.fn_lem3_3 F f h h0,
       rw sq_eq_one_iff at h1,
       cases h1 with h1 h1,
-      { left; exact fn_thm2 F char_ne_2 f h h1, },
+      { left; exact solution.fn_sol F char_ne_2 f h h1, },
       { right,
         have h2 := general.fn_thm1 F f h,
         have h3 : (-f) 0 = 1 := by simp; rw [h1, neg_neg],
-        have h4 := fn_thm2 F char_ne_2 (-f) h2 h3,
+        have h4 := solution.fn_sol F char_ne_2 (-f) h2 h3,
         rw [← neg_sub, ← h4, neg_neg], }, }, },
   { intros h,
     rcases h with h | h | h; subst h,
