@@ -4,7 +4,7 @@ import
 
 /-
   Solution of 2017 A6 for the originial case : F = ℝ
-  This file simply states the main result in "A6_char_ne_2.lean" for the original case..
+  This file simply states the main result in "A6_char_ne_2.lean" for the original case.
 -/
 
 namespace IMO2017A6
