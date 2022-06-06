@@ -153,15 +153,17 @@ begin
     exact fn_lem1_1 F f feq1 feq2, },
 end
 
---- The rest of the lemmas do not use A6_general
+
+
+---- The rest of the lemmas do not use A6_general
 lemma fn_lem2_1 :
   ∀ x : F, f (f x) = f x :=
 begin
   intros x,
   have h := feq1 x 1,
-  rwa [mul_one, char_two.add_self_eq_zero, zero_add,fn_lem1_3 F f feq1 feq2,
-       mul_one, ← sub_left_inj, add_sub_cancel, sub_eq_add, add_comm, feq2,
-       add_assoc, char_two.add_self_eq_zero, add_zero] at h,
+  rwa [mul_one, char_two.add_self_eq_zero, zero_add, fn_lem1_3 F f feq1 feq2,
+       mul_one, ← eq_sub_iff_add_eq, sub_eq_add, add_comm, feq2, add_assoc,
+       char_two.add_self_eq_zero, add_zero] at h,
 end
 
 lemma fn_lem2_2 :
@@ -186,6 +188,35 @@ begin
       add_comm, add_right_inj, fn_lem2_2 F f feq1 feq2] at h0,
   rw inv_eq_of_mul_eq_one_right h0,
 end
+
+lemma fn_lem2_4 : 
+  ∀ x y : F, f (f x * f y) + f (x + y) + 1 = f ((x + 1) * (y + 1)) :=
+begin
+  intros x y,
+  rw [feq1, ←feq2],
+  apply congr_arg,
+  ring,
+end
+
+lemma fn_lem2_5 (a b : F) (h : f a = f b) :
+  ∀ x : F, f (a * x) + f (a + x) = f(b * x) + f (b + x) :=
+begin
+  suffices : ∀ x y : F, f (x * y) + f (x + y) = f (f (x + 1) * f (y + 1)) + 1,
+  { intros x,
+    have h0 : f (a + 1) = f (b + 1) := by rw [feq2, feq2, h],
+    rw [this, h0, ← this], },
+  intros x y,
+  have h0 : x + 1 + (y + 1) = x + y :=
+    by rw [add_add_add_comm, char_two.add_self_eq_zero, add_zero],
+  rw [← eq_sub_iff_add_eq, sub_eq_add, add_right_comm, ← h0, feq1, ← feq2],
+  apply congr_arg,
+  rw [← sub_eq_add x, ← sub_eq_add y],
+  ring,
+end
+
+
+
+---- TODO: Results for equalities involving polynomials over 𝔽₂
 
 end solution
 
