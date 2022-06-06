@@ -22,8 +22,7 @@ variable [char_p F 2]
 
 
 
----- Solution for the new FE system with char(F) = 2
----- We will write partial progress; we have no real full solution yet
+---- Base lemmas for the new FE system with char(F) = 2
 namespace base_lemma
 
 variable f : F → F
@@ -144,7 +143,7 @@ begin
   ring,
 end
 
-end solution
+end base_lemma
 
 
 
