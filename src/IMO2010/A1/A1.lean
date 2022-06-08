@@ -1,6 +1,5 @@
 import
   data.real.basic
-  logic.function.basic
   data.set.basic
 
 /-
