@@ -54,7 +54,7 @@ begin
 end
 
 lemma fn_lem4 :
-  ∀ x : ℝ, x < 0 → f x ≥ 0 :=
+  ∀ x : ℝ, x < 0 → 0 ≤ f x :=
 begin
   intros x h,
   have h0 := fn_lem3 f fineq x (2 * f x),
