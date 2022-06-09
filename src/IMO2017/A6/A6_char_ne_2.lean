@@ -114,7 +114,7 @@ end solution
 
 
 ---- Wrapper
-theorem fn_all :
+theorem IMO2017A6_case_char_ne_2 :
   set_of (fn_eq F) = {0, 1 - id, id - 1} :=
 begin
   rw set.ext_iff; simp,

@@ -106,7 +106,7 @@ end
 
 
 ---- Wrapper
-theorem fn_sol :
+theorem IMO2011A6_sol :
   ∀ x : ℝ, x ≤ 0 → f x = 0 :=
 begin
   intros x h,

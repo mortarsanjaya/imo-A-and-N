@@ -152,7 +152,7 @@ end solution
 
 
 ---- Wrapper
-theorem fn_all :
+theorem IMO2010A1_sol :
   set_of fn_eq = const ℝ '' ({0} ∪ set.Ico 1 2) :=
 begin
   have X : set.Ico 1 2 = {C : ℝ | ⌊C⌋ = 1},

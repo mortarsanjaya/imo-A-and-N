@@ -183,7 +183,7 @@ end solution
 
 
 ---- Wrapper
-theorem fn_all :
+theorem IMO2015A2_sol :
   set_of fn_eq = {const ℤ (-1), id + 1} :=
 begin
   rw set.ext_iff; simp,

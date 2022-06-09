@@ -11,7 +11,7 @@ namespace IMO2017A6
 
 namespace case_real
 
-theorem fn_all :
+theorem IMO2017A6_sol :
   set_of (fn_eq ℝ) = {0, 1 - id, id - 1} :=
 begin
   apply case_char_ne_2.fn_all ℝ,
