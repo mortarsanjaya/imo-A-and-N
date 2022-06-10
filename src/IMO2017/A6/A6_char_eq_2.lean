@@ -3,7 +3,6 @@ import
   algebra.char_p.basic
   algebra.char_p.pi
   algebra.char_p.two
-  logic.function.basic
 
 /-
   My progress of 2017 A6 for the case char(F) = 2
