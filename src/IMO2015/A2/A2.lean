@@ -1,8 +1,6 @@
 import
   data.int.basic
-  data.nat.basic
   data.set.basic
-  tactic.ring
 
 /-
   IMO 2015 A2
@@ -156,7 +154,8 @@ begin
     calc A * x + (A + B) = A * (x + 1) + B : by rw [mul_add, mul_one, add_assoc _ A]
     ... = f (x + 1) : by rw ← h
     ... = f (f x) : by rw ← fn_lem2 f feq
-    ... = A * A * x + (A * B + B) : by rw [h, h]; ring, },
+    ... = A * (A * x + B) + B : by rw [h, h]
+    ... = A * A * x + (A * B + B) : by rw [mul_add, add_assoc, ← mul_assoc], },
   have h1 := fn_lem7 f feq _ _ _ _ h0,
   cases h1 with h1 h2,
   rw add_left_inj at h2,
