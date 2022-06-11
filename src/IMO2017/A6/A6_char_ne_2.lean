@@ -5,6 +5,8 @@ import
   data.set.basic
   
 
+namespace IMO2017A6
+
 /-
   Solution of 2017 A6 for the case char(F) ≠ 2.
 
@@ -31,10 +33,6 @@ import
      In particular we can combine the latter step directly into injectivity.
 -/
 
-namespace IMO2017A6
-
-universe u
-
 
 
 
@@ -45,6 +43,7 @@ namespace case_char_ne_2
 
 open function
 
+universe u
 variable {F : Type u}
 variable [field F]
 
@@ -183,6 +182,10 @@ end case_char_ne_2
 
 
 
+
+
+
+
 ---- Case F = ℝ
 theorem IMO2017A6_sol_R :
   set_of fn_eq = ({0, 1 - id, id - 1} : set (ℝ → ℝ)) :=
@@ -191,11 +194,5 @@ begin
   rw [ring_char.eq_zero, ne_comm],
   exact two_ne_zero,
 end
-
-
-
-
-
-
 
 end IMO2017A6

@@ -17,7 +17,8 @@ namespace IMO2015A2
   See http://www.imo-official.org/problems/IMO2015SL.pdf
   We will follow the official solution.
 -/
-def fn_eq (f : ℤ → ℤ) := ∀ x y : ℤ, f (x - f y) = f (f x) - f y - 1
+def fn_eq (f : ℤ → ℤ) :=
+  ∀ x y : ℤ, f (x - f y) = f (f x) - f y - 1
 
 
 

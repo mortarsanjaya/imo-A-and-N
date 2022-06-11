@@ -3,6 +3,12 @@ import
   algebra.char_p.two
   algebra.char_p.pi
 
+namespace IMO2017A6
+
+universe u
+variable {F : Type u}
+variable [field F]
+
 /-
   Progress of 2017 A6 for the case char(F) = 2
 
@@ -11,11 +17,14 @@ import
   Then, we prove basic lemmas about the new FE system.
 -/
 
-namespace IMO2017A6
+def fn_eq1 (f : F → F) :=
+  ∀ x y : F, f (f x * f y) + f (x + y) = f (x * y + x + y)
+def fn_eq2 (f : F → F) :=
+  ∀ x : F, f (x + 1) = f x + 1
 
-universe u
-variable {F : Type u}
-variable [field F]
+
+
+
 
 
 
@@ -24,16 +33,6 @@ namespace case_char_eq_2
 open char_two
 
 variable [char_p F 2]
-
-
-
-
-
-
-
----- Start with new definitions
-def fn_eq1 (f : F → F) := ∀ x y : F, f (f x * f y) + f (x + y) = f (x * y + x + y)
-def fn_eq2 (f : F → F) := ∀ x : F, f (x + 1) = f x + 1
 
 
 

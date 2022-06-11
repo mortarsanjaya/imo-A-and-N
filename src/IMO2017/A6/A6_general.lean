@@ -29,7 +29,8 @@ variable [field F]
   3. This file contains the statement of the functional equation and
        lemmas that are usable for both case char F ≠ 2 and char F = 2.
 -/
-def fn_eq (f : F → F) := ∀ x y : F, f (f x * f y) + f (x + y) = f (x * y)
+def fn_eq (f : F → F) :=
+  ∀ x y : F, f (f x * f y) + f (x + y) = f (x * y)
 
 
 
