@@ -1,6 +1,7 @@
 import
   IMO2017.A6.A6_char_eq_2.basic
   IMO2017.A6.A6_char_eq_2.extra.my_F2X_induction
+  data.zmod.algebra
 
 namespace IMO2017A6
 
@@ -56,7 +57,7 @@ namespace poly_result
 
 open polynomial
 
-def phi2F := zmod.cast_hom (dvd_refl 2) F
+def phi2F := algebra_map (zmod 2) F
 
 
 
