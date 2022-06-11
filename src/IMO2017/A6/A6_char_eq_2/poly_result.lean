@@ -1,6 +1,6 @@
 import
-  IMO2017.A6.A6_char_eq_2.base_lemma
-  data.zmod.algebra
+  IMO2017.A6.A6_char_eq_2.basic
+  data.zmod.basic
   data.polynomial.eval
   data.polynomial.div
 
@@ -33,7 +33,7 @@ import
 namespace IMO2017A6
 
 universe u
-variable F : Type u
+variable {F : Type u}
 variable [field F]
 
 
@@ -58,31 +58,30 @@ def phi2F := zmod.cast_hom (dvd_refl 2)
 
 
 
-variable f : F → F
-variable feq1 : fn_eq1 F f
-variable feq2 : fn_eq2 F f
+variable {f : F → F}
+variable feq1 : fn_eq1 f
+variable feq2 : fn_eq2 f
 include feq1 feq2
 
 
 
-lemma fn_induction_intro (a b : F) (h : f a = f b) :
+lemma fn_induction_intro {a b : F} (h : f a = f b) :
   ∀ P : polynomial (zmod 2),
     f (eval₂ (phi2F F) a P) = f (eval₂ (phi2F F) b P) →
       f (eval₂ (phi2F F) a (X + P)) = f (eval₂ (phi2F F) b (X + P)) →
         f (eval₂ (phi2F F) a (X * P)) = f (eval₂ (phi2F F) b (X * P)) :=
 begin
-  simp only [eval₂_X, eval₂_add, eval₂_mul]; intros P h0 h1,
+  intros P h0 h1,
+  rw [eval₂_add, eval₂_X, eval₂_add, eval₂_X] at h1,
+  rw [eval₂_mul, eval₂_X, eval₂_mul, eval₂_X],
   let Pa := eval₂ (phi2F F) a P,
   let Pb := eval₂ (phi2F F) b P,
   calc f (a * Pa) = f (a * Pa) + f (a + Pa) - f (a + Pa) : by rw add_sub_cancel
-  ... = f (b * Pa) + f (b + Pa) - f (a + Pa) : by rw base_lemma.fn_lem2_5 F f feq1 feq2 a b h
-  ... = f (Pa * b) + f (Pa + b) - f (a + Pa) : by rw [mul_comm, add_comm b Pa]
-  ... = f (Pb * b) + f (Pb + b) - f (a + Pa) : by rw base_lemma.fn_lem2_5 F f feq1 feq2 Pa Pb h0
-  ... = f (b * Pb) + f (b + Pb) - f (a + Pa) : by rw [mul_comm, add_comm Pb b]
+  ... = f (b * Pb) + f (b + Pb) - f (a + Pa) : by rw base_lemma.fn_lem2_7 feq1 feq2 h h0
   ... = f (b * Pb) : by rw [h1, add_sub_cancel],
 end
 
-theorem fn_thm (a b : F) (h : f a = f b) :
+theorem fn_thm {a b : F} (h : f a = f b) :
   ∀ P : polynomial (zmod 2), f (eval₂ (phi2F F) a P) = f (eval₂ (phi2F F) b P) :=
 begin
 
@@ -92,20 +91,17 @@ begin
     intros c,
     cases c with x x_prop,
     rcases x with _ | x | x,
-    { left; refl, },
-    { right; refl, },
-    { rw [nat.succ_lt_succ_iff, nat.add_def, add_zero, nat.succ_lt_succ_iff] at x_prop,
-      have := nat.not_lt_zero x,
-      contradiction, },
+    left; refl,
+    right; refl,
+    rw [nat.succ_lt_succ_iff, nat.add_def, add_zero, nat.succ_lt_succ_iff] at x_prop,
+    exfalso; exact nat.not_lt_zero x x_prop,
   end,
 
   ---- Some stupid result
   have zmod2_coe : ∀ c : zmod 2, (phi2F F) c = ↑c :=
   begin
-    intros c,
-    cases c,
-    unfold phi2F,
-    simp,
+    intros c; cases c,
+    unfold phi2F; rw zmod.cast_hom_apply,
   end,
 
   ---- Another stupid result
@@ -113,8 +109,8 @@ begin
   begin
     intros x c,
     cases zmod2_elts c with h h,
-    all_goals { subst h; simp, },
-    exact feq2 x,
+    rw [h, zmod.cast_zero, add_zero, add_zero],
+    rw [h, zmod.cast_one', feq2],
   end,
 
   ---- Start of the main result
@@ -124,7 +120,8 @@ begin
 
   -- Case n ≤ 1
   { rw ← h0 at h1,
-    rw eq_X_add_C_of_nat_degree_le_one h1; simp,
+    rw eq_X_add_C_of_nat_degree_le_one h1,
+    simp only [polynomial.eval₂_C, polynomial.eval₂_X, polynomial.eval₂_add, polynomial.eval₂_mul],
     rw [zmod2_coe, zmod2_coe, fn_aux, fn_aux, add_left_inj],
     cases zmod2_elts (P.coeff 1) with Px Px; rw Px; simp,
     exact h, },
@@ -133,7 +130,7 @@ begin
   { rw [← mod_by_monic_add_div P monic_X, mod_by_monic_X, add_comm, eval₂_add,
         eval₂_add, eval₂_C, eval₂_C, zmod2_coe, fn_aux, fn_aux, add_left_inj],
     suffices : (P /ₘ X).nat_degree < n,
-    { apply fn_induction_intro F f feq1 feq2 a b h,
+    { apply fn_induction_intro feq1 feq2 h,
       { apply n_ih (P /ₘ X).nat_degree this; refl, },
       { apply n_ih (X + P /ₘ X).nat_degree,
         swap,
