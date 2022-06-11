@@ -9,8 +9,6 @@ namespace IMO2017A6
 
 namespace extra
 
-namespace my_F2X_induction
-
 open polynomial
 
 
@@ -38,7 +36,7 @@ end
   2. For any P ∈ 𝔽₂[X], if M P holds, then M (P + 1) holds,
   3. For any P ∈ 𝔽₂[X], if M P and M (P + X) holds, then M (P * X) holds.
 -/
-theorem induction1 {M : polynomial (zmod 2) → Prop} :
+theorem my_poly_induction {M : polynomial (zmod 2) → Prop} :
   M 0 → M X →
     (∀ P : polynomial (zmod 2), M P → M (P + 1)) →
     (∀ P : polynomial (zmod 2), M P → M (P + X) → M (P * X)) →
@@ -80,10 +78,6 @@ begin
 end
 
 
-
-
-
-end my_F2X_induction
 
 end extra
 

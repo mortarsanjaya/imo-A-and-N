@@ -71,7 +71,7 @@ include feq1 feq2
 theorem fn_thm {a b : F} (h : f a = f b) :
   ∀ P : polynomial (zmod 2), f (eval₂ phi2F a P) = f (eval₂ phi2F b P) :=
 begin
-  apply extra.my_F2X_induction.induction1,
+  apply extra.my_poly_induction,
   { rw [eval₂_zero, eval₂_zero] },
   { rwa [eval₂_X, eval₂_X] },
   { intros P h,
