@@ -18,24 +18,25 @@ open ratfunc
 universe u
 
 /-
-  For any M : F[X] → Prop, M(P) holds for all P ∈ 𝔽₂[X] if all the following are true:
-  (1). For any c ∈ F, M(cX) holds,
-  (2). For any P ∈ F[X] and c ∈ F, if M(P) holds, then M(P + c) holds,
-  (3). For any P ∈ F[X], if M(P) and M(P + X) holds, then M(P * X) holds.
+  Let R be a non-trivial commutative ring.
+  For any M : R[X] → Prop, M(P) holds for all P ∈ R[X] if all the following are true:
+  (1). For any c ∈ R, M(cX) holds,
+  (2). For any P ∈ R[X] and c ∈ R, if M(P) holds, then M(P + c) holds,
+  (3). For any P ∈ R[X], if M(P) and M(P + X) holds, then M(P * X) holds.
 
   Proof:
     By strong induction on deg(P).
 
     Base case (deg(P) ≤ 1):
-      For deg(P) ≤ 1, P = cX + d for c, d ∈ 𝔽₂[X].
+      For deg(P) ≤ 1, P = cX + d for c, d ∈ R[X].
       By (1), M(cX) holds, and then by (2), M(P) holds.
 
     Induction step (deg(P) > 1):
-      Suppose that for some n > 1, we have M(P) for all P ∈ F[X] with deg(P) < n.
+      Suppose that for some n > 1, we have M(P) for all P ∈ R[X] with deg(P) < n.
       Take some P with deg(P) = n.
       By (2), we can WLOG assume X | P.
 
-      Now, write P = QX for some Q ∈ F[X].
+      Now, write P = QX for some Q ∈ R[X].
       Since deg(Q) < deg(P) = n, by IH, we have M(Q).
       But also, M(Q + X) holds since deg(Q + X) ≤ max {deg(Q), 1} < n.
       Thus, by (3), we have M(P).
