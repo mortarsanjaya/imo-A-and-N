@@ -3,6 +3,7 @@ import
   IMO2017.A6.A6_char_eq_2.extra.my_poly_induction
   IMO2017.A6.A6_char_eq_2.extra.zmod2_elts
   data.zmod.algebra
+  field_theory.ratfunc
 
 namespace IMO2017A6
 
