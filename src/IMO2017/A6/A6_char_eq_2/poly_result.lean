@@ -46,28 +46,26 @@ include feq1 feq2 fval_eq
 
 /-
   Proof of result 1 (∀ P ∈ 𝔽₂[X], f(P(a)) = f(P(b))):
-  Strong induction on deg(P) with deg(P) ≤ 1 as a base case.
-  Note that:
-  1. For any c ∈ 𝔽₂, the equation is true for cX.
-     Trivial since c = 0 or 1 and the equation is trivially true for 0 and X.
-  2. For any c ∈ 𝔽₂, the equation is true for P + c if it is true for P.
-     Due to f(x + 1) = f(x) + 1 (FE 2 of the new FE system) and c = 0 or 1.
-  3. The equation is true for PX if it is true for P and P + X.
-     Due to f(a) = f(b) → f(c) = f(d) → f(ac) + f(a + c) = f(bd) + f(b + d) (base lemma 2.7).
-  See "extra/my_F2X_induction.lean", theorem "my_poly_induction".
+  Refer to theorem "my_poly_induction" in file "extra/my_F2X_induction.lean".
 -/
-theorem fF2poly_eq_of_fval_eq :
-  ∀ P : polynomial (zmod 2), f (eval₂ phi2F a P) = f (eval₂ phi2F b P) :=
+theorem fF2poly_eq_of_fval_eq (P : polynomial (zmod 2)) :
+  f (eval₂ phi2F a P) = f (eval₂ phi2F b P) :=
 begin
-  apply extra.my_poly_induction,
+  revert P; apply extra.my_poly_induction,
+
+  -- ∀ c : R, M(cX)
   { intros c,
     cases extra.zmod2_elts c with h h,
     rw [h, map_zero, zero_mul, eval₂_zero, eval₂_zero],
     rw [h, map_one, one_mul, eval₂_X,eval₂_X, fval_eq] },
+
+  -- ∀ (P : R[X]) (c : R), M(P) → M(P + c)
   { intros P c h,
     cases extra.zmod2_elts c with h0 h0,
     rw [h0, map_zero, add_zero, h],
     rw [h0, map_one, eval₂_add, eval₂_add, eval₂_one, eval₂_one, feq2, feq2, h] },
+
+  -- ∀ P : R[X], M(P) → M(P + X) → M(P * X)
   { intros P h0 h1,
     rw [eval₂_add, eval₂_X, eval₂_add, eval₂_X] at h1,
     rw [eval₂_mul, eval₂_X, eval₂_mul, eval₂_X],
