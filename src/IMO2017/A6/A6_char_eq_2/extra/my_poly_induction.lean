@@ -62,29 +62,27 @@ theorem my_poly_induction {R : Type u} [nontrivial R] [comm_ring R] {M : polynom
   (∀ P : polynomial R, M P → M (P + X) → M (P * X)) →
   ∀ P : polynomial R, M P :=
 begin
-  intros M_base M_ih1 M_ih2 P,
-  induction h : P.nat_degree using nat.strong_induction_on with n n_ih generalizing P,
-  cases le_or_lt n 1 with h0 h0,
+  intros M_base M_ih1 M_ih2,
+  apply polynomial_strong_induction_nat_degree; intros P P_ih,
+  cases le_or_lt P.nat_degree 1 with h h,
 
-  -- Case n ≤ 1 (Base Case)
-  { rw ← h at h0,
-    rw eq_X_add_C_of_nat_degree_le_one h0,
+  -- Base case: deg(P) ≤ 1
+  { rw eq_X_add_C_of_nat_degree_le_one h,
     apply M_ih1,
     exact M_base (P.coeff 1) },
   
-  -- Case 1 < n (Induction Step)
+  -- Induction step: deg(P) > 1
   { rw [← mod_by_monic_add_div P monic_X, mod_by_monic_X, add_comm, mul_comm],
     apply M_ih1,
-    have h1 : (P /ₘ X).nat_degree < n,
-    { rw [nat_degree_div_by_monic P monic_X, nat_degree_X, h],
-      exact nat.sub_lt (lt_trans zero_lt_one h0) zero_lt_one },
+    have h1 : (P /ₘ X).nat_degree < P.nat_degree,
+    { rw [nat_degree_div_by_monic P monic_X, nat_degree_X],
+      exact nat.sub_lt (lt_trans zero_lt_one h) zero_lt_one },
     apply M_ih2,
-    { apply n_ih (P /ₘ X).nat_degree h1; refl },
-    { apply n_ih (P /ₘ X + X).nat_degree,
-      work_on_goal 2 { refl },
-      apply lt_of_le_of_lt (nat_degree_add_le _ X),
-      rw [nat_degree_X, max_lt_iff],
-      split; assumption } },
+    apply P_ih (P /ₘ X) h1; refl,
+    apply P_ih (P /ₘ X + X),
+    apply lt_of_le_of_lt (nat_degree_add_le _ X),
+    rw [nat_degree_X, max_lt_iff],
+    split; assumption },
 end
 
 
