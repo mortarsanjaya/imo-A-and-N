@@ -1,7 +1,6 @@
 import
   data.polynomial.basic
   data.polynomial.div
-  field_theory.ratfunc
 
 /-
   Implementation of induction necessary for results given in "poly_result.lean"
@@ -11,11 +10,27 @@ namespace IMO2017A6
 namespace extra
 
 open polynomial
-open ratfunc
-
-
 
 universe u
+
+
+
+/-
+  Strong induction on degree of polynomial, using nat_degree
+-/
+theorem polynomial_strong_induction_nat_degree {R : Type u} [comm_ring R] {M : polynomial R → Prop}
+  (h : ∀ P : polynomial R, (∀ Q : polynomial R, Q.nat_degree < P.nat_degree → M Q) → M P) :
+  ∀ P : polynomial R, M P :=
+begin
+  intros P,
+  induction h0 : P.nat_degree using nat.strong_induction_on with n n_ih generalizing P,
+  apply h; intros Q h1,
+  rw h0 at h1,
+  apply n_ih Q.nat_degree h1,
+  refl,
+end
+
+
 
 /-
   Let R be a non-trivial commutative ring.
