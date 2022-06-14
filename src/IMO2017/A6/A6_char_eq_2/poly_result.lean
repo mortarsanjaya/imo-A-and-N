@@ -16,7 +16,7 @@ variable [field F]
   1. ∀ P ∈ 𝔽₂[X], f(P(a)) = f(P(b)),
   2. ∀ P ∈ 𝔽₂[X], P(a) = 0 ↔ P(b) = 0,
   3. ∀ P = Q/R ∈ 𝔽₂(X), R(a), R(b) ≠ 0 → f(P(a)) = f(P(b))
-  See "extra/my_F2X_induction.lean" for details on induction needed for result 1 and 3.
+  See "extra/my_poly_induction.lean" for details on induction needed for result 1 and 3.
 
   TODO: State and prove result 3.
 -/
@@ -90,6 +90,28 @@ begin
       fF2poly_eq_of_fval_eq feq1 feq2 fval_eq,
       base_lemma.fn_lem1_3 feq1 feq2],
 end
+
+
+
+/-
+  Proof of result 3 (∀ P = Q/R ∈ 𝔽₂(X), R(a), R(b) ≠ 0 → f(P(a)) = f(P(b))):
+  Refer to theorem "my_poly_induction2" in file "extra/my_F2X_induction.lean".
+  We start by stating the result in terms of just polynomials.
+-/
+theorem fF2ratfunc_eq_of_fval_eq' (P Q : polynomial (zmod 2)) :
+  f (eval₂ phi2F a P / eval₂ phi2F a Q) = f (eval₂ phi2F b P / eval₂ phi2F b Q) :=
+begin
+  sorry,
+end
+
+theorem fF2ratfunc_eq_of_fval_eq (P : ratfunc (zmod 2)) :
+  f (eval phi2F a P) = f (eval phi2F b P) :=
+begin
+  apply ratfunc.induction_on P; intros,
+  apply fF2ratfunc_eq_of_fval_eq' feq1 feq2 fval_eq,
+end
+
+
 
 
 end case_char_eq_2
