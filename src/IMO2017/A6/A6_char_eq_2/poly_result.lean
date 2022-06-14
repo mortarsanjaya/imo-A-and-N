@@ -79,8 +79,17 @@ end
 
 
 
-
-
+/-
+  Proof of result 2 (∀ P ∈ 𝔽₂[X], P(a) = 0 ↔ P(b) = 0):
+  Trivial from result 1 and f(x) = 0 ↔ x = 0
+-/
+theorem fF2poly_zeroes_eq_of_fval_eq (P : polynomial (zmod 2)) :
+  eval₂ phi2F a P = 0 ↔ eval₂ phi2F b P = 0 :=
+begin
+  rw [← base_lemma.fn_lem1_3 feq1 feq2,
+      fF2poly_eq_of_fval_eq feq1 feq2 fval_eq,
+      base_lemma.fn_lem1_3 feq1 feq2],
+end
 
 
 end case_char_eq_2
