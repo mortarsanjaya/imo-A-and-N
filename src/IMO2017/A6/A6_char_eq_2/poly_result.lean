@@ -26,6 +26,7 @@ namespace case_char_eq_2
 open char_two
 open polynomial
 open ratfunc
+open_locale classical
 
 variable [char_p F 2]
 
@@ -74,7 +75,8 @@ begin
     let Pb : F := eval₂ phi2F b P,
     calc f (Pa * a) = f (Pa * a) + f (Pa + a) - f (Pa + a) : by rw add_sub_cancel
     ... = f (Pb * b) + f (Pb + b) - f (Pa + a) : by rw base_lemma.fn_lem2_7 feq1 feq2 h0 fval_eq
-    ... = f (Pb * b) : by rw [h1, add_sub_cancel] },
+    ... = f (Pb * b) + f (Pb + b) - f (Pb + b) : by rw h1
+    ... = f (Pb * b) : by rw add_sub_cancel },
 end
 
 
@@ -101,7 +103,43 @@ end
 theorem fF2ratfunc_eq_of_fval_eq' (P Q : polynomial (zmod 2)) :
   f (eval₂ phi2F a P / eval₂ phi2F a Q) = f (eval₂ phi2F b P / eval₂ phi2F b Q) :=
 begin
-  sorry,
+  revert P Q; apply extra.my_poly_induction2,
+
+  -- ∀ (c : F) (P : F[X]), M(P, c)
+  { intros c P,
+    cases extra.zmod2_elts c with h h,
+    rw [h, map_zero, eval₂_zero, eval₂_zero, div_zero, div_zero],
+    rw [h, map_one, eval₂_one, eval₂_one, div_one, div_one],
+    exact fF2poly_eq_of_fval_eq feq1 feq2 fval_eq P },
+  
+  -- ∀ P Q : F[X], M(P, Q) → M(Q, P)
+  { intros P Q h,
+    rw [← inv_div, base_lemma.fn_lem2_3 feq1 feq2, h,
+        ← base_lemma.fn_lem2_3 feq1 feq2, inv_div] },
+
+  -- ∀ P Q R : F[X], deg(R) < deg(Q) → M(R, Q) → M(PR, Q) → M(PQ + R, Q)
+  { intros P Q R junk h h0,
+    by_cases h1 : eval₂ phi2F a Q = 0,
+
+    -- Case 1: Q(a) = 0
+    { rw [h1, div_zero],
+      rw fF2poly_zeroes_eq_of_fval_eq feq1 feq2 fval_eq at h1,
+      rw [h1, div_zero] },
+
+    -- Case 2: Q(a) ≠ 0
+    { rw [eval₂_mul, ← mul_div, eval₂_mul, ← mul_div] at h0,
+      rw [eval₂_add, eval₂_mul, ← add_div_eq_mul_add_div _ _ h1],
+      rw fF2poly_zeroes_eq_of_fval_eq feq1 feq2 fval_eq at h1,
+      rw [eval₂_add, eval₂_mul, ← add_div_eq_mul_add_div _ _ h1],
+      have h2 := fF2poly_eq_of_fval_eq feq1 feq2 fval_eq P,
+      let Pa : F := eval₂ phi2F a P,
+      let Pb : F := eval₂ phi2F b P,
+      let RQa : F := eval₂ phi2F a R / eval₂ phi2F a Q,
+      let RQb : F := eval₂ phi2F b R / eval₂ phi2F b Q,
+      calc f (Pa + RQa) = f (Pa * RQa) + f (Pa + RQa) - f (Pa * RQa) : by rw add_sub_cancel'
+      ... = f (Pb * RQb) + f (Pb + RQb) - f (Pa * RQa) : by rw base_lemma.fn_lem2_7 feq1 feq2 h2 h
+      ... = f (Pb * RQb) + f (Pb + RQb) - f (Pb * RQb) : by rw h0
+      ... = f (Pb + RQb) : by rw add_sub_cancel' } },
 end
 
 theorem fF2ratfunc_eq_of_fval_eq (P : ratfunc (zmod 2)) :
