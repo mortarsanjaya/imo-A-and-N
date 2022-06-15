@@ -48,7 +48,7 @@ include feq1 feq2 fval_eq
 
 /-
   Proof of result 1 (∀ P ∈ 𝔽₂[X], f(P(a)) = f(P(b))):
-  Refer to theorem "my_poly_induction" in file "extra/my_F2X_induction.lean".
+  Refer to theorem "my_poly_induction" in file "extra/my_poly_induction.lean".
 -/
 theorem fF2poly_eq_of_fval_eq (P : polynomial (zmod 2)) :
   f (eval₂ phi2F a P) = f (eval₂ phi2F b P) :=
@@ -97,8 +97,9 @@ end
 
 /-
   Proof of result 3 (∀ P = Q/R ∈ 𝔽₂(X), R(a), R(b) ≠ 0 → f(P(a)) = f(P(b))):
-  Refer to theorem "my_poly_induction2" in file "extra/my_F2X_induction.lean".
+  Refer to theorem "my_poly_induction2" in file "extra/my_poly_induction.lean".
   We start by stating the result in terms of just polynomials.
+  Afterwards, we state the result in terms of rational functions.
 -/
 theorem fF2ratfunc_eq_of_fval_eq' (P Q : polynomial (zmod 2)) :
   f (eval₂ phi2F a P / eval₂ phi2F a Q) = f (eval₂ phi2F b P / eval₂ phi2F b Q) :=
