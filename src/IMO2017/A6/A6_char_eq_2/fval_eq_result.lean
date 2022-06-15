@@ -12,13 +12,12 @@ variable {F : Type u}
 variable [field F]
 
 /-
+  Some result implied from f(a) = f(b) for some a, b ∈ F.
   We prove that, given a, b ∈ F with f(a) = f(b), we have
   1. ∀ P ∈ 𝔽₂[X], f(P(a)) = f(P(b)),
   2. ∀ P ∈ 𝔽₂[X], P(a) = 0 ↔ P(b) = 0,
   3. ∀ P = Q/R ∈ 𝔽₂(X), R(a), R(b) ≠ 0 → f(P(a)) = f(P(b))
   See "extra/my_poly_induction.lean" for details on induction needed for result 1 and 3.
-
-  TODO: State and prove result 3.
 -/
 
 namespace case_char_eq_2
