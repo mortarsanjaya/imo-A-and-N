@@ -6,8 +6,6 @@ import
 
 namespace IMO2017A3
 
-open function
-
 variable {S : Type}
 variable [fintype S]
 variable [decidable_eq S]
@@ -26,6 +24,10 @@ variable [decidable_eq S]
   Then we proceed as in the claim: use this property to show that f(f(S)) = f(S).
 -/
 def fn_prop (f : S → S) := ∀ g : S → S, f ∘ g ∘ f = g ∘ f ∘ g → g = f
+
+
+
+open function
 
 
 
