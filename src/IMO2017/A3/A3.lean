@@ -21,8 +21,8 @@ variable [decidable_eq S]
 
   See http://www.imo-official.org/problems/IMO2017SL.pdf
   We will partially follow the official solution.
-  We start with proving that indeed there exists positive integer n ≥ 3 such that
-          f^{n + 2} = f^{2n + 1}
+  It suffices to prove that there exists a positive integer n such that
+          f^{n + 3} = f^{2n + 3}
   Then we proceed as in the claim: use this property to show that f(f(S)) = f(S).
 -/
 def fn_prop (f : S → S) := ∀ g : S → S, f ∘ g ∘ f = g ∘ f ∘ g → g = f
@@ -101,7 +101,7 @@ begin
       ← h0, ← iterate_add],
 end
 
-theorem fn_sol : f '' (set.range f) = set.range f :=
+theorem IMO2017A3_sol : f '' (set.range f) = set.range f :=
 begin
   rw set.ext_iff; intros x,
   rw [set.mem_image, set.mem_range]; split,
