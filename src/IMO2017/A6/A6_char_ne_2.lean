@@ -1,29 +1,28 @@
 import
   IMO2017.A6.A6_general
   algebra.char_p.basic
-  data.real.basic
   data.set.basic
   
 
 namespace IMO2017A6
 
 /-
-  Solution of 2017 A6 for the case char(F) ≠ 2.
+  Solution of IMO 2017 A6 (P2), Generalized Version, for the case char(F) ≠ 2.
 
-    Solution, continuing from the general case:
-  From f(x + 1) = f(x) - 1, we know that f(x + n) = f(x) - n ∀ x ∈ F, n ∈ ℤ.
-  In particular, for n ∈ ℤ, f(x) = n iff x = 1 - n.
-  Now, plugging in y = -1 yields f(2 f(x)) + f(x) + 1 = f(-x) for all x ∈ F.
+  Solution, continuing from the general case:
+    From f(x + 1) = f(x) - 1, we know that f(x + n) = f(x) - n ∀ x ∈ F, n ∈ ℤ.
+    In particular, for n ∈ ℤ, f(x) = n iff x = 1 - n.
+    Now, plugging in y = -1 yields f(2 f(x)) + f(x) + 1 = f(-x) for all x ∈ F.
 
-  In particular, for any x, y ∈ F, f(x) = f(y) implies f(-x) = f(-y).
-  On the other hand, this implies
-    f(x - y) = f(-xy) - f(f(x) f(-y)) = f(-xy) - f(f(-x) f(y)) = f(y - x).
-  Finally, for any t ∈ F, f(t) = f(-t) implies
-    f(2 f(t)) + 1 = 0 → f(2 f(t)) = -1 → 2 f(t) = 2 → f(t) = 1 → t = 0.
-  Thus x - y = 0 → x = y, proving that f is indeed injective.
-  Note that 2 f(t) = 2 → f(t) = 1 works only because char(F) ≠ 2.
+    In particular, for any x, y ∈ F, f(x) = f(y) implies f(-x) = f(-y).
+    On the other hand, this implies
+      f(x - y) = f(-xy) - f(f(x) f(-y)) = f(-xy) - f(f(-x) f(y)) = f(y - x).
+    Finally, for any t ∈ F, f(t) = f(-t) implies
+      f(2 f(t)) + 1 = 0 → f(2 f(t)) = -1 → 2 f(t) = 2 → f(t) = 1 → t = 0.
+    Thus x - y = 0 → x = y, proving that f is indeed injective.
+    Note that 2 f(t) = 2 → f(t) = 1 works only because char(F) ≠ 2.
 
-    Implementation details:
+  Implementation details:
   1. We do not need the whole f(x) = n ↔ x = 1 - n result.
      We actually only need f(-1) = 2, f(x) = -1 → x = 2, and f(x) = 1 → x = 0.
      In fact, we will write the first one as f(-1) = 1 + 1.
@@ -185,14 +184,5 @@ end case_char_ne_2
 
 
 
-
----- Case F = ℝ
-theorem IMO2017A6_sol_R :
-  set_of fn_eq = ({0, 1 - id, id - 1} : set (ℝ → ℝ)) :=
-begin
-  apply case_char_ne_2.IMO2017A6_sol_char_ne_2,
-  rw [ring_char.eq_zero, ne_comm],
-  exact two_ne_zero,
-end
 
 end IMO2017A6
