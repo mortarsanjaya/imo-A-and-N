@@ -23,7 +23,8 @@ variable [decidable_eq S]
           f^{n + 3} = f^{2n + 3}
   Then we proceed as in the claim: use this property to show that f(f(S)) = f(S).
 -/
-def fn_prop (f : S → S) := ∀ g : S → S, f ∘ g ∘ f = g ∘ f ∘ g → g = f
+def fn_prop (f : S → S) :=
+  ∀ g : S → S, f ∘ g ∘ f = g ∘ f ∘ g → g = f
 
 
 
@@ -43,7 +44,8 @@ include fprop
 
 
 
-lemma fn_lem1 : ∃ m n : ℕ, m < n ∧ nat.iterate f m = nat.iterate f n :=
+lemma fn_lem1 :
+  ∃ m n : ℕ, m < n ∧ nat.iterate f m = nat.iterate f n :=
 begin
   have h := not_injective_infinite_fintype (nat.iterate f),
   unfold injective at h,
@@ -58,7 +60,8 @@ begin
   rw h,
 end
 
-lemma fn_lem2 : ∃ m : ℕ, 0 < m ∧ nat.iterate f (2 * m) = nat.iterate f m :=
+lemma fn_lem2 :
+  ∃ m : ℕ, 0 < m ∧ nat.iterate f (2 * m) = nat.iterate f m :=
 begin
   rcases fn_lem1 fprop with ⟨m, n, h, h0⟩,
   let k := n - m,
@@ -91,7 +94,8 @@ begin
   exact le_self_add,
 end
 
-lemma fn_lem3 : ∃ N : ℕ, 0 < N ∧ nat.iterate f (N + 1) = f :=
+lemma fn_lem3 :
+  ∃ N : ℕ, 0 < N ∧ nat.iterate f (N + 1) = f :=
 begin
   rcases fn_lem2 fprop with ⟨m, h, h0⟩,
   use m; split,
@@ -103,7 +107,8 @@ begin
       ← h0, ← iterate_add],
 end
 
-theorem IMO2017A3_sol : f '' (set.range f) = set.range f :=
+theorem IMO2017A3_sol :
+  f '' (set.range f) = set.range f :=
 begin
   rw set.ext_iff; intros x,
   rw [set.mem_image, set.mem_range]; split,
