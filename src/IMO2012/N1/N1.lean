@@ -124,7 +124,7 @@ end good_pairs
 
 
 ---- Wrapper
-theorem pair_sol :
+theorem IMO2012N1_sol :
   good = is_coprime :=
 begin
   apply funext; intros x,
