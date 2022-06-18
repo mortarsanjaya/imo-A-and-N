@@ -17,17 +17,18 @@ variable [field F]
   Note:
   
   1. The case char F ≠ 2 is solved.
-     See file "A6_char_ne_2.lean", with two main theorems:
-        IMO2017A6_sol_char_ne_2, IMO2017A6_sol_R
+     See file "A6_char_ne_2.lean", with main theorem "IMO2017A6_sol_char_ne_2".
      We refer to the solution by user "anantmudgal09" on AoPS:
        https://artofproblemsolving.com/community/c6h1480146p8693244.
      Note that the solution extends to the case char F ≠ 2.
-     The same file will also contain the result for F = ℝ.
+  
+  2. The case F = ℝ is thus solved as well since char ℝ = 0 ≠ 2.
+     We put the result into file "A6.lean", with main theorem "IMO2017A6_sol_R".
 
-  2. The case char F = 2 is still open.
+  3. The case char F = 2 is still open.
      See the folder "A6_char_eq_2".
 
-  3. This file contains the statement of the functional equation and
+  4. This file contains the statement of the functional equation and
        lemmas that are usable for both case char F ≠ 2 and char F = 2.
 -/
 def fn_eq (f : F → F) :=
