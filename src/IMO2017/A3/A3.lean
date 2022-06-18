@@ -107,7 +107,12 @@ begin
       ← h0, ← iterate_add],
 end
 
-theorem IMO2017A3_sol :
+end solution
+
+
+
+---- Final solution
+theorem IMO2017A3_sol {f : S → S} (fprop : fn_prop f) :
   f '' (set.range f) = set.range f :=
 begin
   rw set.ext_iff; intros x,
@@ -119,17 +124,13 @@ begin
   
   { intros h,
     cases h with y h,
-    rcases fn_lem3 fprop with ⟨N, h0, h1⟩,
+    rcases solution.fn_lem3 fprop with ⟨N, h0, h1⟩,
     use nat.iterate f N y; split,
     rw set.mem_range; use nat.iterate f (N - 1) y,
     rw [← comp_apply f, ← iterate_succ', nat.succ_eq_add_one, nat.sub_add_cancel],
     rw ← nat.lt_iff_add_one_le; exact h0,
     rw [← comp_apply f, ← iterate_succ', nat.succ_eq_add_one, h1, h] },
 end
-
-
-
-end solution
 
 
 
