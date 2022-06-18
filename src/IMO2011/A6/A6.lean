@@ -102,26 +102,23 @@ begin
   exact le_antisymm (fn_lem5 fineq x) (fn_lem4 fineq x h),
 end
 
+end solution
+
 
 
 ---- Final solution
-theorem IMO2011A6_sol :
+theorem IMO2011A6_sol {f : ℝ → ℝ} (fineq : fn_ineq f) :
   ∀ x : ℝ, x ≤ 0 → f x = 0 :=
 begin
   intros x h,
   rw le_iff_lt_or_eq at h,
   cases h with h h,
-  exact fn_lem6 fineq x h,
+  exact solution.fn_lem6 fineq x h,
   subst h,
-  apply le_antisymm (fn_lem5 fineq 0),
-  have h := fn_lem1 fineq (-1) (-1),
-  rwa [fn_lem6 fineq (-1) neg_one_lt_zero, mul_zero, sub_self, zero_add] at h,
+  apply le_antisymm (solution.fn_lem5 fineq 0),
+  have h := solution.fn_lem1 fineq (-1) (-1),
+  rwa [solution.fn_lem6 fineq (-1) neg_one_lt_zero, mul_zero, sub_self, zero_add] at h,
 end
-
-end solution
-
-
-
 
 
 
