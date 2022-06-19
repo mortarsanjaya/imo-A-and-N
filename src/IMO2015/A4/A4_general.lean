@@ -30,7 +30,36 @@ variable [is_domain R]
   This file will follow the whole official solution for the case char(R) ≠ 2.
   We will also work with our own solution for the case char(R) = 2 in this file.
   
+  Solution for the case char(R) = 2:
+    Proceed equally in case f(0) ≠ 0.
+    From now on, assume that f(0) = 0.
+    As in the case char(R) ≠ 2, We also prove that f(-1) = -1 and
+    (1)        ∀ x ∈ R, x + f(x + 1) is a fixed point.
+    The equality f(1) = 1 is now immediate from f(-1) = -1 since -1 = 1.
 
+    Plugging in x = 0 into the original equation yields
+    (2)       ∀ y ∈ R, f(y) is a fixed point.
+    Next, plugging y = x + 1 into the original equation yields
+    (3)       ∀ x ∈ R, f(x + 1) + f(x² + x) = (x + 1) (f(x) + 1).
+    Comparing (3) with x and with x + 1, we will get x f(x + 1) = (x + 1) f(x).
+    In particular, if x is a non-zero fixed point, then x + 1 is a fixed point.
+    But 1 is a fixed point as well, so we get
+    (4).      ∀ x ∈ R, x is a fixed point → x + 1 is a fixed point.
+    Next, plugging y = x into the original equation gives us
+              ∀ x ∈ R, f(x²) + 1 = (x + 1) (f(x) + 1)
+    Then, by (2) and (4),
+    (5).      ∀ x ∈ R, (x + 1) (f(x) + 1) is a fixed point.
+    Next, by plugging y = 0 into the original equation, we get
+    (6).      ∀ x ∈ R, x + f(x) is a fixed point.
+    Finally, for any t ∈ R, plug (x, y) ↦ (t + 1, f(t) + 1) into the original equation.
+    By (6), x + y = t + f(t) is a fixed point, while by (2) and (4), y is a fixed point.
+    Thus the equation simplifies to
+              f(xy) = yf(x) → f((t + 1) (f(t) + 1)) = (f(t) + 1) f(t + 1).
+    But by (5), (t + 1) (f(t) + 1) is also a fixed point.
+    Thus, either f(t) = 1 or t + 1 is a fixed point.
+    However, if f(t) = 1, then (6) yields that t + 1 is a fixed point.
+    Thus, either way, for any t ∈ R, t + 1 is a fixed point.
+    Replacing t with x - 1 gives us f(x) = x for all x ∈ R, as desired.
 -/
 def fn_eq (f : R → R) :=
   ∀ x y : R, f (x + f (x + y)) + f (x * y) = x + f (x + y) + y * f x
