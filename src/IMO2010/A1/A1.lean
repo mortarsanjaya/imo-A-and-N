@@ -72,7 +72,7 @@ begin
   rw [int.floor_zero, int.cast_zero, zero_mul, eq_comm, mul_right_eq_self₀] at h0,
   cases h0 with h0 h0,
   rwa [← int.cast_one, int.cast_inj] at h0,
-  contradiction,
+  exfalso; exact h h0,
 end
 
 lemma fn_lem2 :
@@ -130,7 +130,7 @@ end results
 
 
 
----- Wrapper
+---- Final solution
 theorem final_solution :
   set_of fn_eq = {0} ∪ const ℝ '' (set.Ico 1 2) :=
 begin
