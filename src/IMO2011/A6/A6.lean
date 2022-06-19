@@ -24,7 +24,9 @@ def fn_ineq (f : ℝ → ℝ) :=
 
 
 
-namespace solution
+namespace results
+
+
 
 variable {f : ℝ → ℝ}
 variable fineq : fn_ineq f
@@ -39,26 +41,20 @@ begin
 end
 
 lemma fn_lem2 :
-  ∀ a b : ℝ, 0 ≤ f a * f b - b * f b + (f (f b) - f (f a)) :=
+  ∀ a b : ℝ, b * f b + f (f a) ≤ f a * f b + f (f b) :=
 begin
   intros a b,
-  have h := fn_lem1 fineq (f a) b,
-  rwa [add_sub, sub_nonneg],
+  rw [add_comm, ← le_sub_iff_add_le, add_sub_right_comm],
+  exact fn_lem1 fineq (f a) b,
 end
 
 lemma fn_lem3 :
   ∀ a b : ℝ, a * f a + b * f b ≤ 2 * f a * f b :=
 begin
   intros a b,
-  have h := add_nonneg (fn_lem2 fineq a b) (fn_lem2 fineq b a),
-  rw [add_add_add_comm, add_sub _ (f _), sub_add_cancel, sub_self,
-      add_zero, sub_add_sub_comm, mul_comm (f b) (f a), sub_nonneg] at h,
-  calc a * f a + b * f b = b * f b + a * f a : by rw add_comm
-  ... ≤ f a * f b + f a * f b : by exact h
-  ... = 1 * (f a * f b) + 1 * (f a * f b) : by rw one_mul
-  ... = (1 + 1) * (f a * f b) : by rw ← add_mul
-  ... = (1 + 1) * f a * f b : by rw mul_assoc
-  ... = 2 * f a * f b : by refl,
+  have h := add_le_add (fn_lem2 fineq b a) (fn_lem2 fineq a b),
+  rwa [add_add_add_comm, add_comm (f (f b)), add_add_add_comm _ (f (f a)),
+       add_le_add_iff_right, mul_comm (f b), ← two_mul, ← mul_assoc] at h,
 end
 
 lemma fn_lem4 :
@@ -74,25 +70,19 @@ lemma fn_lem5 :
 begin
   intros x,
   rw ← not_lt; intros h,
-  suffices : ∃ M : ℝ, ∀ t : ℝ, t < M → f t < 0,
-  { cases this with M h0,
-    let c := min M 0 - 1,
-    have h1 : 0 ≤ f c,
-    { apply fn_lem4 fineq,
-      rw sub_lt_zero,
-      exact lt_of_le_of_lt (min_le_right M 0) zero_lt_one },
-    rw ← not_lt at h1,
-    apply h1,
-    apply h0,
-    rw sub_lt_iff_lt_add,
-    apply lt_of_le_of_lt (min_le_left M 0),
-    rw lt_add_iff_pos_right,
-    exact zero_lt_one },
-  use x - f (f x) / f x,
-  intros t h0,
-  apply lt_of_le_of_lt (fn_lem1 fineq t x),
-  rwa [← sub_mul, ← lt_neg_iff_add_neg, ← lt_div_iff h,
-       sub_lt_iff_lt_add', neg_div, ← sub_eq_add_neg],
+  let M := x - f (f x) / f x,
+  have h0 : ∀ t : ℝ, t < M → f t < 0,
+  { intros t h0,
+    apply lt_of_le_of_lt (fn_lem1 fineq t x),
+    rwa [← sub_mul, ← lt_neg_iff_add_neg, ← lt_div_iff h,
+        sub_lt_iff_lt_add', neg_div, ← sub_eq_add_neg] },
+  cases exists_lt (min M 0) with C h1,
+  rw lt_min_iff at h1,
+  cases h1 with h1 h2,
+  have h3 := h0 C h1,
+  have h4 := fn_lem4 fineq C h2,
+  rw ← not_lt at h4,
+  exact h4 h3,
 end
 
 lemma fn_lem6 :
@@ -102,28 +92,33 @@ begin
   exact le_antisymm (fn_lem5 fineq x) (fn_lem4 fineq x h),
 end
 
-end solution
+lemma fn_lem7 :
+  0 ≤ f 0 :=
+begin
+  cases exists_lt (0 : ℝ) with x h,
+  have h0 := results.fn_lem1 fineq x x,
+  rwa [results.fn_lem6 fineq x h, mul_zero, sub_self, zero_add] at h0,
+end
+
+
+
+end results
+
+
+
+
 
 
 
 ---- Final solution
-theorem IMO2011A6_sol {f : ℝ → ℝ} (fineq : fn_ineq f) :
+theorem final_solution {f : ℝ → ℝ} (fineq : fn_ineq f) :
   ∀ x : ℝ, x ≤ 0 → f x = 0 :=
 begin
   intros x h,
   rw le_iff_lt_or_eq at h,
   cases h with h h,
-  exact solution.fn_lem6 fineq x h,
-  subst h,
-  apply le_antisymm (solution.fn_lem5 fineq 0),
-  have h := solution.fn_lem1 fineq (-1) (-1),
-  rwa [solution.fn_lem6 fineq (-1) neg_one_lt_zero, mul_zero, sub_self, zero_add] at h,
+  exact results.fn_lem6 fineq x h,
+  rw h; exact le_antisymm (results.fn_lem5 fineq 0) (results.fn_lem7 fineq),
 end
-
-
-
-
-
-
 
 end IMO2011A6
