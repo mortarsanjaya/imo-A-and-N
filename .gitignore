@@ -1,1 +1,3 @@
-src/.DS_Store
+*.olean
+/_target
+/leanpkg.path
