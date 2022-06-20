@@ -153,16 +153,6 @@ section case_char_ne_2
 variable char_ne_2 : ring_char R ≠ 2
 include char_ne_2
 
-lemma two_ne_zero_R :
-  (2 : R) ≠ 0 :=
-begin
-  intros h,
-  apply char_ne_2,
-  apply char_p.ring_char_of_prime_eq_zero,
-  exact nat.prime_two,
-  rw [nat.cast_bit0, nat.cast_one, h],
-end
-
 variable {f : R → R}
 variable feq : fn_eq f
 variable h : f 0 = 0
@@ -179,7 +169,7 @@ begin
       ← two_mul (f 1), ← two_mul, mul_one, eq_comm, mul_right_eq_self₀] at h0,
   cases h0 with h0 h0,
   exact h0,
-  exfalso; exact two_ne_zero_R char_ne_2 h0,
+  exfalso; exact ring.two_ne_zero char_ne_2 h0,
 end
 
 lemma fn_lem2_2 :
@@ -232,7 +222,7 @@ theorem fn_thm2 :
   f = id :=
 begin
   apply funext; intros x,
-  rw ← mul_right_inj' (two_ne_zero_R char_ne_2),
+  rw ← mul_right_inj' (ring.two_ne_zero char_ne_2),
   calc 2 * f x = f x + f x : by rw two_mul
   ... = f (1 + f (x + 1)) + - (f (1 + f (x + 1))) + (f x + f x) : by rw [add_neg_self, zero_add]
   ... = f (1 + f (x + 1)) + f x + (- (f (1 + f (x + 1))) + f x) : by rw add_add_add_comm
