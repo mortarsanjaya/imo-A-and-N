@@ -101,8 +101,7 @@ end answer
 ---- General lemmas
 section general
 
-variable {f : R → R}
-variable feq : fn_eq f
+variables {f : R → R} (feq : fn_eq f)
 include feq
 
 
@@ -153,9 +152,7 @@ section case_char_ne_2
 variable char_ne_2 : ring_char R ≠ 2
 include char_ne_2
 
-variable {f : R → R}
-variable feq : fn_eq f
-variable h : f 0 = 0
+variables {f : R → R} (feq : fn_eq f) (h : f 0 = 0)
 include feq h
 
 
@@ -242,9 +239,7 @@ section case_char_eq_2
 
 variable [char_p R 2]
 
-variable {f : R → R}
-variable feq : fn_eq f
-variable h : f 0 = 0
+variables {f : R → R} (feq : fn_eq f) (h : f 0 = 0)
 include feq h
 
 

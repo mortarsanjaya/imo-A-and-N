@@ -59,8 +59,7 @@ end answer
 ---- We prove that there are no other functions satisfying fn_eq here
 section solution
 
-variable {f : ℝ → ℝ}
-variable feq : fn_eq f
+variables {f : ℝ → ℝ} (feq : fn_eq f)
 include feq
 
 lemma fn_lem1 :

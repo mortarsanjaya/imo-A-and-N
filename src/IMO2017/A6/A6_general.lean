@@ -50,8 +50,7 @@ namespace results
 ---- General lemmas
 section general
 
-variable {f : F → F}
-variable feq : fn_eq f
+variables {f : F → F} (feq : fn_eq f)
 include feq
 
 theorem fn_general1 :

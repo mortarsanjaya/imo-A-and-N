@@ -39,11 +39,8 @@ variable [char_p F 2]
 
 def phi2F := algebra_map (zmod 2) F
 
-variable {f : F → F}
-variable feq1 : fn_eq1 f
-variable feq2 : fn_eq2 f
-variables {a b : F}
-variable fval_eq : f a = f b
+variables {f : F → F} (feq1 : fn_eq1 f) (feq2 : fn_eq2 f)
+variables {a b : F} (fval_eq : f a = f b)
 include feq1 feq2 fval_eq
 
 
@@ -61,13 +58,13 @@ begin
   { intros c,
     cases extra.zmod2_elts c with h h,
     rw [h, map_zero, zero_mul, eval₂_zero, eval₂_zero],
-    rw [h, map_one, one_mul, eval₂_X,eval₂_X, fval_eq] },
+    rw [h, map_one, one_mul, eval₂_X, eval₂_X, fval_eq] },
 
   -- ∀ (P : R[X]) (c : R), M(P) → M(P + c)
   { intros P c h,
     cases extra.zmod2_elts c with h0 h0,
     rw [h0, map_zero, add_zero, h],
-    rw [h0, map_one, eval₂_add, eval₂_add, eval₂_one, eval₂_one, feq2, feq2, h] },
+    rw [h0, map_one, eval₂_add, eval₂_one, eval₂_add, eval₂_one, feq2, feq2, h] },
 
   -- ∀ P : R[X], M(P) → M(P + X) → M(P * X)
   { intros P h0 h1,
