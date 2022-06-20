@@ -7,8 +7,6 @@ import
 
 namespace IMO2012N1
 
-
-
 /--
   IMO 2012 N1
 
@@ -28,32 +26,32 @@ def good (m n : ℤ) :=
 
 
 
+
+
+
+
 open set
 open int
 
-
-
-
+namespace results
 
 
 
 ---- We prove that some pairs are "bad" i.e. not good
-namespace bad_pairs
+section bad_pairs
 
-lemma pair_bad1 :
-  ∀ c : ℤ, admissible {n : ℤ | c ∣ n} :=
+lemma bad_pairs1 (c : ℤ) :
+  admissible {n : ℤ | c ∣ n} :=
 begin
-  intros c x y,
-  simp only [mem_set_of_eq],
-  intros h h0 k,
+  intros x y,
+  simp only [mem_set_of_eq]; intros h h0 k,
   cases h with a h,
   cases h0 with b h0,
   rw [h, h0],
-  use c * (a * a + k * a * b + b * b),
-  ring,
+  use c * (a * a + k * a * b + b * b); ring,
 end
 
-theorem pair_bad :
+lemma bad_pairs2 :
   ∀ m n : ℤ, good m n → is_coprime m n :=
 begin
   intros m n h,
@@ -62,7 +60,7 @@ begin
   have h0 : (1 : ℤ) ∈ S,
   { rw h S,
     exact mem_univ 1,
-    exact pair_bad1 _,
+    exact bad_pairs1 _,
     all_goals { rw mem_set_of_eq },
     exact int.gcd_dvd_left m n,
     exact int.gcd_dvd_right m n },
@@ -77,9 +75,9 @@ end bad_pairs
 
 
 ---- We prove that the rest are good
-namespace good_pairs
+section good_pairs
 
-lemma pair_good1 :
+lemma good_pairs1 :
   ∀ (m : ℤ) (A : set ℤ), admissible A → m ∈ A → ∀ k : ℤ, k * m ^ 2 ∈ A :=
 begin
   intros m A h h0 k,
@@ -88,8 +86,7 @@ begin
        add_comm (1 : ℤ), add_assoc, sub_add_cancel] at h1,
 end
 
-
-lemma pair_good2 :
+lemma good_pairs2 :
   ∀ (x y : ℤ) (A : set ℤ), admissible A → x ∈ A → y ∈ A → (x + y) ^ 2 ∈ A :=
 begin
   intros x y A h h0 h1,
@@ -97,47 +94,47 @@ begin
   exact h x y h0 h1 2,
 end
 
-lemma pair_good3 :
+lemma good_pairs3 :
   ∀ x y : ℤ, is_coprime x y → ∀ A : set ℤ, admissible A → x ∈ A → y ∈ A → (1 : ℤ) ∈ A :=
 begin
   intros x y h A h0 h1 h2,
   have h3 : is_coprime (x ^ 2) (y ^ 2) := is_coprime.pow h,
   rcases h3 with ⟨k, m, h3⟩,
   rw [← one_pow 2, ← h3],
-  apply pair_good2 _ _ A h0,
-  exact pair_good1 x A h0 h1 _,
-  exact pair_good1 y A h0 h2 _,
+  apply good_pairs2 _ _ A h0,
+  exact good_pairs1 x A h0 h1 _,
+  exact good_pairs1 y A h0 h2 _,
 end
 
-theorem pair_good :
+lemma good_pairs4 :
   ∀ x y : ℤ, is_coprime x y → good x y :=
 begin
   intros x y h A h0 h1 h2,
   rw eq_univ_iff_forall; intros z,
-  have h3 := pair_good3 x y h A h0 h1 h2,
-  have h4 := pair_good1 (1 : ℤ) A h0 h3 z,
+  have h3 := good_pairs3 x y h A h0 h1 h2,
+  have h4 := good_pairs1 (1 : ℤ) A h0 h3 z,
   rwa [one_pow, mul_one] at h4,
 end
 
 end good_pairs
 
+end results
 
 
----- Wrapper
+
+
+
+
+
+---- Final solution
 theorem IMO2012N1_sol :
   good = is_coprime :=
 begin
   apply funext; intros x,
   apply funext; intros y,
   apply propext; split,
-  exact bad_pairs.pair_bad x y,
-  exact good_pairs.pair_good x y,
+  exact results.bad_pairs2 x y,
+  exact results.good_pairs4 x y,
 end
-
-
-
-
-
-
 
 end IMO2012N1
