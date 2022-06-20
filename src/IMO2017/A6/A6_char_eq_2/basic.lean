@@ -9,14 +9,15 @@ universe u
 variable {F : Type u}
 variable [field F]
 
-/-
+/--
   Progress of 2017 A6 for the case char(F) = 2
 
-  Here, we give an alternative FE system.
+  Here, we give an alternative FE system as follows:
+          ∀ x y : F, f(f(x) f(y)) + f(x + y) = f(xy + x + y)
+          ∀ x : F, f(x + 1) = f(x) + 1
   We also give correspondence results between the two FE systems.
   Then, we prove basic lemmas about the new FE system.
 -/
-
 def fn_eq1 (f : F → F) :=
   ∀ x y : F, f (f x * f y) + f (x + y) = f (x * y + x + y)
 def fn_eq2 (f : F → F) :=
@@ -28,9 +29,9 @@ def fn_eq2 (f : F → F) :=
 
 
 
-namespace case_char_eq_2
-
 open char_two
+
+namespace case_char_eq_2
 
 variable [char_p F 2]
 
@@ -57,10 +58,10 @@ end
 theorem fn_thm1 {f : F → F} (h : f ≠ 0) (feq : fn_eq f) :
   fn_eq1 (λ x, f (x + 1)) :=
 begin
-  have feq2 := fn_lem2 h feq, 
+  have feq2 := fn_lem2 h feq,
   intros x y; simp only [],
-  rw [feq2, add_assoc, add_comm 1 (f _), ← feq2, add_right_comm x, add_assoc,
-      feq, add_mul, one_mul, mul_add, mul_one, ← add_assoc],
+  rw [feq2, add_assoc, add_comm 1 (f _), ← feq2, add_right_comm x,
+      add_assoc, feq, add_one_mul, mul_add_one, ← add_assoc],
 end
 
 theorem fn_thm2 {f : F → F} (h : f ≠ 0) (feq : fn_eq f) :
@@ -74,15 +75,9 @@ theorem fn_thm3 {f : F → F} (feq1 : fn_eq1 f) (feq2 : fn_eq2 f) :
   fn_eq (λ x, f (x + 1)) :=
 begin
   intros x y; simp only [],
-  rw [feq2, add_assoc, add_comm 1 (f _), ← feq2, add_right_comm x, add_assoc, feq1],
-  apply congr_arg; symmetry,
-  calc x * y + 1 = (x + 1 - 1) * y + 1 : by rw add_sub_cancel
-  ... = (x + 1 + 1) * y + 1 : by rw sub_eq_add
-  ... = (x + 1) * y + y + 1 : by rw [add_mul, one_mul]
-  ... = (x + 1) * y + (y + 1) : by rw add_assoc
-  ... = (x + 1) * (y + 1 - 1) + (y + 1) : by rw add_sub_cancel
-  ... = (x + 1) * (y + 1 + 1) + (y + 1) : by rw sub_eq_add
-  ... = (x + 1) * (y + 1) + (x + 1) + (y + 1) : by rw [mul_add, mul_one],
+  rw [feq2, add_assoc, add_comm 1 (f _), ← feq2, add_right_comm x, add_assoc,
+      feq1, ← mul_add_one, ← sub_eq_add (y + 1) 1, add_sub_cancel, ← add_assoc,
+      ← add_one_mul, ← sub_eq_add (x + 1) 1, add_sub_cancel],
 end
 
 theorem fn_corr {f : F → F} (h : f ≠ 0) :
@@ -163,10 +158,7 @@ lemma fn_lem2_2 :
   ∀ x : F, f x = 1 ↔ x = 1 :=
 begin
   intros x,
-  calc f x = 1 ↔ f x + 1 = 0 : by rw [← sub_eq_zero, sub_eq_add]
-  ... ↔ f (x + 1) = 0 : by rw ← feq2
-  ... ↔ x + 1 = 0 : by rw fn_lem1_3 feq1 feq2
-  ... ↔ x = 1 : by rw [← sub_eq_add, sub_eq_zero],
+  rw [← sub_eq_zero, sub_eq_add, ← feq2, fn_lem1_3 feq1 feq2, ← sub_eq_add, sub_eq_zero],
 end
 
 lemma fn_lem2_3 :
@@ -185,24 +177,24 @@ lemma fn_lem2_4 :
   ∀ x y : F, f (f x * f y) + f (x + y) + 1 = f ((x + 1) * (y + 1)) :=
 begin
   intros x y,
-  rw [feq1, ← feq2, add_mul, one_mul, mul_add, mul_one, ← add_assoc],
+  rw [feq1, ← feq2, ← mul_add_one, add_assoc, ← add_one_mul],
 end
 
 lemma fn_lem2_5 :
   ∀ x y : F, f ((f x + 1) * (f y + 1)) + 1 = f (x * y) + f (x + y) :=
 begin
   intros x y,
-  have h := fn_lem2_4 feq1 feq2 (x - 1) (y - 1),
-  rwa [sub_add_cancel, sub_add_cancel, sub_add_sub_comm, char_two.add_self_eq_zero,
-      sub_zero, add_right_comm, ← eq_sub_iff_add_eq, sub_eq_add, sub_eq_add,
-      sub_eq_add, feq2, feq2] at h,
+  have h := fn_lem2_4 feq1 feq2 (x + 1) (y + 1),
+  rw [feq2, feq2, add_right_comm, ← eq_sub_iff_add_eq] at h,
+  rw [h, sub_eq_add, add_assoc, add_assoc, add_add_add_comm,
+      char_two.add_self_eq_zero, add_zero, add_zero, add_zero],
 end
 
 lemma fn_lem2_6 {a b : F} (h : f a = f b) :
   ∀ x : F, f (a * x) + f (a + x) = f(b * x) + f (b + x) :=
 begin
   intros x,
-  rw [← fn_lem2_5 feq1 feq2, h, fn_lem2_5 feq1 feq2 ],
+  rw [← fn_lem2_5 feq1 feq2, h, fn_lem2_5 feq1 feq2],
 end
 
 lemma fn_lem2_7 {a b c d : F} (h : f a = f b) (h0 : f c = f d) :
@@ -218,11 +210,11 @@ end base_lemma
 
 
 
-
-
-
-
 end case_char_eq_2
+
+
+
+
 
 
 

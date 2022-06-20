@@ -20,12 +20,20 @@ variable [field F]
   See "extra/my_poly_induction.lean" for details on induction needed for result 1 and 3.
 -/
 
-namespace case_char_eq_2
+
+
+
+
+
 
 open char_two
 open polynomial
 open ratfunc
 open_locale classical
+
+namespace case_char_eq_2
+
+
 
 variable [char_p F 2]
 
@@ -34,14 +42,9 @@ def phi2F := algebra_map (zmod 2) F
 variable {f : F → F}
 variable feq1 : fn_eq1 f
 variable feq2 : fn_eq2 f
-variable {a : F}
-variable {b : F}
+variables {a b : F}
 variable fval_eq : f a = f b
 include feq1 feq2 fval_eq
-
-
-
-
 
 
 
@@ -151,7 +154,12 @@ end
 
 
 
-
 end case_char_eq_2
+
+
+
+
+
+
 
 end IMO2017A6

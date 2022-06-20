@@ -13,7 +13,7 @@ namespace IMO2017A6
 theorem final_solution_real :
   set_of fn_eq = ({0, 1 - id, id - 1} : set (ℝ → ℝ)) :=
 begin
-  apply results.case_char_ne_2.final_solution_char_ne_2,
+  apply final_solution_char_ne_2,
   rw [ring_char.eq_zero, ne_comm],
   exact two_ne_zero,
 end

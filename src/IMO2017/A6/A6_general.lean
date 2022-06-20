@@ -157,6 +157,35 @@ end general
 
 
 
+---- Our guess of functions satisfying fn_eq
+section answer
+
+lemma fn_ans1 :
+  fn_eq (0 : F → F) :=
+begin
+  intros x y,
+  rw [pi.zero_apply, pi.zero_apply, pi.zero_apply, add_zero],
+end
+
+lemma fn_ans2 :
+  fn_eq (1 - id : F → F) :=
+begin
+  intros x y,
+  simp only [id.def, pi.one_apply, pi.sub_apply],
+  ring,
+end
+
+lemma fn_ans3 :
+  fn_eq (id - 1 : F → F) :=
+begin
+  rw ← neg_sub,
+  exact results.fn_general1 fn_ans2,
+end
+
+end answer
+
+
+
 end results
 
 
