@@ -26,8 +26,7 @@ namespace results
 
 
 
-variable {f : ℝ → ℝ}
-variable fineq : fn_ineq f
+variables {f : ℝ → ℝ} (fineq : fn_ineq f)
 include fineq
 
 lemma fn_lem1 :

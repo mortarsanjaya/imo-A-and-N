@@ -103,9 +103,7 @@ end correspondence
 ---- More base lemmas for the new FE system
 namespace base_lemma
 
-variable {f : F → F}
-variable feq1 : fn_eq1 f
-variable feq2 : fn_eq2 f
+variables {f : F → F} (feq1 : fn_eq1 f) (feq2 : fn_eq2 f)
 include feq1 feq2
 
 

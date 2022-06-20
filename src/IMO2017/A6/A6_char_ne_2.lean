@@ -48,8 +48,7 @@ open_locale classical
 namespace results
 namespace case_char_ne_2
 
-variable {f : F → F}
-variable feq : fn_eq f
+variables {f : F → F} (feq : fn_eq f)
 include feq
 
 lemma fn_lem1 :
