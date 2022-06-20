@@ -27,6 +27,7 @@ def fn_eq (f : ℝ → ℝ) :=
 
 
 
+
 open function
 open_locale classical
 
