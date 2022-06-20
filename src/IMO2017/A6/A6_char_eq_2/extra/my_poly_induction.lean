@@ -6,7 +6,6 @@ import
   Implementation of induction necessary for results given in "poly_result.lean"
 -/
 namespace IMO2017A6
-
 namespace extra
 
 open polynomial
@@ -177,5 +176,4 @@ end
 
 
 end extra
-
 end IMO2017A6

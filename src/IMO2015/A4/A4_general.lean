@@ -4,7 +4,6 @@ import
   algebra.char_p.two
   dynamics.fixed_points.basic
   data.set.basic
-  tactic.observe
 
 namespace IMO2015A4
 
@@ -18,17 +17,17 @@ variable [is_domain R]
   
   Let R be a domain.
   Find all functions f : R → R such that, for all x, y ∈ R,
-          f(x + f(x + y)) + f(xy) = x + f(x + y) + yf(x).
+          f(x + f(x + y)) + f(xy) = x + f(x + y) + y f(x).
 
-  Answer: f = x ↦ 2 - x and f = id : x ↦ x.
+  Answer: f = x ↦ 2 - x and f = x ↦ x.
 
   See http://www.imo-official.org/problems/IMO2015SL.pdf.
   The official solution works perfectly only for the case char(R) ≠ 2.
   For the case char(R) = 2, one may obtain f(x²) + 1 = (f(x) + 1)(x + 1) for all x ∈ R.
   This turns out to be enough in proving that f must be the identity.
 
-  This file will follow the whole official solution for the case char(R) ≠ 2.
-  We will also work with our own solution for the case char(R) = 2 in this file.
+  In this file, we follow the official solution for the case char(R) ≠ 2.
+  We also work with our own solution for the case char(R) = 2.
   
   Solution for the case char(R) = 2:
     Proceed equally in case f(0) ≠ 0.
@@ -66,12 +65,36 @@ def fn_eq (f : R → R) :=
 
 
 
+
+
+
+
 open function
 open_locale classical
 
+namespace results
 
 
 
+---- All functions satisying fn_eq are described here
+section answer
+
+theorem fn_ans1 :
+  fn_eq (id : R → R) :=
+begin
+  intros x y,
+  rw [id.def, id.def, id.def, id.def, mul_comm],
+end
+
+theorem fn_ans2 :
+  fn_eq (2 - id : R → R) :=
+begin
+  intros x y,
+  simp only [pi.bit0_apply, id.def, pi.one_apply, pi.sub_apply],
+  ring,
+end
+
+end answer
 
 
 
@@ -95,13 +118,12 @@ end
 lemma fn_lem1_2 :
   f 0 ≠ 0 → ∀ x : R, is_fixed_pt f x → x = 1 :=
 begin
-  intros h x h0,
+  unfold is_fixed_pt; intros h x h0,
   have h1 := feq 0 x,
-  rw [zero_add, zero_add, is_fixed_pt.eq h0, is_fixed_pt.eq h0,
-      zero_mul, add_right_inj, eq_comm, mul_left_eq_self₀] at h1,
+  rw [zero_add, zero_add, h0, h0, zero_mul, add_right_inj, eq_comm, mul_left_eq_self₀] at h1,
   cases h1 with h1 h1,
   exact h1,
-  contradiction,
+  exfalso; exact h h1,
 end
 
 lemma fn_lem1_3 :
@@ -110,8 +132,7 @@ begin
   intros h; apply funext; intros x,
   rw [pi.sub_apply, id.def, pi.bit0_apply, pi.one_apply],
   have h0 := fn_lem1_2 feq h _ (fn_lem1_1 feq (x - 1)),
-  rwa [sub_add_cancel, add_comm, ← eq_sub_iff_add_eq,
-       ← sub_add, add_comm, ← add_sub_assoc] at h0,
+  rwa [sub_add_cancel, add_comm, ← eq_sub_iff_add_eq, ← sub_add, add_comm, ← add_sub_assoc] at h0,
 end
 
 lemma fn_lem1_4 :
@@ -122,28 +143,15 @@ begin
   rwa [neg_add_self, h, add_zero] at h0,
 end
 
-
-
 end general
 
 
 
----- Specific solution for the case char(R) ≠ 2
----- We will assume f(0) = 0 as the case f(0) ≠ 0 is solved.
+---- Solution for the case char(R) ≠ 2, assuming f(0) = 0
 section case_char_ne_2
 
 variable char_ne_2 : ring_char R ≠ 2
 include char_ne_2
-
-lemma two_ne_zero_R :
-  (2 : R) ≠ 0 :=
-begin
-  intros h,
-  apply char_ne_2,
-  apply char_p.ring_char_of_prime_eq_zero,
-  exact nat.prime_two,
-  rw [nat.cast_bit0, nat.cast_one, h],
-end
 
 variable {f : R → R}
 variable feq : fn_eq f
@@ -156,12 +164,12 @@ lemma fn_lem2_1 :
   f 1 = 1 :=
 begin
   have h0 := feq 1 (-1),
-  rw [add_neg_self, h, add_zero, one_mul, fn_lem1_4 feq h, ← sub_eq_zero] at h0,
-  ring_nf at h0,
-  rw [sub_eq_zero, mul_right_eq_self₀] at h0,
+  rw [add_neg_self, h, add_zero, one_mul, fn_lem1_4 feq h, neg_one_mul,
+      eq_add_neg_iff_add_eq, add_right_comm, eq_comm, eq_add_neg_iff_add_eq,
+      ← two_mul (f 1), ← two_mul, mul_one, eq_comm, mul_right_eq_self₀] at h0,
   cases h0 with h0 h0,
   exact h0,
-  exfalso; exact two_ne_zero_R char_ne_2 h0,
+  exfalso; exact ring.two_ne_zero char_ne_2 h0,
 end
 
 lemma fn_lem2_2 :
@@ -184,8 +192,7 @@ lemma fn_lem2_4 :
   ∀ x : R, is_fixed_pt f (x + f (x + 1) + 2) :=
 begin
   intros x,
-  apply fn_lem2_3 char_ne_2 feq h,
-  exact fn_lem1_1 feq x,
+  apply fn_lem2_3 char_ne_2 feq h _ (fn_lem1_1 feq x),
   have h0 := feq (x + 1) 0,
   rw [mul_zero, zero_mul, add_zero, add_zero, h, add_zero] at h0,
   rwa add_right_comm,
@@ -195,7 +202,7 @@ lemma fn_lem2_5 :
   ∀ x : R, f (-x) = - (f x) :=
 begin
   intros x,
-  have h0 := fn_lem2_4 char_ne_2 feq h (x - 2),
+  have h0 := fn_lem2_4 char_ne_2 feq h (x - (1 + 1)),
   change (2 : R) with (1 + 1 : R) at h0,
   rw [add_assoc, sub_add_add_cancel, sub_add, add_sub_cancel] at h0,
   have h1 := feq x (-1),
@@ -215,7 +222,7 @@ theorem fn_thm2 :
   f = id :=
 begin
   apply funext; intros x,
-  rw ← mul_right_inj' (two_ne_zero_R char_ne_2),
+  rw ← mul_right_inj' (ring.two_ne_zero char_ne_2),
   calc 2 * f x = f x + f x : by rw two_mul
   ... = f (1 + f (x + 1)) + - (f (1 + f (x + 1))) + (f x + f x) : by rw [add_neg_self, zero_add]
   ... = f (1 + f (x + 1)) + f x + (- (f (1 + f (x + 1))) + f x) : by rw add_add_add_comm
@@ -226,12 +233,11 @@ begin
   ... = 2 * x : by rw ← two_mul,
 end
 
-
-
 end case_char_ne_2
 
 
 
+---- Solution for the case char(R) = 2, assuming f(0) = 0
 section case_char_eq_2
 
 variable [char_p R 2]
@@ -330,34 +336,38 @@ begin
     exact fn_lem3_4 feq h _ (fn_lem3_2 feq h (x * x)) },
 end
 
-
-
 end case_char_eq_2
 
 
 
----- Wrapper
-theorem IMO2015A4_sol_general :
+end results
+
+
+
+
+
+
+
+---- Final solution
+theorem final_solution :
   set_of fn_eq = ({id, 2 - id} : set (R → R)) :=
 begin
   rw set.ext_iff; intros f,
   rw [set.mem_set_of_eq, set.mem_insert_iff, set.mem_singleton_iff]; split,
+
+  ---- All functions satisfying fn_eq are in the RHS set
   { intros h,
     by_cases h0 : f 0 = 0,
     left; by_cases h1 : ring_char R = 2,
-    exact @fn_thm3 R _inst_1 _inst_2 (ring_char.of_eq h1) f h h0,
-    exact fn_thm2 h1 h h0,
-    right; exact fn_lem1_3 h h0 },
+    exact @results.fn_thm3 R _inst_1 _inst_2 (ring_char.of_eq h1) f h h0,
+    exact results.fn_thm2 h1 h h0,
+    right; exact results.fn_lem1_3 h h0 },
+  
+  ---- All functions on the RHS satisfy fn_eq
   { intros h,
-    cases h with h h; rw h; intros x y,
-    rw [id.def, id.def, id.def, id.def, mul_comm],
-    simp only [pi.bit0_apply, id.def, pi.one_apply, pi.sub_apply]; ring },
+    cases h with h h,
+    rw h; exact results.fn_ans1,
+    rw h; exact results.fn_ans2 },
 end
-
-
-
-
-
-
 
 end IMO2015A4

@@ -1,12 +1,11 @@
 import
   data.fintype.basic
   data.fintype.card
-  logic.function.basic
-  tactic.norm_num
 
 namespace IMO2017A3
 
-variable {S : Type}
+universe u
+variable {S : Type u}
 variable [fintype S]
 variable [decidable_eq S]
 
@@ -28,23 +27,17 @@ def fn_prop (f : S → S) :=
 
 
 
+
+
+
+
 open function
 
+namespace results
 
 
 
-
-
-
-namespace solution
-
-variable {f : S → S}
-variable fprop : fn_prop f
-include fprop
-
-
-
-lemma fn_lem1 :
+lemma fn_lem1 (f : S → S) :
   ∃ m n : ℕ, m < n ∧ nat.iterate f m = nat.iterate f n :=
 begin
   have h := not_injective_infinite_fintype (nat.iterate f),
@@ -52,18 +45,17 @@ begin
   simp_rw not_forall at h,
   rcases h with ⟨m, n, h, h0⟩,
   change ¬m = n with m ≠ n at h0,
-  rw ne_iff_lt_or_gt at h0,
-  cases h0,
+  rw ne_iff_lt_or_gt at h0; cases h0,
   use [m, n]; split; assumption,
   use [n, m]; split,
   exact h0,
   rw h,
 end
 
-lemma fn_lem2 :
+lemma fn_lem2 (f : S → S) :
   ∃ m : ℕ, 0 < m ∧ nat.iterate f (2 * m) = nat.iterate f m :=
 begin
-  rcases fn_lem1 fprop with ⟨m, n, h, h0⟩,
+  rcases fn_lem1 f with ⟨m, n, h, h0⟩,
   let k := n - m,
   let l := n + (k - (n % k)),
   use l; split,
@@ -94,48 +86,49 @@ begin
   exact le_self_add,
 end
 
-lemma fn_lem3 :
+lemma fn_lem3 {f : S → S} (fprop : fn_prop f) :
   ∃ N : ℕ, 0 < N ∧ nat.iterate f (N + 1) = f :=
 begin
-  rcases fn_lem2 fprop with ⟨m, h, h0⟩,
+  rcases fn_lem2 f with ⟨m, h, h0⟩,
   use m; split,
   exact h,
   apply fprop,
-  rw [← iterate_succ, ← iterate_succ', ← iterate_succ', ← iterate_add,
-      nat.succ_eq_add_one, nat.succ_eq_add_one, add_assoc, add_assoc,
-      add_assoc m 1 1, add_add_add_comm, ← two_mul m, iterate_add,
-      ← h0, ← iterate_add],
+  rw [← iterate_succ, ← iterate_succ', ← iterate_succ', ← iterate_add, nat.succ_eq_add_one,
+      nat.succ_eq_add_one, add_assoc, add_assoc, add_assoc m 1 1, add_add_add_comm,
+      ← two_mul m, iterate_add, ← h0, ← iterate_add],
 end
 
-end solution
+
+
+end results
+
+
+
+
 
 
 
 ---- Final solution
-theorem IMO2017A3_sol {f : S → S} (fprop : fn_prop f) :
+theorem final_solution {f : S → S} (fprop : fn_prop f) :
   f '' (set.range f) = set.range f :=
 begin
   rw set.ext_iff; intros x,
   rw [set.mem_image, set.mem_range]; split,
 
+  ---- f(f(S)) ⊆ f(S)
   { intros h,
     rcases h with ⟨y, h, h0⟩,
     use y; exact h0 },
   
+  ---- f(S) ⊆ f(f(S))
   { intros h,
     cases h with y h,
-    rcases solution.fn_lem3 fprop with ⟨N, h0, h1⟩,
+    rcases results.fn_lem3 fprop with ⟨N, h0, h1⟩,
     use nat.iterate f N y; split,
     rw set.mem_range; use nat.iterate f (N - 1) y,
     rw [← comp_apply f, ← iterate_succ', nat.succ_eq_add_one, nat.sub_add_cancel],
     rw ← nat.lt_iff_add_one_le; exact h0,
     rw [← comp_apply f, ← iterate_succ', nat.succ_eq_add_one, h1, h] },
 end
-
-
-
-
-
-
 
 end IMO2017A3
