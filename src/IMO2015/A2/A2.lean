@@ -13,23 +13,61 @@ namespace IMO2015A2
   Answer: f = -1 and f = x ↦ x + 1.
 
   See http://www.imo-official.org/problems/IMO2015SL.pdf
-  We will follow the official solution.
+  We will follow the official Solution.
 -/
 def fn_eq (f : ℤ → ℤ) :=
   ∀ x y : ℤ, f (x - f y) = f (f x) - f y - 1
 
 
 
+
+
+
+
+---- Extra lemmas needed to solve the problem
+namespace extra
+
+lemma fn_linear_diff {f : ℤ → ℤ} {c : ℤ} (h : ∀ x : ℤ, f (x + 1) = f x + c) :
+  ∀ x : ℤ, f x = c * x + f 0 :=
+begin
+  suffices : ∀ (x : ℤ) (n : ℕ), f (x + ↑n) = f x + c * ↑n,
+  { intros x,
+    rcases int.eq_coe_or_neg x with ⟨n, h | h⟩,
+    rw [← zero_add x, h, this, zero_add, add_comm],
+    rw [add_comm, h, mul_neg, eq_add_neg_iff_add_eq, ← this, neg_add_self] },
+  intros x n,
+  induction n with n,
+  rw [int.coe_nat_zero, mul_zero, add_zero, add_zero],
+  rw [int.coe_nat_succ, ← add_assoc, h, n_ih, mul_add_one, add_assoc],
+end
+
+lemma linear_eq_match {a b c d : ℤ} (h : ∀ x : ℤ, a * x + b = c * x + d) :
+  a = c ∧ b = d :=
+begin
+  have h0 := h 0,
+  rw [mul_zero, mul_zero, zero_add, zero_add] at h0,
+  split,
+  have h1 := h 1,
+  rwa [mul_one, mul_one, h0, add_left_inj] at h1,
+  exact h0,
+end
+
+end extra
+
+
+
+
+
+
+
 open function
 
-
-
-
+namespace results
 
 
 
 ---- All functions satisying fn_eq are described here
-namespace answer
+section answer
 
 theorem fn_ans1 :
   fn_eq (const ℤ (-1)) :=
@@ -50,26 +88,8 @@ end answer
 
 
 
----- Extra lemmas needed to solve the problem
-namespace extra
-
-lemma linear_eq_match {a b c d : ℤ} :
-  (∀ x : ℤ, a * x + b = c * x + d) → a = c ∧ b = d :=
-begin
-  intros h,
-  have h0 := h 0,
-  rw [mul_zero, mul_zero, zero_add, zero_add] at h0,
-  have h1 := h 1,
-  rw [mul_one, mul_one, h0, add_left_inj] at h1,
-  split; assumption,
-end
-
-end extra
-
-
-
 ---- We prove that there are no other functions satisfying fn_eq here
-namespace solution
+section solution
 
 variable {f : ℤ → ℤ}
 variable feq : fn_eq f
@@ -89,23 +109,22 @@ lemma fn_lem2 :
   ∀ x y : ℤ, f (x - f y) = f (x + 1) - f y - 1 :=
 begin
   intros x y,
-  have h := feq x y,
-  rwa fn_lem1 feq at h,
+  rw ← fn_lem1 feq,
+  exact feq x y,
 end
 
 lemma fn_lem3 :
   ∀ x : ℤ, f (x - 1 - f x) = -1 :=
 begin
   intros x,
-  have h := fn_lem2 feq (x - 1) x,
-  rwa [sub_add_cancel, sub_self, zero_sub] at h,
+  rw [fn_lem2 feq, sub_add_cancel, sub_self, zero_sub],
 end
 
 lemma fn_lem4 :
-  ∀ x : ℤ, f (x + 1) = f (-1) + 1 + f x :=
+  ∀ x : ℤ, f x = (f (-1) + 1) * x + f 0 :=
 begin
-  intros x,
-  rw ← sub_eq_iff_eq_add,
+  apply extra.fn_linear_diff; intros x,
+  rw [add_comm (f x), ← sub_eq_iff_eq_add],
   calc f (x + 1) - f x = f (x + 1) - f x - 1 + 1 : by rw sub_add_cancel
   ... = f (x - f x) + 1 : by rw ← fn_lem2 feq
   ... = f (x - f x - 1 + 1) + 1 : by rw sub_add_cancel
@@ -114,42 +133,22 @@ begin
   ... = f (-1) + 1 : by rw fn_lem3 feq,
 end
 
-lemma fn_lem5 :
-  ∀ x : ℤ, f x = (f (-1) + 1) * x + f 0 :=
-begin
-  suffices : ∀ x n : ℤ, f (x + n) = (f (-1) + 1) * n + f x,
-    intros x; rw [← zero_add x, this, zero_add],
-  have h : ∀ (x : ℤ) (n : ℕ), f (x + ↑n) = (f (-1) + 1) * ↑n + f x,
-  { intros x n,
-    induction n with n,
-    rw [int.coe_nat_zero, mul_zero, add_zero, zero_add],
-    rw [int.coe_nat_succ, ← add_assoc, fn_lem4 feq, n_ih,
-        ← add_assoc, add_left_inj, add_comm ↑n, mul_add, mul_one] },
-  intros x n,
-  cases n with n,
-  rw [int.of_nat_eq_coe, h],
-  rw [int.neg_succ_of_nat_eq, ← int.coe_nat_succ, mul_neg,
-      eq_neg_add_iff_add_eq, ← h, neg_add_cancel_right],
-end
-
-theorem fn_sol :
+theorem fn_thm :
   f = const ℤ (-1) ∨ f = id + 1 :=
 begin
   let A := f (-1) + 1,
   let B := f 0,
-  have h : ∀ x : ℤ, f x = A * x + B := by exact fn_lem5 feq,
+  have h : ∀ x : ℤ, f x = A * x + B := fn_lem4 feq,
   have h0 : A = A * A ∧ A + B = A * B + B,
   { apply extra.linear_eq_match; intros x,
     calc A * x + (A + B) = A * (x + 1) + B : by rw [mul_add, mul_one, add_assoc _ A]
-    ... = f (x + 1) : by rw ← h
-    ... = f (f x) : by rw ← fn_lem1 feq
-    ... = A * (A * x + B) + B : by rw [h, h]
+    ... = A * (A * x + B) + B : by rw [← h, ← fn_lem1 feq, h, h]
     ... = A * A * x + (A * B + B) : by rw [mul_add, add_assoc, ← mul_assoc] },
   cases h0 with h0 h1,
   rw [eq_comm, mul_left_eq_self₀] at h0,
   cases h0 with h0 h0,
-  { rw [add_left_inj, h0, one_mul] at h1,
-    right; apply funext; intros x,
+  { right; apply funext; intros x,
+    rw [add_left_inj, h0, one_mul] at h1,
     rw [pi.add_apply, id.def, pi.one_apply, h, h0, one_mul, ← h1] },
   { left; apply funext; intros x,
     rw [const_apply, h, h0, zero_mul, zero_add],
@@ -163,22 +162,24 @@ end solution
 
 
 
----- Wrapper
+end results
+
+
+
+
+
+
+
+---- Final solution
 theorem final_solution :
   set_of fn_eq = {const ℤ (-1), id + 1} :=
 begin
   rw set.ext_iff; intros f,
   rw [set.mem_set_of_eq, set.mem_insert_iff, set.mem_singleton_iff]; split,
-  exact solution.fn_sol,
-  intros h; cases h with h h; subst h,
-  exact answer.fn_ans1,
-  exact answer.fn_ans2,
+  exact results.fn_thm,
+  intros h; cases h with h h,
+  rw h; exact results.fn_ans1,
+  rw h; exact results.fn_ans2,
 end
-
-
-
-
-
-
 
 end IMO2015A2
