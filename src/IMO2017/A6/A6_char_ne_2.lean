@@ -150,7 +150,7 @@ end solution
 
 
 ---- Wrapper
-theorem IMO2017A6_sol_char_ne_2 (char_ne_2 : ring_char F ≠ 2) :
+theorem final_solution_char_ne_2 (char_ne_2 : ring_char F ≠ 2) :
   set_of fn_eq = ({0, 1 - id, id - 1} : set (F → F)) :=
 begin
   rw set.ext_iff; intros f,

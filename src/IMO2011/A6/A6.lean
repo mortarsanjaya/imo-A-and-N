@@ -10,8 +10,6 @@ namespace IMO2011A6
           f(x + y) ≤ y f(x) + f(f(x)).
   Prove that f(x) = 0 for all x ≤ 0.
 
-  Main theorem: IMO2011A6_sol
-
   See https://www.imo-official.org/problems/IMO2011SL.pdf.
   We will follow the official Solution 1.
 -/

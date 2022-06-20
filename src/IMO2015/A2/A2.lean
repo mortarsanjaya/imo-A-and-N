@@ -12,8 +12,6 @@ namespace IMO2015A2
 
   Answer: f = -1 and f = x ↦ x + 1.
 
-  Main theorem: IMO2015A2_sol
-
   See http://www.imo-official.org/problems/IMO2015SL.pdf
   We will follow the official solution.
 -/
@@ -166,7 +164,7 @@ end solution
 
 
 ---- Wrapper
-theorem IMO2015A2_sol :
+theorem final_solution :
   set_of fn_eq = {const ℤ (-1), id + 1} :=
 begin
   rw set.ext_iff; intros f,

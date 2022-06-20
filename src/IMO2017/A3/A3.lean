@@ -112,7 +112,7 @@ end solution
 
 
 ---- Final solution
-theorem IMO2017A3_sol {f : S → S} (fprop : fn_prop f) :
+theorem final_solution {f : S → S} (fprop : fn_prop f) :
   f '' (set.range f) = set.range f :=
 begin
   rw set.ext_iff; intros x,

@@ -11,7 +11,7 @@ namespace IMO2017A6
   Follows from the generalized version case char(F) ≠ 2 since char(ℝ) = 0 ≠ 2. 
 -/
 
-theorem IMO2017A6_sol :
+theorem final_solution_real :
   set_of fn_eq = ({0, 1 - id, id - 1} : set (ℝ → ℝ)) :=
 begin
   apply case_char_ne_2.IMO2017A6_sol_char_ne_2,

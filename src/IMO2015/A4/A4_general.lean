@@ -337,7 +337,7 @@ end case_char_eq_2
 
 
 ---- Wrapper
-theorem IMO2015A4_sol_general :
+theorem final_solution :
   set_of fn_eq = ({id, 2 - id} : set (R → R)) :=
 begin
   rw set.ext_iff; intros f,

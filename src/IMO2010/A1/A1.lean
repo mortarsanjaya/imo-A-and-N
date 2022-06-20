@@ -12,8 +12,6 @@ namespace IMO2010A1
 
   Answer: f = 0 or f = C for some C ∈ [1, 2).
 
-  Main theorem: IMO2010A1_sol
-
   See https://www.imo-official.org/problems/IMO2010SL.pdf.
   We will follow some parts of the Solution 1.
   For Case 2 : f(0) = 0, we do the following steps instead:

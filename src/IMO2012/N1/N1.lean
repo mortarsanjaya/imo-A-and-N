@@ -127,7 +127,7 @@ end results
 
 
 ---- Final solution
-theorem IMO2012N1_sol :
+theorem final_solution :
   good = is_coprime :=
 begin
   apply funext; intros x,
