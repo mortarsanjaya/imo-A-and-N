@@ -43,7 +43,7 @@ lemma fn_lem1 {f : F → F} (h : f ≠ 0) (feq : fn_eq f) :
   f 0 = 1 :=
 begin
   apply frobenius_inj F 2,
-  have h0 := general.fn_lem3_3 feq h,
+  have h0 := results.fn_general3_3 feq h,
   unfold frobenius; rw [ring_hom.coe_mk, h0, one_pow],
 end
 
@@ -51,7 +51,7 @@ lemma fn_lem2 {f : F → F} (h : f ≠ 0) (feq : fn_eq f) :
   fn_eq2 f :=
 begin
   intros x,
-  rw [general.fn_lem4_1 feq (fn_lem1 h feq), sub_eq_add],
+  rw [results.fn_general4_1 feq (fn_lem1 h feq), sub_eq_add],
 end
 
 theorem fn_thm1 {f : F → F} (h : f ≠ 0) (feq : fn_eq f) :
@@ -119,7 +119,7 @@ include feq1 feq2
 lemma fn_lem1_1 :
   f 0 = 0 :=
 begin
-  have h := general.fn_lem3_4 (correspondence.fn_thm3 feq1 feq2),
+  have h := results.fn_general3_4 (correspondence.fn_thm3 feq1 feq2),
   simp only [] at h,
   rwa char_two.add_self_eq_zero at h,
 end
@@ -140,7 +140,7 @@ begin
   calc f x = 0 ↔ f (x + 1 + 1) = 0 : by rw [← sub_eq_add, add_sub_cancel]
   ... ↔ x + 1 = 1 : _
   ... ↔ x = 0 : by rw add_left_eq_self,
-  { rw general.fn_thm3 (correspondence.fn_thm3 feq1 feq2),
+  { rw results.fn_general3 (correspondence.fn_thm3 feq1 feq2),
     intros h,
     have h0 : f (0 + 1) = (0 : F → F) 0 := by rw ← h; simp only [],
     rw [zero_add, pi.zero_apply, fn_lem1_2 feq1 feq2] at h0,

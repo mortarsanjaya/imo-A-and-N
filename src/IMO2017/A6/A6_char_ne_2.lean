@@ -2,13 +2,15 @@ import
   IMO2017.A6.A6_general
   algebra.char_p.basic
   data.set.basic
-  
 
 namespace IMO2017A6
 
-/-
-  Solution of IMO 2017 A6 (P2), Generalized Version, for the case char(F) ≠ 2.
+universe u
+variable {F : Type u}
+variable [field F]
 
+/-
+  IMO 2017 A6 (P2), Generalized Version, for the case char(F) ≠ 2.
   Solution, continuing from the general case:
     From f(x + 1) = f(x) - 1, we know that f(x + n) = f(x) - n ∀ x ∈ F, n ∈ ℤ.
     In particular, for n ∈ ℤ, f(x) = n iff x = 1 - n.
@@ -38,30 +40,28 @@ namespace IMO2017A6
 
 
 
-namespace case_char_ne_2
-
 open function
+open_locale classical
 
-universe u
-variable {F : Type u}
-variable [field F]
+namespace results
+namespace case_char_ne_2
 
 
 
 ---- All functions satisfying fn_eq in case char(F) ≠ 2
-namespace answer
+section answer
 
 lemma fn_ans1 :
   fn_eq (0 : F → F) :=
 begin
-  intros _ _,
+  intros x y,
   rw [pi.zero_apply, pi.zero_apply, pi.zero_apply, add_zero],
 end
 
 lemma fn_ans2 :
   fn_eq (1 - id : F → F) :=
 begin
-  intros _ _,
+  intros x y,
   simp only [id.def, pi.one_apply, pi.sub_apply],
   ring,
 end
@@ -70,16 +70,15 @@ lemma fn_ans3 :
   fn_eq (id - 1 : F → F) :=
 begin
   rw ← neg_sub,
-  exact general.fn_thm1 fn_ans2,
+  exact results.fn_general1 fn_ans2,
 end
-
 
 end answer
 
 
 
 ---- Injectivity result for char(F) ≠ 2, implying no other possible functions satisfying fn_eq
-namespace solution
+section solution
 
 variable {f : F → F}
 variable feq : fn_eq f
@@ -89,7 +88,7 @@ lemma fn_lem1 :
   f 0 = 1 → ∀ x : F, f (x - 1) = f x + 1 :=
 begin
   intros h x,
-  rw [← sub_eq_iff_eq_add, ← general.fn_lem4_1 feq h, sub_add_cancel],
+  rw [← sub_eq_iff_eq_add, ← results.fn_general4_1 feq h, sub_add_cancel],
 end
 
 lemma fn_lem2 :
@@ -97,7 +96,7 @@ lemma fn_lem2 :
 begin
   intros h x,
   have h0 : f (-1) = 1 + 1 :=
-    by rwa [← sub_eq_iff_eq_add, ← general.fn_lem4_1 feq h, neg_add_self, h],
+    by rwa [← sub_eq_iff_eq_add, ← results.fn_general4_1 feq h, neg_add_self, h],
   rw [← h0, add_assoc, ← fn_lem1 feq h, sub_eq_add_neg, feq, mul_neg_one],
 end
 
@@ -105,26 +104,20 @@ lemma fn_lem3 (char_ne_2 : ring_char F ≠ 2) :
   f 0 = 1 → ∀ x : F, f x = f (-x) ↔ x = 0 :=
 begin
   intros h x,
+  have h0 := fn_lem2 feq h x,
+  rw [add_right_comm, ← eq_sub_iff_add_eq, ← fn_lem1 feq h] at h0,
   have X : f ≠ 0,
   { intros h1,
     rw [h1, pi.zero_apply] at h,
     exact zero_ne_one h },
-  have h0 := fn_lem2 feq h x,
-  rw [add_right_comm, ← eq_sub_iff_add_eq, ← fn_lem1 feq h] at h0,
-  calc f x = f (-x) ↔ f (-x) - f x = 0 : by rw [eq_comm, sub_eq_zero]
-  ... ↔ f (f x * (1 + 1) - 1) = 0 : by rw h0
-  ... ↔ f x * (1 + 1) - 1 = 1 : by rw general.fn_thm3 feq X
-  ... ↔ f x * (1 + 1) = 1 + 1 : by rw sub_eq_iff_eq_add
-  ... ↔ f x = 1 : _
-  ... ↔ f (x + 1) = 0 : by rw [← sub_eq_zero, general.fn_lem4_1 feq h]
-  ... ↔ x = 0 : by rw [general.fn_thm3 feq X, add_left_eq_self],
-  ---- Solve f(x) (1 + 1) = 1 + 1 ↔ f x = 1
-  { rw mul_left_eq_self₀,
-    apply or_iff_left; intros h1,
-    apply char_ne_2,
-    apply char_p.ring_char_of_prime_eq_zero,
-    exact nat.prime_two,
-    rw [nat.cast_bit0, nat.cast_one, ← h1]; refl },
+  rw [eq_comm, ← sub_eq_zero, ← h0, results.fn_general3 feq X, sub_eq_iff_eq_add,
+      mul_left_eq_self₀, or_iff_left, ← sub_eq_zero, ← results.fn_general4_1 feq h,
+      results.fn_general3 feq X, add_left_eq_self],
+  intros h1,
+  apply char_ne_2,
+  apply char_p.ring_char_of_prime_eq_zero,
+  exact nat.prime_two,
+  rw [nat.cast_bit0, nat.cast_one, ← h1]; refl,
 end
 
 lemma fn_lem4 (char_ne_2 : ring_char F ≠ 2) :
@@ -141,7 +134,7 @@ theorem fn_sol (char_ne_2 : ring_char F ≠ 2) :
   f 0 = 1 → f = 1 - id :=
 begin
   intros h,
-  apply general.fn_thm4 feq h,
+  apply results.fn_general4 feq h,
   exact fn_lem4 feq char_ne_2 h,
 end
 
@@ -160,25 +153,26 @@ begin
     by_cases h0 : f = 0,
     left; exact h0,
     right,
-    have h1 := general.fn_lem3_3 h h0,
+    have h1 := results.fn_general3_3 h h0,
     rw sq_eq_one_iff at h1,
     cases h1 with h1 h1,
-    left; exact solution.fn_sol h char_ne_2 h1,
+    left; exact fn_sol h char_ne_2 h1,
     right,
     rw [← neg_sub, eq_neg_iff_eq_neg, eq_comm],
-    apply solution.fn_sol (general.fn_thm1 h) char_ne_2,
+    apply fn_sol (results.fn_general1 h) char_ne_2,
     rwa [pi.neg_apply, h1, neg_neg] },
   { intros h,
     rcases h with h | h | h; subst h,
-    exact answer.fn_ans1,
-    exact answer.fn_ans2,
-    exact answer.fn_ans3 },
+    exact fn_ans1,
+    exact fn_ans2,
+    exact fn_ans3 },
 end
 
 
 
 end case_char_ne_2
 
+end results
 
 
 
