@@ -11,6 +11,7 @@ variable [field F]
 
 /-
   IMO 2017 A6 (P2), Generalized Version, case char(F) ≠ 2.
+  
   Solution, continuing from the general case:
     From f(x + 1) = f(x) - 1, we know that f(x + n) = f(x) - n ∀ x ∈ F, n ∈ ℤ.
     In particular, for n ∈ ℤ, f(x) = n iff x = 1 - n.

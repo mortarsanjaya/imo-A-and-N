@@ -7,6 +7,7 @@ namespace IMO2019A1
 /-
   IMO 2019 A1 (P1), Original Version
 
+  Solution:
   From the generalized version, all functions satisfying the equation are of form
     x ↦ φ(x) + x + C for some φ ∈ End(ℤ) with φ² = 1 and C ∈ G with φ(C) = C.
   However, the only φ ∈ End(ℤ) with φ² = 1 are id and x ↦ -x.
