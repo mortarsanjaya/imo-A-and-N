@@ -19,7 +19,7 @@ variable [is_domain R]
   Find all functions f : R → R such that, for all x, y ∈ R,
           f(x + f(x + y)) + f(xy) = x + f(x + y) + y f(x).
 
-  Answer: f = x ↦ 2 - x and f = x ↦ x.
+  Answer: f = id : x ↦ x and f = x ↦ 2 - x.
 
   See http://www.imo-official.org/problems/IMO2015SL.pdf.
   The official solution works perfectly only for the case char(R) ≠ 2.
