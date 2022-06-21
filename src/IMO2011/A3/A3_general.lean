@@ -19,10 +19,10 @@ variables [comm_ring R] [is_domain R] [nontrivial R]
 
   See https://www.imo-official.org/problems/IMO2011SL.pdf.
   We will follow the official Solution.
-  It adopts directly to any domain R with 2 having a double-sided inverse.
+  It adopts directly to any domain R with 2 being invertible.
 
   Note:
-  1. We will only put the condition of 2 having an inverse when necessary.
+  1. We will only put the condition of 2 being invertible when necessary.
   2. The non-triviality is actually not required, but the trivial ring case is trivial.
   3. It seems that even the case char(R) = 2 is too ugly to even consider.
 -/
