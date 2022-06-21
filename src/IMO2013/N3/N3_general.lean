@@ -8,8 +8,6 @@ namespace IMO2013N3
 
 universe u
 variables {S : Type u} [linear_order S]
-variables {f : ℕ+ → S} (fmax : ∀ a b : ℕ+, f (a * b) = max (f a) (f b))
-include fmax
 
 /--
   IMO 2013 N3, "Generalized" Version
@@ -20,23 +18,23 @@ include fmax
           f(n⁴ + n² + 1) = f((n + 1)⁴ + (n + 1)² + 1).
 
   Solution:
-    Call n ∈ ℕ⁺ good if f(n⁴ + n² + 1) = f((n + 1)⁴ + (n + 1)² + 1), and bad otherwise.
+    Call n ∈ ℕ⁺ f-good if f(n⁴ + n² + 1) = f((n + 1)⁴ + (n + 1)² + 1), and f-bad otherwise.
     Let T(n) = n² + n + 1 for each n ∈ ℕ⁺.
     As in the official solution, one notices that, for all n ≥ 2,
             f(T(n²)) = max{f(T(n - 1)), f(T(n))}.
-    Thus, a positive integer n ≥ 2 is good if and only if
+    Thus, a positive integer n ≥ 2 is f-good if and only if
             max{f(T(n - 1)), f(T(n))} = max{f(T(n)), f(T(n + 1))}.
     Next, we prove the following easy claim.
 
     Claim:
-      For any bad positive integer n, if f(T(n - 1)) ≤ f(T(n)) then f(T(n)) < f(T(n + 1)).
+      For any f-bad positive integer n, if f(T(n - 1)) ≤ f(T(n)) then f(T(n)) < f(T(n + 1)).
     Proof:
       If f(T(n + 1)) ≤ f(T(n)), then
         max{f(T(n - 1)), f(T(n))} = max{f(T(n)), f(T(n + 1))} = T(n).
-      That means n is good; a contradiction.
+      That means n is f-good; a contradiction.
     
-    Now suppose that there exists finitely many good positive integer.
-    Then there exists N ≥ 2 such that for any n ∈ ℕ⁺ with n ≥ N, n is bad.
+    Now suppose that there exists finitely many f-good positive integer.
+    Then there exists N ≥ 2 such that for any n ∈ ℕ⁺ with n ≥ N, n is f-bad.
     We divide into two cases:
 
     1. There exists an integer C ≥ N such that f(T(C - 1)) ≤ f(T(C)).
@@ -67,7 +65,7 @@ include fmax
 
   3. In the implementation, instead of using n in the good predicate, we use n + 1.
 -/
-def good (n : ℕ+) :=
+def good (f : ℕ+ → S) (n : ℕ+) :=
   f (n ^ 4 + n ^ 2 + 1) = f ((n + 1) ^ 4 + (n + 1) ^ 2 + 1)
 
 
@@ -78,16 +76,19 @@ def good (n : ℕ+) :=
 
 namespace results
 
+variables {f : ℕ+ → S} (fmax : ∀ a b : ℕ+, f (a * b) = max (f a) (f b))
+include fmax
+
 lemma lem1 (n : ℕ+) :
-  good fmax (n + 1) ↔ f (T ((n + 1) ^ 2)) = f (T ((n + 1 + 1) ^ 2)) :=
+  good f (n + 1) ↔ f (T ((n + 1) ^ 2)) = f (T ((n + 1 + 1) ^ 2)) :=
     by unfold good T; rw [nat.bit0_val, pow_mul, pow_mul]
 
 lemma lem2 (n : ℕ+) :
-  good fmax (n + 1) ↔ max (f (T n)) (f (T (n + 1))) = max (f (T (n + 1))) (f (T (n + 1 + 1))) :=
-    by rw [lem1, T_sq_factor, fmax, T_sq_factor, fmax]
+  good f (n + 1) ↔ max (f (T n)) (f (T (n + 1))) = max (f (T (n + 1))) (f (T (n + 1 + 1))) :=
+    by rw [lem1 fmax, T_sq_factor, fmax, T_sq_factor, fmax]
 
 lemma lem3 (n : ℕ+) :
-  ¬good fmax (n + 1) → f (T n) ≤ f (T (n + 1)) → f (T (n + 1)) < f (T (n + 1 + 1)) :=
+  ¬good f (n + 1) → f (T n) ≤ f (T (n + 1)) → f (T (n + 1)) < f (T (n + 1 + 1)) :=
 begin
   intros h h0,
   apply lt_of_not_le; intros h1,
@@ -95,7 +96,7 @@ begin
   rw [lem2 fmax, max_eq_right h0, max_eq_left h1],
 end
 
-lemma lem4 (N : ℕ+) (h : ∀ n : ℕ+, N < n → ¬good fmax n) :
+lemma lem4 (N : ℕ+) (h : ∀ n : ℕ+, N < n → ¬good f n) :
   ∀ C : ℕ+, N < C → f (T C) ≤ f (T (C + 1)) → ∀ k : ℕ+, f (T (C + 1)) < f (T (C + 1 + k)) :=
 begin
   intros C h0 h1,
@@ -119,7 +120,7 @@ begin
   rw add_assoc; exact lt_trans h0 (pnat.lt_add_right C (k + 1)),
 end
 
-lemma lem5 (N : ℕ+) (h : ∀ n : ℕ+, N < n → ¬good fmax n) :
+lemma lem5 (N : ℕ+) (h : ∀ n : ℕ+, N < n → ¬good f n) :
   ∀ n : ℕ+, N < n → f (T (n + 1)) < f (T n) :=
 begin
   intros C h0,
@@ -129,7 +130,7 @@ begin
   exact lt_irrefl _ h2,
 end
 
-lemma lem6 (N : ℕ+) (h : ∀ n : ℕ+, N < n → ¬good fmax n) :
+lemma lem6 (N : ℕ+) (h : ∀ n : ℕ+, N < n → ¬good f n) :
   ∀ n : ℕ+, N < n → ∀ k : ℕ+, f (T (n + k)) < f (T n) :=
 begin
   intros n h0 k,
@@ -141,7 +142,7 @@ begin
   exact lt_trans h0 (pnat.lt_add_right n k),
 end
 
-lemma lem7 (N : ℕ+) (h : ∀ n : ℕ+, N < n → ¬good fmax n) :
+lemma lem7 (N : ℕ+) (h : ∀ n : ℕ+, N < n → ¬good f n) :
   false :=
 begin
   have h0 := lem6 fmax N h (N + 1) (pnat.lt_add_right N 1) (N * (N + 1)),
@@ -157,8 +158,8 @@ end results
 
 
 
-theorem final_solution_general :
-  set.infinite (set_of (good fmax)) :=
+theorem final_solution_general {f : ℕ+ → S} (fmax : ∀ a b : ℕ+, f (a * b) = max (f a) (f b)) :
+  set.infinite (set_of (good f)) :=
 begin
   intros h,
   have h0 := set.finite.bdd_above h,
