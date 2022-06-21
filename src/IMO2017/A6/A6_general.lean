@@ -20,10 +20,10 @@ variable [field F]
      See file "A6_char_ne_2.lean", with main theorem "final_solution_char_ne_2".
      We refer to the solution by user "anantmudgal09" on AoPS:
        https://artofproblemsolving.com/community/c6h1480146p8693244.
-     Note that the solution extends to the case char F ≠ 2.
+     Note that the solution extends to the case char(F) ≠ 2.
   
   2. The case F = ℝ is thus solved as well since char ℝ = 0 ≠ 2.
-     We put the result into file "A6.lean", with main theorem "final_solution_real".
+     We put the result into file "A6_original.lean", with main theorem "final_solution_original".
 
   3. The case char F = 2 is still open.
      See the folder "A6_char_eq_2".

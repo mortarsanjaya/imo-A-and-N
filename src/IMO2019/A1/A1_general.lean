@@ -21,8 +21,8 @@ variable [add_comm_group G]
   The only solutions to the case G = ℤ are n ↦ 0 and x ↦ 2n + C for some constant C.
   However, there is a more general functions satisfying the above equation.
 
-  The proof for the original version with G = ℤ is in the file "A1_int.lean".
-  See theorem "final_solution_int".
+  The proof for the original version with G = ℤ is in the file "A1_original.lean".
+  See theorem "final_solution_original".
 
   Answer:
     Fix some φ ∈ End(G) with φ² = id, and fix a fixed point C of φ.
@@ -30,7 +30,7 @@ variable [add_comm_group G]
     Furthermore, all functions satisfying the above equation are of this form.
 
   Solution:
-    See https://www.imo-official.org/problems/IMO2011SL.pdf.
+    See https://www.imo-official.org/problems/IMO2019SL.pdf.
     We refer to the official Solution 2 and modify it for our generalization needs.
     
     Let f be an arbitrary function satisfying the above equation.

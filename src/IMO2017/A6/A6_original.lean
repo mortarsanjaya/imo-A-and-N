@@ -11,7 +11,7 @@ namespace IMO2017A6
   See "A6_char_ne_2.lean" for this generalized version
 -/
 
-theorem final_solution_real :
+theorem final_solution_original :
   set_of fn_eq = ({0, 1 - id, id - 1} : set (ℝ → ℝ)) :=
 begin
   apply final_solution_char_ne_2,

@@ -71,7 +71,7 @@ end extra
 
 
 
-theorem final_solution_int :
+theorem final_solution_original :
   set_of fn_eq = {(0 : ℤ → ℤ)} ∪ (λ C : ℤ, (λ x : ℤ, 2 * x + C)) '' univ :=
 begin
   rw [final_solution_general extra.nat_int_two_torsion_free, ext_iff]; intros f,
