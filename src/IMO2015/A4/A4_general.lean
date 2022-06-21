@@ -344,7 +344,7 @@ end results
 
 
 ---- Final solution
-theorem final_solution :
+theorem final_solution_general :
   set_of fn_eq = ({id, 2 - id} : set (R → R)) :=
 begin
   rw set.ext_iff; intros f,
