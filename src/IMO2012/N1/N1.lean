@@ -3,7 +3,6 @@ import
   data.int.gcd
   data.set.basic
   ring_theory.int.basic
-  tactic.ring
 
 namespace IMO2012N1
 
@@ -45,10 +44,11 @@ lemma bad_pairs1 (c : ℤ) :
 begin
   intros x y,
   simp only [mem_set_of_eq]; intros h h0 k,
-  cases h with a h,
-  cases h0 with b h0,
-  rw [h, h0],
-  use c * (a * a + k * a * b + b * b); ring,
+  apply dvd_add,
+  apply dvd_add,
+  exact dvd_pow h two_ne_zero,
+  rw ← mul_assoc; exact dvd_mul_of_dvd_right h0 _,
+  exact dvd_pow h0 two_ne_zero,
 end
 
 lemma bad_pairs2 :
