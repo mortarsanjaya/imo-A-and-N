@@ -1,6 +1,4 @@
-import
-  algebra.ring.basic
-  tactic.ring
+import algebra.ring.basic tactic.ring
 
 namespace IMOSL
 namespace IMO2011A3

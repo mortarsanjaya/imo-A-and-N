@@ -1,6 +1,4 @@
-import
-  IMO2011.A3.A3_general
-  data.real.basic
+import IMO2011.A3.A3_general data.real.basic
 
 namespace IMOSL
 namespace IMO2011A3
