@@ -81,9 +81,7 @@ end results
 /-- Final solution -/
 theorem final_solution : good = is_coprime :=
 begin
-  apply funext; intros x,
-  apply funext; intros y,
-  apply propext; split,
+  ext x y; split,
   exacts [results.bad_pairs x y, results.good_pairs x y]
 end
 
