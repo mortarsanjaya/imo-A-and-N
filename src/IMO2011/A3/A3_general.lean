@@ -3,8 +3,7 @@ import algebra.ring.basic tactic.ring
 namespace IMOSL
 namespace IMO2011A3
 
-variable {R : Type*}
-variables [comm_ring R] [is_domain R] [nontrivial R]
+variables {R : Type*} [comm_ring R] [is_domain R] [nontrivial R]
 
 /--
   IMO 2011 A3, Generalized Version
