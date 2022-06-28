@@ -1,9 +1,6 @@
-import
-  data.int.basic
-  data.int.gcd
-  data.set.basic
-  ring_theory.int.basic
+import data.int.gcd data.set.basic ring_theory.int.basic
 
+namespace IMOSL
 namespace IMO2012N1
 
 /--
@@ -18,14 +15,8 @@ namespace IMO2012N1
   See https://www.imo-official.org/problems/IMO2012SL.pdf.
   We will follow the official Solution.
 -/
-def admissible (A : set ℤ) :=
-  ∀ x y : ℤ, x ∈ A → y ∈ A → ∀ k : ℤ, x ^ 2 + k * (x * y) + y ^ 2 ∈ A
-def good (m n : ℤ) :=
-  ∀ A : set ℤ, admissible A → m ∈ A → n ∈ A → A = set.univ
-
-
-
-
+def admissible (A : set ℤ) := ∀ x y : ℤ, x ∈ A → y ∈ A → ∀ k : ℤ, x ^ 2 + k * (x * y) + y ^ 2 ∈ A
+def good (m n : ℤ) := ∀ A : set ℤ, admissible A → m ∈ A → n ∈ A → A = set.univ
 
 
 
@@ -34,107 +25,67 @@ open int
 
 namespace results
 
-
-
----- We prove that some pairs are "bad" i.e. not good
-section bad_pairs
-
-lemma bad_pairs1 (c : ℤ) :
-  admissible {n : ℤ | c ∣ n} :=
-begin
-  intros x y,
-  simp only [mem_set_of_eq]; intros h h0 k,
-  apply dvd_add,
-  apply dvd_add,
-  exact dvd_pow h two_ne_zero,
-  rw ← mul_assoc; exact dvd_mul_of_dvd_right h0 _,
-  exact dvd_pow h0 two_ne_zero,
-end
-
-lemma bad_pairs2 :
+/-- Characterization of bad pairs -/
+lemma bad_pairs :
   ∀ m n : ℤ, good m n → is_coprime m n :=
 begin
   intros m n h,
   rw ← int.gcd_eq_one_iff_coprime,
-  let S := {k : ℤ | ↑(int.gcd m n) ∣ k},
-  have h0 : (1 : ℤ) ∈ S,
-  { rw h S,
+  let c := ↑(int.gcd m n),
+  let S := {k : ℤ | c ∣ k},
+  have step1 : admissible S :=
+  begin
+    intros x y h h0 k,
+    rw mem_set_of_eq at h h0 ⊢,
+    rw ← mul_assoc,
+    repeat { apply dvd_add },
+    exacts [dvd_pow h two_ne_zero, dvd_mul_of_dvd_right h0 _, dvd_pow h0 two_ne_zero]
+  end,
+  have step2 : (1 : ℤ) ∈ S,
+  { rw h S step1,
     exact mem_univ 1,
-    exact bad_pairs1 _,
     all_goals { rw mem_set_of_eq },
     exact int.gcd_dvd_left m n,
     exact int.gcd_dvd_right m n },
-  rw mem_set_of_eq at h0,
+  rw mem_set_of_eq at step2,
   apply nat.eq_one_of_dvd_one,
   change (1 : ℕ) with (1 : ℤ).nat_abs,
-  exact dvd_nat_abs_of_of_nat_dvd h0,
+  exact dvd_nat_abs_of_of_nat_dvd step2
 end
 
-end bad_pairs
-
-
-
----- We prove that the rest are good
-section good_pairs
-
-lemma good_pairs1 :
-  ∀ (m : ℤ) (A : set ℤ), admissible A → m ∈ A → ∀ k : ℤ, k * m ^ 2 ∈ A :=
+/-- Characterization of good pairs -/
+lemma good_pairs (x y : ℤ) (h : is_coprime x y) : good x y :=
 begin
-  intros m A h h0 k,
-  have h1 := h m m h0 h0 (k - (1 + 1)),
-  rwa [← one_mul (m ^ 2), ← sq, ← add_mul, ← add_mul,
-       add_comm (1 : ℤ), add_assoc, sub_add_cancel] at h1,
-end
-
-lemma good_pairs2 :
-  ∀ (x y : ℤ) (A : set ℤ), admissible A → x ∈ A → y ∈ A → (x + y) ^ 2 ∈ A :=
-begin
-  intros x y A h h0 h1,
-  rw [add_sq, mul_assoc],
-  exact h x y h0 h1 2,
-end
-
-lemma good_pairs3 :
-  ∀ x y : ℤ, is_coprime x y → ∀ A : set ℤ, admissible A → x ∈ A → y ∈ A → (1 : ℤ) ∈ A :=
-begin
-  intros x y h A h0 h1 h2,
+  intros A h0 h1 h2,
+  have step1 : ∀ m : ℤ, m ∈ A → ∀ k : ℤ, k * m ^ 2 ∈ A :=
+  begin
+    intros m h3 k,
+    have h4 := h0 m m h3 h3 (k - 2),
+    ring_nf at h4; exact h4
+  end,
+  suffices : (1 : ℤ) ∈ A,
+  { rw eq_univ_iff_forall; intros z,
+    have h3 := step1 (1 : ℤ) this z,
+    rwa [one_pow, mul_one] at h3 },
   have h3 : is_coprime (x ^ 2) (y ^ 2) := is_coprime.pow h,
   rcases h3 with ⟨k, m, h3⟩,
-  rw [← one_pow 2, ← h3],
-  apply good_pairs2 _ _ A h0,
-  exact good_pairs1 x A h0 h1 _,
-  exact good_pairs1 y A h0 h2 _,
+  rw [← one_pow 2, ← h3, add_sq, mul_assoc],
+  refine h0 _ _ _ _ 2,
+  exacts [step1 x h1 _, step1 y h2 _]
 end
-
-lemma good_pairs4 :
-  ∀ x y : ℤ, is_coprime x y → good x y :=
-begin
-  intros x y h A h0 h1 h2,
-  rw eq_univ_iff_forall; intros z,
-  have h3 := good_pairs3 x y h A h0 h1 h2,
-  have h4 := good_pairs1 (1 : ℤ) A h0 h3 z,
-  rwa [one_pow, mul_one] at h4,
-end
-
-end good_pairs
 
 end results
 
 
 
-
-
-
-
----- Final solution
-theorem final_solution :
-  good = is_coprime :=
+/-- Final solution -/
+theorem final_solution : good = is_coprime :=
 begin
   apply funext; intros x,
   apply funext; intros y,
   apply propext; split,
-  exact results.bad_pairs2 x y,
-  exact results.good_pairs4 x y,
+  exacts [results.bad_pairs x y, results.good_pairs x y]
 end
 
 end IMO2012N1
+end IMOSL
