@@ -1,5 +1,4 @@
-import
-  data.real.basic
+import data.real.basic
 
 namespace IMOSL
 namespace IMO2010A1
@@ -101,4 +100,3 @@ end
 
 end IMO2010A1
 end IMOSL
-
