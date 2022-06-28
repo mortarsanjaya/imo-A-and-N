@@ -1,6 +1,6 @@
-import
-  data.real.basic
+import data.real.basic
 
+namespace IMOSL
 namespace IMO2011A6
 
 /--
@@ -13,59 +13,42 @@ namespace IMO2011A6
   See https://www.imo-official.org/problems/IMO2011SL.pdf.
   We will follow the official Solution 1.
 -/
-def fn_ineq (f : ℝ → ℝ) :=
-  ∀ x y : ℝ, f (x + y) ≤ y * f x + f (f x)
-
-
-
-
+def fn_ineq (f : ℝ → ℝ) := ∀ x y : ℝ, f (x + y) ≤ y * f x + f (f x)
 
 
 
 namespace results
 
-
-
 variables {f : ℝ → ℝ} (fineq : fn_ineq f)
 include fineq
 
-lemma fn_lem1 :
-  ∀ t x : ℝ, f t ≤ t * f x - x * f x + f (f x) :=
+lemma fn_lem1 (t x : ℝ) : f t ≤ t * f x - x * f x + f (f x) :=
 begin
-  intros t x,
   have h := fineq x (t - x),
-  rwa [add_sub_cancel'_right, sub_mul] at h,
+  rwa [add_sub_cancel'_right, sub_mul] at h
 end
 
-lemma fn_lem2 :
-  ∀ a b : ℝ, b * f b + f (f a) ≤ f a * f b + f (f b) :=
+lemma fn_lem2 (a b : ℝ) : b * f b + f (f a) ≤ f a * f b + f (f b) :=
 begin
-  intros a b,
   rw [add_comm, ← le_sub_iff_add_le, add_sub_right_comm],
   exact fn_lem1 fineq (f a) b,
 end
 
-lemma fn_lem3 :
-  ∀ a b : ℝ, a * f a + b * f b ≤ 2 * f a * f b :=
+lemma fn_lem3 (a b : ℝ) : a * f a + b * f b ≤ 2 * f a * f b :=
 begin
-  intros a b,
   have h := add_le_add (fn_lem2 fineq b a) (fn_lem2 fineq a b),
   rwa [add_add_add_comm, add_comm (f (f b)), add_add_add_comm _ (f (f a)),
        add_le_add_iff_right, mul_comm (f b), ← two_mul, ← mul_assoc] at h,
 end
 
-lemma fn_lem4 :
-  ∀ x : ℝ, x < 0 → 0 ≤ f x :=
+lemma fn_lem4 (x : ℝ) (h : x < 0) : 0 ≤ f x :=
 begin
-  intros x h,
   have h0 := fn_lem3 fineq x (2 * f x),
   rwa [add_le_iff_nonpos_left, ← div_le_iff_of_neg' h, zero_div] at h0,
 end
 
-lemma fn_lem5 :
-  ∀ x : ℝ, f x ≤ 0 :=
+lemma fn_lem5 (x : ℝ) : f x ≤ 0 :=
 begin
-  intros x,
   rw ← not_lt; intros h,
   let M := x - f (f x) / f x,
   have h0 : ∀ t : ℝ, t < M → f t < 0,
@@ -82,36 +65,23 @@ begin
   exact h4 h3,
 end
 
-lemma fn_lem6 :
-  ∀ x : ℝ, x < 0 → f x = 0 :=
-begin
-  intros x h,
-  exact le_antisymm (fn_lem5 fineq x) (fn_lem4 fineq x h),
-end
+lemma fn_lem6 (x : ℝ) (h : x < 0) : f x = 0 :=
+  le_antisymm (fn_lem5 fineq x) (fn_lem4 fineq x h)
 
-lemma fn_lem7 :
-  0 ≤ f 0 :=
+lemma fn_lem7 : 0 ≤ f 0 :=
 begin
   cases exists_lt (0 : ℝ) with x h,
   have h0 := results.fn_lem1 fineq x x,
   rwa [results.fn_lem6 fineq x h, mul_zero, sub_self, zero_add] at h0,
 end
 
-
-
 end results
 
 
 
-
-
-
-
----- Final solution
-theorem final_solution {f : ℝ → ℝ} (fineq : fn_ineq f) :
-  ∀ x : ℝ, x ≤ 0 → f x = 0 :=
+/-- Final solution -/
+theorem final_solution {f : ℝ → ℝ} (fineq : fn_ineq f) (x : ℝ) (h : x ≤ 0) : f x = 0 :=
 begin
-  intros x h,
   rw le_iff_lt_or_eq at h,
   cases h with h h,
   exact results.fn_lem6 fineq x h,
@@ -119,3 +89,4 @@ begin
 end
 
 end IMO2011A6
+end IMOSL
