@@ -90,11 +90,12 @@ end results
 theorem final_solution (f : ℝ → ℝ) :
   fn_eq f ↔ f = 0 ∨ ∃ C : ℝ, ⌊C⌋ = 1 ∧ f = const ℝ C :=
 begin
-  split; intros h,
-  { by_cases h0 : f 0 = 0,
-    left; exact results.case_f0_eq_0 h h0,
-    right; exact results.case_f0_ne_0 h h0 },
-  { rcases h with rfl | ⟨C, h, rfl⟩; intros x y; simp,
+  split,
+  { intros feq,
+    by_cases h : f 0 = 0,
+    left; exact results.case_f0_eq_0 feq h,
+    right; exact results.case_f0_ne_0 feq h },
+  { rintros (rfl | ⟨C, h, rfl⟩) x y; simp,
     rw [h, int.cast_one, mul_one] }
 end
 
