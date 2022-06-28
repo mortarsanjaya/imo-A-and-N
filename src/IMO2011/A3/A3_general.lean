@@ -156,7 +156,7 @@ begin
       apply funext; intros x,
       rw [results.fn_lem4 feq h, zero_mul, zero_mul, sub_zero, zero_add, h0, pi.zero_apply],
       rw [h, zero_mul, add_zero, pi.zero_apply] } },
-  { rintros (⟨rfl, rfl⟩ | ⟨⟨C, rfl⟩, rfl⟩); intros x y; simp,
+  { rintros (⟨rfl, rfl⟩ | ⟨⟨C, rfl⟩, rfl⟩) x y; simp,
     ring }
 end
 
