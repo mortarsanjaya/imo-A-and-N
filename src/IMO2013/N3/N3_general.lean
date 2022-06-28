@@ -3,8 +3,7 @@ import IMO2013.N3.N3_extra data.set.finite
 namespace IMOSL
 namespace IMO2013N3
 
-universe u
-variables {S : Type u} [linear_order S]
+variables {S : Type*} [linear_order S]
 
 /--
   IMO 2013 N3, "Generalized" Version
