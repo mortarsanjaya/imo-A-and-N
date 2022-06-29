@@ -20,6 +20,7 @@ Next, we prove the following easy claim.
 
 Claim:
 For any f-bad positive integer n, if f(T(n - 1)) ≤ f(T(n)) then f(T(n)) < f(T(n + 1)).
+
 Proof:
 If f(T(n + 1)) ≤ f(T(n)), then
   max{f(T(n - 1)), f(T(n))} = max{f(T(n)), f(T(n + 1))} = T(n).
