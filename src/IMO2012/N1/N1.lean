@@ -1,7 +1,10 @@
-import data.int.gcd data.set.basic ring_theory.int.basic
+import ring_theory.int.basic
 
 namespace IMOSL
 namespace IMO2012N1
+
+open set
+open int
 
 /--
   IMO 2012 N1
@@ -19,9 +22,6 @@ def admissible (A : set ℤ) := ∀ x y : ℤ, x ∈ A → y ∈ A → ∀ k : �
 def good (m n : ℤ) := ∀ A : set ℤ, admissible A → m ∈ A → n ∈ A → A = set.univ
 
 
-
-open set
-open int
 
 namespace results
 

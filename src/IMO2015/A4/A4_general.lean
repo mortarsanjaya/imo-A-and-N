@@ -1,7 +1,10 @@
-import algebra.algebra.basic algebra.char_p.two dynamics.fixed_points.basic
+import algebra.char_p.two dynamics.fixed_points.basic
 
 namespace IMOSL
 namespace IMO2015A4
+
+open function
+open_locale classical
 
 variables {R : Type*} [comm_ring R] [is_domain R]
 
@@ -56,13 +59,6 @@ variables {R : Type*} [comm_ring R] [is_domain R]
 def fn_eq (f : R → R) := ∀ x y : R, f (x + f (x + y)) + f (x * y) = x + f (x + y) + y * f x
 
 
-
-
-
-
-
-open function
-open_locale classical
 
 namespace results
 

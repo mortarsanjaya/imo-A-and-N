@@ -3,6 +3,8 @@ import algebra.ring.basic tactic.ring
 namespace IMOSL
 namespace IMO2011A3
 
+open function
+
 variables {R : Type*} [comm_ring R] [is_domain R] [nontrivial R]
 
 /--
@@ -26,8 +28,6 @@ variables {R : Type*} [comm_ring R] [is_domain R] [nontrivial R]
 def fn_eq (f g : R → R) := ∀ x y : R, g (f (x + y)) = f x + (2 * x + y) * g y
 
 
-
-open function
 
 namespace extra
 

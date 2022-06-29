@@ -3,6 +3,8 @@ import data.fintype.card
 namespace IMOSL
 namespace IMO2017A3
 
+open function
+
 variables {S : Type*} [fintype S] [decidable_eq S]
 
 /--
@@ -20,8 +22,6 @@ variables {S : Type*} [fintype S] [decidable_eq S]
 def fn_prop (f : S → S) := ∀ g : S → S, f ∘ g ∘ f = g ∘ f ∘ g → g = f
 
 
-
-open function
 
 namespace extra
 

@@ -1,5 +1,8 @@
 import data.real.basic
 
+open function
+open_locale classical
+
 namespace IMOSL
 namespace IMO2010A1
 
@@ -21,9 +24,6 @@ namespace IMO2010A1
 def fn_eq (f : ℝ → ℝ) := ∀ x y : ℝ, f (⌊x⌋ * y) = f x * ⌊f y⌋
 
 
-
-open function
-open_locale classical
 
 namespace extra
 

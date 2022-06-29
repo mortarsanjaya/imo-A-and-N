@@ -3,9 +3,9 @@ import algebra.module.basic
 namespace IMOSL
 namespace IMO2019A1
 
-variables {G : Type*} [add_comm_group G]
-
 open function
+
+variables {G : Type*} [add_comm_group G]
 
 /--
   IMO 2019 A1 (P1), Generalized Version
