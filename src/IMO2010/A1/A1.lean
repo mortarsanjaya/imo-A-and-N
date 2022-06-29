@@ -1,33 +1,38 @@
 import data.real.basic
 
+/-!
+# IMO 2010 A1 (P1)
+
+Determine all functions f : ℝ → ℝ such that, for all x, y ∈ ℝ,
+  f(⌊x⌋ y) = f(x) ⌊f(y)⌋.
+
+## Answer
+
+f = 0 or f = C for some C ∈ [1, 2).
+
+## Solution
+
+See https://www.imo-official.org/problems/IMO2010SL.pdf.
+We will follow some parts of the Solution 1.
+For Case 2 : f(0) = 0, we do the following steps instead:
+1. For any x ∈ [0, 1), we prove ⌊f(x)⌋ = 0 via proving f(x) ⌊f(x)⌋ = 0.
+2. Using f(1/2) = 0, prove that f(1) = 0.
+3. Using f(1) = 0, prove that f = 0.
+-/
+
 open function
 open_locale classical
 
 namespace IMOSL
 namespace IMO2010A1
 
-/--
-  IMO 2010 A1 (P1)
-
-  Determine all functions f : ℝ → ℝ such that, for all x, y ∈ ℝ,
-          f(⌊x⌋ y) = f(x) ⌊f(y)⌋.
-
-  Answer: f = 0 or f = C for some C ∈ [1, 2).
-
-  See https://www.imo-official.org/problems/IMO2010SL.pdf.
-  We will follow some parts of the Solution 1.
-  For Case 2 : f(0) = 0, we do the following steps instead:
-  1. For any x ∈ [0, 1), we prove ⌊f(x)⌋ = 0 via proving f(x) ⌊f(x)⌋ = 0.
-  2. Using f(1/2) = 0, prove that f(1) = 0.
-  3. Using f(1) = 0, prove that f = 0.
--/
 def fn_eq (f : ℝ → ℝ) := ∀ x y : ℝ, f (⌊x⌋ * y) = f x * ⌊f y⌋
 
 
 
 namespace extra
 
-/-- For any r : ℝ, 1 < r → ⌊r⌋ = 0 -/
+/-- For any r : ℝ, 1 < r → ⌊r⌋ = 0. -/
 lemma floor_eq_zero_of_eq_one {r : ℝ} (h : 1 < r) : ⌊r⁻¹⌋ = 0 :=
 begin
   rw [int.floor_eq_iff, int.cast_zero, zero_add, inv_nonneg]; split,

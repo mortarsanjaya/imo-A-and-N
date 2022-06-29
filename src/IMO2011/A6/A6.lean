@@ -1,18 +1,21 @@
 import data.real.basic
 
+/-!
+# IMO 2011 A6 (P3)
+
+Let f : ℝ → ℝ be a function such that, for all x, y ∈ ℝ,
+  (x + y) ≤ y f(x) + f(f(x)).
+Prove that f(x) = 0 for all x ≤ 0.
+
+## Solution
+
+See <https://www.imo-official.org/problems/IMO2011SL.pdf>.
+We will follow the official Solution 1.
+-/
+
 namespace IMOSL
 namespace IMO2011A6
 
-/--
-  IMO 2011 A6 (P3)
-
-  Let f : ℝ → ℝ be a function such that, for all x, y ∈ ℝ,
-          f(x + y) ≤ y f(x) + f(f(x)).
-  Prove that f(x) = 0 for all x ≤ 0.
-
-  See https://www.imo-official.org/problems/IMO2011SL.pdf.
-  We will follow the official Solution 1.
--/
 def fn_ineq (f : ℝ → ℝ) := ∀ x y : ℝ, f (x + y) ≤ y * f x + f (f x)
 
 

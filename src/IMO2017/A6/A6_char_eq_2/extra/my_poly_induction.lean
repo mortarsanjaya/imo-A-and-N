@@ -2,9 +2,10 @@ import
   data.polynomial.basic
   data.polynomial.field_division
 
-/-
+/-!
   Implementation of induction necessary for results given in "poly_result.lean"
 -/
+
 namespace IMOSL
 namespace IMO2017A6
 namespace extra
@@ -14,9 +15,7 @@ open_locale classical
 
 
 
-/-
-  Strong induction on degree of polynomial, using nat_degree (with deg(0) = 0)
--/
+/-- Strong induction on degree of polynomial, using nat_degree (with deg(0) = 0). -/
 theorem polynomial_strong_induction_nat_degree {R : Type*} [comm_ring R] {M : polynomial R → Prop}
   (h : ∀ P : polynomial R, (∀ Q : polynomial R, Q.nat_degree < P.nat_degree → M Q) → M P) :
   ∀ P : polynomial R, M P :=
@@ -31,7 +30,7 @@ end
 
 
 
-/-
+/--
   Let R be a non-trivial commutative ring and take some M : R[X] → Prop.
   Then, M(P) holds for all P ∈ R[X] if all the following are true:
   (1). For any c ∈ R, M(cX) holds,
@@ -86,7 +85,7 @@ end
 
 
 
-/-
+/--
   Let F be a field and take some M : F[X] × F[X] → Prop.
   Then, M(P, Q) holds for all P, Q ∈ F[X] if all the following are true:
   (1). For all c ∈ F and P ∈ F[X], M(P, c) holds,

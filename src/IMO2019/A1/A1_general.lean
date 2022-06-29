@@ -1,50 +1,54 @@
 import algebra.module.basic
 
-namespace IMOSL
-namespace IMO2019A1
+/-!
+# IMO 2019 A1 (P1), Generalized Version
+
+Let G be an abelian group.
+Fix an arbitrary function g : G → G with g(0) = 0 and an injective endomorphism T of G.
+Determine all functions f : G → G such that, for all x, y ∈ G,
+  f(g(x)) + Tf(y) = f(f(x + y)).
+  
+## Answer
+
+Fix some φ ∈ End(G) and C ∈ G such that φ ∘ h = Tφ = φ^2 and φ(C) = U(C).
+Then x ↦ φ(x) + C satisfies the above equation.
+Furthermore, all functions satisfying the above equation are of this form.
+
+## Solution
+
+See <https://www.imo-official.org/problems/IMO2019SL.pdf>.
+We refer to the official Solution 2 and modify it for our generalization needs.
+    
+Let f be an arbitrary function satisfying the above equation.
+Let C = f(0).
+As in the official Solution 2, we get both the following:
+  ∀ x ∈ G, f(f(x)) = Tf(x) + C                      (1)
+  ∀ x ∈ G, f(g(x)) = T(f(x) - C) + C                (2)
+  ∀ x y ∈ G, f(x + y) = f(x) + f(y) - C             (3)
+Conversely, one can check that (1), (2), and (3) indeed implies the original equation.
+Thus, it remains to classify all functions f satisfying (1), (2), and (3).
+
+First notice that (3) is equivalent to f - C being additive.
+In particular, (3) means that we can write f = φ + C for some φ ∈ End(G).
+Then (2) reads as φ ∘ g = Tφ and (1) becomes
+  ∀ x : G, φ(φ(x) + C) = Tφ(x) + T(C) + C → φ^2(x) + φ(C) = Tφ(x) + T(C)
+Plugging in x = 0 yields φ(C) = T(C).
+In turn, this implies that the above equation becomes φ^2 = Tφ.
+This shows that φ ∘ g = Tφ = φ^2 and φ(C) = T(C).
+  
+## Notes
+
+* For the case G = ℤ, see "A1_int.lean", theorem "final_solution_int".
+* For the original case (T = 2 and h = x ↦ 2x), see theorem "final_solution_original" instead.
+-/
 
 open function
 
+namespace IMOSL
+namespace IMO2019A1
+
 variables {G : Type*} [add_comm_group G]
 
-/--
-  IMO 2019 A1 (P1), Generalized Version
-
-  Let G be an abelian group.
-  Fix an arbitrary function g : G → G with g(0) = 0 and an injective endomorphism T of G.
-  Determine all functions f : G → G such that, for all x, y ∈ G,
-          f(g(x)) + Tf(y) = f(f(x + y)).
-  
-  Answer:
-    Fix some φ ∈ End(G) and C ∈ G such that φ ∘ h = Tφ = φ^2 and φ(C) = U(C).
-    Then x ↦ φ(x) + C satisfies the above equation.
-    Furthermore, all functions satisfying the above equation are of this form.
-
-  Solution:
-    See https://www.imo-official.org/problems/IMO2019SL.pdf.
-    We refer to the official Solution 2 and modify it for our generalization needs.
-    
-    Let f be an arbitrary function satisfying the above equation.
-    Let C = f(0).
-    As in the official Solution 2, we get both the following:
-            ∀ x ∈ G, f(f(x)) = Tf(x) + C                      (1)
-            ∀ x ∈ G, f(g(x)) = T(f(x) - C) + C               (2)
-            ∀ x y ∈ G, f(x + y) = f(x) + f(y) - C             (3)
-    Conversely, one can check that (1), (2), and (3) indeed implies the original equation.
-    Thus, it remains to classify all functions f satisfying (1), (2), and (3).
-
-    First notice that (3) is equivalent to f - C being additive.
-    In particular, (3) means that we can write f = φ + C for some φ ∈ End(G).
-    Then (2) reads as φ ∘ g = Tφ and (1) becomes
-            ∀ x : G, φ(φ(x) + C) = Tφ(x) + T(C) + C → φ^2(x) + φ(C) = Tφ(x) + T(C)
-    Plugging in x = 0 yields φ(C) = T(C).
-    In turns, this implies that the above equation becomes φ^2 = Tφ.
-    This shows that φ ∘ g = Tφ = φ^2 and φ(C) = T(C).
-  
-  Note:
-    For the case G = ℤ, see "A1_int.lean", theorem "final_solution_int".
-    For the original case (T = 2 and h = x ↦ 2x), see theorem "final_solution_original" instead.
--/
 def fn_eq (g : G → G) (T : add_monoid.End G) (f : G → G) :=
   ∀ a b : G, f (g a) + T (f b) = f (f (a + b))
 

@@ -1,35 +1,39 @@
 import IMO2019.A1.A1_general algebra.ring.equiv data.int.basic
 
+/-!
+# IMO 2019 A1 (P1), Integer Version
+
+Let g : ℤ → ℤ be a function with g(0) = 0, and let s be an integer with s ≠ 0.
+Determine all functions f : ℤ → ℤ such that, for all x, y ∈ ℤ,
+  f(g(x)) + s f(y) = f(f(x + y)).
+
+## Answer
+
+1. g ≠ x ↦ sx: f = 0 only.
+2. g = x ↦ sx: f = 0 and f = x ↦ sx + C for any choice of C ∈ ℤ.
+
+## Solution
+
+The ring of endomorphisms of ℤ is isomorphic to ℤ itself.
+So, that means we can write φ(x) = kx and T(x) = sx for some integer m, r, and s.
+The equation Tφ = φ^2 implies ks = k^2, so either m = s or m = 0.
+The equation φ ∘ g = Tφ reads as k g(x) = skx for all x ∈ ℤ.
+Thus, for g ≠ x ↦ sx, we have k = 0, and the equation φ(C) = T(C) reads as sC = 0 → C + 0.
+For g = x ↦ sx, any choice of C works.
+
+## Implementation details
+
+We define a ring isomorphism between ℤ and End(ℤ) and use it for the solution.
+-/
+
+open function
+
 namespace IMOSL
 namespace IMO2019A1
 
-/--
-  IMO 2019 A1 (P1), Integer Version (G = ℤ)
-
-  Let g : ℤ → ℤ be a function with g(0) = 0, and let s be an integer with s ≠ 0.
-  Determine all functions f : ℤ → ℤ such that, for all x, y ∈ ℤ,
-          f(g(x)) + s f(y) = f(f(x + y)).
-
-  Answer:
-    1. g ≠ x ↦ sx: f = 0 only.
-    2. g = x ↦ sx: f = 0 and f = x ↦ sx + C for any choice of C ∈ ℤ.
-
-  Solution:
-    The ring of endomorphisms of ℤ is isomorphic to ℤ itself.
-    So, that means we can write φ(x) = kx and T(x) = sx for some integer m, r, and s.
-    The equation Tφ = φ^2 implies ks = k^2, so either m = s or m = 0.
-    The equation φ ∘ g = Tφ reads as k g(x) = skx for all x ∈ ℤ.
-    Thus, for g ≠ x ↦ sx, we have k = 0, and the equation φ(C) = T(C) reads as sC = 0 → C + 0.
-    For g = x ↦ sx, any choice of C works.
-
-  Implementation note:
-    We first need to give a ring isomorphism between End(ℤ).
--/
 def fn_eq_int (g : ℤ → ℤ) (s : ℤ) (f : ℤ → ℤ) := ∀ x y : ℤ, f (g x) + s * f y = f (f (x + y))
 
 
-
-open function
 
 namespace extra
 

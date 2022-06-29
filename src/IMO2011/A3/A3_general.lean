@@ -1,30 +1,35 @@
 import algebra.ring.basic tactic.ring
 
-namespace IMOSL
-namespace IMO2011A3
+/-!
+# IMO 2011 A3, Generalized Version
+
+Let R be a non-trivial domain such that 2 has an inverse in R.
+Determine all pairs of (f, g) functions R → R such that, for all x, y ∈ R,
+  g(f(x + y)) = f(x) + (2x + y) g(y).
+
+## Answer
+
+(f, g) = (0, 0) and (f, g) = (x ↦ x² + C, id) for some C ∈ R.
+
+## Solution
+
+See https://www.imo-official.org/problems/IMO2011SL.pdf.
+We will follow the official Solution.
+It adopts directly to any domain R with 2 being invertible.
+
+# Notes
+
+1. The non-triviality is actually not required, but the trivial ring case is trivial.
+2. It seems that the case char(R) = 2 is too ugly to even consider, let alone the general case.
+-/
 
 open function
 
+namespace IMOSL
+namespace IMO2011A3
+
 variables {R : Type*} [comm_ring R] [is_domain R] [nontrivial R]
 
-/--
-  IMO 2011 A3, Generalized Version
-
-  Let R be a non-trivial domain such that 2 has an inverse in R.
-  Determine all pairs of (f, g) functions R → R such that, for all x, y ∈ R,
-          g(f(x + y)) = f(x) + (2x + y) g(y).
-
-  Answer: (f, g) = (0, 0) and (f, g) = (x ↦ x² + C, id) for some C ∈ R.
-
-  See https://www.imo-official.org/problems/IMO2011SL.pdf.
-  We will follow the official Solution.
-  It adopts directly to any domain R with 2 being invertible.
-
-  Note:
-  1. We will only put the condition of 2 being invertible when necessary.
-  2. The non-triviality is actually not required, but the trivial ring case is trivial.
-  3. It seems that even the case char(R) = 2 is too ugly to even consider.
--/
 def fn_eq (f g : R → R) := ∀ x y : R, g (f (x + y)) = f x + (2 * x + y) * g y
 
 

@@ -5,30 +5,28 @@ import
   data.zmod.algebra
   field_theory.ratfunc
 
-namespace IMOSL
-namespace IMO2017A6
+/-!
+Some result implied from f(a) = f(b) for some a, b ∈ F.
+We prove that, given a, b ∈ F with f(a) = f(b), we have
+1. ∀ P ∈ 𝔽₂[X], f(P(a)) = f(P(b)),
+2. ∀ P ∈ 𝔽₂[X], P(a) = 0 ↔ P(b) = 0,
+3. ∀ P = Q/R ∈ 𝔽₂(X), R(a), R(b) ≠ 0 → f(P(a)) = f(P(b))
+See "extra/my_poly_induction.lean" for details on induction needed for result 1 and 3.
+-/
 
 open char_two
 open polynomial
 open ratfunc
 open_locale classical
 
-variables {F : Type*} [field F]
+namespace IMOSL
+namespace IMO2017A6
 
-/-
-  Some result implied from f(a) = f(b) for some a, b ∈ F.
-  We prove that, given a, b ∈ F with f(a) = f(b), we have
-  1. ∀ P ∈ 𝔽₂[X], f(P(a)) = f(P(b)),
-  2. ∀ P ∈ 𝔽₂[X], P(a) = 0 ↔ P(b) = 0,
-  3. ∀ P = Q/R ∈ 𝔽₂(X), R(a), R(b) ≠ 0 → f(P(a)) = f(P(b))
-  See "extra/my_poly_induction.lean" for details on induction needed for result 1 and 3.
--/
+variables {F : Type*} [field F]
 
 
 
 namespace case_char_eq_2
-
-
 
 variable [char_p F 2]
 

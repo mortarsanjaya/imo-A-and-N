@@ -1,23 +1,28 @@
 import ring_theory.int.basic
 
-namespace IMOSL
-namespace IMO2012N1
+/-!
+# IMO 2012 N1
+
+A set A of integers is called admissible if it has the following property:
+  for any x, y ∈ A and integer k, we have x² + kxy + y² ∈ A.
+Determine all pairs (m, n) of integers such that the only admissible set containing m and n is ℤ.
+
+## Answer
+
+The pair (m, n) satisfies the condition if and only if m and n are coprime.
+
+## Solution
+
+See <https://www.imo-official.org/problems/IMO2012SL.pdf>.
+We will follow the official Solution.
+-/
 
 open set
 open int
 
-/--
-  IMO 2012 N1
+namespace IMOSL
+namespace IMO2012N1
 
-  A set A of integers is called admissible if it has the following property:
-          For any x, y ∈ A and integer k, we have x² + kxy + y² ∈ A.
-  Determine all pairs (m, n) of integers such that the only admissible set containing m and n is ℤ.
-
-  Answer: The pair (m, n) satisfies the condition if and only if m and n are coprime.
-
-  See https://www.imo-official.org/problems/IMO2012SL.pdf.
-  We will follow the official Solution.
--/
 def admissible (A : set ℤ) := ∀ x y : ℤ, x ∈ A → y ∈ A → ∀ k : ℤ, x ^ 2 + k * (x * y) + y ^ 2 ∈ A
 def good (m n : ℤ) := ∀ A : set ℤ, admissible A → m ∈ A → n ∈ A → A = set.univ
 

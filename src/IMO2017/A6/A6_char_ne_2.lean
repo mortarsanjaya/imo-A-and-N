@@ -1,38 +1,39 @@
 import IMO2017.A6.A6_general algebra.char_p.basic
 
-namespace IMOSL
-namespace IMO2017A6
+/-!
+# IMO 2017 A6 (P2), Generalized Version, case char(F) ≠ 2.
+  
+## Solution (continue from the general case)
+
+From f(x + 1) = f(x) - 1, we know that f(x + n) = f(x) - n ∀ x ∈ F, n ∈ ℤ.
+In particular, for n ∈ ℤ, f(x) = n iff x = 1 - n.
+Now, plugging in y = -1 yields f(2 f(x)) + f(x) + 1 = f(-x) for all x ∈ F.
+In particular, for any x, y ∈ F, f(x) = f(y) implies f(-x) = f(-y).
+On the other hand, this implies
+  f(x - y) = f(-xy) - f(f(x) f(-y)) = f(-xy) - f(f(-x) f(y)) = f(y - x).
+Finally, for any t ∈ F, f(t) = f(-t) implies
+  f(2 f(t)) + 1 = 0 → f(2 f(t)) = -1 → 2 f(t) = 2 → f(t) = 1 → t = 0.
+Thus x - y = 0 → x = y, proving that f is indeed injective.
+Note that 2 f(t) = 2 → f(t) = 1 works only because char(F) ≠ 2.
+
+# Implementation details
+
+1. We do not need the whole f(x) = n ↔ x = 1 - n result.
+We actually only need f(-1) = 2, f(x) = -1 → x = 2, and f(x) = 1 → x = 0.
+We will write the first one as f(-1) = 1 + 1.
+
+2. We will prove f(t) = f(-t) ↔ t = 0 instead of f(t) = f(-t) → t = 0.
+We will also prove this result before f(x) = f(y) → f(x - y) = f(y - x).
+In particular we can combine the latter step directly into injectivity.
+-/
 
 open function
 open_locale classical
 
+namespace IMOSL
+namespace IMO2017A6
+
 variables {F : Type*} [field F]
-
-/-
-  IMO 2017 A6 (P2), Generalized Version, case char(F) ≠ 2.
-  
-  Solution, continuing from the general case:
-    From f(x + 1) = f(x) - 1, we know that f(x + n) = f(x) - n ∀ x ∈ F, n ∈ ℤ.
-    In particular, for n ∈ ℤ, f(x) = n iff x = 1 - n.
-    Now, plugging in y = -1 yields f(2 f(x)) + f(x) + 1 = f(-x) for all x ∈ F.
-
-    In particular, for any x, y ∈ F, f(x) = f(y) implies f(-x) = f(-y).
-    On the other hand, this implies
-      f(x - y) = f(-xy) - f(f(x) f(-y)) = f(-xy) - f(f(-x) f(y)) = f(y - x).
-    Finally, for any t ∈ F, f(t) = f(-t) implies
-      f(2 f(t)) + 1 = 0 → f(2 f(t)) = -1 → 2 f(t) = 2 → f(t) = 1 → t = 0.
-    Thus x - y = 0 → x = y, proving that f is indeed injective.
-    Note that 2 f(t) = 2 → f(t) = 1 works only because char(F) ≠ 2.
-
-  Implementation details:
-  1. We do not need the whole f(x) = n ↔ x = 1 - n result.
-     We actually only need f(-1) = 2, f(x) = -1 → x = 2, and f(x) = 1 → x = 0.
-     In fact, we will write the first one as f(-1) = 1 + 1.
-
-  2. We will prove f(t) = f(-t) ↔ t = 0 instead of f(t) = f(-t) → t = 0.
-     We will also prove this result before f(x) = f(y) → f(x - y) = f(y - x).
-     In particular we can combine the latter step directly into injectivity.
--/
 
 
 

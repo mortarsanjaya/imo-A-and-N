@@ -1,39 +1,39 @@
 import algebra.algebra.basic
 
-namespace IMOSL
-namespace IMO2017A6
+/-!
+# IMO 2017 A6 (P2), Generalized Version
+  
+# Let F be an arbitrary field.
+# Determine all functions f : F → F such that, for all x, y ∈ F,
+  f(f(x) f(y)) + f(x + y) = f(xy).
+          
+# Notes
+  
+1. The case char F ≠ 2 is solved.
+See file "A6_char_ne_2.lean", theorem "final_solution_char_ne_2".
+We refer to the solution by user "anantmudgal09" on AoPS:
+  <https://artofproblemsolving.com/community/c6h1480146p8693244>.
+Note that the solution extends to the case char(F) ≠ 2.
+  
+2. The case F = ℝ is thus solved as well since char ℝ = 0 ≠ 2.
+See file "A6_original.lean", theorem "final_solution_original".
+
+3. The case char F = 2 is still open.
+See folder "A6_char_eq_2".
+
+4. This file contains the statement of the functional equation and
+lemmas that are usable for both case char F ≠ 2 and char F = 2.
+-/
 
 open function
 open_locale classical
 
+namespace IMOSL
+namespace IMO2017A6
+
 variables {F : Type*} [field F]
 
-/--
-  IMO 2017 A6 (P2), Generalized Version
-  
-  Let F be an arbitrary field.
-  Determine all functions f : F → F such that, for all x, y ∈ F,
-          f(f(x) f(y)) + f(x + y) = f(xy).
-          
-  Note:
-  
-  1. The case char F ≠ 2 is solved.
-     See file "A6_char_ne_2.lean", with main theorem "final_solution_char_ne_2".
-     We refer to the solution by user "anantmudgal09" on AoPS:
-       https://artofproblemsolving.com/community/c6h1480146p8693244.
-     Note that the solution extends to the case char(F) ≠ 2.
-  
-  2. The case F = ℝ is thus solved as well since char ℝ = 0 ≠ 2.
-     We put the result into file "A6_original.lean", with main theorem "final_solution_original".
-
-  3. The case char F = 2 is still open.
-     See the folder "A6_char_eq_2".
-
-  4. This file contains the statement of the functional equation and
-       lemmas that are usable for both case char F ≠ 2 and char F = 2.
--/
-def fn_eq (f : F → F) :=
-  ∀ x y : F, f (f x * f y) + f (x + y) = f (x * y)
+def fn_eq (f : F → F) := ∀ x y : F, f (f x * f y) + f (x + y) = f (x * y)
 
 
 

@@ -1,11 +1,6 @@
 import IMO2017.A6.A6_general algebra.char_p.two algebra.char_p.pi
 
-namespace IMOSL
-namespace IMO2017A6
-
-variables {F : Type*} [field F]
-
-/--
+/-!
   Progress of 2017 A6 for the case char(F) = 2
 
   Here, we give an alternative FE system as follows:
@@ -14,18 +9,25 @@ variables {F : Type*} [field F]
   We also give correspondence results between the two FE systems.
   Then, we prove basic lemmas about the new FE system.
 -/
-def fn_eq1 (f : F → F) :=
-  ∀ x y : F, f (f x * f y) + f (x + y) = f (x * y + x + y)
-def fn_eq2 (f : F → F) :=
-  ∀ x : F, f (x + 1) = f x + 1
-
-
-
-
-
-
 
 open char_two
+
+namespace IMOSL
+namespace IMO2017A6
+
+variables {F : Type*} [field F]
+
+
+def fn_eq1 (f : F → F) := ∀ x y : F, f (f x * f y) + f (x + y) = f (x * y + x + y)
+def fn_eq2 (f : F → F) := ∀ x : F, f (x + 1) = f x + 1
+
+
+
+
+
+
+
+
 
 namespace case_char_eq_2
 
