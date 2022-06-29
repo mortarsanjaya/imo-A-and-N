@@ -1,32 +1,23 @@
-import
-  algebra.group.basic
-  algebra.module.torsion
-  algebra.hom.group
-  group_theory.torsion
+import algebra.module.basic
 
-
+namespace IMOSL
 namespace IMO2019A1
 
-universe u
-variable {G : Type u}
-variable [add_comm_group G]
+variables {G : Type*} [add_comm_group G]
 
 /--
   IMO 2019 A1 (P1), Generalized Version
 
-  Let G be a 2-torsion-free abelian group.
-  Determine all functions f : G → G such that, for all a, b ∈ G,
-          f(2a) + 2 f(b) = f(f(a + b)).
-
-  The only solutions to the case G = ℤ are n ↦ 0 and x ↦ 2n + C for some constant C.
-  However, there is a more general functions satisfying the above equation.
-
-  The proof for the original version with G = ℤ is in the file "A1_original.lean".
-  See theorem "final_solution_original".
-
+  Let G be an abelian group, and take some T, U ∈ End(G).
+  Here, End(G) is the set of endomorphisms of G.
+  Let T and U be homomorphisms G → G.
+  Suppose that U is injective.
+  Determine all functions f : G → G such that, for all x, y ∈ G,
+          f(Tx) + Uf(y) = f(f(x + y)).
+  
   Answer:
-    Fix some φ ∈ End(G) with φ² = id, and fix a fixed point C of φ.
-    Then, x ↦ φ(x) + x + C satisfies the above equation.
+    Fix some φ ∈ End(G) and C ∈ G such that φT = Uφ = φ^2 and φ(C) = U(C).
+    Then x ↦ φ(x) + C satisfies the above equation.
     Furthermore, all functions satisfying the above equation are of this form.
 
   Solution:
@@ -36,44 +27,25 @@ variable [add_comm_group G]
     Let f be an arbitrary function satisfying the above equation.
     Let C = f(0).
     As in the official Solution 2, we get both the following:
-            ∀ b ∈ G, f(f(b)) = 2 f(b) + C                     (1)
-            ∀ a ∈ G, f(2a) = 2 f(a) - C
-            ∀ a b ∈ G, f(a + b) = f(a) + f(b) - C             (2)
-    Conversely, one can check that (1) and (2) indeed implies the original equation.
-    Thus, it remains to classify all functions f satisfying (1) and (2).
+            ∀ x ∈ G, f(f(x)) = Uf(x) + C                      (1)
+            ∀ x ∈ G, f(Tx) = U(f(x) - C) + C                  (2)
+            ∀ x y ∈ G, f(x + y) = f(x) + f(y) - C             (3)
+    Conversely, one can check that (1), (2), and (3) indeed implies the original equation.
+    Thus, it remains to classify all functions f satisfying (1), (2), and (3).
 
-    Now, let φ = x ↦ f(x) - (x + C).
-    By the second equation, φ is an endomorphism of G.
-    The first equation now tells us that, for all b ∈ G,
-            φ(f(b)) = f(b)
-            φ²(b) + φ(b) + φ(C) = φ(b) + b + C
-            φ²(b) + φ(C) = b + C
-    Plugging in b = 0 yields φ(C) = C, which implies φ² = id.
-    This shows that we have f(x) = φ(x) + x + C with φ² = id and φ(C) = C.
-    In particular, φ is an automorphism of G of order at most 2.
-
-    Conversely, one can check that, for any φ ∈ End(G) with φ² = id,
-      the map x ↦ φ(x) + x + C indeed satisfies (1) and (2).
-    The latter is trivial, so we just check for the former:
-            f(f(b)) = 2 f(b) + C ↔ φ(f(b)) = f(b).
-    And indeed the latter equation holds since φ² = id and φ(C) = C.
+    First notice that (3) is equivalent to f - C being additive.
+    In particular, (3) means that we can write f = φ + C for some φ ∈ End(G).
+    Then (2) reads as φT = Uφ and (1) becomes
+            ∀ x : G, φ(φ(x) + C) = Uφ(x) + UC + C → φ^2(x) + φ(C) = Uφ(x) + UC
+    Plugging in x = 0 yields φ(C) = UC.
+    In turns, this implies that the above equation becomes φ^2 = Uφ.
+    This shows that φT = Uφ = φ^2 and φ(C) = U(C).
   
   Note:
-  1. The solution indeed generalizes the case G = ℤ.
-     The only group automorphisms of ℤ are id and x ↦ -x.
-     In the former case, C is arbitrary, giving us f = x ↦ 2x + C.
-     In the latter case, we force C = 0 and φ = 0, giving us f = 0.
-
-  2. Obtaining (2) requires G to be 2-torsion-free.
-     However, (1) and f(2a) = 2 f(a) - C does not require G to be 2-torsion-free.
-     Thus, we will include the 2-torsion-free criterion rather moderately.
+    For the case G = ℤ, see "A1_int.lean", theorem "final_solution_int".
+    For the original case (T = U = 2), see theorem "final_solution_original" instead.
 -/
-def fn_eq (f : G → G) :=
-  ∀ a b : G, f (2 • a) + 2 • f b = f (f (a + b))
-
-
-
-
+def fn_eq (T U : add_monoid.End G) (f : G → G) := ∀ a b : G, f (T a) + U (f b) = f (f (a + b))
 
 
 
@@ -81,184 +53,103 @@ open function
 
 namespace results
 
-
-
 /-- Equation (1) -/
-@[protected]
-def fn_eq1 (f : G → G) (C : G) :=
-  ∀ a : G, f (f a) = 2 • f a + C
+def fn_eq1 (U : add_monoid.End G) (f : G → G) (C : G) := ∀ x : G, f (f x) = U (f x) + C
 
 /-- Equation (2) -/
-@[protected]
-def fn_eq2 (f : G → G) (C : G) :=
-  ∀ a b : G, f (a + b) = f a + f b - C
+def fn_eq2 (T U : add_monoid.End G) (f : G → G) (C : G) := ∀ x : G, f (T x) = U (f x - C) + C
 
+/-- Equation (3) -/
+def fn_eq3 (f : G → G) (C : G) := ∀ x y : G, f (x + y) = f x + f y - C
 
-
----- Here, we prove that feq holds if and only if (1) and (2) holds.
-section iff_cond
-
-lemma fn_lem1_1 {f : G → G} (feq : fn_eq f) :
-  fn_eq1 f (f 0) :=
-begin
-  intros b,
-  have h := feq 0 b,
-  rwa [zero_add, smul_zero, add_comm, eq_comm] at h,
-end
-
-lemma fn_lem1_2 {f : G → G} (feq : fn_eq f) :
-  ∀ a : G, f (2 • a) = 2 • f a - f 0 :=
-begin
-  intros a,
-  have h := feq a 0,
-  rwa [add_zero, fn_lem1_1 feq, ← eq_add_neg_iff_add_eq, ← zsmul_neg_coe_of_pos _ zero_lt_two,
-       add_assoc, ← one_add_zsmul, int.coe_nat_succ, int.coe_nat_one, ← sub_eq_add_neg,
-       ← sub_sub, sub_self, zero_sub, neg_one_smul, ← sub_eq_add_neg] at h,
-end
-
-lemma fn_lem1_3 (two_torsion_free : submodule.torsion_by ℕ G 2 = ⊥)
-    {f : G → G} (feq : fn_eq f) :
-  fn_eq2 f (f 0) :=
-begin
-  intros a b,
-  have h := feq a b,
-  rwa [add_comm, fn_lem1_1 feq, fn_lem1_2 feq, add_sub, sub_eq_iff_eq_add, ← smul_add,
-       add_assoc, ← two_smul ℕ (f 0), ← smul_add, eq_comm, ← sub_eq_zero, ← smul_sub,
-       ← submodule.mem_torsion_by_iff, two_torsion_free, submodule.mem_bot, sub_eq_zero,
-       add_comm (f b), ← eq_sub_iff_add_eq] at h,
-end
-
-lemma fn_lem1_4 {f : G → G} (feq1 : fn_eq1 f (f 0)) (feq2 : fn_eq2 f (f 0)) :
-  fn_eq f :=
-begin
-  intros a b,
-  rw [add_comm, feq1, feq2, two_smul ℕ a, feq2, ← two_smul ℕ (f a), add_sub, ← smul_add,
-      add_comm, sub_eq_iff_eq_add, add_assoc, ← two_smul ℕ (f 0), ← smul_add, sub_add_cancel],
-end
-
-theorem fn_thm1 (two_torsion_free : submodule.torsion_by ℕ G 2 = ⊥) (f : G → G) :
-  fn_eq f ↔ (fn_eq1 f (f 0) ∧ fn_eq2 f (f 0)) :=
+theorem feq_iff_feq123 (T U : add_monoid.End G) (U_inj : injective U) (f : G → G) :
+  fn_eq T U f ↔ (fn_eq1 U f (f 0) ∧ fn_eq2 T U f (f 0) ∧ fn_eq3 f (f 0)) :=
 begin
   split,
-  intros h; split,
-  exact fn_lem1_1 h,
-  exact fn_lem1_3 two_torsion_free h,
-  intros h; cases h with h h0,
-  exact fn_lem1_4 h h0,
+  --- fn_eq → fn_eq1 ∧ fn_eq2 ∧ fn_eq3
+  { intros feq,
+    have feq1 : fn_eq1 U f (f 0) :=
+    begin
+      intros x,
+      have h := feq 0 x,
+      rwa [T.map_zero, zero_add, add_comm, eq_comm] at h
+    end,
+    have feq2 : fn_eq2 T U f (f 0) :=
+    begin
+      intros x,
+      have h := feq x 0,
+      rwa [add_zero, feq1, ← eq_sub_iff_add_eq, add_sub_right_comm, ← U.map_sub] at h
+    end,
+    rw [and_iff_right feq1, and_iff_right feq2]; intros x y,
+    have h := feq x y,
+    rw [feq1, feq2, add_right_comm, add_left_inj, ← U.map_add, ← add_sub_right_comm, eq_comm] at h,
+    exact U_inj h },
+  ---- fn_eq1 → fn_eq2 → fn_eq3 → fn_eq
+  { rintros ⟨feq1, feq2, feq3⟩ x y,
+    rw [feq1, feq2, add_right_comm, add_left_inj, ← U.map_add, feq3, add_sub_right_comm] }
 end
 
-end iff_cond
-
-
-
----- Now we describe all functions satisfying (1) and (2).
-section description
-
-lemma fn_lem2_1 {f : G → G} {C : G} (feq2 : fn_eq2 f C) :
-  ∃ g : add_monoid.End G, f = g + const G C :=
+theorem feq3_iff_exists_hom_eq_f_sub_C (f : G → G) (C : G) :
+  fn_eq3 f C ↔ ∃ φ : add_monoid.End G, f = φ + const G C :=
 begin
-  have h := feq2 0 0,
-  rw [add_zero, eq_sub_iff_add_eq, add_right_inj] at h,
-  use f - const G C,
-  rw [pi.sub_apply, const_apply, h, sub_self],
-  intros x y,
-  simp only [pi.sub_apply, const_apply],
-  rw [feq2, sub_add_sub_comm, sub_sub],
-  rw [add_monoid_hom.coe_mk, sub_add_cancel],
-end
-
-lemma fn_lem2_2 (φ : add_monoid.End G) (C : G) :
-  fn_eq2 (φ + const G C) C :=
-begin
-  intros a b,
-  simp only [pi.add_apply, const_apply],
-  rw [add_monoid_hom.map_add, ← add_sub, add_sub_cancel, add_right_comm],
-end
-
-lemma fn_lem2_3 {g : add_monoid.End G} {C : G}
-    (feq1 : fn_eq1 (g + const G C) C) :
-  ∃ (φ : add_monoid.End G), g = φ + 1 ∧ φ C = C ∧ φ ^ 2 = 1 :=
-begin
-  let φ := g - 1,
-  use φ; split,
-  rw sub_add_cancel,
-  have h : ∀ a : G, (φ ^ 2) a + φ C = a + C,
-  { intros a,
-    have h := feq1 a,
-    simp only [pi.add_apply, const_apply] at h,
-    rw [add_left_inj, smul_add, add_monoid_hom.map_add, ← eq_sub_iff_add_eq,
-        ← add_sub, add_comm, ← sub_eq_iff_eq_add] at h,
-    rw [add_monoid.End.coe_pow, iterate_succ, iterate_one, comp_app],
-    simp only [add_monoid.coe_one, id.def, add_monoid_hom.sub_apply],
-    rw [add_monoid_hom.map_sub, ← sub_add, sub_sub, ← two_smul ℕ (g a), h, add_comm _ a,
-        add_assoc, add_right_inj, add_sub, sub_add_cancel, two_smul ℕ, add_sub_cancel] },
-  have h0 := h 0,
-  rw [zero_add, add_monoid_hom.map_zero, zero_add] at h0,
   split,
-  exact h0,
-  rw add_monoid_hom.ext_iff; intros a,
-  have h1 := h a,
-  rwa [h0, add_left_inj] at h1,
+  { intros feq3,
+    use f - const G C,
+    have h := feq3 0 0,
+    rw [add_zero, eq_sub_iff_add_eq, add_right_inj] at h,
+    rw [pi.sub_apply, const_apply, h, sub_self],
+    intros x y; simp only [const_apply, pi.sub_apply],
+    rw [feq3, sub_sub, add_sub_add_comm],
+    rw [add_monoid_hom.coe_mk, sub_add_cancel] },
+  { rintros ⟨φ, rfl⟩ x y,
+    simp only [pi.add_apply, const_apply],
+    rw [← add_assoc, add_sub_cancel, add_right_comm, φ.map_add] }
 end
 
-lemma fn_lem2_4 {φ : add_monoid.End G} (h : φ ^ 2 = 1) {C : G} (h0 : φ C = C) :
-  fn_eq ((φ + 1 : add_monoid.End G) + const G C) :=
+theorem feq2_hom_iff (T U φ : add_monoid.End G) (C : G) :
+    fn_eq2 T U (φ + const G C) C ↔ φ * T = U * φ :=
+  by simp only [fn_eq2, pi.add_apply, const_apply, add_sub_cancel, add_left_inj,
+                add_monoid_hom.ext_iff, add_monoid.coe_mul, comp_app]
+
+theorem feq1_hom_iff (U φ : add_monoid.End G) (C : G) :
+  fn_eq1 U (φ + const G C) C ↔ (φ ^ 2 = U * φ ∧ φ C = U C) :=
 begin
-  apply fn_lem1_4,
-
-  ---- First prove fn_eq1
-  { intros a,
-    simp only [const_apply, add_zero, id.def, pi.add_apply],
-    have h1 : φ (φ a) = a :=
-      by rw [← comp_app φ, ← iterate_one φ, ← iterate_add,
-             ← add_monoid.End.coe_pow, h, add_monoid.coe_one, id_def],
-    simp_rw [add_monoid_hom.add_apply],
-    simp only [add_monoid.coe_one, id_def],
-    rw [add_monoid_hom.map_zero, zero_add, zero_add, add_left_inj, add_monoid_hom.map_add,
-        h0, add_monoid_hom.map_add, h1, add_comm _ (φ a), ← two_smul ℕ] },
-
-  ---- Now prove fn_eq2
-  { rw [pi.add_apply, const_apply, add_monoid_hom.map_zero, zero_add],
-    exact fn_lem2_2 (φ + 1) C },
+  rw [pow_two, add_monoid_hom.ext_iff],
+  simp only [fn_eq1, pi.add_apply, const_apply, add_left_inj,
+             φ.map_add, U.map_add, add_monoid.coe_mul, comp_app],
+  split,
+  { intros feq1,
+    have h := feq1 0,
+    rw [φ.map_zero, φ.map_zero, zero_add, U.map_zero, zero_add] at h,
+    rw and_iff_left h; intros x,
+    have h0 := feq1 x,
+    rwa [h, add_left_inj] at h0 },
+  { rintros ⟨h, h0⟩ x;
+    rw [h0, h] }
 end
-
-end description
-
-
 
 end results
 
 
 
-
-
-
-
-theorem final_solution_general (two_torsion_free : submodule.torsion_by ℕ G 2 = ⊥) :
-  set_of fn_eq =
-    (λ (s : add_monoid.End G × G), (s.fst + 1 : add_monoid.End G) + const G s.snd) ''
-      {s | s.fst ^ 2 = 1 ∧ s.fst s.snd = s.snd} :=
+/-- Final solution -/
+theorem final_solution_general (T U : add_monoid.End G) (U_inj : injective U) (f : G → G) :
+  fn_eq T U f ↔ ∃ (φ : add_monoid.End G) (C : G),
+    f = φ + const G C ∧ φ * T = U * φ ∧ φ ^ 2 = U * φ ∧ φ C = U C :=
 begin
-  rw set.ext_iff; intros f,
-  rw [set.mem_set_of_eq, set.mem_image, prod.exists],
-  simp only [add_monoid_hom.coe_mk, set.mem_set_of_eq]; split,
-
-  ---- All functions satisfying fn_eq are in the RHS set
-  { intros feq,
-    have feq1 := results.fn_lem1_1 feq,
-    have feq2 := results.fn_lem1_3 two_torsion_free feq,
-    set C := f 0,
-    cases results.fn_lem2_1 feq2 with g h,
-    rw h at feq1,
-    rcases results.fn_lem2_3 feq1 with ⟨φ, h0, h1, h2⟩,
-    use [φ, C]; split,
-    split; assumption,
-    rw [← h0, ← h] },
-
-  ---- All functions on the RHS satisfy fn_eq
-  { intros h,
-    rcases h with ⟨φ, C, ⟨h, h0⟩, h1⟩,
-    rw ← h1; exact results.fn_lem2_4 h h0 },
+  rw [results.feq_iff_feq123 _ _ U_inj, results.feq3_iff_exists_hom_eq_f_sub_C]; split,
+  { set C := f 0 with C_val,
+    rintros ⟨feq1, feq2, φ, h⟩,
+    rw [h, results.feq1_hom_iff] at feq1,
+    rw [h, results.feq2_hom_iff] at feq2,
+    use [φ, f 0]; split,
+    rw [← C_val, ← h],
+    split; assumption },
+  { rintros ⟨φ, C, rfl, h, h0, h1⟩,
+    rw [pi.add_apply, const_apply, φ.map_zero, zero_add,
+        results.feq1_hom_iff, results.feq2_hom_iff],
+    repeat { split }; assumption }
 end
 
 end IMO2019A1
+end IMOSL
