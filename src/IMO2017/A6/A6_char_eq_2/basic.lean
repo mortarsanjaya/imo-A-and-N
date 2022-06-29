@@ -1,13 +1,9 @@
-import
-  IMO2017.A6.A6_general
-  algebra.char_p.two
-  algebra.char_p.pi
+import IMO2017.A6.A6_general algebra.char_p.two algebra.char_p.pi
 
+namespace IMOSL
 namespace IMO2017A6
 
-universe u
-variable {F : Type u}
-variable [field F]
+variables {F : Type*} [field F]
 
 /--
   Progress of 2017 A6 for the case char(F) = 2
@@ -217,3 +213,4 @@ end case_char_eq_2
 
 
 end IMO2017A6
+end IMOSL

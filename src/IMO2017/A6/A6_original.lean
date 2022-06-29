@@ -1,7 +1,6 @@
-import
-  IMO2017.A6.A6_char_ne_2
-  data.real.basic
+import IMO2017.A6.A6_char_ne_2 data.real.basic
 
+namespace IMOSL
 namespace IMO2017A6
 
 /-
@@ -20,3 +19,4 @@ begin
 end
 
 end IMO2017A6
+end IMOSL

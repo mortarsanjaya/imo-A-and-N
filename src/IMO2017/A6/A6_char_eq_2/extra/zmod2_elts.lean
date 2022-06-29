@@ -1,6 +1,6 @@
-import
-  data.zmod.basic
+import data.zmod.basic
 
+namespace IMOSL
 namespace IMO2017A6
 namespace extra
 
@@ -21,3 +21,4 @@ end
 
 end extra
 end IMO2017A6
+end IMOSL

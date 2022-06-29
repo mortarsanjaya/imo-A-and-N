@@ -5,11 +5,15 @@ import
   data.zmod.algebra
   field_theory.ratfunc
 
+namespace IMOSL
 namespace IMO2017A6
 
-universe u
-variable {F : Type u}
-variable [field F]
+open char_two
+open polynomial
+open ratfunc
+open_locale classical
+
+variables {F : Type*} [field F]
 
 /-
   Some result implied from f(a) = f(b) for some a, b ∈ F.
@@ -21,15 +25,6 @@ variable [field F]
 -/
 
 
-
-
-
-
-
-open char_two
-open polynomial
-open ratfunc
-open_locale classical
 
 namespace case_char_eq_2
 
@@ -160,3 +155,4 @@ end case_char_eq_2
 
 
 end IMO2017A6
+end IMOSL

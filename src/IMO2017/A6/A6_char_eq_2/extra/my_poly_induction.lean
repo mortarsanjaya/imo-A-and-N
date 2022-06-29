@@ -5,20 +5,19 @@ import
 /-
   Implementation of induction necessary for results given in "poly_result.lean"
 -/
+namespace IMOSL
 namespace IMO2017A6
 namespace extra
 
 open polynomial
 open_locale classical
 
-universe u
-
 
 
 /-
   Strong induction on degree of polynomial, using nat_degree (with deg(0) = 0)
 -/
-theorem polynomial_strong_induction_nat_degree {R : Type u} [comm_ring R] {M : polynomial R → Prop}
+theorem polynomial_strong_induction_nat_degree {R : Type*} [comm_ring R] {M : polynomial R → Prop}
   (h : ∀ P : polynomial R, (∀ Q : polynomial R, Q.nat_degree < P.nat_degree → M Q) → M P) :
   ∀ P : polynomial R, M P :=
 begin
@@ -56,7 +55,7 @@ end
       But also, M(Q + X) holds since deg(Q + X) ≤ max {deg(Q), 1} < n.
       Thus, by (3), we have M(P).
 -/
-theorem my_poly_induction {R : Type u} [nontrivial R] [comm_ring R] {M : polynomial R → Prop} :
+theorem my_poly_induction {R : Type*} [nontrivial R] [comm_ring R] {M : polynomial R → Prop} :
   (∀ c : R, M (C c * X)) →
   (∀ (P : polynomial R) (d : R), M P → M (P + C d)) →
   (∀ P : polynomial R, M P → M (P + X) → M (P * X)) →
@@ -118,7 +117,7 @@ end
   • In the induction step, the case Q | P and Q ∤ P require different proof steps.
     Thus, we will separate these two cases.
 -/
-theorem my_poly_induction2 {F : Type u} [field F] {M : polynomial F → polynomial F → Prop} :
+theorem my_poly_induction2 {F : Type*} [field F] {M : polynomial F → polynomial F → Prop} :
   (∀ (c : F) (P : polynomial F), M P (C c)) →
   (∀ P Q : polynomial F, M P Q → M Q P) →
   (∀ P Q R : polynomial F, R.nat_degree < Q.nat_degree → M R Q → M (P * R) Q → M (P * Q + R) Q) →
@@ -177,3 +176,4 @@ end
 
 end extra
 end IMO2017A6
+end IMOSL

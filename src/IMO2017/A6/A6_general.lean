@@ -1,11 +1,12 @@
-import
-  algebra.algebra.basic
+import algebra.algebra.basic
 
+namespace IMOSL
 namespace IMO2017A6
 
-universe u
-variable {F : Type u}
-variable [field F]
+open function
+open_locale classical
+
+variables {F : Type*} [field F]
 
 /--
   IMO 2017 A6 (P2), Generalized Version
@@ -35,13 +36,6 @@ def fn_eq (f : F → F) :=
   ∀ x y : F, f (f x * f y) + f (x + y) = f (x * y)
 
 
-
-
-
-
-
-open function
-open_locale classical
 
 namespace results
 
@@ -194,3 +188,4 @@ end results
 
 
 end IMO2017A6
+end IMOSL

@@ -1,13 +1,12 @@
-import
-  IMO2017.A6.A6_general
-  algebra.char_p.basic
-  data.set.basic
+import IMO2017.A6.A6_general algebra.char_p.basic
 
+namespace IMOSL
 namespace IMO2017A6
 
-universe u
-variable {F : Type u}
-variable [field F]
+open function
+open_locale classical
+
+variables {F : Type*} [field F]
 
 /-
   IMO 2017 A6 (P2), Generalized Version, case char(F) ≠ 2.
@@ -36,13 +35,6 @@ variable [field F]
 -/
 
 
-
-
-
-
-
-open function
-open_locale classical
 
 ---- Injectivity result for char(F) ≠ 2.
 ---- This implies no other functions satisfying fn_eq
@@ -141,3 +133,4 @@ begin
 end
 
 end IMO2017A6
+end IMOSL
