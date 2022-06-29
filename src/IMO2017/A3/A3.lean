@@ -1,13 +1,9 @@
-import
-  data.fintype.basic
-  data.fintype.card
+import data.fintype.card
 
+namespace IMOSL
 namespace IMO2017A3
 
-universe u
-variable {S : Type u}
-variable [fintype S]
-variable [decidable_eq S]
+variables {S : Type*} [fintype S] [decidable_eq S]
 
 /--
   IMO 2017 A3
@@ -18,27 +14,19 @@ variable [decidable_eq S]
 
   See http://www.imo-official.org/problems/IMO2017SL.pdf
   We will partially follow the official solution.
-  It suffices to prove that there exists a positive integer n such that
-          f^{n + 3} = f^{2n + 3}
+  We use f^{n + 3} = f^{2n + 3} for the claim instead of f^{n + 2} = f^{2n + 1}.
   Then we proceed as in the claim: use this property to show that f(f(S)) = f(S).
 -/
-def fn_prop (f : S → S) :=
-  ∀ g : S → S, f ∘ g ∘ f = g ∘ f ∘ g → g = f
-
-
-
-
+def fn_prop (f : S → S) := ∀ g : S → S, f ∘ g ∘ f = g ∘ f ∘ g → g = f
 
 
 
 open function
 
-namespace results
+namespace extra
 
-
-
-lemma fn_lem1 (f : S → S) :
-  ∃ m n : ℕ, m < n ∧ nat.iterate f m = nat.iterate f n :=
+/-- There exists m, k ∈ ℕ such that 0 < k and f^m = f^{m + k} -/
+lemma exists_iterate_eq (f : S → S) : ∃ m k : ℕ, 0 < k ∧ (f^[m + k] = (f^[m])) :=
 begin
   have h := not_injective_infinite_fintype (nat.iterate f),
   unfold injective at h,
@@ -46,89 +34,67 @@ begin
   rcases h with ⟨m, n, h, h0⟩,
   change ¬m = n with m ≠ n at h0,
   rw ne_iff_lt_or_gt at h0; cases h0,
-  use [m, n]; split; assumption,
-  use [n, m]; split,
-  exact h0,
-  rw h,
+  use [m, n - m]; split,
+  exact nat.sub_pos_of_lt h0,
+  rw [nat.add_sub_of_le (le_of_lt h0), h],
+  use [n, m - n]; split,
+  exact nat.sub_pos_of_lt h0,
+  rw [nat.add_sub_of_le (le_of_lt h0), h]
 end
 
-lemma fn_lem2 (f : S → S) :
-  ∃ m : ℕ, 0 < m ∧ nat.iterate f (2 * m) = nat.iterate f m :=
+lemma iterate_preperiod_add {f : S → S} {m k : ℕ} (h : 0 < k) (h0 : f^[m + k] = (f^[m])) (n : ℕ) :
+  f^[m + n + k] = (f^[m + n]) :=
+by rw [add_right_comm, iterate_add, h0, iterate_add]
+
+lemma iterate_preperiod_mul {f : S → S} {m k : ℕ} (h : 0 < k) (h0 : f^[m + k] = (f^[m])) (n : ℕ) :
+  f^[m + n * k] = (f^[m]) :=
 begin
-  rcases fn_lem1 f with ⟨m, n, h, h0⟩,
-  let k := n - m,
-  let l := n + (k - (n % k)),
-  use l; split,
-  exact nat.lt_add_right 0 n _ (pos_of_gt h),
-
-  rw [← nat.add_sub_cancel_left m n, nat.add_sub_assoc (le_of_lt h)] at h0,
-  have h1 : ∀ c : ℕ, m ≤ c → nat.iterate f (c + k) = nat.iterate f c,
-  { intros c h1,
-    rw le_iff_exists_add' at h1,
-    cases h1 with d h1,
-    rw [h1, add_assoc, iterate_add, ← h0, iterate_add] },
-
-  have h2 : k ∣ l,
-  { change l with n + (k - n % k),
-    rw [← nat.add_sub_assoc, add_comm, nat.add_sub_assoc (nat.mod_le _ _)],
-    exact (nat.dvd_add (dvd_refl k) (nat.dvd_sub_mod n)),
-    refine le_of_lt (nat.mod_lt n _),
-    rwa tsub_pos_iff_lt },
-  
-  ---- Take a such that l = ak, then induction on a
-  cases h2 with a h2,
-  rw two_mul; nth_rewrite 1 h2; clear h2,
-  induction a with a a_ih,
-  rw [mul_zero, add_zero],
-  rw [nat.succ_eq_add_one, mul_add, mul_one, ← add_assoc,
-      iterate_add, a_ih, ← iterate_add, h1],
-  refine le_of_lt (lt_of_lt_of_le h _),
-  exact le_self_add,
+  induction n with n n_ih,
+  rw [zero_mul, add_zero],
+  rw [nat.succ_mul, ← add_assoc, iterate_add, n_ih, ← iterate_add, h0]
 end
 
-lemma fn_lem3 {f : S → S} (fprop : fn_prop f) :
-  ∃ N : ℕ, 0 < N ∧ nat.iterate f (N + 1) = f :=
+lemma exists_iterate_idempotent (f : S → S) : ∃ m : ℕ, 0 < m ∧ ((f^[m])^[2] = (f^[m])) :=
 begin
-  rcases fn_lem2 f with ⟨m, h, h0⟩,
-  use m; split,
-  exact h,
-  apply fprop,
-  rw [← iterate_succ, ← iterate_succ', ← iterate_succ', ← iterate_add, nat.succ_eq_add_one,
-      nat.succ_eq_add_one, add_assoc, add_assoc, add_assoc m 1 1, add_add_add_comm,
-      ← two_mul m, iterate_add, ← h0, ← iterate_add],
+  rcases exists_iterate_eq f with ⟨m, k, h, h0⟩,
+  suffices : ∃ l : ℕ, m < l ∧ k ∣ l,
+  { rcases this with ⟨l, h1, n, h2⟩,
+    use l; split,
+    exact pos_of_gt h1,
+    rcases le_iff_exists_add.mp (le_of_lt h1) with ⟨c, h3⟩,
+    have h4 := iterate_preperiod_mul h (iterate_preperiod_add h h0 c) n,
+    rwa [← h3, mul_comm, ← h2, ← mul_two, iterate_mul] at h4 },
+  use m + (k - (m % k)),
+  have h1 := nat.mod_lt m h,
+  split,
+  rwa [lt_add_iff_pos_right, tsub_pos_iff_lt],
+  rw [← nat.add_sub_assoc (le_of_lt h1), add_comm, nat.add_sub_assoc (nat.mod_le _ _)],
+  exact (nat.dvd_add (dvd_refl k) (nat.dvd_sub_mod m))
 end
 
-
-
-end results
-
+end extra
 
 
 
-
-
-
----- Final solution
+/-- Final solution -/
 theorem final_solution {f : S → S} (fprop : fn_prop f) :
   f '' (set.range f) = set.range f :=
 begin
   rw set.ext_iff; intros x,
-  rw [set.mem_image, set.mem_range]; split,
-
-  ---- f(f(S)) ⊆ f(S)
-  { intros h,
-    rcases h with ⟨y, h, h0⟩,
-    use y; exact h0 },
-  
-  ---- f(S) ⊆ f(f(S))
-  { intros h,
-    cases h with y h,
-    rcases results.fn_lem3 fprop with ⟨N, h0, h1⟩,
-    use nat.iterate f N y; split,
-    rw set.mem_range; use nat.iterate f (N - 1) y,
-    rw [← comp_apply f, ← iterate_succ', nat.succ_eq_add_one, nat.sub_add_cancel],
-    rw ← nat.lt_iff_add_one_le; exact h0,
-    rw [← comp_apply f, ← iterate_succ', nat.succ_eq_add_one, h1, h] },
+  simp; split,
+  rintros ⟨y, h⟩; use (f y); exact h,
+  rintros ⟨y, h⟩,
+  rcases extra.exists_iterate_idempotent f with ⟨M, h0, h1⟩,
+  have h2 : (f^[M.succ]) = f :=
+  begin
+    apply fprop,
+    rw ← iterate_mul at h1,
+    simp_rw [← iterate_succ, ← iterate_succ', nat.succ_eq_add_one, add_assoc],
+    rw [← iterate_add, add_add_add_comm, ← mul_two M, iterate_add f M, iterate_add f (M * 2), h1]
+  end,
+  use (f^[M.pred] y),
+  rw [← comp_app f (f^[_]), ← comp_app f, comp_iterate_pred_of_pos f h0, ← iterate_succ', h2, h]
 end
 
 end IMO2017A3
+end IMOSL

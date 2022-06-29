@@ -1,7 +1,6 @@
-import
-  data.real.basic
-  data.set.basic
+import data.real.basic
 
+namespace IMOSL
 namespace IMO2010A1
 
 /--
@@ -19,135 +18,85 @@ namespace IMO2010A1
   2. Using f(1/2) = 0, prove that f(1) = 0.
   3. Using f(1) = 0, prove that f = 0.
 -/
-def fn_eq (f : ℝ → ℝ) :=
-  ∀ x y : ℝ, f (⌊x⌋ * y) = f x * ⌊f y⌋
-
-
-
-
+def fn_eq (f : ℝ → ℝ) := ∀ x y : ℝ, f (⌊x⌋ * y) = f x * ⌊f y⌋
 
 
 
 open function
 open_locale classical
 
+namespace extra
+
+/-- For any r : ℝ, 1 < r → ⌊r⌋ = 0 -/
+lemma floor_eq_zero_of_eq_one {r : ℝ} (h : 1 < r) : ⌊r⁻¹⌋ = 0 :=
+begin
+  rw [int.floor_eq_iff, int.cast_zero, zero_add, inv_nonneg]; split,
+  exacts [le_of_lt (lt_trans zero_lt_one h), inv_lt_one h]
+end
+
+end extra
+
+
+
 namespace results
-
-
-
----- All functions satisying fn_eq are described here
-section answer
-
-theorem fn_ans1 :
-  fn_eq 0 :=
-begin
-  intros x y,
-  rw [pi.zero_apply, pi.zero_apply, zero_mul],
-end
-
-theorem fn_ans2 (C : ℝ) (h : ⌊C⌋ = 1) :
-  fn_eq (const ℝ C) :=
-begin
-  intros x y,
-  rw [const_apply, h, int.cast_one, mul_one],
-end
-
-end answer
-
-
-
----- We prove that there are no other functions satisfying fn_eq here
-section solution
 
 variables {f : ℝ → ℝ} (feq : fn_eq f)
 include feq
 
-lemma fn_lem1 :
-  f 0 ≠ 0 → ∀ y : ℝ, ⌊f y⌋ = 1 :=
+/-- Case 1: f(0) ≠ 0 -/
+lemma case_f0_ne_0 (h : f 0 ≠ 0) : ∃ C : ℝ, ⌊C⌋ = 1 ∧ f = const ℝ C :=
 begin
-  intros h y,
-  have h0 := feq 0 y,
-  rw [int.floor_zero, int.cast_zero, zero_mul, eq_comm, mul_right_eq_self₀] at h0,
-  cases h0 with h0 h0,
-  rwa [← int.cast_one, int.cast_inj] at h0,
-  exfalso; exact h h0,
-end
-
-lemma fn_lem2 :
-  f 0 ≠ 0 → ∃ C : ℝ, ⌊C⌋ = 1 ∧ const ℝ C = f :=
-begin
-  intros h,
-  use f 0; split,
-  exact fn_lem1 feq h 0,
-  apply funext; intros x,
+  use f 0,
+  have step1 : ∀ y : ℝ, ⌊f y⌋ = 1 :=
+  begin
+    intros y,
+    have h0 := feq 0 y,
+    rw [int.floor_zero, int.cast_zero, zero_mul, eq_comm, mul_right_eq_self₀] at h0,
+    cases h0 with h0 h0,
+    rwa [← int.cast_one, int.cast_inj] at h0,
+    exfalso; exact h h0
+  end,
+  split,
+  exact step1 0,
+  ext,
   have h1 := feq x 0,
-  rwa [mul_zero, fn_lem1 feq h 0, int.cast_one, mul_one] at h1,
+  rwa [mul_zero, step1 0, int.cast_one, mul_one, eq_comm] at h1
 end
 
-lemma fn_lem3 :
-  f 0 = 0 → ∀ x : ℝ, ⌊x⌋ = 0 → ⌊f x⌋ = 0 :=
+/-- Case 2: f(0) = 0 -/
+lemma case_f0_eq_0 (h : f 0 = 0) : f = 0 :=
 begin
-  intros h x h0,
-  have h1 := feq x x,
-  rw [h0, int.cast_zero, zero_mul, h, zero_eq_mul] at h1,
-  cases h1 with h1 h1,
-  rw [h1, int.floor_zero],
-  rwa [← int.cast_zero, int.cast_inj] at h1,
-end
-
-lemma fn_lem4 :
-  f 0 = 0 → f 1 = 0 :=
-begin
-  intros h,
+  suffices : f 1 = 0,
+  { ext,
+    have h0 := feq 1 x,
+    rwa [this, zero_mul, int.floor_one, int.cast_one, one_mul] at h0 },
   have h0 := feq ↑(2 : ℤ) 2⁻¹,
-  rwa [int.floor_coe, int.cast_bit0, int.cast_one, fn_lem3 feq h,
-       int.cast_zero, mul_zero, mul_inv_cancel] at h0,
-  exact two_ne_zero,
-  rw [int.floor_eq_iff, int.cast_zero, zero_add],
-  norm_num,
+  rwa [int.floor_coe, int.cast_bit0, int.cast_one, mul_inv_cancel] at h0,
+  work_on_goal 2 { exact two_ne_zero },
+  have h1 := feq 2⁻¹ 2⁻¹,
+  rw [extra.floor_eq_zero_of_eq_one one_lt_two, int.cast_zero,
+      zero_mul, h, zero_eq_mul, or_comm] at h1,
+  cases h1 with h1 h1,
+  rwa [h1, mul_zero] at h0,
+  rwa [h1, int.floor_zero, int.cast_zero, mul_zero] at h0
 end
-
-lemma fn_lem5 :
-  f 0 = 0 → f = 0 :=
-begin
-  intros h,
-  apply funext; intros x,
-  have h0 := feq 1 x,
-  rwa [fn_lem4 feq h, zero_mul, int.floor_one, int.cast_one, one_mul] at h0,
-end
-
-end solution
-
-
 
 end results
 
 
 
-
-
-
-
----- Final solution
-theorem final_solution :
-  set_of fn_eq = {0} ∪ const ℝ '' (set.Ico 1 2) :=
+/-- Final solution -/
+theorem final_solution (f : ℝ → ℝ) :
+  fn_eq f ↔ f = 0 ∨ ∃ C : ℝ, ⌊C⌋ = 1 ∧ f = const ℝ C :=
 begin
-  have X : set.Ico (1 : ℝ) (2 : ℝ) = int.floor ⁻¹' {1} :=
-    by rw [int.preimage_floor_singleton, int.cast_one]; refl,
-  rw [X, eq_comm, set.ext_iff]; intros f,
-  simp only [set.mem_set_of_eq, set.singleton_union, set.mem_insert_iff,
-             set.mem_image, set.mem_preimage, set.mem_singleton_iff],
-  split; intros h,
-
-  ---- All functions on the RHS satisfy fn_eq
-  { rcases h with h | ⟨C, h, h0⟩,
-    rw h; exact results.fn_ans1,
-    rw ← h0; refine results.fn_ans2 C h },
-  
-  ---- All functions satisfying fn_eq are in the RHS set
-  { by_cases h0 : f 0 = 0,
-    left; exact results.fn_lem5 h h0,
-    right; exact results.fn_lem2 h h0 },
+  split,
+  { intros feq,
+    by_cases h : f 0 = 0,
+    left; exact results.case_f0_eq_0 feq h,
+    right; exact results.case_f0_ne_0 feq h },
+  { rintros (rfl | ⟨C, h, rfl⟩) x y; simp,
+    rw [h, int.cast_one, mul_one] }
 end
 
 end IMO2010A1
+end IMOSL

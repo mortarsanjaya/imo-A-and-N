@@ -1,8 +1,8 @@
 [package]
 name = "imo-A-and-N"
 version = "0.1"
-lean_version = "leanprover-community/lean:3.43.0"
+lean_version = "leanprover-community/lean:3.44.1"
 path = "src"
 
 [dependencies]
-mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "07c83c81c0016c1ac08e8c9c3f1260c2f4c6ac7f"}
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "728e074e011d3da69f2479bac2f1aafe2fb12f87"}

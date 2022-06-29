@@ -1,16 +1,9 @@
-import
-  algebra.algebra.basic
-  algebra.char_p.basic
-  algebra.char_p.two
-  dynamics.fixed_points.basic
-  data.set.basic
+import algebra.algebra.basic algebra.char_p.two dynamics.fixed_points.basic
 
+namespace IMOSL
 namespace IMO2015A4
 
-universe u
-variable {R : Type u}
-variable [comm_ring R]
-variable [is_domain R]
+variables {R : Type*} [comm_ring R] [is_domain R]
 
 /--
   IMO 2015 A4 (P5), Generalized Version
@@ -60,8 +53,7 @@ variable [is_domain R]
     Thus, either way, for any t ∈ R, t + 1 is a fixed point.
     Replacing t with x - 1 gives us f(x) = x for all x ∈ R, as desired.
 -/
-def fn_eq (f : R → R) :=
-  ∀ x y : R, f (x + f (x + y)) + f (x * y) = x + f (x + y) + y * f x
+def fn_eq (f : R → R) := ∀ x y : R, f (x + f (x + y)) + f (x * y) = x + f (x + y) + y * f x
 
 
 
@@ -73,28 +65,6 @@ open function
 open_locale classical
 
 namespace results
-
-
-
----- All functions satisying fn_eq are described here
-section answer
-
-theorem fn_ans1 :
-  fn_eq (id : R → R) :=
-begin
-  intros x y,
-  rw [id.def, id.def, id.def, id.def, mul_comm],
-end
-
-theorem fn_ans2 :
-  fn_eq (2 - id : R → R) :=
-begin
-  intros x y,
-  simp only [pi.bit0_apply, id.def, pi.one_apply, pi.sub_apply],
-  ring,
-end
-
-end answer
 
 
 
@@ -343,26 +313,22 @@ end results
 
 
 
----- Final solution
-theorem final_solution_general :
-  set_of fn_eq = ({id, 2 - id} : set (R → R)) :=
+/-- Final solution -/
+theorem final_solution_general (f : R → R) :
+  fn_eq f ↔ f = id ∨ f = 2 - id :=
 begin
-  rw set.ext_iff; intros f,
-  rw [set.mem_set_of_eq, set.mem_insert_iff, set.mem_singleton_iff]; split,
-
-  ---- All functions satisfying fn_eq are in the RHS set
-  { intros h,
+  split,
+  { intros feq,
     by_cases h0 : f 0 = 0,
     left; by_cases h1 : ring_char R = 2,
-    exact @results.fn_thm3 R _inst_1 _inst_2 (ring_char.of_eq h1) f h h0,
-    exact results.fn_thm2 h1 h h0,
-    right; exact results.fn_lem1_3 h h0 },
-  
-  ---- All functions on the RHS satisfy fn_eq
-  { intros h,
-    cases h with h h,
-    rw h; exact results.fn_ans1,
-    rw h; exact results.fn_ans2 },
+    have _inst_3 := ring_char.of_eq h1,
+    exactI results.fn_thm3 feq h0,
+    exact results.fn_thm2 h1 feq h0,
+    right; exact results.fn_lem1_3 feq h0 },
+  { rintros (rfl | rfl) x y; simp,
+    exact mul_comm x y,
+    ring }
 end
 
 end IMO2015A4
+end IMOSL
