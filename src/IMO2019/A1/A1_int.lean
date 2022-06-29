@@ -6,25 +6,26 @@ namespace IMO2019A1
 /--
   IMO 2019 A1 (P1), Integer Version (G = ℤ)
 
-  Let r and s be integers with s ≠ 0.
+  Let g : ℤ → ℤ be a function with g(0) = 0, and let s be an integer with s ≠ 0.
   Determine all functions f : ℤ → ℤ such that, for all x, y ∈ ℤ,
-          f(rx) + sf(y) = f(f(x + y)).
+          f(g(x)) + s f(y) = f(f(x + y)).
 
   Answer:
-    1. r ≠ s: f = 0 only.
-    2. r = s: f = 0 and f = x ↦ sx + C for any choice of C ∈ ℤ.
+    1. g ≠ x ↦ sx: f = 0 only.
+    2. g = x ↦ sx: f = 0 and f = x ↦ sx + C for any choice of C ∈ ℤ.
 
   Solution:
     The ring of endomorphisms of ℤ is isomorphic to ℤ itself.
-    So, that means we can write φ(x) = mx, T(x) = rx, and U(x) = sx for some integer m, r, and s.
-    The equations φT = Uφ = φ^2 implies mr = ms = m^2, so either m = r = s or m = 0.
-    For r ≠ s, we have m = 0, and thus sC = φ(C) = rC → C = 0.
-    For r = s, any choice of C works.
+    So, that means we can write φ(x) = kx and T(x) = sx for some integer m, r, and s.
+    The equation Tφ = φ^2 implies ks = k^2, so either m = s or m = 0.
+    The equation φ ∘ g = Tφ reads as k g(x) = skx for all x ∈ ℤ.
+    Thus, for g ≠ x ↦ sx, we have k = 0, and the equation φ(C) = T(C) reads as sC = 0 → C + 0.
+    For g = x ↦ sx, any choice of C works.
 
   Implementation note:
     We first need to give a ring isomorphism between End(ℤ).
 -/
-def fn_eq_int (r s : ℤ) (f : ℤ → ℤ) := ∀ x y : ℤ, f (r * x) + s * f y = f (f (x + y))
+def fn_eq_int (g : ℤ → ℤ) (s : ℤ) (f : ℤ → ℤ) := ∀ x y : ℤ, f (g x) + s * f y = f (f (x + y))
 
 
 
@@ -67,40 +68,51 @@ begin
   intros h; rw [← End_int_eq_of_int_map_one φ, h, End_int_eq_of_int_map_one ρ]
 end
 
+
+
 /-- Connection between fn_eq_int and fn_eq -/
-lemma feq_int_iff_feq_gen (r s : ℤ) (f : ℤ → ℤ) :
-    fn_eq_int r s f ↔ fn_eq (extra.End_int_of_int r) (extra.End_int_of_int s) f :=
+lemma feq_int_iff_feq_gen (g : ℤ → ℤ) (s : ℤ) (f : ℤ → ℤ) :
+    fn_eq_int g s f ↔ fn_eq g (extra.End_int_of_int s) f :=
   by simp only [fn_eq_int, fn_eq, extra.End_int_of_int_eq_mul]
 
 end extra
 
 
 
-/-- Final solution, case r ≠ s -/
-theorem final_solution_int_case_r_ne_s {r s : ℤ} (s_ne_zero : s ≠ 0) (h : r ≠ s) (f : ℤ → ℤ) :
-  fn_eq_int r s f ↔ f = 0 :=
+/-- Final solution, case g ≠ x ↦ sx -/
+theorem final_solution_int {g : ℤ → ℤ} (g_zero : g 0 = 0) {s : ℤ} (s_ne_zero : s ≠ 0) 
+    (h : g ≠ λ x, s * x) (f : ℤ → ℤ) :
+  fn_eq_int g s f ↔ f = 0 :=
 begin
   symmetry; split,
   rintros rfl x y; simp only [pi.zero_apply, mul_zero, add_zero],
   intros h0,
-  rw [extra.feq_int_iff_feq_gen, final_solution_general] at h0,
+  rw [extra.feq_int_iff_feq_gen, final_solution_general g_zero] at h0,
   work_on_goal 2 { exact extra.End_int_inj_of_ne_zero s_ne_zero },
-  rcases h0 with ⟨φ, C, rfl, h0, junk, h1⟩; clear junk,
+  rcases h0 with ⟨φ, C, rfl, h0, h1, h2⟩,
   rw [extra.End_int_eq_iff_eq_at_one, add_monoid.coe_mul, comp_app,
-      extra.End_int_of_int_eq_mul, add_monoid.coe_mul, comp_app,
-      extra.End_int_of_int_eq_mul, mul_one, extra.End_int_eq_map_one_mul,
-      mul_comm, mul_eq_mul_right_iff, or_iff_right h] at h0,
-  rw [extra.End_int_of_int_eq_mul, extra.End_int_eq_map_one_mul,
-      h0, zero_mul, zero_eq_mul, or_iff_right s_ne_zero] at h1,
-  rw [h1, pi.const_zero, add_zero, ← extra.End_int_eq_of_int_map_one φ, h0, map_zero],
-  refl
+      extra.End_int_of_int_eq_mul, pow_two, add_monoid.coe_mul, comp_app,
+      extra.End_int_eq_map_one_mul, mul_eq_mul_right_iff] at h1,
+  cases h1 with h1 h1,
+  ---- φ(1) = s; a contradiction
+  { exfalso; apply h; ext n,
+    have h3 : (φ ∘ g) n = (extra.End_int_of_int s * φ) n := by rw h0,
+    rw [comp_app, add_monoid.coe_mul, comp_app, extra.End_int_of_int_eq_mul,
+        extra.End_int_eq_map_one_mul, extra.End_int_eq_map_one_mul φ n, h1] at h3,
+    exact mul_left_cancel₀ s_ne_zero h3 },
+  ---- φ(1) = 0; then f = 0
+  { rw [extra.End_int_of_int_eq_mul, extra.End_int_eq_map_one_mul,
+        h1, zero_mul, zero_eq_mul, or_iff_right s_ne_zero] at h2,
+    rw [h2, pi.const_zero, add_zero, ← extra.End_int_eq_of_int_map_one φ, h1, map_zero],
+    refl }
 end
 
-/-- Final solution, case r = s -/
+/-- Final solution, case g = x ↦ sx -/
 theorem final_solution_int_case_r_eq_s {s : ℤ} (s_ne_zero : s ≠ 0) (f : ℤ → ℤ) :
-  fn_eq_int s s f ↔ (f = 0 ∨ ∃ C : ℤ, f = λ x, s * x + C) :=
+  fn_eq_int (λ x, s * x) s f ↔ (f = 0 ∨ ∃ C : ℤ, f = λ x, s * x + C) :=
 begin
   rw [extra.feq_int_iff_feq_gen, final_solution_general],
+  work_on_goal 2 { rw mul_zero },
   work_on_goal 2 { exact extra.End_int_inj_of_ne_zero s_ne_zero },
   split,
   { rintros ⟨φ, C, rfl, junk, h, h0⟩; clear junk,
@@ -117,16 +129,15 @@ begin
   { rintros (rfl | ⟨C, rfl⟩),
     use [0, 0]; simp,
     rw [extra.End_int_of_int_eq_mul, mul_zero],
-    split; refl,
+    work_on_goal 1 { repeat { split }},
     use [extra.End_int_of_int s, C]; repeat { split },
-    ext; rw [pi.add_apply, const_apply, add_left_inj, extra.End_int_of_int_eq_mul] }
+    ext; rw [pi.add_apply, const_apply, add_left_inj, extra.End_int_of_int_eq_mul],
+    ext; rw [add_monoid.coe_mul, comp_apply, comp_apply, extra.End_int_of_int_eq_mul s x] }
 end
 
-
-
-/-- Final solution, original case: r = s = 2 -/
+/-- Final solution, original case: g = x ↦ 2x, s = 2 -/
 theorem final_solution_original (f : ℤ → ℤ) :
-    fn_eq_int 2 2 f ↔ (f = 0 ∨ ∃ C : ℤ, f = λ x, 2 * x + C) :=
+    fn_eq_int (λ x, 2 * x) 2 f ↔ (f = 0 ∨ ∃ C : ℤ, f = λ x, 2 * x + C) :=
   final_solution_int_case_r_eq_s two_ne_zero f
 
 end IMO2019A1
