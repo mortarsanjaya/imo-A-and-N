@@ -1,4 +1,4 @@
-import algebra.char_p.two dynamics.fixed_points.basic
+import algebra.algebra.basic
 
 /-!
 # IMO 2015 A4 (P5), Generalized Version
@@ -9,49 +9,72 @@ Find all functions f : R → R such that, for all x, y ∈ R,
 
 ## Answer
 
-f = id : x ↦ x and f = x ↦ 2 - x.
+f = id and f = x ↦ 2 - x.
 
 ## Solution
 
 See <http://www.imo-official.org/problems/IMO2015SL.pdf>.
-The official solution works perfectly only for the case char(R) ≠ 2.
-For the case char(R) = 2, one may obtain f(x²) + 1 = (f(x) + 1)(x + 1) for all x ∈ R.
-This turns out to be enough in proving that f must be the identity.
+However, instead of working with f, we work with f - id.
+That is, we will solve the following functional equation instead:
+(*)        ∀ x y ∈ R, f(f(x + y) + 2x + y) = y f(x) - f(xy).
+It suffices to prove that f satisfies (*) if and only if f = 0 or f = x ↦ 2 - 2x.
 
-In this file, we follow the official solution for the case char(R) ≠ 2.
-We also work with our own solution for the case char(R) = 2.
+The official solution works perfectly only for the case char(R) ≠ 2.
+We rearrange this solution for our new functional equation.
+We also present our own solution for the case char(R) = 2.
+
+Plugging y = 1 and replacing x with x - 1 into (*) yields
+(1)        ∀ x ∈ R, f(f(x) + 2x - 1) = 0.
+Plugging x = 0 into (*) yields
+(2)        ∀ y ∈ R, f(y + f(y)) = (y - 1) f(0).
+For the case f(0) ≠ 0, this means that f(y) = 0 implies y = 1.
+In particular, (1) yields f(x) = 2 - 2x for all x ∈ R.
+We will split the case char(R) ≠ 2 and char(R) = 2 for the case f(0) = 0.
+
+### Solution, case char(R) ≠ 2
+
+Plugging x = 0 into (1) yields f(-1) = 0.
+Plugging x = 1 and y = -1 into (*) afterwards yields 2f(1) = 0 → f(1) = 0.
+Now, plugging in x = 1 into (*) yields
+(3)  f(f(y + 1) + y + 2) = -f(y) for all y ∈ R.
+In particular, if f(y) = 0 and f(y + 1) = 0, then f(y + 2) = 0.
+Plugging y = 0 into (*) now yields f(f(x) + 2x) = 0 for all x ∈ R.
+Combined with (1) and (3), we get
+(4)       ∀ x ∈ R, f(f(x) + 2x + 1) = 0.
+Now, if we plug y = -1 into (*) and use (4), we get
+  0 = f(f(x - 1) + 2x - 1) = -f(x) - f(-x) for all x ∈ R.
+This implies that f is odd.
+
+Finally, plugging in x = -1 and replacing y with -y into (*) yields
+  -f(y) = f(f(-y - 1) - y - 2) = -f(f(y + 1) + y + 2) for all y ∈ R.
+Combined with (3), we get f(y) = 0 for all y ∈ R.
   
 ### Solution for the case char(R) = 2
 
-Proceed equally in case f(0) ≠ 0.
+Proceed equally in case f(0) ≠ 0 (which turns out to be impossible in this case).
 From now on, assume that f(0) = 0.
-As in the case char(R) ≠ 2, We also prove that f(-1) = -1 and
-(1)        ∀ x ∈ R, x + f(x + 1) is a fixed point.
-The equality f(1) = 1 is now immediate from f(-1) = -1 since -1 = 1.
+Equation (*) becomes
+(5)         f(f(x + y) + y) = y f(x) + f(xy).
+Plugging in y = 0 into (5) yields f(f(x)) = 0 for all x ∈ R.
+Plugging in x = 0 into (5) yields f(f(y) + y) = 0 for all y ∈ R instead.
+Plugging in x = f(y), combined with the previous two equalities,
+  yields f(f(y) y) = f(y) for all y ∈ R.
+Plugging in y = f(x) instead gives us f(xf(x)) + f(x)² = 0.
+Thus we have f(x f(x)) = f(x)² = f(x) for all x ∈ R.
+That is, we have f(x) ∈ {0, 1} for all x ∈ R.
 
-Plugging in x = 0 into the original equation yields
-(2)       ∀ y ∈ R, f(y) is a fixed point.
-Next, plugging y = x + 1 into the original equation yields
-(3)       ∀ x ∈ R, f(x + 1) + f(x² + x) = (x + 1) (f(x) + 1).
-Comparing (3) with x and with x + 1, we will get x f(x + 1) = (x + 1) f(x).
-In particular, if x is a non-zero fixed point, then x + 1 is a fixed point.
-But 1 is a fixed point as well, so we get
-(4).      ∀ x ∈ R, x is a fixed point → x + 1 is a fixed point.
-Next, plugging y = x into the original equation gives us
-  ∀ x ∈ R, f(x²) + 1 = (x + 1) (f(x) + 1)
-Then, by (2) and (4),
-(5).      ∀ x ∈ R, (x + 1) (f(x) + 1) is a fixed point.
-Next, by plugging y = 0 into the original equation, we get
-(6).      ∀ x ∈ R, x + f(x) is a fixed point.
-Finally, for any t ∈ R, plug (x, y) ↦ (t + 1, f(t) + 1) into the original equation.
-By (6), x + y = t + f(t) is a fixed point, while by (2) and (4), y is a fixed point.
-Thus the equation simplifies to
-  f(xy) = yf(x) → f((t + 1) (f(t) + 1)) = (f(t) + 1) f(t + 1).
-But by (5), (t + 1) (f(t) + 1) is also a fixed point.
-Thus, either f(t) = 1 or t + 1 is a fixed point.
-However, if f(t) = 1, then (6) yields that t + 1 is a fixed point.
-Thus, either way, for any t ∈ R, t + 1 is a fixed point.
-Replacing t with x - 1 gives us f(x) = x for all x ∈ R, as desired.
+It remains to show that f(x) ≠ 1 for any x ∈ R.
+Suppose for the sake of contradiction that f(t) = 1 for some t ∈ R.
+Plugging x = y = t into (5) yields f(t²) = t + 1 ∈ {0, 1}, so t ∈ {0, 1}.
+But f(0) = 0, and f(f(x)) = 0 yields f(1) ≠ 1 → f(1) = 0.
+Contradiction; this implies f = 0, as desired.
+
+## Notes
+
+We do not need to show that the new FE implies the original FE.
+That is, we just show that the original FE implies the new FE.
+The case division can also be stated just by 2 ≠ 0 vs. 2 = 0.
+We also try not having to change subtraction into addition many times.
 -/
 
 open function
@@ -68,267 +91,146 @@ def fn_eq (f : R → R) := ∀ x y : R, f (x + f (x + y)) + f (x * y) = x + f (x
 
 namespace results
 
+def fn_eq' (f : R → R) := ∀ x y : R, f (f (x + y) + 2 * x + y) = y * f x - f (x * y)
 
-
----- General lemmas
-section general
-
-variables {f : R → R} (feq : fn_eq f)
-include feq
-
-
-
-lemma fn_lem1_1 :
-  ∀ x : R, is_fixed_pt f (x + f (x + 1)) :=
+lemma feq'_of_feq {f : R → R} (feq : fn_eq f) : fn_eq' (f - id) :=
 begin
+  set g := f - id with ← hg; intros x y,
+  rw sub_eq_iff_eq_add at hg,
+  have h0 := feq x y,
+  set z := x + f (x + y) with hz,
+  rw [← eq_sub_iff_add_eq, add_sub_assoc, add_comm, ← sub_eq_iff_eq_add] at h0,
+  rw [add_comm, hg, pi.add_apply, id.def, add_assoc, add_right_comm, ← two_mul] at hz,
+  rw [add_assoc, ← hz]; simp [g],
+  rw [h0, mul_sub, mul_comm y x, sub_sub_sub_cancel_right]
+end
+
+
+
+/-- From now on, we only work with fn_eq' -/
+variables {f : R → R} (feq' : fn_eq' f)
+include feq'
+
+lemma feq'_zeroes1 (x : R) : f (f x + 2 * x - 1) = 0 :=
+begin
+  nth_rewrite 1 ← add_sub_cancel (1 : R) (1 : R),
+  have h := feq' (x - 1) (1 : R),
+  rwa [one_mul, mul_one, sub_self, sub_add_cancel, mul_sub_one, ← add_sub_assoc, sub_add] at h
+end
+
+/-- Case 1: f(0) ≠ 0 -/
+theorem case_f0_ne_0 (f0_ne_0 : f 0 ≠ 0) : f = λ x, 2 - 2 * x :=
+begin
+  ext x,
+  have h := feq' 0 (f x + 2 * x - 1),
+  rwa [zero_mul, zero_add, feq'_zeroes1 feq', zero_add, mul_zero, zero_add,
+      feq'_zeroes1 feq', ← sub_one_mul, zero_eq_mul, or_iff_left f0_ne_0,
+      sub_sub, sub_eq_zero, ← eq_sub_iff_add_eq] at h
+end
+
+lemma f1_eq_0 (f0_eq_0 : f 0 = 0) : f 1 = 0 :=
+begin
+  have h := feq'_zeroes1 feq' 0,
+  rw [f0_eq_0, zero_add, mul_zero, zero_sub] at h,
+  cases eq_or_ne (2 : R) 0 with R2_eq_0 R2_ne_0,
+  ---- Case 1 : 2 = 0
+  { rw ← h; apply congr_arg,
+    rw [eq_neg_iff_add_eq_zero, ← two_mul, mul_one, R2_eq_0] },
+  ---- Case 2 : 2 ≠ 0
+  { have h0 := feq' 1 (-1),
+    ring_nf at h0,
+    rwa [f0_eq_0, zero_add, h, sub_zero, eq_neg_iff_add_eq_zero,
+         ← two_mul, mul_eq_zero, or_iff_right R2_ne_0] at h0 }
+end
+
+/-- Case 2: f(0) = 0, 2 ≠ 0 in R -/
+theorem case_f0_eq_0_R2_ne_0 (f0_eq_0 : f 0 = 0) (R2_ne_0 : (2 : R) ≠ 0) : f = 0 :=
+begin
+
+  ---- Get the equality f(f(1 + x) + (2 + x)) = -f(x).
+  have h : ∀ x : R, f (f (1 + x) + (2 + x)) = - (f x) :=
+  begin
+    intros x,
+    have h := feq' 1 x,
+    rwa [f1_eq_0 feq' f0_eq_0, mul_zero, zero_sub, one_mul, mul_one, add_assoc] at h
+  end,
+
+  ---- From h, it suffices to prove that f is odd.
+  suffices : ∀ x : R, f (- x) = - (f x),
+  { ext x,
+    have h0 := feq' (-1) (-x),
+    rwa [neg_mul_neg, one_mul, this 1, f1_eq_0 feq' f0_eq_0, neg_zero, mul_zero, zero_sub,
+         ← neg_add, mul_neg_one, add_assoc, ← neg_add, this, ← neg_add, this, h, neg_neg,
+         eq_neg_iff_add_eq_zero, ← two_mul, mul_eq_zero, or_iff_right R2_ne_0] at h0 },
+  
+  ---- f being odd is equivalent to f(f(x) + 2x + 1) = 0.
+  suffices : ∀ x : R, f (f x + 2 * x + 1) = 0,
+  { intros x,
+    rw [← mul_neg_one, eq_comm, ← neg_one_mul, ← sub_eq_zero, ← feq', ← this (x - 1)],
+    ring_nf },
+
+  ---- Now show f(f(x) + 2x + 1) = 0.
   intros x,
-  have h := feq x 1,
-  rwa [one_mul, mul_one, add_left_inj] at h,
+  have h0 := feq' x 0,
+  rw [add_zero, add_zero, zero_mul, mul_zero, f0_eq_0, sub_zero] at h0,
+  have h1 := h (f x + 2 * x - 1),
+  rw [feq'_zeroes1 feq', neg_zero, add_comm (1 : R), sub_add_cancel, h0, zero_add] at h1,
+  rw ← h1; apply congr_arg,
+  rw [add_comm (2 : R), add_comm_sub, add_right_inj, eq_sub_iff_add_eq, ← two_mul, mul_one]
 end
 
-lemma fn_lem1_2 :
-  f 0 ≠ 0 → ∀ x : R, is_fixed_pt f x → x = 1 :=
+/-- Case 3: f(0) = 0, 2 = 0 in R -/
+theorem case_f0_eq_0_R2_eq_0 (f0_eq_0 : f 0 = 0) (R2_eq_0 : (2 : R) = 0) : f = 0 :=
 begin
-  unfold is_fixed_pt; intros h x h0,
-  have h1 := feq 0 x,
-  rw [zero_add, zero_add, h0, h0, zero_mul, add_right_inj, eq_comm, mul_left_eq_self₀] at h1,
-  cases h1 with h1 h1,
-  exact h1,
-  exfalso; exact h h1,
-end
 
-lemma fn_lem1_3 :
-  f 0 ≠ 0 → f = 2 - id :=
-begin
-  intros h; apply funext; intros x,
-  rw [pi.sub_apply, id.def, pi.bit0_apply, pi.one_apply],
-  have h0 := fn_lem1_2 feq h _ (fn_lem1_1 feq (x - 1)),
-  rwa [sub_add_cancel, add_comm, ← eq_sub_iff_add_eq, ← sub_add, add_comm, ← add_sub_assoc] at h0,
-end
-
-lemma fn_lem1_4 :
-  f 0 = 0 → f (-1) = -1 :=
-begin
-  intros h,
-  have h0 := fn_lem1_1 feq (-1),
-  rwa [neg_add_self, h, add_zero] at h0,
-end
-
-end general
-
-
-
----- Solution for the case char(R) ≠ 2, assuming f(0) = 0
-section case_char_ne_2
-
-variable char_ne_2 : ring_char R ≠ 2
-include char_ne_2
-
-variables {f : R → R} (feq : fn_eq f) (h : f 0 = 0)
-include feq h
-
-
-
-lemma fn_lem2_1 :
-  f 1 = 1 :=
-begin
-  have h0 := feq 1 (-1),
-  rw [add_neg_self, h, add_zero, one_mul, fn_lem1_4 feq h, neg_one_mul,
-      eq_add_neg_iff_add_eq, add_right_comm, eq_comm, eq_add_neg_iff_add_eq,
-      ← two_mul (f 1), ← two_mul, mul_one, eq_comm, mul_right_eq_self₀] at h0,
-  cases h0 with h0 h0,
-  exact h0,
-  exfalso; exact ring.two_ne_zero char_ne_2 h0,
-end
-
-lemma fn_lem2_2 :
-  ∀ x : R, f (1 + f (x + 1)) + f x = 1 + f (x + 1) + x :=
-begin
+  have feq'' := feq',
+  simp only [fn_eq', R2_eq_0, zero_mul, add_zero] at feq'',
+  suffices : ∀ x : R, f x = 0 ∨ f x = 1,
+  { ext x,
+    cases this x with h h,
+    exact h,
+    have h0 := feq'' x x,
+    rw [← two_mul, R2_eq_0, zero_mul, f0_eq_0, zero_add, h, mul_one, eq_sub_iff_add_eq] at h0,
+    cases this (x * x) with h1 h1,
+    rw [pi.zero_apply, ← h0, h1, add_zero, f1_eq_0 feq' f0_eq_0],
+    rw [pi.zero_apply, ← h0, h1, ← two_mul, R2_eq_0, zero_mul, f0_eq_0] },
+  
+  ---- Now prove that f(x) ∈ {0, 1} for any x ∈ R.
   intros x,
-  have h0 := feq 1 x,
-  rwa [add_comm 1 x, one_mul, fn_lem2_1 char_ne_2 feq h, mul_one] at h0,
+  have h := feq'' x 0,
+  rw [add_zero, add_zero, zero_mul, mul_zero, f0_eq_0, sub_zero] at h,
+  have h0 := feq'' 0 x,
+  rw [zero_add, zero_mul, f0_eq_0, sub_zero, mul_zero] at h0,
+  have h1 := feq'' (f x) x,
+  rw [h0, zero_add, h, mul_zero, zero_sub, eq_neg_iff_eq_neg] at h1,
+  have h2 := feq'' x (f x),
+  rw [add_comm x (f x), h0, zero_add, h, mul_comm x, h1, ← mul_neg_one,
+      ← mul_sub, zero_eq_mul, sub_eq_zero] at h2,
+  cases h2 with h2 h2; rw h2,
+  left; refl,
+  right; rw [neg_eq_iff_add_eq_zero, ← two_mul, R2_eq_0, zero_mul]
 end
-
-lemma fn_lem2_3 :
-  ∀ x : R, is_fixed_pt f x → is_fixed_pt f (x + 1) → is_fixed_pt f (x + 2) :=
-begin
-  unfold is_fixed_pt; intros x h0 h1,
-  have h2 := fn_lem2_2 char_ne_2 feq h x,
-  rwa [h1, h0, add_left_inj, add_comm 1 (x + 1), add_assoc] at h2,
-end
-
-lemma fn_lem2_4 :
-  ∀ x : R, is_fixed_pt f (x + f (x + 1) + 2) :=
-begin
-  intros x,
-  apply fn_lem2_3 char_ne_2 feq h _ (fn_lem1_1 feq x),
-  have h0 := feq (x + 1) 0,
-  rw [mul_zero, zero_mul, add_zero, add_zero, h, add_zero] at h0,
-  rwa add_right_comm,
-end
-
-lemma fn_lem2_5 :
-  ∀ x : R, f (-x) = - (f x) :=
-begin
-  intros x,
-  have h0 := fn_lem2_4 char_ne_2 feq h (x - (1 + 1)),
-  change (2 : R) with (1 + 1 : R) at h0,
-  rw [add_assoc, sub_add_add_cancel, sub_add, add_sub_cancel] at h0,
-  have h1 := feq x (-1),
-  rwa [← sub_eq_add_neg, is_fixed_pt.eq h0, add_right_inj, mul_neg_one, neg_one_mul] at h1,
-end
-
-lemma fn_lem2_6 :
-  ∀ x : R, - (f (1 + f (x + 1))) + f x = - (1 + f (x + 1)) + x :=
-begin
-  intros x,
-  have h0 := feq (-1) (-x),
-  rwa [← neg_add, fn_lem2_5 char_ne_2 feq h, ← neg_add, fn_lem2_5 char_ne_2 feq h,
-      fn_lem1_4 feq h, neg_mul_neg, one_mul, neg_mul_neg, mul_one, add_comm 1 x] at h0,
-end
-
-theorem fn_thm2 :
-  f = id :=
-begin
-  apply funext; intros x,
-  rw ← mul_right_inj' (ring.two_ne_zero char_ne_2),
-  calc 2 * f x = f x + f x : by rw two_mul
-  ... = f (1 + f (x + 1)) + - (f (1 + f (x + 1))) + (f x + f x) : by rw [add_neg_self, zero_add]
-  ... = f (1 + f (x + 1)) + f x + (- (f (1 + f (x + 1))) + f x) : by rw add_add_add_comm
-  ... = 1 + f (x + 1) + x + (- (f (1 + f (x + 1))) + f x) : by rw fn_lem2_2 char_ne_2 feq h x
-  ... = 1 + f (x + 1) + x + (- (1 + f (x + 1)) + x) : by rw fn_lem2_6 char_ne_2 feq h x
-  ... = 1 + f (x + 1) + - (1 + f (x + 1)) + (x + x) : by rw add_add_add_comm
-  ... = x + x : by rw [add_neg_self, zero_add]
-  ... = 2 * x : by rw ← two_mul,
-end
-
-end case_char_ne_2
-
-
-
----- Solution for the case char(R) = 2, assuming f(0) = 0
-section case_char_eq_2
-
-variable [char_p R 2]
-
-variables {f : R → R} (feq : fn_eq f) (h : f 0 = 0)
-include feq h
-
-
-
-lemma fn_lem3_1 :
-  f 1 = 1 :=
-begin
-  rw ← char_two.neg_eq (1 : R),
-  exact fn_lem1_4 feq h,
-end
-
-lemma fn_lem3_2 :
-  ∀ x : R, is_fixed_pt f (f x) :=
-begin
-  intros x,
-  have h0 := feq 0 x,
-  rwa [zero_add, zero_add, zero_mul, h, add_zero, mul_zero, add_zero] at h0,
-end
-
-lemma fn_lem3_3 :
-  ∀ x : R, f (x * (x + 1)) = (x + 1) * (f x + 1) + f (x + 1) :=
-begin
-  intros x,
-  have h0 := feq x (x + 1),
-  rwa [← add_assoc, char_two.add_self_eq_zero, zero_add, fn_lem3_1 feq h, add_comm,
-      ← eq_sub_iff_add_eq, ← mul_one_add, add_comm 1 (f x), char_two.sub_eq_add] at h0,
-end
-
-lemma fn_lem3_4 :
-  ∀ x : R, is_fixed_pt f x → is_fixed_pt f (x + 1) :=
-begin
-  unfold is_fixed_pt; intros x h0,
-  by_cases h1 : x + 1 = 0,
-  rw [h1, h],
-  have h2 := fn_lem3_3 feq h (x + 1),
-  rwa [← char_two.sub_eq_add (x + 1), add_sub_cancel, mul_comm, fn_lem3_3 feq h x, h0,
-      mul_add_one x, ← char_two.sub_eq_add _ x, add_sub_cancel, ← eq_sub_iff_add_eq,
-      char_two.sub_eq_add, ← add_one_mul, mul_right_inj' h1, eq_comm] at h2,
-end
-
-lemma fn_lem3_5 :
-  ∀ x : R, f (x * x) + 1 = (x + 1) * (f x + 1) :=
-begin
-  intros x,
-  have h0 := feq x x,
-  rw [char_two.add_self_eq_zero, h, add_zero, add_comm, ← eq_sub_iff_add_eq] at h0,
-  rw [h0, char_two.sub_eq_add, add_assoc, add_comm x, add_one_mul, mul_add_one],
-end
-
-lemma fn_lem3_6 :
-  ∀ x : R, is_fixed_pt f (x + f x) :=
-begin
-  intros x,
-  have h0 := feq x 0,
-  rwa [add_zero, zero_mul, add_zero, mul_zero, h, add_zero] at h0,
-end
-
-lemma fn_lem3_7 :
-  ∀ x y : R, y ≠ 0 → is_fixed_pt f y → is_fixed_pt f (x + y) → is_fixed_pt f (x * y) →
-    is_fixed_pt f x :=
-begin
-  unfold is_fixed_pt; intros x y h0 h1 h2 h3,
-  have h4 := feq x y,
-  rwa [h2, ← add_assoc, char_two.add_self_eq_zero, zero_add, h1,
-       add_right_inj, h3, mul_comm, mul_right_inj' h0, eq_comm] at h4,
-end
-
-theorem fn_thm3 :
-  f = id :=
-begin
-  suffices : ∀ x : R, f (x + 1) = x + 1,
-  { apply funext; intros x,
-    have h0 := this (x - 1),
-    rwa sub_add_cancel at h0 },
-  intros x,
-  by_cases h0 : f x + 1 = 0,
-
-  ---- First, if f(x) = 1, then x + 1 is indeed a fixed point.
-  { rw [← char_two.sub_eq_add, sub_eq_zero] at h0,
-    have h1 := fn_lem3_6 feq h x,
-    rwa h0 at h1 },
-
-  ---- Now consider the case f(x) ≠ 1.
-  { refine fn_lem3_7 feq h (x + 1) (f x + 1) h0 _ _ _,
-    exact fn_lem3_4 feq h _ (fn_lem3_2 feq h x),
-    rw [add_add_add_comm, char_two.add_self_eq_zero, add_zero],
-    exact fn_lem3_6 feq h x,
-    rw ← fn_lem3_5 feq h x,
-    exact fn_lem3_4 feq h _ (fn_lem3_2 feq h (x * x)) },
-end
-
-end case_char_eq_2
-
-
 
 end results
 
 
 
-
-
-
-
 /-- Final solution -/
-theorem final_solution_general (f : R → R) :
-  fn_eq f ↔ f = id ∨ f = 2 - id :=
+theorem final_solution_general (f : R → R) : fn_eq f ↔ f = id ∨ f = λ x, 2 - x :=
 begin
   split,
-  { intros feq,
-    by_cases h0 : f 0 = 0,
-    left; by_cases h1 : ring_char R = 2,
-    have _inst_3 := ring_char.of_eq h1,
-    exactI results.fn_thm3 feq h0,
-    exact results.fn_thm2 h1 feq h0,
-    right; exact results.fn_lem1_3 feq h0 },
-  { rintros (rfl | rfl) x y; simp,
-    exact mul_comm x y,
+  { intros h,
+    have h0 := results.feq'_of_feq h,
+    cases eq_or_ne ((f - id) 0) 0 with h1 h1,
+    { left; rw ← sub_eq_zero,
+      cases eq_or_ne (2 : R) 0 with R2_eq_0 R2_ne_0,
+      exacts [results.case_f0_eq_0_R2_eq_0 h0 h1 R2_eq_0,
+              results.case_f0_eq_0_R2_ne_0 h0 h1 R2_ne_0] },
+    { right; ext x,
+      have h2 : (f - id) x = 2 - 2 * x := by rw results.case_f0_ne_0 h0 h1,
+      rwa [pi.sub_apply, id.def, two_mul, ← sub_sub, sub_left_inj] at h2 } },
+  { rintros (rfl | rfl) x y; simp only [id.def],
+    rw mul_comm,
     ring }
 end
 
