@@ -3,7 +3,7 @@ import algebra.module.basic
 /-!
 # IMO 2019 A1 (P1), Generalized Version
 
-Let G be an abelian group.
+Let (G, +) be an abelian group.
 Fix an arbitrary function g : G → G with g(0) = 0 and an injective endomorphism T of G.
 Determine all functions f : G → G such that, for all x, y ∈ G,
   f(g(x)) + Tf(y) = f(f(x + y)).
