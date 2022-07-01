@@ -54,7 +54,10 @@ begin
     suffices : (m.succ : ℝ) / f m.succ ≤ f m + m / f m,
     { refine le_trans this (le_of_le_of_eq (add_le_add_left m_ih _) _),
       rw [← eq_sub_iff_add_eq, nat.succ_eq_add_one, sum_range_succ_sub_sum] },
-    sorry
+    rw [div_le_iff (h _), ← mul_inv_le_iff, add_div' _ _ _ (ne_of_gt (h m)),
+        ← sq, inv_div, ← mul_div_assoc],
+    exact h0 m,
+    exact add_pos_of_pos_of_nonneg (h m) (div_nonneg (nat.cast_nonneg m) (le_of_lt (h m)))
   end,
   apply nat.le_induction,
   { rw [nat.cast_bit0, nat.cast_one],
