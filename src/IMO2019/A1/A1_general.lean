@@ -148,13 +148,14 @@ begin
   rw [results.feq_iff_feq123 g_zero T_inj, results.feq3_iff_exists_hom_eq_f_sub_C]; split,
   { set C := f 0 with C_val,
     rintros ⟨feq1, feq2, φ, h⟩,
+    use [φ, C],
     rw [h, results.feq1_hom_iff] at feq1,
-    cases feq1 with feq1_1 feq1_2,
-    rw [h, results.feq2_hom_iff] at feq2,
-    use [φ, C]; repeat { split }; assumption },
+    rw [and_iff_right h, and_iff_left feq1],
+    rwa [h, results.feq2_hom_iff] at feq2 },
   { rintros ⟨φ, C, rfl, h, h0, h1⟩,
-    rw [pi.add_apply, const_apply, φ.map_zero, zero_add, results.feq1_hom_iff, results.feq2_hom_iff],
-    repeat { split }; assumption }
+    rw [pi.add_apply, const_apply, φ.map_zero, zero_add, results.feq1_hom_iff, and_assoc,
+        and_iff_right h0, and_iff_right h1, results.feq2_hom_iff, and_iff_right h],
+    use φ }
 end
 
 end IMO2019A1
