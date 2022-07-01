@@ -14,7 +14,7 @@ The pair (m, n) satisfies the condition if and only if m and n are coprime.
 ## Solution
 
 See <https://www.imo-official.org/problems/IMO2012SL.pdf>.
-We will follow the official Solution.
+We will follow the official Solution with some modification.
 -/
 
 open set
@@ -31,10 +31,8 @@ def good (m n : ℤ) := ∀ A : set ℤ, admissible A → m ∈ A → n ∈ A �
 namespace results
 
 /-- Characterization of bad pairs -/
-lemma bad_pairs :
-  ∀ m n : ℤ, good m n → is_coprime m n :=
+lemma bad_pairs (m n : ℤ) (h : good m n) : is_coprime m n :=
 begin
-  intros m n h,
   rw ← int.gcd_eq_one_iff_coprime,
   let c := ↑(int.gcd m n),
   let S := {k : ℤ | c ∣ k},
@@ -50,8 +48,7 @@ begin
   { rw h S step1,
     exact mem_univ 1,
     all_goals { rw mem_set_of_eq },
-    exact int.gcd_dvd_left m n,
-    exact int.gcd_dvd_right m n },
+    exacts [int.gcd_dvd_left m n, int.gcd_dvd_right m n] },
   rw mem_set_of_eq at step2,
   apply nat.eq_one_of_dvd_one,
   change (1 : ℕ) with (1 : ℤ).nat_abs,
@@ -62,21 +59,21 @@ end
 lemma good_pairs (x y : ℤ) (h : is_coprime x y) : good x y :=
 begin
   intros A h0 h1 h2,
-  have step1 : ∀ m : ℤ, m ∈ A → ∀ k : ℤ, k * m ^ 2 ∈ A :=
+  have h3 : ∀ m : ℤ, m ∈ A → ∀ k : ℤ, k * m ^ 2 ∈ A :=
   begin
     intros m h3 k,
-    have h4 := h0 m m h3 h3 (k - 2),
-    ring_nf at h4; exact h4
+    replace h3 := h0 m m h3 h3 (k - (1 + 1)),
+    rwa [← sq, ← one_add_mul, add_comm (1 : ℤ), ← add_one_mul, add_assoc, sub_add_cancel] at h3
   end,
   suffices : (1 : ℤ) ∈ A,
   { rw eq_univ_iff_forall; intros z,
-    have h3 := step1 (1 : ℤ) this z,
+    replace h3 := h3 (1 : ℤ) this z,
     rwa [one_pow, mul_one] at h3 },
-  have h3 : is_coprime (x ^ 2) (y ^ 2) := is_coprime.pow h,
-  rcases h3 with ⟨k, m, h3⟩,
-  rw [← one_pow 2, ← h3, add_sq, mul_assoc],
+  have h4 : is_coprime (x ^ 2) (y ^ 2) := is_coprime.pow h,
+  rcases h4 with ⟨k, m, h4⟩,
+  rw [← one_pow 2, ← h4, add_sq, mul_assoc],
   refine h0 _ _ _ _ 2,
-  exacts [step1 x h1 _, step1 y h2 _]
+  exacts [h3 x h1 _, h3 y h2 _]
 end
 
 end results
@@ -85,10 +82,7 @@ end results
 
 /-- Final solution -/
 theorem final_solution : good = is_coprime :=
-begin
-  ext x y; split,
-  exacts [results.bad_pairs x y, results.good_pairs x y]
-end
+  by ext x y; exact iff.intro (results.bad_pairs x y) (results.good_pairs x y)
 
 end IMO2012N1
 end IMOSL
