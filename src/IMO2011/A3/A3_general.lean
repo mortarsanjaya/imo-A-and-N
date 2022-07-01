@@ -87,17 +87,15 @@ lemma fn_lem3 (exists_inv_2 : ∃ t : R, 2 * t = 1) :
   ∃ A B : R, ∀ x : R, g x = A * x + B :=
 begin
   use [g 1 - g 0, g 0]; intros x,
-  have h : ∀ x y z : R, (y - x) * g z + (z - y) * g x + (x - z) * g y = 0 :=
-  begin
-    intros x y z,
-    rcases extra.ravi_subst exists_inv_2 x y z with ⟨a, b, c, rfl, rfl, rfl⟩,
-    have h0 : ∀ u v w : R, u + v - (w + u) = v - w := by intros; ring,
-    repeat { rw [h0, ← fn_lem2 feq] },
-    ring
-  end,
-  have h0 := h 0 x 1,
-  rw [zero_sub, neg_one_mul, ← sub_eq_add_neg, sub_eq_zero] at h0,
-  rw ← h0; ring
+  rcases extra.ravi_subst exists_inv_2 0 x 1 with ⟨a, b, c, h, rfl, h0⟩,
+  rw [eq_comm, add_eq_zero_iff_eq_neg] at h; subst h,
+  calc g (c + a) = (a - c) * g (a + c) : by rw [sub_eq_add_neg, ← h0, one_mul, add_comm]
+  ... = f (-a) - f (- -c) + (f (- -c) - f (-c)) : by rw [← fn_lem2 feq, ← sub_add_sub_cancel]
+  ... = (a + c) * g 1 + (f (- -c) - f (-c)) : by rw [fn_lem2 feq, ← h0, sub_neg_eq_add]
+  ... = (a + c) * g 1 + (-c - c) * g 0 : by rw [fn_lem2 feq, neg_add_self]
+  ... = (a + c) * (g 1 - g 0) + (a + c) * g 0 + (-c - c) * g 0 : by rw [mul_sub, sub_add_cancel]
+  ... = (a + c) * (g 1 - g 0) + (a + -c) * g 0 : by rw [add_assoc, ← add_mul, add_add_sub_cancel]
+  ... = (g 1 - g 0) * (c + a) + g 0 : by rw [← h0, one_mul, add_comm a c, mul_comm]
 end
 
 lemma fn_lem4 {A B : R} (h : ∀ x : R, g x = A * x + B) (x : R) :
@@ -105,7 +103,7 @@ lemma fn_lem4 {A B : R} (h : ∀ x : R, g x = A * x + B) (x : R) :
 begin
   have h0 := fn_lem2 feq (-x) 0,
   rwa [neg_neg, neg_zero, sub_zero, add_zero, sub_eq_iff_eq_add, h] at h0,
-  rw h0; ring
+  rw [h0, mul_comm, add_mul, mul_assoc, ← sq, neg_sq, mul_neg, sub_eq_add_neg]
 end
 
 lemma fn_lem5 {A B : R} (h : ∀ x : R, g x = A * x + B) (x : R) :
@@ -122,14 +120,13 @@ begin
   rcases extra.poly_deg_2_zero two_ne_zero (fn_lem5 feq h) with ⟨h0, h1, h2⟩,
   rw [sq, ← sub_one_mul, mul_eq_zero, sub_eq_zero] at h0,
   rcases h0 with rfl | rfl,
-  { split,
-    rwa [one_mul, add_comm, add_sub_cancel] at h2,
+  { rw [one_mul, add_comm, add_sub_cancel] at h2,
+    rw and_iff_right h2,
     left; refl },
-  { rwa [zero_add, neg_one_mul, neg_eq_zero] at h1; split,
-    exact h1,
-    right; split,
-    refl,
-    rwa [zero_mul, zero_add, h1, zero_sub, neg_eq_zero] at h2 }
+  { rw [zero_add, neg_one_mul, neg_eq_zero] at h1,
+    rw [zero_mul, zero_add, h1, zero_sub, neg_eq_zero] at h2,
+    rw [and_iff_right h1, and_iff_left h2],
+    right; refl }
 end
 
 end results
@@ -143,18 +140,16 @@ begin
   split,
   { intros feq,
     rcases results.fn_lem3 feq exists_inv_2 with ⟨A, B, h⟩,
-    have two_ne_zero : (2 : R) ≠ 0,
+    replace exists_inv_2 : (2 : R) ≠ 0,
     { intros h0,
       cases exists_inv_2 with t X,
       rw [h0, zero_mul, eq_comm] at X,
       exact one_ne_zero X },
-    rcases results.fn_lem6 feq two_ne_zero h with ⟨rfl, rfl | ⟨rfl, h0⟩⟩,
+    rcases results.fn_lem6 feq exists_inv_2 h with ⟨rfl, rfl | ⟨rfl, h0⟩⟩,
     { right; rw and_comm; split,
-      ext,
-      rw [h, add_zero, one_mul, id.def],
-      use f 0; ext,
-      rw [results.fn_lem4 feq h, zero_mul, sub_zero, one_mul] },
-    { left; split; ext,
+      funext; rw [h, add_zero, one_mul, id.def],
+      use f 0; funext; rw [results.fn_lem4 feq h, zero_mul, sub_zero, one_mul] },
+    { left; split; funext,
       rw [results.fn_lem4 feq h, zero_mul, zero_mul, sub_zero, zero_add, h0, pi.zero_apply],
       rw [h, zero_mul, add_zero, pi.zero_apply] } },
   { rintros (⟨rfl, rfl⟩ | ⟨⟨C, rfl⟩, rfl⟩) x y; simp,

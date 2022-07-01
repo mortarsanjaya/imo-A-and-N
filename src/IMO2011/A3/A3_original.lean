@@ -16,7 +16,7 @@ theorem final_solution_original (f g : ℝ → ℝ) :
 begin
   apply final_solution_general,
   use 2⁻¹; rw mul_inv_cancel,
-  exact two_ne_zero,
+  exact two_ne_zero
 end
 
 end IMO2011A3
