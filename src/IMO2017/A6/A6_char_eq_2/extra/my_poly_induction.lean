@@ -31,7 +31,10 @@ theorem polynomial.nat_degree_add_div {F : Type*} [field F]
     {P Q : F[X]} (hQ0 : Q ≠ 0) (hPQ : Q.nat_degree ≤ P.nat_degree) :
   Q.nat_degree + (P / Q).nat_degree = P.nat_degree :=
 begin
-  sorry,
+  have h : (Q.leading_coeff)⁻¹ ≠ 0 := inv_ne_zero (leading_coeff_ne_zero.mpr hQ0),
+  rw [div_def, nat_degree_C_mul h, nat_degree_div_by_monic,
+      nat_degree_mul_C h, add_comm, nat.sub_add_cancel hPQ],
+  exact (monic_mul_leading_coeff_inv hQ0)
 end
 
 
