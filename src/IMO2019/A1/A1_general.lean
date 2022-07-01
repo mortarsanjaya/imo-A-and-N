@@ -147,8 +147,7 @@ theorem final_solution_general {g : G → G} (g_zero : g 0 = 0)
 begin
   rw [results.feq_iff_feq123 g_zero T_inj, results.feq3_iff_exists_hom_eq_f_sub_C]; split,
   { set C := f 0 with C_val,
-    rintros ⟨feq1, feq2, φ, h⟩,
-    use [φ, C],
+    rintros ⟨feq1, feq2, φ, h⟩; use [φ, C],
     rw [h, results.feq1_hom_iff] at feq1,
     rw [and_iff_right h, and_iff_left feq1],
     rwa [h, results.feq2_hom_iff] at feq2 },
