@@ -115,7 +115,7 @@ begin
 end
 
 theorem feq2_hom_iff (g : G → G) (T φ : add_monoid.End G) (C : G) :
-    fn_eq2 g T (φ + const G C) C ↔ φ ∘ g = ⇑(T * φ) :=
+  fn_eq2 g T (φ + const G C) C ↔ φ ∘ g = ⇑(T * φ) :=
 begin
   rw [add_monoid.coe_mul, funext_iff],
   simp only [fn_eq2, pi.add_apply, const_apply, add_sub_cancel, add_left_inj]
@@ -125,8 +125,7 @@ theorem feq1_hom_iff (T φ : add_monoid.End G) (C : G) :
   fn_eq1 T (φ + const G C) C ↔ (φ ^ 2 = T * φ ∧ φ C = T C) :=
 begin
   rw [pow_two, add_monoid_hom.ext_iff],
-  simp only [fn_eq1, pi.add_apply, const_apply, add_left_inj,
-             φ.map_add, T.map_add, add_monoid.coe_mul, comp_app],
+  simp [fn_eq1, φ.map_add, T.map_add],
   split,
   { intros feq1,
     have h := feq1 0,
@@ -134,8 +133,7 @@ begin
     rw and_iff_left h; intros x,
     have h0 := feq1 x,
     rwa [h, add_left_inj] at h0 },
-  { rintros ⟨h, h0⟩ x;
-    rw [h0, h] }
+  { rintros ⟨h, h0⟩ x; rw [h0, h] }
 end
 
 end results
