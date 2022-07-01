@@ -1,4 +1,4 @@
-import algebra.algebra.basic
+import algebra.algebra.basic algebra.char_p.basic tactic.field_simp
 
 /-!
 # IMO 2017 A6 (P2), Generalized Version
@@ -7,27 +7,16 @@ Let F be an arbitrary field.
 Determine all functions f : F → F such that, for all x, y ∈ F,
   f(f(x) f(y)) + f(x + y) = f(xy).
 
-## Solution
+## Solution, case char(F) ≠ 2
 
 We refer to the solution by user "anantmudgal09" on AoPS:
   <https://artofproblemsolving.com/community/c6h1480146p8693244>.
+This solution extends to the case char(F) ≠ 2.
 
-# Notes
-  
-1. The case char F ≠ 2 is solved.
-See file "A6_char_ne_2.lean", theorem "final_solution_char_ne_2".
-We refer to the solution by user "anantmudgal09" on AoPS:
-  <https://artofproblemsolving.com/community/c6h1480146p8693244>.
-Note that the solution extends to the case char(F) ≠ 2.
-  
-2. The case F = ℝ is thus solved as well since char ℝ = 0 ≠ 2.
-See file "A6_original.lean", theorem "final_solution_original".
+## Notes
 
-3. The case char F = 2 is still open.
-See folder "A6_char_eq_2".
-
-4. This file contains the statement of the functional equation and
-lemmas that are usable for both case char F ≠ 2 and char F = 2.
+We have no full solution yet for the case char(F) = 2.
+See the folder "A6_char_ne_2" for progress on this case.
 -/
 
 open function
@@ -44,152 +33,133 @@ def fn_eq (f : F → F) := ∀ x y : F, f (f x * f y) + f (x + y) = f (x * y)
 
 namespace results
 
-
-
----- General lemmas
-section general
-
 variables {f : F → F} (feq : fn_eq f)
 include feq
 
-theorem fn_general1 :
-  fn_eq (-f) :=
+lemma fn_lem1 : fn_eq (-f) :=
 begin
   intros x y,
   simp only [pi.neg_apply],
   rw [neg_mul_neg, ← neg_add, feq],
 end
 
-theorem fn_general2 :
-  (∃ x : F, x ≠ 1 ∧ f x = 0) → f = 0 :=
+lemma fn_lem2 (f_ne_0 : f ≠ 0) {x : F} (h : f x = 0) : x = 1 :=
 begin
-  intros h,
+  contrapose f_ne_0,
+  rw not_not,
   suffices : f 0 = 0,
-  { apply funext; intros x,
+  { funext x,
     have h0 := feq x 0,
     rwa [mul_zero, add_zero, this, mul_zero, this, zero_add] at h0 },
-  rcases h with ⟨c, h, h0⟩,
-  rw ← sub_ne_zero at h,
-  let d := c / (c - 1),
-  have h1 := feq c d,
-  suffices : c + d = c * d,
-    rwa [this, add_left_eq_self, h0, zero_mul] at h1,
-  calc c + c / (c - 1) = (c * (c - 1) + c) / (c - 1) : by rw add_div_eq_mul_add_div _ _ h
-  ... = (c * (c - 1) + c * 1) / (c - 1) : by rw mul_one
-  ... = c * (c - 1 + 1) / (c - 1) : by rw ← mul_add
-  ... = c * c / (c - 1) : by rw sub_add_cancel
-  ... = c * (c / (c - 1)) : by rw mul_div_assoc,
+  suffices : x + x / (x - 1) = x * (x / (x - 1)),
+  { have h0 := feq x (x / (x - 1)),
+    rwa [h, zero_mul, this, add_left_eq_self] at h0 },
+  change x ≠ 1 at f_ne_0,
+  rw [← sub_ne_zero] at f_ne_0,
+  field_simp,
+  rw [mul_sub_one, sub_add_cancel]
 end
 
-lemma fn_general3_1 :
-  f (f 0 ^ 2) = 0 :=
+lemma fn_lem3 (f_ne_0 : f ≠ 0) : f (f 0 ^ 2) = 0 :=
 begin
   have h := feq 0 0,
-  rwa [add_zero, mul_zero, add_left_eq_self, ← sq] at h,
+  rwa [add_zero, mul_zero, add_left_eq_self, ← sq] at h
 end
 
-lemma fn_general3_2 :
-  f ≠ 0 → ∀ x : F, f x = 0 → x = 1 :=
-begin
-  intros h x h0,
-  by_contra h1,
-  apply h,
-  apply fn_general2 feq,
-  use x; split; assumption,
-end
+lemma fn_lem4 (f_ne_0 : f ≠ 0) : f 0 ^ 2 = 1 :=
+  fn_lem2 feq f_ne_0 (fn_lem3 feq f_ne_0)
 
-lemma fn_general3_3 :
-  f ≠ 0 → f 0 ^ 2 = 1 :=
-begin
-  intros h,
-  apply fn_general3_2 feq h,
-  exact fn_general3_1 feq,
-end
-
-lemma fn_general3_4 :
-  f 1 = 0 :=
+lemma fn_lem5 : f 1 = 0 :=
 begin
   by_cases h : f = 0,
   rw [h, pi.zero_apply],
-  have h0 := fn_general3_1 feq,
-  rwa fn_general3_3 feq h at h0,
+  rw [← fn_lem4 feq h, fn_lem3 feq h]
 end
 
-theorem fn_general3 :
-  f ≠ 0 → ∀ x : F, f x = 0 ↔ x = 1 :=
+lemma fn_lem6 (f0_eq_1 : f 0 = 1) (x : F) : f x = 0 ↔ x = 1 :=
 begin
-  intros h x; split,
-  exact fn_general3_2 feq h x,
-  intros h0,
-  rw h0; exact fn_general3_4 feq,
+  split,
+  apply fn_lem2 feq,
+  rintros rfl,
+  rw [pi.zero_apply, eq_comm] at f0_eq_1,
+  exact one_ne_zero f0_eq_1,
+  rintros rfl; exact fn_lem5 feq
 end
 
-lemma fn_general4_1 :
-  f 0 = 1 → ∀ x : F, f (x + 1) = f x - 1 :=
+lemma fn_lem7 (f0_eq_1 : f 0 = 1) (x : F) : f (x + 1) = f x - 1 :=
 begin
-  intros h x,
-  have h0 := feq x 1,
-  rwa [fn_general3_4 feq, mul_zero, mul_one, h, add_comm, ← eq_sub_iff_add_eq] at h0,
+  have h := feq x 1,
+  rwa [fn_lem5 feq, mul_zero, mul_one, f0_eq_1, add_comm, ← eq_sub_iff_add_eq] at h
 end
 
-lemma fn_general4_2 :
-  f 0 = 1 → ∀ x : F, f (f x) + f x = 1 :=
+lemma fn_lem8 (f0_eq_1 : f 0 = 1) (f_inj : injective f) : f = λ x, 1 - x :=
 begin
-  intros h x,
-  have h0 := feq x 0,
-  rwa [mul_zero, h, mul_one, add_zero] at h0,
+  have h : ∀ x : F, f (f x) + f x = 1 :=
+  begin
+    intros x,
+    have h := feq x 0,
+    rwa [mul_zero, f0_eq_1, mul_one, add_zero] at h
+  end,
+  funext x,
+  rw [← h x, eq_sub_iff_add_eq, add_comm, add_left_inj],
+  apply f_inj,
+  rw [← add_left_inj (f (f x)), h, add_comm, h]
 end
 
-theorem fn_general4 :
-  f 0 = 1 → injective f → f = 1 - id :=
+lemma fn_lem9 (f0_eq_1 : f 0 = 1) (x : F) : f (x - 1) = f x + 1 :=
+  by rw [← sub_eq_iff_eq_add, ← fn_lem7 feq f0_eq_1, sub_add_cancel]
+
+lemma fn_lem10 (f0_eq_1 : f 0 = 1) (x : F) : f (f x * (1 + 1)) + f x + 1 = f (-x) :=
+  by rw [← mul_neg_one, ← feq x (-1), add_assoc, ← sub_eq_add_neg,
+         fn_lem9 feq f0_eq_1, ← zero_sub, fn_lem9 feq f0_eq_1, f0_eq_1]
+
+lemma fn_lem11 (char_ne_2 : ring_char F ≠ 2) (f0_eq_1 : f 0 = 1) {x : F} (h : f x = f (-x)) : x = 0 :=
 begin
-  intros h h0,
-  apply funext; intros x,
-  have h1 := fn_general4_2 feq h x,
-  have h2 := fn_general4_2 feq h (f x),
-  rw [add_comm, ← h1, add_right_inj] at h2,
-  rwa [pi.sub_apply, pi.one_apply, id.def, ← h1, h0 h2, add_sub_cancel'],
+  have h0 := fn_lem10 feq f0_eq_1 x,
+  rw [add_right_comm, h, add_left_eq_self, ← fn_lem9 feq f0_eq_1, fn_lem6 feq f0_eq_1,
+      sub_eq_iff_eq_add, mul_left_eq_self₀, ← sub_eq_zero, ← fn_lem7 feq f0_eq_1,
+      fn_lem6 feq f0_eq_1, add_left_eq_self, neg_eq_zero] at h0,
+  cases h0 with h0 h0,
+  exact h0,
+  exfalso; exact ring.two_ne_zero char_ne_2 h0
 end
 
-end general
-
-
-
----- Our guess of functions satisfying fn_eq
-section answer
-
-lemma fn_ans1 :
-  fn_eq (0 : F → F) :=
+lemma fn_lem12 (char_ne_2 : ring_char F ≠ 2) (f0_eq_1 : f 0 = 1) : injective f :=
 begin
-  intros x y,
-  rw [pi.zero_apply, pi.zero_apply, pi.zero_apply, add_zero],
+  intros x y h,
+  have h0 : f (-x) = f (-y) := by rw [← fn_lem10 feq f0_eq_1, h, fn_lem10 feq f0_eq_1],
+  have h1 := feq x (-y),
+  rw [h, ← h0, mul_neg, ← neg_mul, mul_comm, ← feq (-x) y, add_right_inj] at h1,
+  rw ← add_neg_eq_zero; apply fn_lem11 feq char_ne_2 f0_eq_1,
+  rw [neg_add, neg_neg, h1]
 end
-
-lemma fn_ans2 :
-  fn_eq (1 - id : F → F) :=
-begin
-  intros x y,
-  simp only [id.def, pi.one_apply, pi.sub_apply],
-  ring,
-end
-
-lemma fn_ans3 :
-  fn_eq (id - 1 : F → F) :=
-begin
-  rw ← neg_sub,
-  exact results.fn_general1 fn_ans2,
-end
-
-end answer
-
-
 
 end results
 
 
 
-
-
+/-- Final solution -/
+theorem final_solution_char_ne_2 (char_ne_2 : ring_char F ≠ 2) (f : F → F) :
+  fn_eq f ↔ f = 0 ∨ (f = λ x, x - 1) ∨ (f = λ x, 1 - x) :=
+begin
+  split,
+  { intros feq,
+    cases eq_or_ne f 0 with h h,
+    left; exact h,
+    right,
+    have h0 := results.fn_lem4 feq h,
+    rw [sq_eq_one_iff] at h0,
+    cases h0 with h0 h0,
+    right; exact results.fn_lem8 feq h0 (results.fn_lem12 feq char_ne_2 h0),
+    left,
+    rw [eq_neg_iff_eq_neg, eq_comm, ← pi.neg_apply f 0] at h0,
+    have h1 := results.fn_lem1 feq,
+    replace h1 := results.fn_lem8 h1 h0 (results.fn_lem12 h1 char_ne_2 h0),
+    rw [eq_comm, eq_neg_iff_eq_neg] at h1,
+    rw h1; funext x; simp only [pi.neg_apply, neg_sub, sub_left_inj] },
+  { rintros (rfl | rfl | rfl) x y; simp,
+    all_goals { ring } }
+end
 
 
 end IMO2017A6
