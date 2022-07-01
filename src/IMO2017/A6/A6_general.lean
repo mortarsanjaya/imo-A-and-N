@@ -3,10 +3,15 @@ import algebra.algebra.basic
 /-!
 # IMO 2017 A6 (P2), Generalized Version
   
-# Let F be an arbitrary field.
-# Determine all functions f : F → F such that, for all x, y ∈ F,
+Let F be an arbitrary field.
+Determine all functions f : F → F such that, for all x, y ∈ F,
   f(f(x) f(y)) + f(x + y) = f(xy).
-          
+
+## Solution
+
+We refer to the solution by user "anantmudgal09" on AoPS:
+  <https://artofproblemsolving.com/community/c6h1480146p8693244>.
+
 # Notes
   
 1. The case char F ≠ 2 is solved.
