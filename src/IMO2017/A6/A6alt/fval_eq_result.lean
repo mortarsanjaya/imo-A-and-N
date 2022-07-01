@@ -40,7 +40,7 @@ include feq1 feq2 fval_eq
   Proof of result 1 (∀ P ∈ 𝔽₂[X], f(P(a)) = f(P(b))):
   Refer to theorem "my_poly_induction" in file "extra/my_poly_induction.lean".
 -/
-theorem fF2poly_eq_of_fval_eq (P : polynomial (zmod 2)) :
+theorem fF2poly_eq_of_fval_eq (P : (zmod 2)[X]) :
   f (eval₂ phi2F a P) = f (eval₂ phi2F b P) :=
 begin
   revert P; apply extra.my_poly_induction,
@@ -75,7 +75,7 @@ end
   Proof of result 2 (∀ P ∈ 𝔽₂[X], P(a) = 0 ↔ P(b) = 0):
   Trivial from result 1 and f(x) = 0 ↔ x = 0
 -/
-theorem fF2poly_zeroes_eq_of_fval_eq (P : polynomial (zmod 2)) :
+theorem fF2poly_zeroes_eq_of_fval_eq (P : (zmod 2)[X]) :
   eval₂ phi2F a P = 0 ↔ eval₂ phi2F b P = 0 :=
 begin
   rw [← base.lem3 feq1 feq2,
@@ -91,7 +91,7 @@ end
   We start by stating the result in terms of just polynomials.
   Afterwards, we state the result in terms of rational functions.
 -/
-theorem fF2ratfunc_eq_of_fval_eq' (P Q : polynomial (zmod 2)) :
+theorem fF2ratfunc_eq_of_fval_eq' (P Q : (zmod 2)[X]) :
   f (eval₂ phi2F a P / eval₂ phi2F a Q) = f (eval₂ phi2F b P / eval₂ phi2F b Q) :=
 begin
   revert P Q; apply extra.my_poly_induction2,
@@ -137,7 +137,7 @@ theorem fF2ratfunc_eq_of_fval_eq (P : ratfunc (zmod 2)) :
   f (eval phi2F a P) = f (eval phi2F b P) :=
 begin
   apply ratfunc.induction_on P; intros,
-  apply fF2ratfunc_eq_of_fval_eq' feq1 feq2 fval_eq,
+  apply fF2ratfunc_eq_of_fval_eq' feq1 feq2 fval_eq
 end
 
 
