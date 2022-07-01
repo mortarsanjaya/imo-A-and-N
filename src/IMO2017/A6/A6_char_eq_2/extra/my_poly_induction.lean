@@ -1,34 +1,51 @@
-import
-  data.polynomial.basic
-  data.polynomial.field_division
+import data.polynomial.field_division
 
 /-!
-  Implementation of induction necessary for results given in "poly_result.lean"
+# Induction on Polynomials  
+  
+Implementation of induction necessary for results given in "fval_eq_result.lean"
 -/
+
+open polynomial
+open_locale polynomial classical
 
 namespace IMOSL
 namespace IMO2017A6
 namespace extra
 
-open polynomial
-open_locale classical
-
-
-
-/-- Strong induction on degree of polynomial, using nat_degree (with deg(0) = 0). -/
-theorem polynomial_strong_induction_nat_degree {R : Type*} [comm_ring R] {M : polynomial R → Prop}
-  (h : ∀ P : polynomial R, (∀ Q : polynomial R, Q.nat_degree < P.nat_degree → M Q) → M P) :
-  ∀ P : polynomial R, M P :=
+/-- An auxiliary lemma of nat_degree of a modulo -/
+theorem polynomial.nat_degree_mod_lt {F : Type*} [field F]
+    (P : F[X]) {Q : F[X]} (hQ : 0 < Q.nat_degree) :
+  (P % Q).nat_degree < Q.nat_degree :=
 begin
-  intros P,
-  induction h0 : P.nat_degree using nat.strong_induction_on with n n_ih generalizing P,
-  apply h; intros Q h1,
-  rw h0 at h1,
-  apply n_ih Q.nat_degree h1,
-  refl,
+  rcases eq_or_ne (P % Q) 0 with h | h,
+  rwa [h, nat_degree_zero],
+  have h0 := ne_zero_of_nat_degree_gt hQ,
+  rw [nat_degree_lt_nat_degree_iff h, mod_def],
+  refine lt_of_lt_of_eq (degree_mod_by_monic_lt _ _) (degree_mul_C _),
+  exacts [monic_mul_leading_coeff_inv h0, (inv_ne_zero (leading_coeff_ne_zero.mpr h0))]
+end
+
+/-- An auxiliary lemma of nat_degree of a div -/
+theorem polynomial.nat_degree_add_div {F : Type*} [field F]
+    {P Q : F[X]} (hQ0 : Q ≠ 0) (hPQ : Q.nat_degree ≤ P.nat_degree) :
+  Q.nat_degree + (P / Q).nat_degree = P.nat_degree :=
+begin
+  sorry,
 end
 
 
+/-- Strong induction on degree of polynomial, using nat_degree (with deg(0) = 0). -/
+theorem polynomial_strong_induction_nat_degree {R : Type*} [comm_ring R] {M : R[X] → Prop}
+  (h : ∀ P : R[X], (∀ Q : R[X], Q.nat_degree < P.nat_degree → M Q) → M P) :
+  ∀ P : R[X], M P :=
+begin
+  intros P; induction h0 : P.nat_degree using nat.strong_induction_on with n n_ih generalizing P,
+  simp only [] at n_ih,
+  apply h; intros Q h1,
+  rw h0 at h1,
+  exact n_ih Q.nat_degree h1 Q rfl
+end
 
 /--
   Let R be a non-trivial commutative ring and take some M : R[X] → Prop.
@@ -54,36 +71,21 @@ end
       But also, M(Q + X) holds since deg(Q + X) ≤ max {deg(Q), 1} < n.
       Thus, by (3), we have M(P).
 -/
-theorem my_poly_induction {R : Type*} [nontrivial R] [comm_ring R] {M : polynomial R → Prop} :
-  (∀ c : R, M (C c * X)) →
-  (∀ (P : polynomial R) (d : R), M P → M (P + C d)) →
-  (∀ P : polynomial R, M P → M (P + X) → M (P * X)) →
-  ∀ P : polynomial R, M P :=
+theorem my_poly_induction {R : Type*} [nontrivial R] [comm_ring R] {M : R[X] → Prop}
+  (M_base : ∀ c : R, M (C c * X)) (M_ih1 : ∀ (P : R[X]) (d : R), M P → M (P + C d))
+  (M_ih2 : ∀ P : R[X], M P → M (P + X) → M (P * X)) (P : R[X]) : M P :=
 begin
-  intros M_base M_ih1 M_ih2,
   apply polynomial_strong_induction_nat_degree; intros P P_ih,
   cases le_or_lt P.nat_degree 1 with h h,
-
-  -- Base case: deg(P) ≤ 1
-  { rw eq_X_add_C_of_nat_degree_le_one h,
-    apply M_ih1,
-    exact M_base (P.coeff 1) },
-  
-  -- Induction step: deg(P) > 1
-  { rw [← mod_by_monic_add_div P monic_X, mod_by_monic_X, add_comm, mul_comm],
-    apply M_ih1,
-    have h1 : (P /ₘ X).nat_degree < P.nat_degree,
-    { rw [nat_degree_div_by_monic P monic_X, nat_degree_X],
-      exact nat.sub_lt (lt_trans zero_lt_one h) zero_lt_one },
-    apply M_ih2,
-    apply P_ih (P /ₘ X) h1; refl,
-    apply P_ih (P /ₘ X + X),
-    apply lt_of_le_of_lt (nat_degree_add_le _ X),
-    rw [nat_degree_X, max_lt_iff],
-    split; assumption },
+  rw eq_X_add_C_of_nat_degree_le_one h,
+  exact M_ih1 _ _ (M_base (P.coeff 1)),
+  rw [← mod_by_monic_add_div P monic_X, mod_by_monic_X, add_comm, mul_comm],
+  have h1 : (P /ₘ X).nat_degree < P.nat_degree :=
+    by rw [nat_degree_div_by_monic P monic_X, nat_degree_X];
+      exact nat.sub_lt (lt_trans zero_lt_one h) zero_lt_one,
+  refine M_ih1 _ _ (M_ih2 _ (P_ih _ h1) (P_ih _ (lt_of_le_of_lt (nat_degree_add_le _ X) _))),
+  rw nat_degree_X; exact max_lt h1 h
 end
-
-
 
 /--
   Let F be a field and take some M : F[X] × F[X] → Prop.
@@ -116,59 +118,31 @@ end
   • In the induction step, the case Q | P and Q ∤ P require different proof steps.
     Thus, we will separate these two cases.
 -/
-theorem my_poly_induction2 {F : Type*} [field F] {M : polynomial F → polynomial F → Prop} :
-  (∀ (c : F) (P : polynomial F), M P (C c)) →
-  (∀ P Q : polynomial F, M P Q → M Q P) →
-  (∀ P Q R : polynomial F, R.nat_degree < Q.nat_degree → M R Q → M (P * R) Q → M (P * Q + R) Q) →
-  ∀ P Q : polynomial F, M P Q :=
+theorem my_poly_induction2 {F : Type*} [field F] {M : F[X] → F[X] → Prop}
+  (M_base : ∀ (c : F) (P : F[X]), M P (C c)) (M_ih1 : ∀ P Q : F[X], M P Q → M Q P)
+  (M_ih2 : ∀ P Q R : F[X], R.nat_degree < Q.nat_degree → M R Q → M (P * R) Q → M (P * Q + R) Q)
+  (P Q : F[X]) : M P Q :=
 begin
-  intros M_base M_ih1 M_ih2 P Q; revert Q P,
-  refine polynomial_strong_induction_nat_degree _; intros Q Q_ih,
+  revert Q P; refine polynomial_strong_induction_nat_degree _; intros Q Q_ih,
   cases nat.eq_zero_or_pos Q.nat_degree with h h,
-  
-  -- Base case: deg(Q) = 0
-  { rw eq_C_of_nat_degree_eq_zero h,
-    exact M_base (Q.coeff 0) },
-
-  -- Induction step: deg(Q) > 0
-  { refine polynomial_strong_induction_nat_degree _; intros P P_ih,
-    cases lt_or_le P.nat_degree Q.nat_degree with h0 h0,
-
-    -- Base case: deg(P) < deg(Q)
-    exact M_ih1 _ _ (Q_ih P h0 Q),
-
-    -- Induction step: deg(P) ≥ deg(Q)
-    rw [← euclidean_domain.mod_add_div P Q, add_comm, mul_comm],
-    by_cases h1 : P % Q = 0,
-
-    -- Case Q | P
-    { have h2 : M 0 Q := by rw ← C_0; exact M_ih1 _ _ (M_base 0 Q),
-      rw h1; refine M_ih2 _ Q 0 _ h2 _,
-      rw nat_degree_zero; exact h,
-      rw mul_zero; exact h2 },
-
-    -- Case Q ∤ P
-    { have h2 : Q ≠ 0 := ne_zero_of_nat_degree_gt h,
-      have h3 : (Q.leading_coeff)⁻¹ ≠ 0 := by apply inv_ne_zero; rwa leading_coeff_ne_zero,
-      have h4 : (Q * C (Q.leading_coeff)⁻¹).monic := monic_mul_leading_coeff_inv h2,
-      have h5 : (P % Q).nat_degree < Q.nat_degree,
-      { rw [nat_degree_lt_nat_degree_iff h1, mod_def],
-        exact lt_of_lt_of_eq (degree_mod_by_monic_lt _ h4) (degree_mul_C h3) },
-      refine M_ih2 _ _ _ h5 (P_ih (P % Q) (lt_of_lt_of_le h5 h0)) _,
-      apply P_ih,
-      calc (P / Q * (P % Q)).nat_degree = (P / Q).nat_degree + (P % Q).nat_degree : _
-      ... < (P / Q).nat_degree + Q.nat_degree : by rwa add_lt_add_iff_left
-      ... = Q.nat_degree + (P / Q).nat_degree : by rw add_comm
-      ... = Q.nat_degree + (P /ₘ _).nat_degree : by rw [div_def, nat_degree_C_mul h3]
-      ... = Q.nat_degree + (P.nat_degree - (Q * _).nat_degree) : by rw nat_degree_div_by_monic _ h4
-      ... = Q.nat_degree + (P.nat_degree - Q.nat_degree) : by rw nat_degree_mul_C h3
-      ... = P.nat_degree : by rw [add_comm, nat.sub_add_cancel h0],
-      { refine nat_degree_mul _ h1,
-        intros h6,
-        rw [div_def, mul_eq_zero, C_eq_zero, or_iff_right h3, div_by_monic_eq_zero_iff h4,
-            degree_mul_C h3, ← nat_degree_lt_nat_degree_iff, lt_iff_not_le] at h6,
-        exact absurd h0 h6,
-        exact ne_zero_of_nat_degree_gt (lt_of_lt_of_le h h0) } } },
+  rw eq_C_of_nat_degree_eq_zero h,
+  exact M_base (Q.coeff 0),
+  refine polynomial_strong_induction_nat_degree _; intros P P_ih,
+  cases lt_or_le P.nat_degree Q.nat_degree with h0 h0,
+  exact M_ih1 _ _ (Q_ih P h0 Q),
+  ---- The main induction step
+  rw [← euclidean_domain.mod_add_div P Q, add_comm, mul_comm],
+  have h1 := polynomial.nat_degree_mod_lt P h,
+  refine M_ih2 _ _ _ h1 (P_ih (P % Q) (lt_of_lt_of_le h1 h0)) (P_ih _ _),
+  clear M_base M_ih1 M_ih2 P_ih Q_ih M,
+  cases eq_or_ne (P % Q) 0 with h2 h2,
+  rw [h2, mul_zero, nat_degree_zero],
+  exact lt_of_lt_of_le h h0,
+  cases eq_or_ne (P / Q) 0 with h3 h3,
+  rw [h3, zero_mul, nat_degree_zero],
+  exact lt_of_lt_of_le h h0,
+  rw [nat_degree_mul h3 h2, ← polynomial.nat_degree_add_div _ h0, add_comm, add_lt_add_iff_right],
+  exacts [polynomial.nat_degree_mod_lt P h, ne_zero_of_nat_degree_gt h],
 end
 
 
