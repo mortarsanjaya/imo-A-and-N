@@ -14,10 +14,8 @@ We prove that, given a, b ∈ F with f(a) = f(b), we have
 See "extra/my_poly_induction.lean" for details on induction needed for result 1 and 3.
 -/
 
-open char_two
-open polynomial
-open ratfunc
-open_locale classical
+open char_two polynomial ratfunc
+open_locale polynomial classical
 
 namespace IMOSL
 namespace IMO2017A6
