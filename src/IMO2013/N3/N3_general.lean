@@ -101,16 +101,15 @@ lemma lem2 {N : ℕ+} (h : ∀ n : ℕ+, N < n → ¬good f n)
   ∀ k : ℕ+, f (T (C + 1)) < f (T (C + 1 + k)) :=
 begin
   suffices : ∀ k : ℕ+, f (T (C + k)) < f (T (C + k + 1)) ∧ f (T (C + 1)) < f (T (C + 1 + k)),
-  intros k; rcases this k with ⟨h2, h3⟩; exact h3,
+    intros k; exact and.right (this k),
   intros k; induction k using pnat.strong_induction_on with k k_ih,
   rcases decidable.eq_or_ne k 1 with rfl | h2,
   split; exact lem1 fmax (h _ (lt_trans h0 (pnat.lt_add_right C 1))) h1,
   rcases pnat.exists_eq_succ_of_ne_one h2 with ⟨k₀, rfl⟩,
   rcases k_ih k₀ (pnat.lt_add_right k₀ 1) with ⟨h3, h4⟩,
-  have h5 : f (T (C + k₀ + 1)) < f (T (C + k₀ + 1 + 1)) :=
+  replace h3 : f (T (C + k₀ + 1)) < f (T (C + k₀ + 1 + 1)) :=
     lem1 fmax (h _ (lt_trans h0 (pnat.lt_add_right C (k₀ + 1)))) (le_of_lt h3),
-  split,
-  rwa ← add_assoc,
+  rw [← add_assoc, and_iff_right h3],
   apply lt_trans h4,
   rwa [add_right_comm, add_add_add_comm]
 end
@@ -127,13 +126,19 @@ end
 lemma lem4 {N : ℕ+} (h : ∀ n : ℕ+, N < n → ¬good f n) {C : ℕ+} (h0 : N < C) :
   ∀ k : ℕ+, f (T (C + k)) < f (T C) :=
 begin
-  intros k,
-  apply pnat.rec_on k; clear k,
+  intros k; apply pnat.rec_on k; clear k,
   exact lem3 fmax h h0,
   intros k h1,
   refine lt_trans _ h1,
   rw ← add_assoc,
   exact lem3 fmax h (lt_trans h0 (pnat.lt_add_right C k))
+end
+
+lemma lem5 (N : ℕ+) (h : ∀ n : ℕ+, N < n → ¬good f n) : false :=
+begin
+  replace h := results.lem4 fmax h (pnat.lt_add_right N 1) (N * (N + 1)),
+  rw [← one_add_mul, add_comm, ← sq, T_sq_factor, fmax, lt_iff_not_le] at h,
+  exact h (le_max_right (f (T N)) (f (T (N + 1))))
 end
   
 end results
@@ -144,17 +149,12 @@ end results
 theorem final_solution_general {f : ℕ+ → S} (fmax : ∀ a b : ℕ+, f (a * b) = max (f a) (f b)) :
   set.infinite (set_of (good f)) :=
 begin
-  apply set.infinite_of_not_bdd_above; rintros ⟨N, h0⟩,
-  simp [upper_bounds] at h0,
-  have h1 : ∀ n : ℕ+, N < n → ¬good f n :=
-  begin
-    intros n h1 h2,
-    rw lt_iff_not_le at h1,
-    exact h1 (h0 h2)
-  end,
-  have h2 := results.lem4 fmax h1 (pnat.lt_add_right N 1) (N * (N + 1)),
-  rw [← one_add_mul, add_comm, ← sq, T_sq_factor, fmax, lt_iff_not_le] at h2,
-  exact h2 (le_max_right (f (T N)) (f (T (N + 1))))
+  apply set.infinite_of_not_bdd_above; rintros ⟨N, h⟩,
+  simp only [upper_bounds, set.mem_set_of] at h,
+  apply results.lem5 fmax N,
+  intros n h0 h1,
+  rw lt_iff_not_le at h0,
+  exact h0 (h h1)
 end
 
 end IMO2013N3
