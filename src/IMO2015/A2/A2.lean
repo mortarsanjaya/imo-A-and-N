@@ -14,6 +14,9 @@ f = -1 and f = x ↦ x + 1.
 
 See <http://www.imo-official.org/problems/IMO2015SL.pdf>.
 We will follow the official Solution 1.
+After obtaining f(x) = Ax + B, we do not need to fully substitute it into f(f(x)) = f(x + 1).
+Instead, just substitute once: A f(x) + B = A (x + 1) + B.
+So either A = 0 or f(x) = x + 1 for all x ∈ ℤ.
 -/
 
 namespace IMOSL
@@ -46,10 +49,9 @@ lemma linear_eq_match {a b c d : ℤ} (h : ∀ x : ℤ, a * x + b = c * x + d) :
 begin
   have h0 := h 0,
   rw [mul_zero, mul_zero, zero_add, zero_add] at h0,
-  split,
   have h1 := h 1,
-  rwa [mul_one, mul_one, h0, add_left_inj] at h1,
-  exact h0,
+  rw [mul_one, mul_one, h0, add_left_inj] at h1,
+  exact and.intro h1 h0,
 end
 
 end extra
@@ -66,17 +68,15 @@ begin
   have h := feq 0 (f 0),
   rw [zero_sub, sub_self, zero_sub] at h,
   have h0 := feq x (-f (f 0)),
-  rwa [h, sub_neg_eq_add, sub_neg_eq_add, add_sub_cancel, eq_comm] at h0,
+  rwa [h, sub_neg_eq_add, sub_neg_eq_add, add_sub_cancel, eq_comm] at h0
 end
 
 lemma fn_lem2 : ∀ x : ℤ, f x = (f (-1) + 1) * x + f 0 :=
 begin
-  have step1 : ∀ x y : ℤ, f (x - f y) = f (x + 1) - f y - 1 :=
-    λ x y, by rw ← fn_lem1 feq; exact feq x y,
   apply extra.fn_linear_diff; intros x,
-  rw [add_comm (f x), ← sub_eq_iff_eq_add, ← sub_add_cancel (f _ - _) (1 : ℤ),
-      ← step1, ← sub_add_cancel (x - f x) 1, ← fn_lem1 feq, sub_right_comm,
-      step1, sub_add_cancel, sub_self, zero_sub]
+  rw [add_comm (f x), ← sub_eq_iff_eq_add, ← sub_eq_iff_eq_add, ← fn_lem1 feq, ← feq,
+      ← sub_add_cancel (x - f x) 1, ← fn_lem1 feq, sub_sub, add_comm, ← sub_sub, feq,
+      fn_lem1 feq, sub_add_cancel, sub_self, zero_sub]
 end
 
 end results
@@ -92,25 +92,17 @@ begin
     let A := f (-1) + 1,
     let B := f 0,
     have h : ∀ x : ℤ, f x = A * x + B := results.fn_lem2 feq,
-    have h0 : A = A * A ∧ A + B = A * B + B :=
-    begin
-      apply extra.linear_eq_match; intros x,
-      calc A * x + (A + B) = A * (x + 1) + B : by rw [mul_add, mul_one, add_assoc _ A]
-      ... = A * (A * x + B) + B : by rw [← h, ← results.fn_lem1 feq, h, h]
-      ... = A * A * x + (A * B + B) : by rw [mul_add, add_assoc, ← mul_assoc]
-    end,
-    cases h0 with h0 h1,
-    rw [eq_comm, mul_left_eq_self₀] at h0,
-    cases h0 with h0 h0,
-    { right; ext x,
-      rw [add_left_inj, h0, one_mul] at h1,
-      rw [h, h0, one_mul, ← h1] },
-    { left; ext x,
-      rw [h, h0, zero_mul, zero_add],
-      have h1 : f (-1) + 1 = 0 := h0,
-      rwa [h, h0, zero_mul, zero_add, ← sub_neg_eq_add, sub_eq_zero] at h1 } },
+    cases eq_or_ne A 0 with h0 h0,
+    { simp only [h0, zero_mul, zero_add] at h,
+      simp only [A] at h0,
+      rw [add_eq_zero_iff_eq_neg, h] at h0,
+      left; funext x,
+      rw [h, h0, pi.neg_apply, pi.one_apply] },
+    { right; funext x,
+      have h1 := results.fn_lem1 feq x,
+      rwa [h, h (x + 1), add_left_inj, mul_eq_mul_left_iff, or_iff_left h0] at h1 } },
   { rintros (rfl | rfl); intros x y; simp,
-    rw [← sub_sub, sub_add_cancel, sub_sub, add_sub_add_right_eq_sub] },
+    rw [← sub_sub, sub_add_cancel, sub_sub, add_sub_add_right_eq_sub] }
 end
 
 end IMO2015A2
