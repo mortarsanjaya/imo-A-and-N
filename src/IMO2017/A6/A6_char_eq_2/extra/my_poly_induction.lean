@@ -146,8 +146,6 @@ begin
   exacts [polynomial.nat_degree_mod_lt P h, ne_zero_of_nat_degree_gt h]
 end
 
-
-
 end extra
 end IMO2017A6
 end IMOSL
