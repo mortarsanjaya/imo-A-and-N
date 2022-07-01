@@ -113,15 +113,16 @@ include feq'
 
 lemma feq'_zeroes1 (x : R) : f (f x + 2 * x - 1) = 0 :=
 begin
-  nth_rewrite 1 ← add_sub_cancel (1 : R) (1 : R),
   have h := feq' (x - 1) (1 : R),
-  rwa [one_mul, mul_one, sub_self, sub_add_cancel, mul_sub_one, ← add_sub_assoc, sub_add] at h
+  rwa [one_mul, mul_one, sub_self, sub_add_cancel, mul_sub_one, ← add_sub_assoc, sub_add] at h,
+  change f (_ - (1 + 1 - 1)) = 0 at h,
+  rwa add_sub_cancel at h
 end
 
 /-- Case 1: f(0) ≠ 0 -/
 theorem case_f0_ne_0 (f0_ne_0 : f 0 ≠ 0) : f = λ x, 2 - 2 * x :=
 begin
-  ext x,
+  funext x,
   have h := feq' 0 (f x + 2 * x - 1),
   rwa [zero_mul, zero_add, feq'_zeroes1 feq', zero_add, mul_zero, zero_add,
       feq'_zeroes1 feq', ← sub_one_mul, zero_eq_mul, or_iff_left f0_ne_0,
@@ -133,14 +134,12 @@ begin
   have h := feq'_zeroes1 feq' 0,
   rw [f0_eq_0, zero_add, mul_zero, zero_sub] at h,
   cases eq_or_ne (2 : R) 0 with R2_eq_0 R2_ne_0,
-  ---- Case 1 : 2 = 0
   { rw ← h; apply congr_arg,
     rw [eq_neg_iff_add_eq_zero, ← two_mul, mul_one, R2_eq_0] },
-  ---- Case 2 : 2 ≠ 0
   { have h0 := feq' 1 (-1),
-    ring_nf at h0,
-    rwa [f0_eq_0, zero_add, h, sub_zero, eq_neg_iff_add_eq_zero,
-         ← two_mul, mul_eq_zero, or_iff_right R2_ne_0] at h0 }
+    rwa [add_neg_self, f0_eq_0, zero_add, two_mul, add_neg_cancel_right,
+         one_mul, h, sub_zero, neg_one_mul, eq_neg_iff_add_eq_zero,
+         ← two_mul, mul_eq_zero, or_iff_right R2_ne_0] at h0 },
 end
 
 /-- Case 2: f(0) = 0, 2 ≠ 0 in R -/
