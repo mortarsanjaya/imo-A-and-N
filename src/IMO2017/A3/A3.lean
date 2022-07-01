@@ -33,8 +33,7 @@ namespace extra
 lemma exists_iterate_eq (f : S → S) : ∃ m k : ℕ, 0 < k ∧ (f^[m + k] = (f^[m])) :=
 begin
   have h := not_injective_infinite_fintype (nat.iterate f),
-  unfold injective at h,
-  simp_rw not_forall at h,
+  simp_rw [injective, not_forall] at h,
   rcases h with ⟨m, n, h, h0⟩,
   wlog h1 : m < n := lt_or_gt_of_ne h0 using [m n, n m],
   use [m, n - m]; split,
