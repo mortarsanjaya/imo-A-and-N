@@ -222,7 +222,7 @@ begin
       cases eq_or_ne (2 : R) 0 with R2_eq_0 R2_ne_0,
       exacts [results.case_f0_eq_0_R2_eq_0 h0 h1 R2_eq_0,
               results.case_f0_eq_0_R2_ne_0 h0 h1 R2_ne_0] },
-    { right; ext x,
+    { right; funext x,
       have h2 : (f - id) x = 2 - 2 * x := by rw results.case_f0_ne_0 h0 h1,
       rwa [pi.sub_apply, id.def, two_mul, ← sub_sub, sub_left_inj] at h2 } },
   { rintros (rfl | rfl) x y; simp only [id.def],
