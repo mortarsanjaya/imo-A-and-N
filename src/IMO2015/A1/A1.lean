@@ -83,8 +83,5 @@ begin
       rwa [lt_sub_iff_add_lt, zero_add, nat.one_lt_cast, nat.lt_iff_add_one_le] } }
 end
 
-
-
-
 end IMO2015A1
 end IMOSL
