@@ -156,7 +156,7 @@ begin
 
   ---- From h, it suffices to prove that f is odd.
   suffices : ∀ x : R, f (- x) = - (f x),
-  { ext x,
+  { funext x,
     have h0 := feq' (-1) (-x),
     rwa [neg_mul_neg, one_mul, this 1, f1_eq_0 feq' f0_eq_0, neg_zero, mul_zero, zero_sub,
          ← neg_add, mul_neg_one, add_assoc, ← neg_add, this, ← neg_add, this, h, neg_neg,
@@ -181,33 +181,30 @@ end
 /-- Case 3: f(0) = 0, 2 = 0 in R -/
 theorem case_f0_eq_0_R2_eq_0 (f0_eq_0 : f 0 = 0) (R2_eq_0 : (2 : R) = 0) : f = 0 :=
 begin
-
-  have feq'' := feq',
-  simp only [fn_eq', R2_eq_0, zero_mul, add_zero] at feq'',
+  have f1_eq_0 := f1_eq_0 feq' f0_eq_0,
+  have add_self : ∀ x : R, x + x = 0 := λ x, by rw [← two_mul, R2_eq_0, zero_mul],
+  simp only [fn_eq', R2_eq_0, zero_mul, add_zero] at feq',
   suffices : ∀ x : R, f x = 0 ∨ f x = 1,
-  { ext x,
+  { funext x,
     cases this x with h h,
     exact h,
-    have h0 := feq'' x x,
-    rw [← two_mul, R2_eq_0, zero_mul, f0_eq_0, zero_add, h, mul_one, eq_sub_iff_add_eq] at h0,
+    have h0 := feq' x x,
+    rw [add_self, f0_eq_0, zero_add, h, mul_one, eq_sub_iff_add_eq] at h0,
     cases this (x * x) with h1 h1,
-    rw [pi.zero_apply, ← h0, h1, add_zero, f1_eq_0 feq' f0_eq_0],
-    rw [pi.zero_apply, ← h0, h1, ← two_mul, R2_eq_0, zero_mul, f0_eq_0] },
+    rw [pi.zero_apply, ← h0, h1, add_zero, f1_eq_0],
+    rw [pi.zero_apply, ← h0, h1, add_self, f0_eq_0] },
   
   ---- Now prove that f(x) ∈ {0, 1} for any x ∈ R.
   intros x,
-  have h := feq'' x 0,
+  rw [or_comm, ← mul_right_eq_self₀, ← add_left_inj (f x), add_self, add_eq_zero_iff_eq_neg],
+  have h := feq' x 0,
   rw [add_zero, add_zero, zero_mul, mul_zero, f0_eq_0, sub_zero] at h,
-  have h0 := feq'' 0 x,
+  have h0 := feq' 0 x,
   rw [zero_add, zero_mul, f0_eq_0, sub_zero, mul_zero] at h0,
-  have h1 := feq'' (f x) x,
+  have h1 := feq' (f x) x,
   rw [h0, zero_add, h, mul_zero, zero_sub, eq_neg_iff_eq_neg] at h1,
-  have h2 := feq'' x (f x),
-  rw [add_comm x (f x), h0, zero_add, h, mul_comm x, h1, ← mul_neg_one,
-      ← mul_sub, zero_eq_mul, sub_eq_zero] at h2,
-  cases h2 with h2 h2; rw h2,
-  left; refl,
-  right; rw [neg_eq_iff_add_eq_zero, ← two_mul, R2_eq_0, zero_mul]
+  have h2 := feq' x (f x),
+  rwa [add_comm x (f x), h0, zero_add, h, mul_comm x, eq_comm, sub_eq_zero, h1] at h2
 end
 
 end results
