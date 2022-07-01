@@ -35,6 +35,7 @@ begin
 end
 
 
+
 /-- Strong induction on degree of polynomial, using nat_degree (with deg(0) = 0). -/
 theorem polynomial_strong_induction_nat_degree {R : Type*} [comm_ring R] {M : R[X] → Prop}
   (h : ∀ P : R[X], (∀ Q : R[X], Q.nat_degree < P.nat_degree → M Q) → M P) :
@@ -142,7 +143,7 @@ begin
   rw [h3, zero_mul, nat_degree_zero],
   exact lt_of_lt_of_le h h0,
   rw [nat_degree_mul h3 h2, ← polynomial.nat_degree_add_div _ h0, add_comm, add_lt_add_iff_right],
-  exacts [polynomial.nat_degree_mod_lt P h, ne_zero_of_nat_degree_gt h],
+  exacts [polynomial.nat_degree_mod_lt P h, ne_zero_of_nat_degree_gt h]
 end
 
 
