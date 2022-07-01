@@ -52,38 +52,32 @@ include feq
 lemma case_f0_ne_0 (h : f 0 ≠ 0) : ∃ C : ℝ, ⌊C⌋ = 1 ∧ f = const ℝ C :=
 begin
   use f 0,
-  have step1 : ∀ y : ℝ, ⌊f y⌋ = 1 :=
-  begin
-    intros y,
-    have h0 := feq 0 y,
-    rw [int.floor_zero, int.cast_zero, zero_mul, eq_comm, mul_right_eq_self₀] at h0,
-    cases h0 with h0 h0,
-    rwa [← int.cast_one, int.cast_inj] at h0,
-    exfalso; exact h h0
-  end,
-  split,
-  exact step1 0,
-  ext,
-  have h1 := feq x 0,
-  rwa [mul_zero, step1 0, int.cast_one, mul_one, eq_comm] at h1
+  suffices : ∀ y : ℝ, ⌊f y⌋ = 1,
+  { rw and_iff_right (this 0),
+    funext,
+    replace h1 := feq x 0,
+    rwa [mul_zero, this 0, int.cast_one, mul_one, eq_comm] at h1 },
+  intros y,
+  have h0 := feq 0 y,
+  rwa [int.floor_zero, int.cast_zero, zero_mul, eq_comm, mul_right_eq_self₀,
+       or_iff_left h, ← int.cast_one, int.cast_inj] at h0
 end
 
 /-- Case 2: f(0) = 0 -/
 lemma case_f0_eq_0 (h : f 0 = 0) : f = 0 :=
 begin
   suffices : f 1 = 0,
-  { ext,
+  { funext,
     have h0 := feq 1 x,
     rwa [this, zero_mul, int.floor_one, int.cast_one, one_mul] at h0 },
   have h0 := feq ↑(2 : ℤ) 2⁻¹,
-  rwa [int.floor_coe, int.cast_bit0, int.cast_one, mul_inv_cancel] at h0,
+  rw [int.floor_coe, int.cast_bit0, int.cast_one, mul_inv_cancel] at h0,
   work_on_goal 2 { exact two_ne_zero },
   have h1 := feq 2⁻¹ 2⁻¹,
-  rw [extra.floor_eq_zero_of_eq_one one_lt_two, int.cast_zero,
-      zero_mul, h, zero_eq_mul, or_comm] at h1,
+  rw [extra.floor_eq_zero_of_eq_one one_lt_two, int.cast_zero, zero_mul, h, zero_eq_mul] at h1,
   cases h1 with h1 h1,
-  rwa [h1, mul_zero] at h0,
-  rwa [h1, int.floor_zero, int.cast_zero, mul_zero] at h0
+  rwa [h1, int.floor_zero, int.cast_zero, mul_zero] at h0,
+  rwa [h1, mul_zero] at h0
 end
 
 end results
