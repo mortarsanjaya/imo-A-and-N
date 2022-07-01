@@ -65,9 +65,8 @@ begin
     rwa [← h3, mul_comm, ← h2, ← mul_two, iterate_mul] at h4 },
   use m + (k - (m % k)),
   replace h := nat.mod_lt m h,
-  split,
-  rwa [lt_add_iff_pos_right, tsub_pos_iff_lt],
-  rw [← nat.add_sub_assoc (le_of_lt h), add_comm, nat.add_sub_assoc (nat.mod_le _ _)],
+  rw [lt_add_iff_pos_right, tsub_pos_iff_lt, and_iff_right h,
+      ← nat.add_sub_assoc (le_of_lt h), add_comm, nat.add_sub_assoc (nat.mod_le _ _)],
   exact (nat.dvd_add (dvd_refl k) (nat.dvd_sub_mod m))
 end
 
