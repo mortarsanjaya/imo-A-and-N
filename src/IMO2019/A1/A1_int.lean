@@ -49,7 +49,7 @@ def End_int_of_int : ℤ ≃+* add_monoid.End ℤ :=
 
 lemma End_int_of_int_eq_mul (x y : ℤ) : End_int_of_int x y = x * y :=
 begin
-  simp [End_int_of_int, int.cast_ring_hom],
+  simp only [End_int_of_int, int.cast_ring_hom],
   exact coe_End_int_of_int_eq_left_mul x y
 end
 
@@ -91,8 +91,8 @@ begin
   symmetry; split,
   rintros rfl x y; simp only [pi.zero_apply, mul_zero, add_zero],
   intros h0,
-  rw [extra.feq_int_iff_feq_gen, final_solution_general g_zero] at h0,
-  work_on_goal 2 { exact extra.End_int_inj_of_ne_zero s_ne_zero },
+  rw [extra.feq_int_iff_feq_gen,
+      final_solution_general g_zero (extra.End_int_inj_of_ne_zero s_ne_zero)] at h0,
   rcases h0 with ⟨φ, C, rfl, h0, h1, h2⟩,
   rw [extra.End_int_eq_iff_eq_at_one, add_monoid.coe_mul, comp_app,
       extra.End_int_of_int_eq_mul, pow_two, add_monoid.coe_mul, comp_app,
@@ -115,28 +115,28 @@ end
 theorem final_solution_int_case_r_eq_s {s : ℤ} (s_ne_zero : s ≠ 0) (f : ℤ → ℤ) :
   fn_eq_int (λ x, s * x) s f ↔ (f = 0 ∨ ∃ C : ℤ, f = λ x, s * x + C) :=
 begin
-  rw [extra.feq_int_iff_feq_gen, final_solution_general],
-  work_on_goal 2 { rw mul_zero },
-  work_on_goal 2 { exact extra.End_int_inj_of_ne_zero s_ne_zero },
+  rw [extra.feq_int_iff_feq_gen,
+      final_solution_general (mul_zero s) (extra.End_int_inj_of_ne_zero s_ne_zero)],
   split,
-  { rintros ⟨φ, C, rfl, junk, h, h0⟩; clear junk,
+  { rintros ⟨φ, C, rfl, -, h, h0⟩,
     rw extra.End_int_of_int_eq_mul at h0,
     rw [extra.End_int_eq_iff_eq_at_one, add_monoid.coe_mul, comp_app,
         extra.End_int_of_int_eq_mul, pow_two, add_monoid.coe_mul, comp_app,
         extra.End_int_eq_map_one_mul, mul_eq_mul_right_iff] at h,
     cases h with h h,
-    right; use C; ext; rw [pi.add_apply, const_apply, extra.End_int_eq_map_one_mul, h],
-    left,
-    rw [extra.End_int_eq_map_one_mul, h, zero_mul, zero_eq_mul, or_iff_right s_ne_zero] at h0,
-    rw [h0, pi.const_zero, add_zero, ← extra.End_int_eq_of_int_map_one φ, h, map_zero],
-    refl },
+    { right,
+      use C; funext,
+      rw [pi.add_apply, const_apply, extra.End_int_eq_map_one_mul, h] },
+    { left,
+      rw [extra.End_int_eq_map_one_mul, h, zero_mul, zero_eq_mul, or_iff_right s_ne_zero] at h0,
+      rw [h0, pi.const_zero, add_zero, ← extra.End_int_eq_of_int_map_one φ, h, map_zero],
+      refl } },
   { rintros (rfl | ⟨C, rfl⟩),
     use [0, 0]; simp,
     rw [extra.End_int_of_int_eq_mul, mul_zero],
-    work_on_goal 1 { repeat { split }},
-    use [extra.End_int_of_int s, C]; repeat { split },
-    ext; rw [pi.add_apply, const_apply, add_left_inj, extra.End_int_of_int_eq_mul],
-    ext; rw [add_monoid.coe_mul, comp_apply, comp_apply, extra.End_int_of_int_eq_mul s x] }
+    repeat { split },
+    funext; rw [pi.add_apply, const_apply, add_left_inj, extra.End_int_of_int_eq_mul],
+    funext; rw [add_monoid.coe_mul, comp_apply, comp_apply, extra.End_int_of_int_eq_mul s x] }
 end
 
 /-- Final solution, original case: g = x ↦ 2x, s = 2 -/
