@@ -51,9 +51,6 @@ begin
   exact one_ne_zero h1
 end
 
-
-
----- More results specialized for case char(F) = 2
 lemma lem4 (x : F) : f (f x) = f x :=
 begin
   have h := feq1 x 1,
