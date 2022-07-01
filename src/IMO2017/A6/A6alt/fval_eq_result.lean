@@ -64,7 +64,7 @@ begin
     let Pa : F := eval₂ phi2F a P,
     let Pb : F := eval₂ phi2F b P,
     calc f (Pa * a) = f (Pa * a) + f (Pa + a) - f (Pa + a) : by rw add_sub_cancel
-    ... = f (Pb * b) + f (Pb + b) - f (Pa + a) : by rw base_lemma.fn_lem2_7 feq1 feq2 h0 fval_eq
+    ... = f (Pb * b) + f (Pb + b) - f (Pa + a) : by rw base.lem10 feq1 feq2 h0 fval_eq
     ... = f (Pb * b) + f (Pb + b) - f (Pb + b) : by rw h1
     ... = f (Pb * b) : by rw add_sub_cancel },
 end
@@ -78,9 +78,9 @@ end
 theorem fF2poly_zeroes_eq_of_fval_eq (P : polynomial (zmod 2)) :
   eval₂ phi2F a P = 0 ↔ eval₂ phi2F b P = 0 :=
 begin
-  rw [← base_lemma.fn_lem1_3 feq1 feq2,
+  rw [← base.lem3 feq1 feq2,
       fF2poly_eq_of_fval_eq feq1 feq2 fval_eq,
-      base_lemma.fn_lem1_3 feq1 feq2],
+      base.lem3 feq1 feq2],
 end
 
 
@@ -105,8 +105,8 @@ begin
   
   -- ∀ P Q : F[X], M(P, Q) → M(Q, P)
   { intros P Q h,
-    rw [← inv_div, base_lemma.fn_lem2_3 feq1 feq2, h,
-        ← base_lemma.fn_lem2_3 feq1 feq2, inv_div] },
+    rw [← inv_div, base.lem6 feq1 feq2, h,
+        ← base.lem6 feq1 feq2, inv_div] },
 
   -- ∀ P Q R : F[X], deg(R) < deg(Q) → M(R, Q) → M(PR, Q) → M(PQ + R, Q)
   { intros P Q R junk h h0,
@@ -128,7 +128,7 @@ begin
       let RQa : F := eval₂ phi2F a R / eval₂ phi2F a Q,
       let RQb : F := eval₂ phi2F b R / eval₂ phi2F b Q,
       calc f (Pa + RQa) = f (Pa * RQa) + f (Pa + RQa) - f (Pa * RQa) : by rw add_sub_cancel'
-      ... = f (Pb * RQb) + f (Pb + RQb) - f (Pa * RQa) : by rw base_lemma.fn_lem2_7 feq1 feq2 h2 h
+      ... = f (Pb * RQb) + f (Pb + RQb) - f (Pa * RQa) : by rw base.lem10 feq1 feq2 h2 h
       ... = f (Pb * RQb) + f (Pb + RQb) - f (Pb * RQb) : by rw h0
       ... = f (Pb + RQb) : by rw add_sub_cancel' } },
 end
