@@ -33,10 +33,9 @@ end
 
 lemma fn_lem2 (x : ℝ) (h : x < 0) : 0 ≤ f x :=
 begin
-  have step2 : ∀ a b : ℝ, a * f a + b * f b ≤ 2 * f a * f b :=
-    λ a b, by linarith [add_le_add (fn_lem1 fineq (f b) a) (fn_lem1 fineq (f a) b)],
-  have h0 := step2 x (2 * f x),
-  rwa [add_le_iff_nonpos_left, ← div_le_iff_of_neg' h, zero_div] at h0
+  have h0 : x * f x ≤ 0 :=
+    by linarith [(fn_lem1 fineq (f (2 * f x)) x), (fn_lem1 fineq (f x) (2 * f x))],
+  rwa [← div_le_iff_of_neg' h, zero_div] at h0
 end
 
 lemma fn_lem3 (x : ℝ) : f x ≤ 0 :=
@@ -61,15 +60,14 @@ end results
 /-- Final solution -/
 theorem final_solution {f : ℝ → ℝ} (fineq : fn_ineq f) (x : ℝ) (h : x ≤ 0) : f x = 0 :=
 begin
-  have step1 : ∀ x : ℝ, x < 0 → f x = 0 :=
-    by intros x h; exact le_antisymm (results.fn_lem3 fineq x) (results.fn_lem2 fineq x h),
+  apply le_antisymm (results.fn_lem3 fineq x),
   rw le_iff_lt_or_eq at h,
   rcases h with h | rfl,
-  exact step1 x h,
+  exact results.fn_lem2 fineq x h,
   cases exists_lt (0 : ℝ) with x h,
+  replace h := le_antisymm (results.fn_lem2 fineq x h) (results.fn_lem3 fineq x),
   have h0 := fineq x 0,
-  rw [zero_mul, zero_add, add_zero, step1 x h] at h0,
-  exact le_antisymm (results.fn_lem3 fineq 0) h0
+  rwa [zero_mul, zero_add, add_zero, ← h] at h0
 end
 
 end IMO2011A6
