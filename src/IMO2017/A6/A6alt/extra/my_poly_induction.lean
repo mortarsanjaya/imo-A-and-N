@@ -10,7 +10,7 @@ open polynomial
 open_locale polynomial classical
 
 namespace IMOSL
-namespace IMO2017A6
+namespace IMO2017A6alt
 namespace extra
 
 /-- An auxiliary lemma of nat_degree of a modulo -/
@@ -150,5 +150,5 @@ begin
 end
 
 end extra
-end IMO2017A6
+end IMO2017A6alt
 end IMOSL

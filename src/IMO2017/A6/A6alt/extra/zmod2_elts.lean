@@ -1,7 +1,7 @@
 import data.zmod.basic
 
 namespace IMOSL
-namespace IMO2017A6
+namespace IMO2017A6alt
 namespace extra
 
 /-- The elements of zmod 2 are just 0 and 1. -/
@@ -13,5 +13,5 @@ begin
 end
 
 end extra
-end IMO2017A6
+end IMO2017A6alt
 end IMOSL

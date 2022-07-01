@@ -1,29 +1,24 @@
 import IMO2017.A6.A6_general algebra.char_p.two algebra.char_p.pi
 
 /-!
-## Progress of 2017 A6 for the case char(F) = 2
+## Alternative formulation of IMO 2017 A6 for the case char(F) = 2
 
-Here, we deal with an alternative FE system as follows:
-  ∀ x y ∈ F, f(f(x) f(y)) + f(x + y) = f(xy + x + y)
-  ∀ x ∈ F, f(x + 1) = f(x) + 1
+Let F be a field of characteristic 2.
+Find all functions f : F → F such that:
+1. ∀ x y ∈ F, f(f(x) f(y)) + f(x + y) = f(xy + x + y)
+2. ∀ x ∈ F, f(x + 1) = f(x) + 1
 -/
 
 open char_two
 open_locale classical
 
 namespace IMOSL
-namespace IMO2017A6
+namespace IMO2017A6alt
 
-variables {F : Type*} [field F]
+variables {F : Type*} [field F] [char_p F 2]
 
 def fn_eq1 (f : F → F) := ∀ x y : F, f (f x * f y) + f (x + y) = f (x * y + x + y)
 def fn_eq2 (f : F → F) := ∀ x : F, f (x + 1) = f x + 1
-
-
-
-namespace case_char_eq_2
-
-variable [char_p F 2]
 
 
 
@@ -103,15 +98,5 @@ lemma fn_lem2_7 {a b c d : F} (h : f a = f b) (h0 : f c = f d) :
 
 end base_lemma
 
-
-
-end case_char_eq_2
-
-
-
-
-
-
-
-end IMO2017A6
+end IMO2017A6alt
 end IMOSL

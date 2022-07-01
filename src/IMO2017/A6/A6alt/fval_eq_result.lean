@@ -1,7 +1,7 @@
 import
-  IMO2017.A6.A6_char_eq_2.basic
-  IMO2017.A6.A6_char_eq_2.extra.my_poly_induction
-  IMO2017.A6.A6_char_eq_2.extra.zmod2_elts
+  IMO2017.A6.A6alt.basic
+  IMO2017.A6.A6alt.extra.my_poly_induction
+  IMO2017.A6.A6alt.extra.zmod2_elts
   data.zmod.algebra
   field_theory.ratfunc
 
@@ -18,7 +18,7 @@ open char_two polynomial ratfunc
 open_locale polynomial classical
 
 namespace IMOSL
-namespace IMO2017A6
+namespace IMO2017A6alt
 
 variables {F : Type*} [field F]
 
@@ -150,5 +150,5 @@ end case_char_eq_2
 
 
 
-end IMO2017A6
+end IMO2017A6alt
 end IMOSL
