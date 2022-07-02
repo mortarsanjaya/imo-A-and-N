@@ -39,7 +39,7 @@ This shows that φ ∘ g = Tφ = φ^2 and φ(C) = T(C).
 ## Notes
 
 * For the case G = ℤ, see "A1_int.lean", theorem "final_solution_int".
-* For the original case (T = 2 and h = x ↦ 2x), see theorem "final_solution_original" instead.
+* For the original case (T = 2 and g = x ↦ 2x), see theorem "final_solution_original" instead.
 -/
 
 open function
