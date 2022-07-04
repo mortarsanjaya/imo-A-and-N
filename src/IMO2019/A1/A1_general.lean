@@ -70,25 +70,23 @@ def fn_eq3 (f : G → G) (C : G) :=
 
 
 
-theorem feq_iff_feq123 {g : G → G} (g_zero : g 0 = 0) {T : add_monoid.End G} (T_inj : injective T) :
-  ∀ f : G → G, fn_eq g T f ↔ (fn_eq1 T f (f 0) ∧ fn_eq2 g T f (f 0) ∧ fn_eq3 f (f 0)) :=
+theorem feq_iff_feq123 {g : G → G} (g_zero : g 0 = 0)
+    {T : add_monoid.End G} (T_inj : injective T) (f : G → G) :
+  fn_eq g T f ↔ (fn_eq1 T f (f 0) ∧ fn_eq2 g T f (f 0) ∧ fn_eq3 f (f 0)) :=
 begin
-  intros f; split,
+  split,
   --- fn_eq → fn_eq1 ∧ fn_eq2 ∧ fn_eq3
   { intros feq,
-    have feq1 : fn_eq1 T f (f 0) :=
-    begin
-      intros x,
+    rw and_iff_left_of_imp,
+    { intros x,
       have h := feq 0 x,
-      rwa [g_zero, zero_add, add_comm, eq_comm] at h
-    end,
-    have feq2 : fn_eq2 g T f (f 0) :=
-    begin
-      intros x,
+      rwa [g_zero, zero_add, add_comm, eq_comm] at h },
+    intros feq1,
+    rw and_iff_left_of_imp,
+    { intros x,
       have h := feq x 0,
-      rwa [add_zero, feq1, ← eq_sub_iff_add_eq, add_sub_right_comm, ← T.map_sub] at h
-    end,
-    rw [and_iff_right feq1, and_iff_right feq2]; intros x y,
+      rwa [add_zero, feq1, ← eq_sub_iff_add_eq, add_sub_right_comm, ← T.map_sub] at h },
+    intros feq2 x y,
     have h := feq x y,
     rw [feq1, feq2, add_right_comm, add_left_inj, ← T.map_add, ← add_sub_right_comm, eq_comm] at h,
     exact T_inj h },
@@ -126,13 +124,13 @@ theorem feq1_hom_iff (T φ : add_monoid.End G) (C : G) :
 begin
   rw [pow_two, add_monoid_hom.ext_iff],
   simp only [fn_eq1, const_apply, pi.add_apply, comp_app, add_monoid.coe_mul, add_left_inj],
-  split,
-  { intros feq1,
-    have h := feq1 0,
-    rw [φ.map_zero, zero_add] at h,
-    rw and_iff_left h; intros x,
-    rw [← add_left_inj (φ C), ← φ.map_add, feq1, h, T.map_add] },
-  { rintros ⟨h, h0⟩ x; rw [φ.map_add, h0, h, T.map_add] }
+  symmetry; split,
+  rintros ⟨h, h0⟩ x; rw [φ.map_add, h0, h, T.map_add],
+  intros feq1,
+  have h := feq1 0,
+  rw [φ.map_zero, zero_add] at h,
+  rw and_iff_left h; intros x,
+  rw [← add_left_inj (φ C), ← φ.map_add, feq1, h, T.map_add],
 end
 
 end results
@@ -145,7 +143,8 @@ theorem final_solution_general {g : G → G} (g_zero : g 0 = 0)
   fn_eq g T f ↔ ∃ (φ : add_monoid.End G) (C : G),
     f = φ + const G C ∧ φ ∘ g = ⇑(T * φ) ∧ φ ^ 2 = T * φ ∧ φ C = T C :=
 begin
-  rw [results.feq_iff_feq123 g_zero T_inj, results.feq3_iff_exists_hom_eq_f_sub_C]; split,
+  rw [results.feq_iff_feq123 g_zero T_inj, results.feq3_iff_exists_hom_eq_f_sub_C],
+  split,
   { set C := f 0 with C_val,
     rintros ⟨feq1, feq2, φ, h⟩; use [φ, C],
     rw [h, results.feq1_hom_iff] at feq1,
