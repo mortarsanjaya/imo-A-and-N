@@ -21,6 +21,10 @@ open finset
 namespace IMOSL
 namespace IMO2010A2
 
+def s1 (x : ℕ → ℝ) := (range 4).sum x
+def s2 (x : ℕ → ℝ) := (range 4).sum (λ i, x i ^ 2)
+def S (x : ℕ → ℝ) := 4 * (range 4).sum (λ i, x i ^ 3) - (range 4).sum (λ i, x i ^ 4)
+
 
 
 namespace extra
@@ -61,43 +65,54 @@ end extra
 
 
 
-/-- Final solution -/
-theorem final_solution (x : ℕ → ℝ) (s1 : (range 4).sum x = 6)
-    (s2 : (range 4).sum (λ i, x i ^ 2) = 12) :
-  let S := 4 * (range 4).sum (λ i, x i ^ 3) - (range 4).sum (λ i, x i ^ 4) in 36 ≤ S ∧ S ≤ 48 :=
+namespace results
+
+def T (x : ℕ → ℝ) := (range 4).sum (λ i, ((x i - 1) ^ 2) ^ 2)
+def B (x : ℕ → ℝ) := 6 * s2 x - 4 * s1 x + 4
+def C (x : ℕ → ℝ) := s2 x - 2 * s1 x + 4
+
+lemma lem1 (x : ℕ → ℝ) : S x = B x - T x :=
 begin
-  intros S,
-  let T := (range 4).sum (λ i, ((x i - 1) ^ 2) ^ 2),
-  have h : S = 52 - T :=
-  begin
-    dsimp only [S, T],
-    have h : (λ i, 4 * x i ^ 3 - x i ^ 4) = (λ i, 6 * x i ^ 2 - 4 * x i + 1 - ((x i - 1) ^ 2) ^ 2)
-      := by funext i; ring,
-    rw [mul_sum, ← sum_sub_distrib, h, sum_sub_distrib, sub_left_inj, sum_add_distrib,
-        sum_const, card_range, sum_sub_distrib, ← mul_sum, s2, ← mul_sum, s1],
-    norm_num
-  end,
-  rw h; clear h S; dsimp only [T],
+  rw eq_sub_iff_add_eq,
+  dsimp only [S, s1, s2, T, B],
+  have h : (λ i, 4 * x i ^ 3 - x i ^ 4 + ((x i - 1) ^ 2) ^ 2) = (λ i, 6 * x i ^ 2 - 4 * x i + 1) :=
+    by funext i; ring,
+  rw [mul_sum, ← sum_sub_distrib, ← sum_add_distrib, h, sum_add_distrib, sum_const,
+      card_range, sum_sub_distrib, ← mul_sum, ← mul_sum, nat.smul_one_eq_coe],
+  simp only [nat.cast_bit0, nat.cast_one]
+end
 
-  have h : (range 4).sum (λ i, (x i - 1) ^ 2) = 4 :=
-  begin
-    simp only [sub_sq, one_pow, mul_one, sum_add_distrib, sum_sub_distrib],
-    rw [s2, sum_const, card_range, ← mul_sum, s1],
-    norm_num
-  end,
-  have h0 : ∀ i : ℕ, 0 ≤ (x i - 1) ^ 2 := λ i, sq_nonneg (x i - 1),
-  split,
+lemma lem2 (x : ℕ → ℝ) : (range 4).sum (λ i, ((x i - 1) ^ 2)) = C x :=
+begin
+  simp only [sub_sq, one_pow, mul_one, sum_add_distrib, sum_sub_distrib, s2, s1, C],
+  rw [sum_const, card_range, ← mul_sum, nat.smul_one_eq_coe],
+  simp only [nat.cast_bit0, nat.cast_one],
+end
 
-  ---- Part 1: T ≤ 16
-  { rw [le_sub_iff_add_le, add_comm, ← le_sub_iff_add_le],
-    apply le_of_le_of_eq (extra.sq_sum_le_sum_sq _ h0 4),
-    rw h; norm_num },
-
-  ---- Part 2: 4 ≤ T
-  { rw [sub_le_iff_le_add, add_comm, ← sub_le_iff_le_add, ← mul_le_mul_left],
+lemma lem3 (x : ℕ → ℝ) : B x - C x ^ 2 ≤ S x ∧ S x ≤ B x - C x ^ 2 / 4 :=
+begin
+  rw lem1; split,
+  { rw [sub_le_sub_iff_left, ← lem2],
+    apply extra.sq_sum_le_sum_sq,
+    intros n; exact sq_nonneg _ },
+  { have h : (0 : ℝ) < ↑4 := by simp only [nat.cast_bit0, zero_lt_bit0, nat.cast_one, zero_lt_one],
+    rw [sub_le_sub_iff_left, ← mul_le_mul_left h],
     refine le_of_eq_of_le _ (extra.QM_AM (λ i, (x i - 1) ^ 2) 4),
-    rw h; norm_num,
-    simp only [nat.cast_bit0, zero_lt_bit0, nat.cast_one, zero_lt_one] },
+    simp only [nat.cast_bit0, nat.cast_one] at h ⊢,
+    rw [← lem2, mul_div_cancel' _ (ne_of_gt h)] }
+end
+
+end results
+
+
+
+/-- Final solution -/
+theorem final_solution {x : ℕ → ℝ} (h : s1 x = 6) (h0 : s2 x = 12) : 36 ≤ S x ∧ S x ≤ 48 :=
+begin
+  have h1 := results.lem3 x,
+  rw [results.B, results.C, h, h0] at h1,
+  norm_num at h1,
+  exact h1
 end
 
 end IMO2010A2
