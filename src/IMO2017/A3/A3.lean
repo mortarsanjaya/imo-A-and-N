@@ -22,7 +22,6 @@ namespace IMO2017A3
 
 variables {S : Type*} [fintype S] [decidable_eq S]
 
-
 def fn_prop (f : S → S) := ∀ g : S → S, f ∘ g ∘ f = g ∘ f ∘ g → g = f
 
 
