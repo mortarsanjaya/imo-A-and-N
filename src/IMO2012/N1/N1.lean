@@ -44,11 +44,13 @@ begin
     repeat { apply dvd_add },
     exacts [dvd_pow h two_ne_zero, dvd_mul_of_dvd_right h0 _, dvd_pow h0 two_ne_zero]
   end,
-  have step2 : (1 : ℤ) ∈ S,
-  { rw h S step1,
+  have step2 : (1 : ℤ) ∈ S :=
+  begin
+    rw h S step1,
     exact mem_univ 1,
     all_goals { rw mem_set_of_eq },
-    exacts [int.gcd_dvd_left m n, int.gcd_dvd_right m n] },
+    exacts [int.gcd_dvd_left m n, int.gcd_dvd_right m n]
+  end,
   rw mem_set_of_eq at step2,
   apply nat.eq_one_of_dvd_one,
   change (1 : ℕ) with (1 : ℤ).nat_abs,
