@@ -3,8 +3,7 @@ import data.real.basic
 /-!
 # IMO 2010 A1 (P1)
 
-Determine all functions f : ℝ → ℝ such that, for all x, y ∈ ℝ,
-  f(⌊x⌋ y) = f(x) ⌊f(y)⌋.
+Determine all functions f : ℝ → ℝ such that f(⌊x⌋ y) = f(x) ⌊f(y)⌋ for all x, y ∈ ℝ.
 
 ## Answer
 
@@ -14,10 +13,13 @@ f = 0 or f = C for some C ∈ [1, 2).
 
 See https://www.imo-official.org/problems/IMO2010SL.pdf.
 We will follow some parts of the Solution 1.
-For Case 2 : f(0) = 0, we do the following steps instead:
-1. For any x ∈ [0, 1), we prove ⌊f(x)⌋ = 0 via proving f(x) ⌊f(x)⌋ = 0.
-2. Using f(1/2) = 0, prove that f(1) = 0.
-3. Using f(1) = 0, prove that f = 0.
+For then f(0) = 0, we do the following steps instead.
+
+Plugging in x = 1 yields f(y) = f(1) ⌊f(y)⌋ for all y ∈ ℝ.
+In particular, to obtain f = 0, it suffices to prove that f(1) = 0.
+Now, plugging in x = y = 1/2 yields f(1/2) ⌊f(1/2)⌋ = 0 since ⌊1/2⌋ = 0.
+This forces ⌊f(1/2)⌋ = 0.
+Finally, plugging in x = 2 and y = 1/2 now yields f(1) = 0, as desired.
 -/
 
 open function
