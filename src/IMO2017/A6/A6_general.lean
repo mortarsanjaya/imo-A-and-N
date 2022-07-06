@@ -282,7 +282,7 @@ end results
 
 
 /-- Final solution -/
-theorem final_solution (f : F → F) :
+theorem final_solution_general (f : F → F) :
   fn_eq f ↔ f = 0 ∨ (f = λ x, x - 1) ∨ (f = λ x, 1 - x) :=
 begin
   split,
