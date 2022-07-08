@@ -1,4 +1,4 @@
-import IMO2019.A1.A1_general algebra.ring.equiv data.int.basic
+import IMO2019.A1.A1_general data.int.basic algebra.algebra.basic
 
 /-!
 # IMO 2019 A1 (P1), Integer Version
@@ -23,7 +23,8 @@ For g = x ↦ sx, any choice of C works.
 
 ## Implementation details
 
-We define a ring isomorphism between ℤ and End(ℤ) and use it for the solution.
+We just need to give a homomorphism ℤ →+* End(ℤ).
+We can in fact give an isomorphism, but we do not need to do that.
 -/
 
 open function
@@ -35,104 +36,93 @@ def fn_eq_int (g : ℤ → ℤ) (s : ℤ) (f : ℤ → ℤ) := ∀ x y : ℤ, f 
 
 
 
-namespace extra
+private lemma intEnd_eq_mul_left (s : ℤ) : ⇑(s : add_monoid.End ℤ) = λ x, s * x :=
+  by funext; rw [← int.smul_one_eq_coe, add_monoid_hom.coe_smul,
+                 add_monoid.coe_one, pi.smul_apply, id.def, smul_eq_mul]
 
-lemma coe_End_int_of_int_eq_left_mul (x y : ℤ) : (x : add_monoid.End ℤ) y = x * y :=
-  by rw ← int.smul_one_eq_coe; refl
-
-/-- The ring isomorphism from ℤ to End(ℤ) -/
-def End_int_of_int : ℤ ≃+* add_monoid.End ℤ :=
-{ inv_fun := λ φ, φ (1 : ℤ),
-  left_inv := λ x, by simp; rw [coe_End_int_of_int_eq_left_mul, mul_one],
-  right_inv := λ φ, by ext; simp; rw [coe_End_int_of_int_eq_left_mul, mul_one],
-  .. int.cast_ring_hom (add_monoid.End ℤ) }
-
-lemma End_int_of_int_eq_mul (x y : ℤ) : End_int_of_int x y = x * y :=
-  by simp only [End_int_of_int, int.cast_ring_hom]; exact coe_End_int_of_int_eq_left_mul x y
-
-lemma End_int_eq_of_int_map_one (φ : ℤ →+ ℤ) : End_int_of_int (φ 1) = φ :=
-  by change φ 1 with End_int_of_int.symm φ; rw ring_equiv.apply_symm_apply
-
-lemma End_int_eq_map_one_mul (φ : ℤ →+ ℤ) (x : ℤ) : φ x = φ 1 * x :=
-  by nth_rewrite 0 ← End_int_eq_of_int_map_one φ; rw End_int_of_int_eq_mul
-
-lemma End_int_inj_of_ne_zero {x : ℤ} (h : x ≠ 0) : injective (End_int_of_int x) :=
-  λ a b h0, by rwa [End_int_of_int_eq_mul, End_int_of_int_eq_mul, mul_right_inj' h] at h0
-
-lemma End_int_eq_iff_eq_at_one (φ ρ : ℤ →+ ℤ) : φ = ρ ↔ φ 1 = ρ 1 :=
+private lemma intEnd_eq_coe_int (φ : add_monoid.End ℤ) : φ = (φ 1 : add_monoid.End ℤ) :=
 begin
-  split,
-  intros h; rw h,
-  intros h; rw [← End_int_eq_of_int_map_one φ, h, End_int_eq_of_int_map_one ρ]
+  apply add_monoid_hom.ext_int,
+  rw intEnd_eq_mul_left; simp only [mul_one]
+end
+
+private lemma intEnd_inj_iff (s : ℤ) : injective (s : add_monoid.End ℤ) ↔ s ≠ 0 :=
+begin
+  rw [intEnd_eq_mul_left, injective]; split,
+  rintros h rfl,
+  replace h := @h 1 0 (by rw [zero_mul, zero_mul]),
+  exact one_ne_zero h,
+  intros h a b h0,
+  rwa [mul_right_inj' h] at h0
+end
+
+private lemma intEnd_cast_inj (s t : ℤ) : (s : add_monoid.End ℤ) = t ↔ s = t :=
+begin
+  symmetry; split,
+  rintros rfl; refl,
+  intros h,
+  replace h : (s : add_monoid.End ℤ) 1 = (t : add_monoid.End ℤ) 1 := by rw h,
+  simp only [intEnd_eq_mul_left, mul_one] at h,
+  exact h
+end
+
+private lemma feq_int_iff_feq_gen (g : ℤ → ℤ) (s : ℤ) (f : ℤ → ℤ) :
+  fn_eq_int g s f ↔ fn_eq g (s : add_monoid.End ℤ) f :=
+begin
+  dsimp only [fn_eq_int, fn_eq],
+  conv_rhs { find ((s : add_monoid.End ℤ) _) { rw intEnd_eq_mul_left } }
 end
 
 
 
-/-- Connection between fn_eq_int and fn_eq -/
-lemma feq_int_iff_feq_gen (g : ℤ → ℤ) (s : ℤ) (f : ℤ → ℤ) :
-    fn_eq_int g s f ↔ fn_eq g (extra.End_int_of_int s) f :=
-  by simp only [fn_eq_int, fn_eq, extra.End_int_of_int_eq_mul]
-
-end extra
-
-
-
-/-- Final solution, case g ≠ x ↦ sx -/
-theorem final_solution_int {g : ℤ → ℤ} (g_zero : g 0 = 0) {s : ℤ} (s_ne_zero : s ≠ 0) 
+theorem final_solution_int {g : ℤ → ℤ} (g0_eq_0 : g 0 = 0) {s : ℤ} (s_ne_0 : s ≠ 0) 
     (h : g ≠ λ x, s * x) (f : ℤ → ℤ) :
   fn_eq_int g s f ↔ f = 0 :=
 begin
   symmetry; split,
   rintros rfl x y; simp only [pi.zero_apply, mul_zero, add_zero],
   intros h0,
-  rw [extra.feq_int_iff_feq_gen,
-      final_solution_general g_zero (extra.End_int_inj_of_ne_zero s_ne_zero)] at h0,
+  rw [feq_int_iff_feq_gen, final_solution_general g0_eq_0 (by rwa intEnd_inj_iff)] at h0,
   rcases h0 with ⟨φ, C, rfl, h0, h1, h2⟩,
-  rw [extra.End_int_eq_iff_eq_at_one, add_monoid.coe_mul, comp_app,
-      extra.End_int_of_int_eq_mul, pow_two, add_monoid.coe_mul, comp_app,
-      extra.End_int_eq_map_one_mul, mul_eq_mul_right_iff] at h1,
-  cases h1 with h1 h1,
-  ---- φ(1) = s; a contradiction
+  rw [intEnd_eq_coe_int (φ ^ 2), intEnd_eq_coe_int (s * φ), sq, intEnd_cast_inj] at h1,
+  simp only [comp_app, add_monoid.coe_mul] at h1,
+  have h3 := intEnd_eq_coe_int φ,
+  nth_rewrite 0 h3 at h1,
+  rw [intEnd_eq_mul_left, intEnd_eq_mul_left, mul_eq_mul_right_iff] at h1,
+  cases h1 with h1 h1; rw h1 at h3,
   { exfalso; apply h; funext n,
-    replace h0 : (φ ∘ g) n = (extra.End_int_of_int s * φ) n := by rw h0,
-    rw [comp_app, add_monoid.coe_mul, comp_app, extra.End_int_of_int_eq_mul,
-        extra.End_int_eq_map_one_mul, extra.End_int_eq_map_one_mul φ n, h1] at h0,
-    exact mul_left_cancel₀ s_ne_zero h0 },
-  ---- φ(1) = 0; then f = 0
-  { rw [extra.End_int_of_int_eq_mul, extra.End_int_eq_map_one_mul,
-        h1, zero_mul, zero_eq_mul, or_iff_right s_ne_zero] at h2,
-    rw [h2, pi.const_zero, add_zero, ← extra.End_int_eq_of_int_map_one φ, h1, map_zero],
-    refl }
+    replace h0 : (φ ∘ g) n = ((s : add_monoid.End ℤ) * φ) n := by rw h0,
+    rwa [comp_app, add_monoid.coe_mul, comp_app, h3, intEnd_eq_mul_left,
+         mul_eq_mul_left_iff, or_iff_left s_ne_0] at h0 },
+  { rw int.cast_zero at h3; subst h3,
+    rw [intEnd_eq_mul_left, add_monoid_hom.zero_apply, zero_eq_mul, or_iff_right s_ne_0] at h2,
+    rw [h2, pi.const_zero, add_zero]; refl }
 end
 
-/-- Final solution, case g = x ↦ sx -/
-theorem final_solution_int_case_r_eq_s {s : ℤ} (s_ne_zero : s ≠ 0) (f : ℤ → ℤ) :
+
+theorem final_solution_int_case_r_eq_s {s : ℤ} (s_ne_0 : s ≠ 0) (f : ℤ → ℤ) :
   fn_eq_int (λ x, s * x) s f ↔ (f = 0 ∨ ∃ C : ℤ, f = λ x, s * x + C) :=
 begin
-  rw [extra.feq_int_iff_feq_gen,
-      final_solution_general (mul_zero s) (extra.End_int_inj_of_ne_zero s_ne_zero)],
-  split,
-  { rintros ⟨φ, C, rfl, -, h, h0⟩,
-    rw extra.End_int_of_int_eq_mul at h0,
-    rw [extra.End_int_eq_iff_eq_at_one, add_monoid.coe_mul, comp_app,
-        extra.End_int_of_int_eq_mul, pow_two, add_monoid.coe_mul, comp_app,
-        extra.End_int_eq_map_one_mul, mul_eq_mul_right_iff] at h,
-    cases h with h h,
-    { right; use C; funext,
-      rw [pi.add_apply, const_apply, extra.End_int_eq_map_one_mul, h] },
-    { left,
-      rw [extra.End_int_eq_map_one_mul, h, zero_mul, zero_eq_mul, or_iff_right s_ne_zero] at h0,
-      rw [h0, pi.const_zero, add_zero, ← extra.End_int_eq_of_int_map_one φ, h, map_zero],
-      refl } },
-  { rintros (rfl | ⟨C, rfl⟩),
-    use [0, 0]; simp,
-    rw [extra.End_int_of_int_eq_mul, mul_zero],
-    repeat { split },
-    funext; rw [pi.add_apply, const_apply, add_left_inj, extra.End_int_of_int_eq_mul],
-    funext; rw [add_monoid.coe_mul, comp_apply, comp_apply, extra.End_int_of_int_eq_mul s x] }
+  symmetry; split,
+  rintros (rfl | ⟨C, rfl⟩) x y; simp,
+  ring,
+  rintros h,
+  rw [feq_int_iff_feq_gen, final_solution_general (mul_zero s) (by rwa intEnd_inj_iff)] at h,
+  rcases h with ⟨φ, C, rfl, -, h, h0⟩,
+  rw [intEnd_eq_coe_int (φ ^ 2), intEnd_eq_coe_int (s * φ), sq, intEnd_cast_inj] at h,
+  simp only [comp_app, add_monoid.coe_mul] at h,
+  have h1 := intEnd_eq_coe_int φ,
+  nth_rewrite 0 h1 at h,
+  rw [intEnd_eq_mul_left, intEnd_eq_mul_left, mul_eq_mul_right_iff] at h,
+  cases h with h h; rw h at h1,
+  { right; use C; funext x,
+    rw [pi.add_apply, const_apply, h1, intEnd_eq_mul_left] },
+  { rw int.cast_zero at h1; subst h1,
+    rw [intEnd_eq_mul_left, add_monoid_hom.zero_apply, zero_eq_mul, or_iff_right s_ne_0] at h0,
+    left; rw [h0, pi.const_zero, add_zero]; refl }
 end
 
-/-- Final solution, original case: g = x ↦ 2x, s = 2 -/
+
 theorem final_solution_original (f : ℤ → ℤ) :
     fn_eq_int (λ x, 2 * x) 2 f ↔ (f = 0 ∨ ∃ C : ℤ, f = λ x, 2 * x + C) :=
   final_solution_int_case_r_eq_s two_ne_zero f

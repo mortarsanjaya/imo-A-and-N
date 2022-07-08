@@ -122,15 +122,14 @@ end
 theorem feq1_hom_iff (T φ : add_monoid.End G) (C : G) :
   fn_eq1 T (φ + const G C) C ↔ (φ ^ 2 = T * φ ∧ φ C = T C) :=
 begin
-  rw [pow_two, add_monoid_hom.ext_iff],
-  simp only [fn_eq1, const_apply, pi.add_apply, comp_app, add_monoid.coe_mul, add_left_inj],
+  rw [pow_two, add_monoid_hom.ext_iff]; simp [fn_eq1],
   symmetry; split,
-  rintros ⟨h, h0⟩ x; rw [φ.map_add, h0, h, T.map_add],
+  rintros ⟨h, h0⟩ x; rw [h0, h],
   intros feq1,
   have h := feq1 0,
-  rw [φ.map_zero, zero_add] at h,
+  rw [map_zero, map_zero, zero_add, map_zero, zero_add] at h,
   rw and_iff_left h; intros x,
-  rw [← add_left_inj (φ C), ← φ.map_add, feq1, h, T.map_add],
+  rw [← add_left_inj (φ C), feq1, h]
 end
 
 end results
