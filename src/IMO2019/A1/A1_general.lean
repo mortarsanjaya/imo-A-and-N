@@ -21,7 +21,7 @@ We refer to the official Solution 2 and modify it for our generalization needs.
     
 Let f be an arbitrary function satisfying the above equation.
 Let C = f(0).
-As in the official Solution 2, we get both the following:
+As in the official Solution 2, we get all the following:
   ∀ x ∈ G, f(f(x)) = Tf(x) + C                      (1)
   ∀ x ∈ G, f(g(x)) = T(f(x) - C) + C                (2)
   ∀ x y ∈ G, f(x + y) = f(x) + f(y) - C             (3)
