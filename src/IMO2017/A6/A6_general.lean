@@ -229,8 +229,8 @@ begin
     by rintros rfl; rw [zero_add, fn_lem1_4 feq f_ne_0, mul_zero] at h; exact zero_ne_one h,
   have h2 : (a + b + 1) * (a⁻¹ + b⁻¹ + 1) = (a + b + a * b) * (a⁻¹ + b⁻¹ + a⁻¹ * b⁻¹) :=
     by field_simp [h0, h1]; ring,
-  replace h2 := X _ _ _ _ (fn_lem4_3 feq f0_eq_1 a b h) (fn_lem4_3 feq f0_eq_1 _ _ _) h2,
-  work_on_goal 2 { rw [fn_lem4_2 feq f0_eq_1, fn_lem4_2 feq f0_eq_1, ← mul_inv, h, inv_one] },
+  replace h2 := X _ _ _ _ (fn_lem4_3 feq f0_eq_1 a b h) (fn_lem4_3 feq f0_eq_1 _ _
+    (by rw [fn_lem4_2 feq f0_eq_1, fn_lem4_2 feq f0_eq_1, ← mul_inv, h, inv_one])) h2,
   clear X,
   let x := a + b⁻¹ + 1,
   let y := b + a⁻¹ + 1,
@@ -243,7 +243,8 @@ begin
       fn_lem2_3 feq f0_eq_1, add_left_eq_self, mul_eq_zero] at h3,
   dsimp only [x, y] at h3,
   cases h3 with h3 h3,
-  all_goals { rwa [fn_lem2_3 feq f0_eq_1, add_left_eq_self, ← char_two.sub_eq_add, sub_eq_zero] at h3 },
+  all_goals {
+    rwa [fn_lem2_3 feq f0_eq_1, add_left_eq_self, ← char_two.sub_eq_add, sub_eq_zero] at h3 },
   rwa mul_eq_one_iff_eq_inv₀ h1,
   rwa [mul_comm, mul_eq_one_iff_eq_inv₀ h0]
 end
