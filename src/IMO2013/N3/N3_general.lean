@@ -70,23 +70,23 @@ def good (f : ℕ+ → S) (n : ℕ+) := f (n ^ 4 + n ^ 2 + 1) = f ((n + 1) ^ 4 +
 
 
 /-- A notation convenience for n² + n + 1. -/
-def T (n : ℕ+) := n ^ 2 + n + 1
+private def T (n : ℕ+) := n ^ 2 + n + 1
 
 /-- Equation defining T -/
-lemma T_def (n : ℕ+) : T n = n ^ 2 + n + 1 := rfl
+private lemma T_def (n : ℕ+) : T n = n ^ 2 + n + 1 := rfl
 
 /-- Proof of the identity T((n + 1)²) = T(n) T(n + 1). -/
-lemma T_sq_factor (n : ℕ+) : T ((n + 1) ^ 2) = T n * T (n + 1) :=
+private lemma T_sq_factor (n : ℕ+) : T ((n + 1) ^ 2) = T n * T (n + 1) :=
   by unfold T; apply pnat.eq; simp; ring
 
 
 
-namespace results
+section results
 
 variables {f : ℕ+ → S} (fmax : ∀ a b : ℕ+, f (a * b) = max (f a) (f b))
 include fmax
 
-lemma lem1 {n : ℕ+} (h : ¬good f (n + 1)) (h0 : f (T n) ≤ f (T (n + 1))) :
+private lemma lem1 {n : ℕ+} (h : ¬good f (n + 1)) (h0 : f (T n) ≤ f (T (n + 1))) :
   f (T (n + 1)) < f (T (n + 1 + 1)) :=
 begin
   apply lt_of_not_le; intros h1,
@@ -96,7 +96,7 @@ begin
   rw [max_eq_right h0, max_eq_left h1]
 end
 
-lemma lem2 {N : ℕ+} (h : ∀ n : ℕ+, N < n → ¬good f n)
+private lemma lem2 {N : ℕ+} (h : ∀ n : ℕ+, N < n → ¬good f n)
     {C : ℕ+} (h0 : N < C) (h1 : f (T C) ≤ f (T (C + 1))) :
   ∀ k : ℕ+, f (T (C + 1)) < f (T (C + 1 + k)) :=
 begin
@@ -114,7 +114,7 @@ begin
   rwa [add_right_comm, add_add_add_comm]
 end
 
-lemma lem3 {N : ℕ+} (h : ∀ n : ℕ+, N < n → ¬good f n) {C : ℕ+} (h0 : N < C) :
+private lemma lem3 {N : ℕ+} (h : ∀ n : ℕ+, N < n → ¬good f n) {C : ℕ+} (h0 : N < C) :
   f (T (C + 1)) < f (T C) :=
 begin
   apply lt_of_not_le; intros h1,
@@ -123,7 +123,7 @@ begin
   exact lt_irrefl _ h2
 end
 
-lemma lem4 {N : ℕ+} (h : ∀ n : ℕ+, N < n → ¬good f n) {C : ℕ+} (h0 : N < C) :
+private lemma lem4 {N : ℕ+} (h : ∀ n : ℕ+, N < n → ¬good f n) {C : ℕ+} (h0 : N < C) :
   ∀ k : ℕ+, f (T (C + k)) < f (T C) :=
 begin
   intros k; apply pnat.rec_on k; clear k,
@@ -134,9 +134,9 @@ begin
   exact lem3 fmax h (lt_trans h0 (pnat.lt_add_right C k))
 end
 
-lemma lem5 (N : ℕ+) (h : ∀ n : ℕ+, N < n → ¬good f n) : false :=
+private lemma lem5 (N : ℕ+) (h : ∀ n : ℕ+, N < n → ¬good f n) : false :=
 begin
-  replace h := results.lem4 fmax h (pnat.lt_add_right N 1) (N * (N + 1)),
+  replace h := lem4 fmax h (pnat.lt_add_right N 1) (N * (N + 1)),
   rw [← one_add_mul, add_comm, ← sq, T_sq_factor, fmax, lt_iff_not_le] at h,
   exact h (le_max_right (f (T N)) (f (T (N + 1))))
 end
@@ -151,7 +151,7 @@ theorem final_solution_general {f : ℕ+ → S} (fmax : ∀ a b : ℕ+, f (a * b
 begin
   apply set.infinite_of_not_bdd_above; rintros ⟨N, h⟩,
   simp only [upper_bounds, set.mem_set_of] at h,
-  apply results.lem5 fmax N,
+  apply lem5 fmax N,
   intros n h0 h1,
   rw lt_iff_not_le at h0,
   exact h0 (h h1)
