@@ -65,13 +65,13 @@ end extra
 
 
 
-namespace results
+section results
 
-def T (x : ℕ → ℝ) := (range 4).sum (λ i, ((x i - 1) ^ 2) ^ 2)
-def B (x : ℕ → ℝ) := 6 * s2 x - 4 * s1 x + 4
-def C (x : ℕ → ℝ) := s2 x - 2 * s1 x + 4
+private def T (x : ℕ → ℝ) := (range 4).sum (λ i, ((x i - 1) ^ 2) ^ 2)
+private def B (x : ℕ → ℝ) := 6 * s2 x - 4 * s1 x + 4
+private def C (x : ℕ → ℝ) := s2 x - 2 * s1 x + 4
 
-lemma lem1 (x : ℕ → ℝ) : S x = B x - T x :=
+private lemma lem1 (x : ℕ → ℝ) : S x = B x - T x :=
 begin
   rw eq_sub_iff_add_eq,
   dsimp only [S, s1, s2, T, B],
@@ -82,14 +82,14 @@ begin
   simp only [nat.cast_bit0, nat.cast_one]
 end
 
-lemma lem2 (x : ℕ → ℝ) : (range 4).sum (λ i, ((x i - 1) ^ 2)) = C x :=
+private lemma lem2 (x : ℕ → ℝ) : (range 4).sum (λ i, ((x i - 1) ^ 2)) = C x :=
 begin
   simp only [sub_sq, one_pow, mul_one, sum_add_distrib, sum_sub_distrib, s2, s1, C],
   rw [sum_const, card_range, ← mul_sum, nat.smul_one_eq_coe],
   simp only [nat.cast_bit0, nat.cast_one],
 end
 
-lemma lem3 (x : ℕ → ℝ) : B x - C x ^ 2 ≤ S x ∧ S x ≤ B x - C x ^ 2 / 4 :=
+private lemma lem3 (x : ℕ → ℝ) : B x - C x ^ 2 ≤ S x ∧ S x ≤ B x - C x ^ 2 / 4 :=
 begin
   rw lem1; split,
   { rw [sub_le_sub_iff_left, ← lem2],
@@ -109,8 +109,8 @@ end results
 /-- Final solution -/
 theorem final_solution {x : ℕ → ℝ} (h : s1 x = 6) (h0 : s2 x = 12) : 36 ≤ S x ∧ S x ≤ 48 :=
 begin
-  have h1 := results.lem3 x,
-  rw [results.B, results.C, h, h0] at h1,
+  have h1 := lem3 x,
+  rw [B, C, h, h0] at h1,
   norm_num at h1,
   exact h1
 end
