@@ -301,8 +301,14 @@ begin
     replace h1 := fn_thm5 h1 h0,
     rw [eq_comm, eq_neg_iff_eq_neg] at h1,
     rw h1; funext x; simp only [pi.neg_apply, neg_sub, sub_left_inj] },
-  { rintros (rfl | rfl | rfl) x y; simp,
-    all_goals { ring } }
+  { rintros (rfl | h),
+    intros x y; simp only [pi.zero_apply, add_zero],
+    have h0 : fn_eq (λ x, x - (1 : F)) := by intros x y; simp only []; ring,
+    rcases h with rfl | rfl,
+    exact h0,
+    replace h0 := feq_neg h0,
+    conv at h0 { congr, rw pi.neg_def, funext, rw neg_sub },
+    exact h0 }
 end
 
 end IMO2017A6
