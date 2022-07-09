@@ -44,19 +44,19 @@ end extra
 
 
 
-namespace results
+section results
 
 variables {f : ℕ → ℝ} (f_pos : ∀ n : ℕ, 0 < f n) (fineq : seq_ineq f)
 include f_pos fineq
 
-lemma lem1 (n : ℕ) : (n.succ : ℝ) / f n.succ ≤ f n + n / f n :=
+private lemma lem1 (n : ℕ) : (n.succ : ℝ) / f n.succ ≤ f n + n / f n :=
 begin
   rw [div_le_iff (f_pos _), ← mul_inv_le_iff, add_div', ← sq, inv_div, ← mul_div_assoc],
   work_on_goal 3 { refine add_pos_of_pos_of_nonneg _ (div_nonneg _ _) },
   exacts [fineq n, (ne_of_gt (f_pos n)), f_pos n, nat.cast_nonneg n, le_of_lt (f_pos n)]
 end
 
-lemma lem2 (n : ℕ) : (n : ℝ) / f n ≤ (range n).sum f :=
+private lemma lem2 (n : ℕ) : (n : ℝ) / f n ≤ (range n).sum f :=
 begin
   induction n with n n_ih,
   rw [nat.cast_zero, zero_div, range_zero, sum_empty],
@@ -76,7 +76,7 @@ begin
   { rw [nat.cast_bit0, nat.cast_one],
     change 2 with 1 + 1,
     rw extra.range_succ_add,
-    refine le_trans _ (add_le_add_left (results.lem2 f_pos fineq 1) _),
+    refine le_trans _ (add_le_add_left (lem2 f_pos fineq 1) _),
     rw [nat.cast_one, one_div],
     exact extra.add_inv_ge_two (f_pos 1) },
   { intros n h h0,
@@ -84,7 +84,7 @@ begin
     rw [extra.range_succ_add, nat.cast_add, nat.cast_one, add_comm],
     exact add_le_add h1 h0,
     rw extra.range_succ_add,
-    refine le_trans _ (add_le_add_left (results.lem2 f_pos fineq n) _),
+    refine le_trans _ (add_le_add_left (lem2 f_pos fineq n) _),
     have h2 := le_trans one_le_two h,
     rw [← nat.sub_add_cancel h2, nat.cast_add, nat.cast_add, nat.cast_one, nat.sub_add_cancel h2,
         div_eq_mul_inv, add_one_mul, add_comm (f n), add_assoc, add_assoc, add_comm _ (f n)],
