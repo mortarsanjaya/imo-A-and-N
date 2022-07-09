@@ -28,10 +28,10 @@ def good (m n : ℤ) := ∀ A : set ℤ, admissible A → m ∈ A → n ∈ A �
 
 
 
-namespace results
+section results
 
 /-- Characterization of bad pairs -/
-lemma bad_pairs (m n : ℤ) (h : good m n) : is_coprime m n :=
+private lemma bad_pairs (m n : ℤ) (h : good m n) : is_coprime m n :=
 begin
   rw ← int.gcd_eq_one_iff_coprime,
   let c := ↑(int.gcd m n),
@@ -58,7 +58,7 @@ begin
 end
 
 /-- Characterization of good pairs -/
-lemma good_pairs (x y : ℤ) (h : is_coprime x y) : good x y :=
+private lemma good_pairs (x y : ℤ) (h : is_coprime x y) : good x y :=
 begin
   intros A h0 h1 h2,
   have h3 : ∀ m : ℤ, m ∈ A → ∀ k : ℤ, k * m ^ 2 ∈ A :=
@@ -84,7 +84,7 @@ end results
 
 /-- Final solution -/
 theorem final_solution : good = is_coprime :=
-  by ext x y; exact iff.intro (results.bad_pairs x y) (results.good_pairs x y)
+  by ext x y; exact iff.intro (bad_pairs x y) (good_pairs x y)
 
 end IMO2012N1
 end IMOSL
