@@ -65,19 +65,19 @@ end extra
 
 
 
-namespace results
+section results
 
 variables {f g : R → R} (feq : fn_eq f g)
 include feq
 
-lemma fn_lem1 : ∀ x : R, g (f x) = f (-x) :=
+private lemma fn_lem1 : ∀ x : R, g (f x) = f (-x) :=
 begin
   intros x,
   have h := feq (-x) (2 * x),
   ring_nf at h; exact h
 end
 
-lemma fn_lem2 : ∀ a b : R, f (-a) - f (-b) = (a - b) * g (a + b) :=
+private lemma fn_lem2 : ∀ a b : R, f (-a) - f (-b) = (a - b) * g (a + b) :=
 begin
   intros a b,
   have h := feq (-b) (b + a),
@@ -85,7 +85,7 @@ begin
   rw [h, two_mul, ← add_assoc, neg_add_cancel_comm, add_comm, ← sub_eq_add_neg, add_comm]
 end
 
-lemma fn_lem3 : ∃ A B : R, ∀ x : R, g x = A * x + B :=
+private lemma fn_lem3 : ∃ A B : R, ∀ x : R, g x = A * x + B :=
 begin
   use [g 1 - g 0, g 0]; intros x,
   rcases extra.ravi_subst 0 x 1 with ⟨a, b, c, h, rfl, h0⟩,
@@ -99,7 +99,7 @@ begin
   ... = (g 1 - g 0) * (c + a) + g 0 : by rw [← h0, one_mul, add_comm a c, mul_comm]
 end
 
-lemma fn_lem4 {A B : R} (h : ∀ x : R, g x = A * x + B) (x : R) :
+private lemma fn_lem4 {A B : R} (h : ∀ x : R, g x = A * x + B) (x : R) :
   f x = A * x ^ 2 - B * x + f 0 :=
 begin
   have h0 := fn_lem2 feq (-x) 0,
@@ -107,7 +107,7 @@ begin
   rw [h0, mul_comm, add_mul, mul_assoc, ← sq, neg_sq, mul_neg, sub_eq_add_neg]
 end
 
-lemma fn_lem5 {A B : R} (h : ∀ x : R, g x = A * x + B) (x : R) :
+private lemma fn_lem5 {A B : R} (h : ∀ x : R, g x = A * x + B) (x : R) :
   A * (A - 1) * x ^ 2 + -(A + 1) * B * x + (f 0 * (A - 1) + B) = 0 :=
 begin
   have h0 := fn_lem1 feq x,
@@ -115,7 +115,7 @@ begin
   nth_rewrite 1 ← h0; ring
 end
 
-lemma fn_lem6 {A B : R} (h : ∀ x : R, g x = A * x + B) :
+private lemma fn_lem6 {A B : R} (h : ∀ x : R, g x = A * x + B) :
   B = 0 ∧ A * (A - 1) = 0 ∧ f 0 * (A - 1) = 0 :=
 begin
   rcases extra.poly_deg_2_zero (fn_lem5 feq h) with ⟨h0, h1, h2⟩,
@@ -135,10 +135,10 @@ theorem final_solution_general (f g : R → R) : fn_eq f g ↔ ∃ A C : R,
 begin
   split,
   { intros feq,
-    rcases results.fn_lem3 feq with ⟨A, B, h⟩,
-    rcases results.fn_lem6 feq h with ⟨rfl, h0, h1⟩,
+    rcases fn_lem3 feq with ⟨A, B, h⟩,
+    rcases fn_lem6 feq h with ⟨rfl, h0, h1⟩,
     use [A, f 0]; rw [and_iff_left h1, and_iff_left h0]; split,
-    funext x; rw [results.fn_lem4 feq h, zero_mul, sub_zero],
+    funext x; rw [fn_lem4 feq h, zero_mul, sub_zero],
     funext x; rw [h, add_zero] },
   { rintros ⟨A, C, rfl, rfl, h, h0⟩ x y,
     simp only [] at h0 ⊢,
