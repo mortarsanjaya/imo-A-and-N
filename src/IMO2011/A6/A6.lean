@@ -20,25 +20,25 @@ def fn_ineq (f : ℝ → ℝ) := ∀ x y : ℝ, f (x + y) ≤ y * f x + f (f x)
 
 
 
-namespace results
+section results
 
 variables {f : ℝ → ℝ} (fineq : fn_ineq f)
 include fineq
 
-lemma fn_lem1 (t x : ℝ) : f t ≤ t * f x - x * f x + f (f x) :=
+private lemma fn_lem1 (t x : ℝ) : f t ≤ t * f x - x * f x + f (f x) :=
 begin
   have h := fineq x (t - x),
   rwa [add_sub_cancel'_right, sub_mul] at h
 end
 
-lemma fn_lem2 (x : ℝ) (h : x < 0) : 0 ≤ f x :=
+private lemma fn_lem2 (x : ℝ) (h : x < 0) : 0 ≤ f x :=
 begin
   have h0 : x * f x ≤ 0 :=
     by linarith [(fn_lem1 fineq (f (2 * f x)) x), (fn_lem1 fineq (f x) (2 * f x))],
   rwa [← div_le_iff_of_neg' h, zero_div] at h0
 end
 
-lemma fn_lem3 (x : ℝ) : f x ≤ 0 :=
+private lemma fn_lem3 (x : ℝ) : f x ≤ 0 :=
 begin
   rw ← not_lt; intros h,
   let M := x - f (f x) / f x,
@@ -60,12 +60,12 @@ end results
 /-- Final solution -/
 theorem final_solution {f : ℝ → ℝ} (fineq : fn_ineq f) (x : ℝ) (h : x ≤ 0) : f x = 0 :=
 begin
-  apply le_antisymm (results.fn_lem3 fineq x),
+  apply le_antisymm (fn_lem3 fineq x),
   rw le_iff_lt_or_eq at h,
   rcases h with h | rfl,
-  exact results.fn_lem2 fineq x h,
+  exact fn_lem2 fineq x h,
   cases exists_lt (0 : ℝ) with x h,
-  replace h := le_antisymm (results.fn_lem2 fineq x h) (results.fn_lem3 fineq x),
+  replace h := le_antisymm (fn_lem2 fineq x h) (fn_lem3 fineq x),
   have h0 := fineq x 0,
   rwa [zero_mul, zero_add, add_zero, ← h] at h0
 end
