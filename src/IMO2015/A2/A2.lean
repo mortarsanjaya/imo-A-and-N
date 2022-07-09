@@ -58,12 +58,12 @@ end extra
 
 
 
-namespace results
+section results
 
 variables {f : ℤ → ℤ} (feq : fn_eq f)
 include feq
 
-lemma fn_lem1 (x : ℤ) : f (f x) = f (x + 1) :=
+private lemma fn_lem1 (x : ℤ) : f (f x) = f (x + 1) :=
 begin
   have h := feq 0 (f 0),
   rw [zero_sub, sub_self, zero_sub] at h,
@@ -71,7 +71,7 @@ begin
   rwa [h, sub_neg_eq_add, sub_neg_eq_add, add_sub_cancel, eq_comm] at h0
 end
 
-lemma fn_lem2 : ∀ x : ℤ, f x = (f (-1) + 1) * x + f 0 :=
+private lemma fn_lem2 : ∀ x : ℤ, f x = (f (-1) + 1) * x + f 0 :=
 begin
   apply extra.fn_linear_diff; intros x,
   rw [add_comm (f x), ← sub_eq_iff_eq_add, ← sub_eq_iff_eq_add, ← fn_lem1 feq, ← feq,
@@ -91,7 +91,7 @@ begin
   { intros feq,
     let A := f (-1) + 1,
     let B := f 0,
-    have h : ∀ x : ℤ, f x = A * x + B := results.fn_lem2 feq,
+    have h : ∀ x : ℤ, f x = A * x + B := fn_lem2 feq,
     cases eq_or_ne A 0 with h0 h0,
     { simp only [h0, zero_mul, zero_add] at h,
       simp only [A] at h0,
@@ -99,7 +99,7 @@ begin
       left; funext x,
       rw [h, h0, pi.neg_apply, pi.one_apply] },
     { right; funext x,
-      have h1 := results.fn_lem1 feq x,
+      have h1 := fn_lem1 feq x,
       rwa [h, h (x + 1), add_left_inj, mul_eq_mul_left_iff, or_iff_left h0] at h1 } },
   { rintros (rfl | rfl); intros x y; simp,
     rw [← sub_sub, sub_add_cancel, sub_sub, add_sub_add_right_eq_sub] }
