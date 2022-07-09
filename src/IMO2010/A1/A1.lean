@@ -45,13 +45,13 @@ end extra
 
 
 
-namespace results
+section results
 
 variables {f : ℝ → ℝ} (feq : fn_eq f)
 include feq
 
 /-- Case 1: f(0) ≠ 0 -/
-lemma case_f0_ne_0 (h : f 0 ≠ 0) : ∃ C : ℝ, ⌊C⌋ = 1 ∧ f = const ℝ C :=
+private lemma case_f0_ne_0 (h : f 0 ≠ 0) : ∃ C : ℝ, ⌊C⌋ = 1 ∧ f = const ℝ C :=
 begin
   use f 0,
   suffices : ∀ y : ℝ, ⌊f y⌋ = 1,
@@ -66,10 +66,10 @@ begin
 end
 
 /-- Case 2: f(0) = 0 -/
-lemma case_f0_eq_0 (h : f 0 = 0) : f = 0 :=
+private lemma case_f0_eq_0 (h : f 0 = 0) : f = 0 :=
 begin
   suffices : f 1 = 0,
-  { funext,
+  { funext x,
     have h0 := feq 1 x,
     rwa [this, zero_mul, int.floor_one, int.cast_one, one_mul] at h0 },
   have h0 := feq ↑(2 : ℤ) 2⁻¹,
@@ -87,14 +87,13 @@ end results
 
 
 /-- Final solution -/
-theorem final_solution (f : ℝ → ℝ) :
-  fn_eq f ↔ f = 0 ∨ ∃ C : ℝ, ⌊C⌋ = 1 ∧ f = const ℝ C :=
+theorem final_solution (f : ℝ → ℝ) : fn_eq f ↔ f = 0 ∨ ∃ C : ℝ, ⌊C⌋ = 1 ∧ f = const ℝ C :=
 begin
   split,
   { intros feq,
     by_cases h : f 0 = 0,
-    left; exact results.case_f0_eq_0 feq h,
-    right; exact results.case_f0_ne_0 feq h },
+    left; exact case_f0_eq_0 feq h,
+    right; exact case_f0_ne_0 feq h },
   { rintros (rfl | ⟨C, h, rfl⟩) x y; simp,
     rw [h, int.cast_one, mul_one] }
 end
