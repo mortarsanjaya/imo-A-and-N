@@ -73,25 +73,25 @@ def fn_eq (f : F → F) := ∀ x y : F, f (f x * f y) + f (x + y) = f (x * y)
 
 
 
-namespace results
+section results
 
 variables {f : F → F} (feq : fn_eq f)
 include feq
 
-lemma feq_neg : fn_eq (-f) :=
+private lemma feq_neg : fn_eq (-f) :=
 begin
   intros x y,
   simp only [pi.neg_apply],
   rw [neg_mul_neg, ← neg_add, feq],
 end
 
-lemma fn_lem1_1 {x : F} (x_ne_0 : x ≠ 0) : f (f (x + 1) * f (x⁻¹ + 1)) = 0 :=
+private lemma fn_lem1_1 {x : F} (x_ne_0 : x ≠ 0) : f (f (x + 1) * f (x⁻¹ + 1)) = 0 :=
 begin
   have h := feq (x + 1) (1 + x⁻¹),
   rwa [mul_one_add, add_one_mul, mul_inv_cancel x_ne_0, add_left_eq_self, add_comm _ x⁻¹] at h
 end
 
-lemma fn_lem1_2 (f_ne_0 : f ≠ 0) {c : F} (h : f c = 0) : c = 1 :=
+private lemma fn_lem1_2 (f_ne_0 : f ≠ 0) {c : F} (h : f c = 0) : c = 1 :=
 begin
   contrapose f_ne_0,
   rw not_not; funext x,
@@ -102,14 +102,14 @@ begin
   rwa [mul_zero, add_zero, h0, mul_zero, h0, zero_add] at h1
 end
 
-lemma fn_lem1_3 (f_ne_0 : f ≠ 0) : f 0 ^ 2 = 1 :=
+private lemma fn_lem1_3 (f_ne_0 : f ≠ 0) : f 0 ^ 2 = 1 :=
 begin
   have h := feq 0 0,
   rw [add_zero, mul_zero, add_left_eq_self, ← sq] at h,
   exact fn_lem1_2 feq f_ne_0 h
 end
 
-lemma fn_lem1_4 (f_ne_0 : f ≠ 0) : f 1 = 0 :=
+private lemma fn_lem1_4 (f_ne_0 : f ≠ 0) : f 1 = 0 :=
 begin
   have h := feq 0 0,
   rwa [add_zero, mul_zero, add_left_eq_self, ← sq, fn_lem1_3 feq f_ne_0] at h
@@ -121,7 +121,7 @@ end
 variable f0_eq_1 : f 0 = 1
 include f0_eq_1
 
-lemma fn_lem2_0 : f ≠ 0 :=
+private lemma fn_lem2_0 : f ≠ 0 :=
 begin
   contrapose f0_eq_1,
   rw not_not at f0_eq_1,
@@ -129,7 +129,7 @@ begin
   exact zero_ne_one
 end
 
-lemma fn_lem2_1 (f_inj : injective f) : f = λ x, 1 - x :=
+private lemma fn_lem2_1 (f_inj : injective f) : f = λ x, 1 - x :=
 begin
   have h : ∀ x : F, f (f x) + f x = 1 :=
     λ x, by have h := feq x 0; rwa [mul_zero, f0_eq_1, mul_one, add_zero] at h,
@@ -139,13 +139,13 @@ begin
   rw [← add_left_inj (f (f x)), h, add_comm, h]
 end
 
-lemma fn_lem2_2 (x : F) : f (x + 1) + 1 = f x :=
+private lemma fn_lem2_2 (x : F) : f (x + 1) + 1 = f x :=
 begin
   have h := feq x 1,
   rwa [fn_lem1_4 feq (fn_lem2_0 feq f0_eq_1), mul_zero, mul_one, f0_eq_1, add_comm] at h
 end
 
-lemma fn_lem2_3 (x : F) : f x = 0 ↔ x = 1 :=
+private lemma fn_lem2_3 (x : F) : f x = 0 ↔ x = 1 :=
 begin
   have h := fn_lem2_0 feq f0_eq_1,
   split,
@@ -158,11 +158,11 @@ end
 /- Case 1 : char(F) ≠ 2 -/
 section case_char_ne_2
 
-lemma fn_lem3_1 (x : F) : f (f x * (1 + 1)) + (f x + 1) = f (-x) :=
+private lemma fn_lem3_1 (x : F) : f (f x * (1 + 1)) + (f x + 1) = f (-x) :=
   by rw [← mul_neg_one, ← feq x (-1), ← fn_lem2_2 feq f0_eq_1 (-1 : F), neg_add_self,
          f0_eq_1, ← fn_lem2_2 feq f0_eq_1 (x + -1), neg_add_cancel_right]
 
-lemma fn_lem3_2 (char_ne_2 : ring_char F ≠ 2) {x : F} (h : f x = f (-x)) : x = 0 :=
+private lemma fn_lem3_2 (char_ne_2 : ring_char F ≠ 2) {x : F} (h : f x = f (-x)) : x = 0 :=
 begin
   have h0 := fn_lem3_1 feq f0_eq_1 x,
   rwa [← h, ← add_left_comm, add_right_eq_self, ← sub_add_cancel (_ * _) (1 : F),
@@ -172,7 +172,7 @@ begin
   exact ring.two_ne_zero char_ne_2
 end
 
-lemma fn_lem3_3 (char_ne_2 : ring_char F ≠ 2) : injective f :=
+private lemma fn_lem3_3 (char_ne_2 : ring_char F ≠ 2) : injective f :=
 begin
   intros x y h,
   have h0 : f (-x) = f (-y) := by rw [← fn_lem3_1 feq f0_eq_1, h, fn_lem3_1 feq f0_eq_1],
@@ -191,10 +191,10 @@ section case_char_eq_2
 
 variable [char_p F 2]
 
-lemma fn_lem4_1 (x : F) : f (x + 1) = f x + 1 :=
+private lemma fn_lem4_1 (x : F) : f (x + 1) = f x + 1 :=
   by rw [← sub_eq_iff_eq_add, char_two.sub_eq_add, fn_lem2_2 feq f0_eq_1]
 
-lemma fn_lem4_2 (x : F) : f (x⁻¹ + 1) = (f (x + 1))⁻¹ :=
+private lemma fn_lem4_2 (x : F) : f (x⁻¹ + 1) = (f (x + 1))⁻¹ :=
 begin
   rcases eq_or_ne x 0 with rfl | h,
   rw [inv_zero, zero_add, fn_lem1_4 feq (fn_lem2_0 feq f0_eq_1), inv_zero],
@@ -204,7 +204,7 @@ begin
   rwa [fn_lem2_3 feq f0_eq_1, add_left_eq_self] at h
 end
 
-lemma fn_lem4_3 (a b : F) (h : f (a + 1) * f (b + 1) = 1) :
+private lemma fn_lem4_3 (a b : F) (h : f (a + 1) * f (b + 1) = 1) :
   f (a + b + 1) = f (a + b + a * b) :=
 begin
   have h0 := feq (a + 1) (b + 1),
@@ -213,7 +213,7 @@ begin
        fn_lem4_1 feq f0_eq_1, add_left_inj, add_assoc (a * b), add_comm (a * b)] at h0
 end
 
-lemma fn_lem4_4 (a b : F) (h : f (a + 1) * f (b + 1) = 1) : a * b = 1 :=
+private lemma fn_lem4_4 (a b : F) (h : f (a + 1) * f (b + 1) = 1) : a * b = 1 :=
 begin
   have X : ∀ a b c d : F, f a = f b → f c = f d → a * c = b * d → f (a + c) = f (b + d) :=
   begin
@@ -248,7 +248,7 @@ begin
   rwa [mul_comm, mul_eq_one_iff_eq_inv₀ h0]
 end
 
-lemma fn_lem4_5 : injective f :=
+private lemma fn_lem4_5 : injective f :=
 begin
   suffices : ∀ a b : F, f (a + 1) = f(b + 1) → a = b,
   { intros a b h,
@@ -268,7 +268,7 @@ end case_char_eq_2
 
 
 
-theorem fn_thm5 : f = λ x, 1 - x :=
+private theorem fn_thm5 : f = λ x, 1 - x :=
 begin
   apply fn_lem2_1 feq f0_eq_1,
   by_cases h : ring_char F = 2,
@@ -290,14 +290,14 @@ begin
     cases eq_or_ne f 0 with h h,
     left; exact h,
     right,
-    have h0 := results.fn_lem1_3 feq h,
+    have h0 := fn_lem1_3 feq h,
     rw sq_eq_one_iff at h0,
     cases h0 with h0 h0,
-    right; exact results.fn_thm5 feq h0,
+    right; exact fn_thm5 feq h0,
     left,
     rw [eq_neg_iff_eq_neg, eq_comm, ← pi.neg_apply f 0] at h0,
-    have h1 := results.feq_neg feq,
-    replace h1 := results.fn_thm5 h1 h0,
+    have h1 := feq_neg feq,
+    replace h1 := fn_thm5 h1 h0,
     rw [eq_comm, eq_neg_iff_eq_neg] at h1,
     rw h1; funext x; simp only [pi.neg_apply, neg_sub, sub_left_inj] },
   { rintros (rfl | rfl | rfl) x y; simp,
