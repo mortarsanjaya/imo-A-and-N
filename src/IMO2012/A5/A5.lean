@@ -1,6 +1,7 @@
 import
   data.real.basic
   data.real.nnreal
+  data.real.sqrt
   algebra.algebra.basic
   algebra.char_p.basic
   algebra.char_p.two
@@ -46,10 +47,10 @@ We now employ a trick that works whenever f is an even function with domain ℝ:
   there exists a function g : ℝ≥0 → R such that f(x) = g(x^2) for all x ∈ ℝ.
 Indeed, such g is defined by g(x) = f(sqrt(x)) for any x ≥ 0.
 Then the original equation becomes
-(1)       g((1 + xy)^2) - g(x^2 + y^2 + 2xy) = g(x^2) g(y^2).
+(1)       g((1 + xy)^2) - g((x + y)^2) = g(x^2) g(y^2).
 Changing y with -y gives us
-(2)       g((1 + xy)^2) - g((1 - xy)^2) = g(x^2 + y^2 + 2xy) - g(x^2 + y^2 - 2xy)
-Now note that, for every u, v ≥ 0, there exists x, y ∈ ℝ such that u = x^2 + y^2 - 2xy and v = 4xy.
+(2)       g((1 + xy)^2) - g((1 - xy)^2) = g((x + y)^2) - g((x - y)^2)
+Now note that, for every u, v ≥ 0, there exists x, y ∈ ℝ such that u = (x - y)^2 and v = 4xy.
 Indeed, the equation becomes |x - y| = sqrt(u) and |x + y| = sqrt(u + v).
 So, one can take x = (sqrt(u + v) + sqrt(u))/2 and y = (sqrt(u + v) - sqrt(u))/2.
 Thus, for all u, v ≥ 0,
@@ -74,7 +75,7 @@ Indeed, there is only one semiring homomorphism ℝ≥0 → ℝ; the natural lif
 The original question also contained the condition f(-1) ≠ 0.
 -/
 
-open function
+open function real
 open_locale classical
 
 namespace IMOSL
@@ -87,6 +88,25 @@ def fn_eq (f : ℝ → R) := ∀ x y : ℝ, f (1 + x * y) - f(x + y) = f x * f y
 
 
 namespace extra
+
+/-- For any x ≤ 0, there exists u ∈ ℝ such that x = 1 + u - u^2 -/
+lemma real_poly_range1 {x : ℝ} (h : x ≤ 0) : ∃ u : ℝ, x = 1 + u * (1 - u) :=
+begin
+  use [(sqrt (5 - 4 * x) + 1) / 2],
+  field_simp; ring_nf,
+  rw [sq_sqrt, neg_add, neg_neg, neg_add_cancel_right],
+  linarith only [h] ---- Too lazy to explicitly write the steps
+end
+
+/-- For any u, v ≥ 0, there exists x, y ∈ ℝ such that u = (x - y)^2 and v = 4xy. -/
+lemma real_mv_poly_range1 {u v : ℝ} (h : 0 ≤ u) (h0 : 0 ≤ v) :
+  ∃ x y : ℝ, u = (x - y) ^ 2 ∧ v = 4 * (x * y) :=
+begin
+  use [(sqrt (u + v) + sqrt u) / 2, (sqrt (u + v) - sqrt u) / 2],
+  split; field_simp; ring_nf,
+  rw sq_sqrt h,
+  rw [sq_sqrt (add_nonneg h0 h), sq_sqrt h, mul_add, add_sub_cancel]
+end
 
 
 
@@ -142,10 +162,13 @@ begin
     rw [← neg_sub, sub_eq_add_neg, ← lem2_2 feq h, ← sub_sub, sub_sub_cancel_left,
         neg_add, ← lem2_2 feq h, ← sub_eq_add_neg, sub_eq_add_neg 2 x, add_comm, this],
     exact le_of_lt (neg_lt_zero.mpr h1) },
-    intros x h0,
-    /- We want to write x = 1 + u - u^2 for some u ∈ ℝ.
-    For this, instead we will just prove a general lemma. -/
-    sorry
+  intros x h0,
+  replace h0 := extra.real_poly_range1 h0,
+  rcases h0 with ⟨u, rfl⟩,
+  rw sub_eq_sub_iff_sub_eq_sub,
+  nth_rewrite 6 ← add_sub_cancel'_right u 1,
+  rw [feq, ← neg_mul_neg (f u), ← lem2_2 feq h, ← lem2_2 feq h, ← feq],
+  congr' 2; ring
 end
 
 private lemma lem2_4 [char_p R 2] {f : ℝ → R} (feq : fn_eq f) : f (-1) = 0 :=
