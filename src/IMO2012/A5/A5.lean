@@ -121,6 +121,39 @@ end
 lemma exists_eq_nnabs_sq (x : ℝ≥0) : ∃ u : ℝ≥0, x = u ^ 2 :=
   by use nnreal.sqrt x; rw nnreal.sq_sqrt
 
+
+
+/--
+  If R is a domain of characteristic non-zero, there is no ring hom ℝ → R.
+
+  If possible, replace this and `nnreal_hom_empty` with `semifield_hom_empty`:
+    For any semifield F of characteristic zero and nontrivial semiring R of
+      characteristic non-zero, there is no semiring hom F → R.
+
+  I will wait until ℝ≥0 has been given a semifield instance.
+-/
+instance real_hom_empty {p : ℕ} [fact (p ≠ 0)] [char_p R p] : is_empty (ℝ →+* R) :=
+{ false := λ φ, begin
+    have h := map_nat_cast φ p,
+    rw char_p.cast_eq_zero R at h,
+    replace h := mul_eq_zero_of_left h (φ p⁻¹),
+    rw [← map_mul, mul_inv_cancel, map_one] at h,
+    exact one_ne_zero h,
+    rw nat.cast_ne_zero,
+    exact fact.out (p ≠ 0)
+  end }
+
+instance nnreal_hom_empty {p : ℕ} [fact (p ≠ 0)] [char_p R p] : is_empty (ℝ≥0 →+* R) :=
+{ false := λ φ, begin
+    have h := map_nat_cast φ p,
+    rw char_p.cast_eq_zero R at h,
+    replace h := mul_eq_zero_of_left h (φ p⁻¹),
+    rw [← map_mul, mul_inv_cancel, map_one] at h,
+    exact one_ne_zero h,
+    rw nat.cast_ne_zero,
+    exact fact.out (p ≠ 0)
+  end }
+
 end extra
 
 
@@ -294,6 +327,33 @@ begin
 end
 
 
+
+/-- Final solution -/
+theorem final_solution_general (f : ℝ → R) : fn_eq f ↔
+  f = 0 ∨ (∃ φ : ℝ →+* R, f = φ - 1) ∨ (∃ φ : ℝ≥0 →+* R, f = λ x : ℝ, φ (x.nnabs ^ 2) - 1) :=
+begin
+  split,
+  { intros feq,
+    cases ne_or_eq (f 0) (-1) with h h,
+    left; exact lem1_2 feq h,
+    right; cases eq_or_ne (f (-1)) 0 with h0 h0,
+    right; exact lem3_6 feq h0 h,
+    left; cases eq_or_ne (ring_char R) 2 with h1 h1,
+    rw ring_char.eq_iff at h1,
+    exfalso; exactI h0 (lem2_4 feq),
+    exact lem2_7 h1 feq h0 },
+  { rintros (rfl | ⟨φ, rfl⟩ | ⟨φ, rfl⟩) x y,
+    simp only [pi.zero_apply]; rw [sub_zero, mul_zero],
+    simp only [pi.sub_apply, pi.one_apply, map_add],
+    rw [map_one, add_sub_cancel', map_mul, add_sub_assoc, ← sub_sub, sub_one_mul, mul_sub_one],
+    simp only [],
+    sorry }
+end
+
+/-- Final solution, case char(R) ≠ 0 -/
+theorem final_solution_char_ne_0 (p : ℕ) [fact (p ≠ 0)] [char_p R p] (f : ℝ → R) :
+    fn_eq f ↔ f = 0 :=
+  by rw [final_solution_general, is_empty.exists_iff, is_empty.exists_iff, or_false, or_false]
 
 end IMO2012A5
 end IMOSL
