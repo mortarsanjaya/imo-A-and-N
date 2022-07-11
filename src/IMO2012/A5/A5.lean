@@ -1,7 +1,7 @@
 import
   data.real.basic
-  data.real.nnreal
   data.real.sqrt
+  data.real.nnreal
   algebra.algebra.basic
   algebra.char_p.basic
   algebra.char_p.two
@@ -76,7 +76,7 @@ The original question also contained the condition f(-1) ≠ 0.
 -/
 
 open function real
-open_locale classical
+open_locale nnreal classical
 
 namespace IMOSL
 namespace IMO2012A5
@@ -99,15 +99,27 @@ begin
 end
 
 /-- For any u, v ≥ 0, there exists x, y ∈ ℝ such that u = (x - y)^2 and v = 4xy. -/
-lemma real_mv_poly_range1 {u v : ℝ} (h : 0 ≤ u) (h0 : 0 ≤ v) :
-  ∃ x y : ℝ, u = (x - y) ^ 2 ∧ v = 4 * (x * y) :=
+lemma real_mv_poly_range1 (u v : ℝ≥0) :
+  ∃ x y : ℝ, (u : ℝ) = (x - y) ^ 2 ∧ (v : ℝ) = 4 * (x * y) :=
 begin
+  have h := nnreal.coe_nonneg u,
   use [(sqrt (u + v) + sqrt u) / 2, (sqrt (u + v) - sqrt u) / 2],
   split; field_simp; ring_nf,
   rw sq_sqrt h,
-  rw [sq_sqrt (add_nonneg h0 h), sq_sqrt h, mul_add, add_sub_cancel]
+  rw [sq_sqrt (add_nonneg (nnreal.coe_nonneg v) h), sq_sqrt h, mul_add, add_sub_cancel]
 end
 
+/-- Given f : ℝ → α, this is the function ℝ≥0 → α given by x ↦ f(sqrt(x)). -/
+noncomputable def comp_sqrt {α : Type*} (f : ℝ → α) := λ x : ℝ≥0, f (sqrt x)
+
+lemma f_abs_eq_of_even {α : Type*} {f : ℝ → α} (h : ∀ x : ℝ, f (-x) = f x) (x : ℝ) :
+  f (|x|) = f x :=
+begin
+  cases le_or_lt 0 x with h0 h0,
+  rw ← abs_eq_self at h0; rw h0,
+  replace h0 := le_of_lt h0,
+  rw ← abs_eq_neg_self at h0; rw [h0, h]
+end
 
 
 end extra
@@ -210,6 +222,55 @@ begin
   rw [lem2_6 char_ne_2 feq h, add_assoc, add_add_add_comm]
 end
 
+
+
+private lemma lem3_1 {f : ℝ → R} (feq : fn_eq f) (h : f (-1) = 0) (x : ℝ) : f (-x) = f x :=
+begin
+  have h0 := lem1_3 feq x,
+  rwa [h, zero_mul, sub_eq_zero, eq_comm] at h0
+end
+
+private lemma lem3_2 {f : ℝ → R} (feq : fn_eq f) (h : f (-1) = 0) (u v : ℝ≥0) :
+  f (1 + v / 4) - f (1 - v / 4) = extra.comp_sqrt f (u + v) - extra.comp_sqrt f u :=
+begin
+  dsimp only [extra.comp_sqrt],
+  rcases extra.real_mv_poly_range1 u v with ⟨x, y, h0, h1⟩,
+  rw [nonneg.coe_add, h0, h1, mul_div_cancel_left (x * y) four_ne_zero],
+  clear h0 h1 u v,
+  have h0 : (x - y) ^ 2 + 4 * (x * y) = (x + y) ^ 2 := by ring,
+  rw h0; clear h0,
+  replace h := lem3_1 feq h,
+  rw [sqrt_sq_eq_abs, extra.f_abs_eq_of_even h, sqrt_sq_eq_abs, extra.f_abs_eq_of_even h,
+      sub_eq_sub_iff_sub_eq_sub, feq, ← h y, ← feq, mul_neg, ← sub_eq_add_neg, ← sub_eq_add_neg]
+end
+
+private lemma lem3_3 {f : ℝ → R} (feq : fn_eq f) (h : f (-1) = 0) (h0 : f 0 = -1) (u v : ℝ≥0) :
+    extra.comp_sqrt f (u + v) = extra.comp_sqrt f u + extra.comp_sqrt f v + 1 :=
+begin
+  rw [add_assoc, ← sub_eq_iff_eq_add', ← lem3_2 feq h,
+      lem3_2 feq h 0, zero_add, sub_eq_add_neg, add_right_inj],
+  simp [extra.comp_sqrt],
+  rwa [h0, neg_neg]
+end
+
+private lemma lem3_4 {f : ℝ → R} (feq : fn_eq f) (h : f (-1) = 0) (h0 : f 0 = -1) (u v : ℝ≥0) :
+    extra.comp_sqrt f (u * v) + 1 = (extra.comp_sqrt f u + 1) * (extra.comp_sqrt f v + 1) :=
+begin
+  sorry
+end
+
+private lemma lem3_4 {f : ℝ → R} (feq : fn_eq f) (h : f (-1) = 0) (h0 : f 0 = -1) :
+  ∃ φ : ℝ≥0 →+* R, f = λ x : ℝ, φ (x.nnabs ^ 2) - 1 :=
+begin
+  use extra.comp_sqrt f + 1,
+  simp [extra.comp_sqrt]; exact lem1_1 feq,
+  simp only [pi.add_apply, pi.one_apply]; exact lem3_4 feq h h0,
+  simp [extra.comp_sqrt]; rw [h0, neg_add_self],
+  simp only [pi.add_apply, pi.one_apply]; intros x y,
+  rw [lem3_3 feq h h0, add_assoc, add_add_add_comm],
+  simp [extra.comp_sqrt]; funext x,
+  rw [sqrt_sq_eq_abs, extra.f_abs_eq_of_even (lem3_1 feq h)]
+end
 
 
 
