@@ -109,9 +109,6 @@ begin
   rw [sq_sqrt (add_nonneg (nnreal.coe_nonneg v) h), sq_sqrt h, mul_add, add_sub_cancel]
 end
 
-/-- Given f : ℝ → α, this is the function ℝ≥0 → α given by x ↦ f(sqrt(x)). -/
-noncomputable def comp_sqrt {α : Type*} (f : ℝ → α) := λ x : ℝ≥0, f (sqrt x)
-
 lemma f_abs_eq_of_even {α : Type*} {f : ℝ → α} (h : ∀ x : ℝ, f (-x) = f x) (x : ℝ) :
   f (|x|) = f x :=
 begin
@@ -121,6 +118,8 @@ begin
   rw ← abs_eq_neg_self at h0; rw [h0, h]
 end
 
+lemma exists_eq_nnabs_sq (x : ℝ≥0) : ∃ u : ℝ≥0, x = u ^ 2 :=
+  by use nnreal.sqrt x; rw nnreal.sq_sqrt
 
 end extra
 
@@ -231,11 +230,10 @@ begin
 end
 
 private lemma lem3_2 {f : ℝ → R} (feq : fn_eq f) (h : f (-1) = 0) (u v : ℝ≥0) :
-  f (1 + v / 4) - f (1 - v / 4) = extra.comp_sqrt f (u + v) - extra.comp_sqrt f u :=
+  f (1 + v / 4) - f (1 - v / 4) = f (sqrt (u + v)) - f (sqrt u) :=
 begin
-  dsimp only [extra.comp_sqrt],
   rcases extra.real_mv_poly_range1 u v with ⟨x, y, h0, h1⟩,
-  rw [nonneg.coe_add, h0, h1, mul_div_cancel_left (x * y) four_ne_zero],
+  rw [h0, h1, mul_div_cancel_left (x * y) four_ne_zero],
   clear h0 h1 u v,
   have h0 : (x - y) ^ 2 + 4 * (x * y) = (x + y) ^ 2 := by ring,
   rw h0; clear h0,
@@ -245,31 +243,54 @@ begin
 end
 
 private lemma lem3_3 {f : ℝ → R} (feq : fn_eq f) (h : f (-1) = 0) (h0 : f 0 = -1) (u v : ℝ≥0) :
-    extra.comp_sqrt f (u + v) = extra.comp_sqrt f u + extra.comp_sqrt f v + 1 :=
+    f (sqrt (u + v)) = f (sqrt u) + f (sqrt v) + 1 :=
+  by rw [add_assoc, ← sub_eq_iff_eq_add', ← lem3_2 feq h, lem3_2 feq h 0, nnreal.coe_zero,
+         zero_add, sub_eq_add_neg, add_right_inj, sqrt_zero, h0, neg_neg]
+
+private lemma lem3_4 {f : ℝ → R} (feq : fn_eq f) (h : f (-1) = 0) (h0 : f 0 = -1)
+  {u v : ℝ} (h1 : 0 ≤ u) (h2 : 0 ≤ v) : f (sqrt (u + v)) = f (sqrt u) + f (sqrt v) + 1 :=
 begin
-  rw [add_assoc, ← sub_eq_iff_eq_add', ← lem3_2 feq h,
-      lem3_2 feq h 0, zero_add, sub_eq_add_neg, add_right_inj],
-  simp [extra.comp_sqrt],
-  rwa [h0, neg_neg]
+  lift u to ℝ≥0 using h1,
+  lift v to ℝ≥0 using h2,
+  exact lem3_3 feq h h0 u v
 end
 
-private lemma lem3_4 {f : ℝ → R} (feq : fn_eq f) (h : f (-1) = 0) (h0 : f 0 = -1) (u v : ℝ≥0) :
-    extra.comp_sqrt f (u * v) + 1 = (extra.comp_sqrt f u + 1) * (extra.comp_sqrt f v + 1) :=
+private lemma lem3_5 {f : ℝ → R} (feq : fn_eq f) (h : f (-1) = 0) (h0 : f 0 = -1) (u v : ℝ≥0) :
+  f (sqrt (u * v)) + 1 = (f (sqrt u) + 1) * (f (sqrt v) + 1) :=
 begin
-  sorry
+  rcases extra.exists_eq_nnabs_sq u with ⟨x, rfl⟩,
+  rcases extra.exists_eq_nnabs_sq v with ⟨y, rfl⟩,
+  have h1 : ∀ u v : ℝ, 0 ≤ u → 0 ≤ v → f (u + v) = f u + f v + f (sqrt (2 * u * v)) + 2 :=
+  begin
+    intros u v hu hv,
+    have hu2 := sq_nonneg u,
+    have hv2 := sq_nonneg v,
+    have h2uv : 0 ≤ 2 * u * v := mul_nonneg (mul_nonneg zero_le_two hu) hv,
+    rw [← sqrt_sq (add_nonneg hu hv), add_sq, lem3_4 feq h h0 (add_nonneg hu2 h2uv) hv2,
+        lem3_4 feq h h0 hu2 h2uv, sqrt_sq hu, sqrt_sq hv, add_right_comm _ 1 (f v),
+        add_assoc, ← bit0, add_right_comm (f u)]
+  end,
+  have hx := nnreal.coe_nonneg x,
+  have hy := nnreal.coe_nonneg y,
+  have hxyp := add_nonneg hx hy,
+  have hxym := mul_nonneg hx hy,
+  rw [real.sqrt_mul' _ (nnreal.coe_nonneg _), nnreal.coe_pow, sqrt_sq hx, nnreal.coe_pow, 
+      sqrt_sq hy, add_one_mul, mul_add_one, ← feq, h1 1 _ zero_le_one hxym, h1 _ _ hx hy,
+      add_sub_add_right_eq_sub, mul_one, mul_assoc, add_sub_add_right_eq_sub, lem1_1 feq,
+      zero_add, add_assoc, ← add_assoc (f x), add_comm (f x + f y), sub_add_add_cancel]
 end
 
-private lemma lem3_4 {f : ℝ → R} (feq : fn_eq f) (h : f (-1) = 0) (h0 : f 0 = -1) :
+private lemma lem3_6 {f : ℝ → R} (feq : fn_eq f) (h : f (-1) = 0) (h0 : f 0 = -1) :
   ∃ φ : ℝ≥0 →+* R, f = λ x : ℝ, φ (x.nnabs ^ 2) - 1 :=
 begin
-  use extra.comp_sqrt f + 1,
-  simp [extra.comp_sqrt]; exact lem1_1 feq,
-  simp only [pi.add_apply, pi.one_apply]; exact lem3_4 feq h h0,
-  simp [extra.comp_sqrt]; rw [h0, neg_add_self],
-  simp only [pi.add_apply, pi.one_apply]; intros x y,
-  rw [lem3_3 feq h h0, add_assoc, add_add_add_comm],
-  simp [extra.comp_sqrt]; funext x,
-  rw [sqrt_sq_eq_abs, extra.f_abs_eq_of_even (lem3_1 feq h)]
+  use λ x, f (sqrt x) + 1,
+  rw [nnreal.coe_one, sqrt_one, lem1_1 feq, zero_add],
+  simp only [nnreal.coe_mul]; exact lem3_5 feq h h0,
+  rw [nnreal.coe_zero, sqrt_zero, h0, neg_add_self],
+  intros x y; rw [nnreal.coe_add, lem3_3 feq h h0, add_add_add_comm, add_assoc],
+  funext x,
+  rw [ring_hom.coe_mk, add_sub_cancel,  nnreal.coe_pow, coe_nnabs,
+      sq_abs, sqrt_sq_eq_abs, extra.f_abs_eq_of_even (lem3_1 feq h)]
 end
 
 
