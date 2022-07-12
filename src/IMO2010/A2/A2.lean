@@ -4,17 +4,7 @@ import
   analysis.mean_inequalities_pow
   data.real.basic
 
-/-!
-# IMO 2010 A2
-
-Let a, b, c, and d be real numbers such that a + b + c + d = 6 and a^2 + b^2 + c^2 + d^2 = 12.
-Prove that 36 ≤ 4(a^3 + b^3 + c^3 + d^3) - (a^4 + b^4 + c^4 + d^4) ≤ 48.
-
-## Solution
-
-See <http://www.imo-official.org/problems/IMO2010SL.pdf>.
-We will follow the official Solution 1.
--/
+/-! # IMO 2010 A2 -/
 
 open finset
 
