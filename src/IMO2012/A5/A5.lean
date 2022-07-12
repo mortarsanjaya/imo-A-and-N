@@ -73,6 +73,8 @@ For R = ℝ, pretty much f = 0, f = x ↦ x - 1, and f = x ↦ x^2 - 1 are the o
 Indeed, there is only one semiring homomorphism ℝ≥0 → ℝ; the natural lift.
 
 The original question also contained the condition f(-1) ≠ 0.
+
+We still use "sorry" here; if anyone wants to solve it, feel free to help!
 -/
 
 open function real
