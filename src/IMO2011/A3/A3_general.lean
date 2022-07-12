@@ -1,29 +1,6 @@
 import algebra.ring.basic tactic.ring
 
-/-!
-# IMO 2011 A3, Generalized Version
-
-Let R be a commutative ring such that 2 has an inverse in R.
-Determine all pairs of (f, g) functions R → R such that, for all x, y ∈ R,
-  g(f(x + y)) = f(x) + (2x + y) g(y).
-
-## Answer
-
-(f, g) = (x ↦ Ax² + C, x ↦ Ax) for some A, C ∈ R, such that A(A - 1) = C(A - 1) = 0.
-
-## Solution
-
-See https://www.imo-official.org/problems/IMO2011SL.pdf.
-We will closely follow the official Solution.
-It adopts directly to any ring with invertible 2.
-However, after getting g = Ax + B and f = Ax^2 - Bx + C, all we can find is that
-  A^2 = A, B = 0, and AC = C; nothing more than that.
-The first equation can only be reduced to A ∈ {0, 1} when R is also a domain.
-
-# Notes
-
-It seems that the case char(R) = 2 is too ugly to even consider, let alone the general case.
--/
+/-! # IMO 2011 A3, Generalized Version -/
 
 open function
 
