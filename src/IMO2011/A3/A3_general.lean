@@ -7,7 +7,7 @@ open function
 namespace IMOSL
 namespace IMO2011A3
 
-variables {R : Type*} [comm_ring R] [invertible (2 : R)]
+variables {R : Type*} [comm_ring R]
 
 def fn_eq (f g : R → R) := ∀ x y : R, g (f (x + y)) = f x + (2 * x + y) * g y
 
@@ -16,14 +16,15 @@ def fn_eq (f g : R → R) := ∀ x y : R, g (f (x + y)) = f x + (2 * x + y) * g 
 namespace extra
 
 /-- Ravi substitution -/
-lemma ravi_subst (x y z : R) : ∃ a b c : R, x = b + c ∧ y = c + a ∧ z = a + b :=
+lemma ravi_subst [invertible (2 : R)] (x y z : R) :
+  ∃ a b c : R, x = b + c ∧ y = c + a ∧ z = a + b :=
 begin
   use [(y + z - x) * ⅟ 2, (z + x - y) *  ⅟ 2, (x + y - z) *  ⅟ 2],
   repeat { split }; ring_nf; rw [mul_inv_of_self, one_mul]
 end
 
 /-- A criterion for a quadratic polynomial to be zero over a ring with invertible 2 -/
-lemma poly_deg_2_zero {A B C : R} (h : ∀ x : R, A * x ^ 2 + B * x + C = 0) :
+lemma poly_deg_2_zero [invertible (2 : R)] {A B C : R} (h : ∀ x : R, A * x ^ 2 + B * x + C = 0) :
   A = 0 ∧ B = 0 ∧ C = 0 :=
 begin
   have h0 : 2 * B = (A * 1 ^ 2 + B * 1 + C) - (A * (-1) ^ 2 + B * (-1) + C) := by ring,
@@ -62,7 +63,7 @@ begin
   rw [h, two_mul, ← add_assoc, neg_add_cancel_comm, add_comm, ← sub_eq_add_neg, add_comm]
 end
 
-private lemma fn_lem3 : ∃ A B : R, ∀ x : R, g x = A * x + B :=
+private lemma fn_lem3 [invertible (2 : R)] : ∃ A B : R, ∀ x : R, g x = A * x + B :=
 begin
   use [g 1 - g 0, g 0]; intros x,
   rcases extra.ravi_subst 0 x 1 with ⟨a, b, c, h, rfl, h0⟩,
@@ -92,7 +93,7 @@ begin
   nth_rewrite 1 ← h0; ring
 end
 
-private lemma fn_lem6 {A B : R} (h : ∀ x : R, g x = A * x + B) :
+private lemma fn_lem6 [invertible (2 : R)] {A B : R} (h : ∀ x : R, g x = A * x + B) :
   B = 0 ∧ A * (A - 1) = 0 ∧ f 0 * (A - 1) = 0 :=
 begin
   rcases extra.poly_deg_2_zero (fn_lem5 feq h) with ⟨h0, h1, h2⟩,
@@ -107,7 +108,7 @@ end results
 
 
 /-- Final solution -/
-theorem final_solution_general (f g : R → R) : fn_eq f g ↔ ∃ A C : R,
+theorem final_solution_general [invertible (2 : R)] (f g : R → R) : fn_eq f g ↔ ∃ A C : R,
   (f = λ x, A * x ^ 2 + C) ∧ (g = λ x, A * x) ∧ A * (A - 1) = 0 ∧ f 0 * (A - 1) = 0 :=
 begin
   split,
@@ -123,6 +124,28 @@ begin
     rw [mul_sub_one, sub_eq_zero, mul_comm] at h h0,
     rw [mul_add, h0, ← mul_assoc, h],
     ring }
+end
+
+/-- Final solution when R is an integral domain -/
+theorem final_solution_domain [is_domain R] [invertible (2 : R)] (f g : R → R) :
+  fn_eq f g ↔ (f = 0 ∧ g = 0) ∨ ((∃ C : R, f = λ x, x ^ 2 + C) ∧ g = id) :=
+begin
+  rw final_solution_general; split,
+  { rintros ⟨A, C, rfl, rfl, h, h0⟩,
+    rw [mul_eq_zero, sub_eq_zero] at h h0,
+    rcases h with rfl | rfl,
+    simp only [] at h0; rw [or_iff_left, zero_mul, zero_add] at h0,
+    left; simp only [h0, zero_mul, zero_add],
+    rw and_self; refl,
+    exact zero_ne_one,
+    clear h0; right; simp only [one_mul]; split,
+    use C,
+    refl },
+  { rintros (⟨rfl, rfl⟩ | ⟨⟨C, rfl⟩, rfl⟩),
+    use [0, 0]; simp only [zero_mul, pi.zero_apply, add_zero],
+    rw [← and_assoc, and_self, and_self]; split; refl,
+    use [1, C]; simp only [one_mul],
+    rw [sub_self, mul_zero, and_self]; repeat { split } }
 end
 
 end IMO2011A3
