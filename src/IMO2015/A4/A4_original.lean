@@ -1,12 +1,6 @@
 import IMO2015.A4.A4_general data.real.basic
 
-/-!
-# IMO 2015 A4 (P5), Original Version
-
-## Solution
-
-Immediately follows from the generalized version.
--/
+/-! # IMO 2015 A4 (P5), Original Version -/
 
 namespace IMOSL
 namespace IMO2015A4
