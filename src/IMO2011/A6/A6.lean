@@ -1,17 +1,6 @@
 import data.real.basic
 
-/-!
-# IMO 2011 A6 (P3)
-
-Let f : ℝ → ℝ be a function such that, for all x, y ∈ ℝ,
-  (x + y) ≤ y f(x) + f(f(x)).
-Prove that f(x) = 0 for all x ≤ 0.
-
-## Solution
-
-See <https://www.imo-official.org/problems/IMO2011SL.pdf>.
-We will follow the official Solution 1.
--/
+/-! # IMO 2011 A6 (P3) -/
 
 namespace IMOSL
 namespace IMO2011A6
