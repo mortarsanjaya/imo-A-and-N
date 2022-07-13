@@ -1,26 +1,6 @@
 import IMO2019.A1.A1_general data.int.basic algebra.algebra.basic
 
-/-!
-# IMO 2019 A1 (P1), Integer Version
-
-Let g : ℤ → ℤ be a function with g(0) = 0, and let s be a non-zero integer.
-Determine all functions f : ℤ → ℤ such that, for all x, y ∈ ℤ,
-  f(g(x)) + s f(y) = f(f(x + y)).
-
-## Answer
-
-1. g ≠ x ↦ sx: f = 0 only.
-2. g = x ↦ sx: f = 0 and f = x ↦ sx + C for any choice of C ∈ ℤ.
-
-## Solution
-
-The ring of endomorphisms of ℤ is isomorphic to ℤ itself.
-So, that means we can write φ(x) = kx and T(x) = sx for some integer m, r, and s.
-The equation Tφ = φ^2 implies ks = k^2, so either m = s or m = 0.
-The equation φ ∘ g = Tφ reads as k g(x) = skx for all x ∈ ℤ.
-Thus, for g ≠ x ↦ sx, we have k = 0, and the equation φ(C) = T(C) reads as sC = 0 → C + 0.
-For g = x ↦ sx, any choice of C works.
--/
+/-! # IMO 2019 A1 (P1), Integer Version -/
 
 open function
 open_locale classical
