@@ -1,21 +1,6 @@
 import data.real.basic data.nat.basic algebra.big_operators.intervals
 
-/-!
-# IMO 2015 A1
-
-Let a_1, a_2, … be a sequence of positive real numbers such that, for all k ≥ 1,
-  a_{k + 1} ≥ k a_k/(a_k^2 + k - 1).
-Prove that a_1 + a_2 + … + a_n ≥ n for every n ≥ 2.
-
-## Solution
-
-See <http://www.imo-official.org/problems/IMO2015SL.pdf>.
-We will follow the official Solution.
-
-## Implementation details
-
-We will use ℕ = {0, 1, …} indexing instead of ℕ+ = {1, 2, …} indexing.
--/
+/-! # IMO 2015 A1 -/
 
 open finset
 
