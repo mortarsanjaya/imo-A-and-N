@@ -1,19 +1,6 @@
 import data.fintype.card
 
-/-!
-# IMO 2017 A3
-
-Let S be a finite set, and fix some f : S → S.
-Suppose that, for any g : S → S, f ∘ g ∘ f = g ∘ f ∘ g implies g = f.
-Prove that f(f(S)) = f(S).
-
-## Solution
-
-See <http://www.imo-official.org/problems/IMO2017SL.pdf>.
-We will partially follow the official solution.
-We use f^{n + 3} = f^{2n + 3} for the claim instead of f^{n + 2} = f^{2n + 1}.
-Then, we proceed as in the claim: use this property to show that f(f(S)) = f(S).
--/
+/-! # IMO 2017 A3 -/
 
 open function
 
