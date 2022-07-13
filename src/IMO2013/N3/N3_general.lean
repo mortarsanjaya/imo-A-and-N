@@ -1,64 +1,6 @@
 import data.set.finite tactic.ring
 
-/-!
-# IMO 2013 N3, "Generalized" Version
-
-Let S be a totally ordered set.
-Fix a function f : ℕ⁺ → S such that f(ab) = max{f(a), f(b)} for all a, b ∈ ℕ⁺.
-Prove that there exists infinitely many positive integers n such that
-  f(n⁴ + n² + 1) = f((n + 1)⁴ + (n + 1)² + 1).
-
-## Solution
-    
-Call n ∈ ℕ⁺ f-good if f(n⁴ + n² + 1) = f((n + 1)⁴ + (n + 1)² + 1), and f-bad otherwise.
-Let T(n) = n² + n + 1 for each n ∈ ℕ⁺.
-As in the official solution, one notices that, for all n ≥ 2,
-  f(T(n²)) = max{f(T(n - 1)), f(T(n))}.
-Thus, a positive integer n ≥ 2 is f-good if and only if
-  max{f(T(n - 1)), f(T(n))} = max{f(T(n)), f(T(n + 1))}.
-Next, we prove the following easy claim.
-
-Claim:
-For any f-bad positive integer n, if f(T(n - 1)) ≤ f(T(n)) then f(T(n)) < f(T(n + 1)).
-
-Proof:
-If f(T(n + 1)) ≤ f(T(n)), then
-  max{f(T(n - 1)), f(T(n))} = max{f(T(n)), f(T(n + 1))} = T(n).
-That means n is f-good; a contradiction.
-    
-Now suppose that there exists finitely many f-good positive integer.
-Then there exists N ≥ 2 such that for any n ∈ ℕ⁺ with n ≥ N, n is f-bad.
-We divide into two cases:
-
-1. There exists an integer C ≥ N such that f(T(C - 1)) ≤ f(T(C)).
-
-One can show by induction, using the claim, that f(T(k)) > f(T(C)) for any k > C.
-In particular f(T(C - 1)) ≤ f(T(C)) < f(T(C²)) = max{f(T(C - 1)), f(T(C))}.
-A contradiction.
-
-2. For any n ≥ N, we have f(T(n - 1)) > f(T(n)).
-
-Then one can show by induction that f(T(k)) < f(T(N)) for any k > N.
-In particular f(T(N - 1)) < f(T(N)) < f(T(N²)) = max{f(T(N - 1)), f(T(N))}.
-This is again a contradiction.
-
-Both cases yield a contradiction.
-Thus, there must exist infinitely many good positive integers.
-
-## Notes
-
-1. The generalization could be seen as a cheap generalization.
-In the original version, S = ℕ⁺ and f is the largest prime divisor function.
-In fact, the problem should be much easier once we notice the property
-  f(ab) = max{f(a), f(b)}, which the generalization gives away from the start.
-However, one has to work harder to achieve contradiction from the chain of inequalities.
-
-2. The official solution relies on f(T(n)) ≠ f(T(n + 1)) for all n ∈ ℕ⁺, where
-f is the largest prime divisor function as in the original problem.
-We do not rely on this fact at all.
-
-3. In the implementation, instead of using n in the good predicate, we use n + 1.
--/
+/-! # IMO 2013 N3, "Generalized" Version -/
 
 namespace IMOSL
 namespace IMO2013N3
