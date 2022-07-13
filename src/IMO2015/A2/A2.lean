@@ -1,23 +1,6 @@
 import data.int.basic
 
-/-!
-# IMO 2015 A2
-
-Determine all functions f : ℤ → ℤ such that, for all x, y ∈ ℤ,
-  f(x - f(y)) = f(f(x)) - f(y) - 1.
-
-## Answer
-
-f = -1 and f = x ↦ x + 1.
-
-## Solution
-
-See <http://www.imo-official.org/problems/IMO2015SL.pdf>.
-We will follow the official Solution 1.
-After obtaining f(x) = Ax + B, we do not need to fully substitute it into f(f(x)) = f(x + 1).
-Instead, just substitute once: A f(x) + B = A (x + 1) + B.
-So either A = 0 or f(x) = x + 1 for all x ∈ ℤ.
--/
+/-! # IMO 2015 A2 -/
 
 namespace IMOSL
 namespace IMO2015A2
