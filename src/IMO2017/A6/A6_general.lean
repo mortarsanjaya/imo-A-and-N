@@ -1,65 +1,6 @@
 import algebra.algebra.basic algebra.char_p.two tactic.field_simp tactic.ring
 
-/-!
-# IMO 2017 A6 (P2), Generalized Version
-  
-Let F be an arbitrary field.
-Determine all functions f : F → F such that, for all x, y ∈ F,
-  f(f(x) f(y)) + f(x + y) = f(xy).
-
-## Solution, case char(F) ≠ 2
-
-We refer to the solution by user "anantmudgal09" on AoPS:
-  <https://artofproblemsolving.com/community/c6h1480146p8693244>.
-This solution extends to the case char(F) ≠ 2.
-
-## Solution, case char(F) = 2
-
-We showed that f(x + 1) = f(x) - 1 for all x ∈ F.
-In this case, we can write it as f(x + 1) = f(x) + 1.
-Furthermore, for any c ≠ 0, the substitution (x, y) = (c + 1, c⁻¹ + 1) yields
-        f(f(c + 1) f(c⁻¹ + 1)) = 0 → f(c + 1) f(c⁻¹ + 1) = 1.
-The rest of the results that we need before the major step is proved in the previous case.
-Now we prove that f is injective, assuming f ≠ 0.
-
-Consider an arbitrary a, b ∈ F such that f(a + 1) f(b + 1) = 1.
-For any such a and b, the substitution (x, y) = (a + 1, b + 1) yields f(a + b + 1) = f(a + b + ab).
-Note that f(a⁻¹ + 1) f(b⁻¹ + 1) = (f(a + 1) f(b + 1))⁻¹ = 1.
-So, we have f(a⁻¹ + b⁻¹ + 1) = f(a⁻¹ + b⁻¹ + (ab)⁻¹) as well.
-
-Now, notice that (a + b + 1)(a⁻¹ + b⁻¹ + 1) = (a + b + ab)(a⁻¹ + b⁻¹ + (ab)⁻¹).
-Both sides are equal to (a + b + 1)(a + b + ab)/(ab).
-Thus, comparing the original equation with (x, y) = (a + b + 1, a⁻¹ + b⁻¹ + 1) and with
-  (x, y) = (a + b + ab, a⁻¹ + b⁻¹ + (ab)⁻¹), the following two expressions are equal:
-        f(f(a + b + 1) f(a⁻¹ + b⁻¹ + 1)) + f(a + b + a⁻¹ + b⁻¹),
-        f(f(a + b + ab) f(a⁻¹ + b⁻¹ + (ab)⁻¹)) + f(a + b + a⁻¹ + b⁻¹ + ab + (ab)⁻¹).
-But the first summand on the two expressions are equal.
-Thus, we get f(a + b + a⁻¹ + b⁻¹) = f(a + b + a⁻¹ + b⁻¹ + ab + (ab)⁻¹).
-
-It turns out that, for (x, y) = (a + b⁻¹ + 1, b + a⁻¹ + 1), one has
-        x + y = a + b + a⁻¹ + b⁻¹,
-        xy = a + b + a⁻¹ + b⁻¹ + ab + (ab)⁻¹ + 1.
-Thus, the above substitution on the original equation yields f(f(x) f(y)) = 1 ↔ f(x) f(y) = 0.
-That is, either f(a + b⁻¹ + 1) = 0 ↔ a + b⁻¹ = 0 or f(b + a⁻¹ + 1) = 0 ↔ b + a⁻¹ = 0.
-Either way, we get ab = 1.
-
-Finally, take any a, b ∈ F such that f(a) = f(b).
-Replace a and b with c + 1 and d + 1, so f(c + 1) = f(d + 1).
-Since f(x) = 0 ↔ x = 1, either we have c = d = 0 or c, d ≠ 0.
-In the latter case, we have f(c + 1) f(d⁻¹ + 1) = f(d + 1) f(d⁻¹ + 1) = 1.
-Then cd⁻¹ = 1, which implies c = d and thus a = c + 1 = d + 1 = b.
-This shows that f is injective, and we are done.
-
-# Note
-
-The real motivation for considering the equation f(a + 1) f(b + 1) = 1 is as follows.
-Letting g(x) = f(x + 1) = f(x) + 1, one obtains g(g(x) g(y)) + g(x + y) = g(xy + x + y).
-We also have g(x + 1) = g(x) + 1 for all x ∈ F.
-From this equation, one can also get g(x⁻¹) = g(x)⁻¹ for any x ≠ 0.
-Considering the equation g(a) = g(b) alone gets us nowhere.
-So, instead, we consider the equation g(a) g(b) = 1 in hopes of proving that ab = 1 is necessary.
-This turns out to work, as demonstrated above.
--/
+/-! # IMO 2017 A6 (P2), Generalized Version -/
 
 open function
 open_locale classical
