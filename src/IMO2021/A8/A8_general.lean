@@ -19,17 +19,7 @@ def fn_eq (f : ℝ → R) := ∀ a b c : ℝ, (f(a) - f(b)) * (f(b) - f(c)) * (f
 
 
 
-namespace extra
-
-lemma exists_add_eq_mul_eq (x y : ℝ) (h : y ≤ 0) : ∃ u v : ℝ, u + v = x ∧ u * v = y :=
-begin
-  use [(x + sqrt (x ^ 2 - 4 * y)) / 2, (x - sqrt (x ^ 2 - 4 * y)) / 2]; split,
-  rw [← add_div, add_add_sub_cancel, ← mul_two, mul_div_cancel x two_ne_zero],
-  rw [div_mul_div_comm, ← sq_sub_sq, sq_sqrt, sub_sub_cancel, bit0, ← two_mul, mul_div_cancel_left],
-  apply mul_ne_zero; exact two_ne_zero,
-  rw [le_sub_iff_add_le, zero_add],
-  exact le_trans (mul_nonpos_of_nonneg_of_nonpos zero_le_four h) (sq_nonneg x)
-end
+section root3
 
 /-- Third root in ℝ -/
 noncomputable def root3 (x : ℝ) := ite (0 ≤ x) (x ^ (↑3 : ℝ)⁻¹) (- ((-x) ^ (↑3 : ℝ)⁻¹))
@@ -74,6 +64,41 @@ lemma root3_mul (x y : ℝ) : root3 (x * y) = root3 x * root3 y :=
 
 lemma root3_inv (x : ℝ) : root3 x⁻¹ = (root3 x)⁻¹ :=
   cube_inj (by simp only [inv_pow, cube_root3])
+
+lemma root3_one : root3 1 = 1 :=
+  cube_inj (by simp only [cube_root3, one_pow])
+
+lemma root3_zero : root3 0 = 0 :=
+  cube_inj (by simp only [cube_root3]; rw [zero_pow (nat.zero_lt_bit1 1)])
+
+lemma root3_pow (x : ℝ) (n : ℕ) : root3 (x ^ n) = root3 x ^ n :=
+begin
+  induction n with n n_ih,
+  rw [pow_zero, pow_zero, root3_one],
+  rw [pow_succ, root3_mul, n_ih, pow_succ]
+end
+
+lemma mul_root3_eq_root3_pow3_mul (x y : ℝ) : x * root3 y = root3 (x ^ 3 * y) :=
+  by rw [root3_mul, root3_cube]
+
+lemma root3_ne_zero {x : ℝ} (h : x ≠ 0) : root3 x ≠ 0 :=
+  by contrapose! h; apply root3_inj; rw [h, root3_zero]
+
+end root3
+
+
+
+namespace extra
+
+lemma exists_add_eq_mul_eq (x y : ℝ) (h : y ≤ 0) : ∃ u v : ℝ, u + v = x ∧ u * v = y :=
+begin
+  use [(x + sqrt (x ^ 2 - 4 * y)) / 2, (x - sqrt (x ^ 2 - 4 * y)) / 2]; split,
+  rw [← add_div, add_add_sub_cancel, ← mul_two, mul_div_cancel x two_ne_zero],
+  rw [div_mul_div_comm, ← sq_sub_sq, sq_sqrt, sub_sub_cancel, bit0, ← two_mul, mul_div_cancel_left],
+  apply mul_ne_zero; exact two_ne_zero,
+  rw [le_sub_iff_add_le, zero_add],
+  exact le_trans (mul_nonpos_of_nonneg_of_nonpos zero_le_four h) (sq_nonneg x)
+end
 
 end extra
 
@@ -120,8 +145,8 @@ begin
     convert feq; clear feq; ring_nf,
     rw [h0, add_one_mul, ← sq, gold_sq, add_right_comm, add_sub_cancel, ← two_mul],
     rw [add_one_mul (-golden_ratio), neg_mul, add_assoc, ← sq, gold_sq, neg_add_self, zero_mul] },
-  use extra.root3 (x / (2 * golden_ratio)),
-  rw [extra.cube_root3, mul_div_cancel' x (mul_ne_zero two_ne_zero gold_ne_zero)]
+  use root3 (x / (2 * golden_ratio)),
+  rw [cube_root3, mul_div_cancel' x (mul_ne_zero two_ne_zero gold_ne_zero)]
 end
 
 private lemma lem2_3 {a b : ℝ} (h : f a = f b) (h0 : a ≠ b) : ∃ c : ℝ, c ≠ 0 ∧ f c = f 0 :=
@@ -223,6 +248,16 @@ begin
   exact zero_ne_one h0
 end
 
+private lemma lem3_6 (f1_eq_1 : f 1 = 1) : (2 : R) ≠ 0 :=
+begin
+  intros h,
+  replace h : f 1 = f (-1) :=
+    by rw [lem3_5 feq f_inj f0_eq_0, f1_eq_1, eq_neg_iff_add_eq_zero, ← bit0, h],
+  replace h := f_inj h,
+  rw [eq_neg_iff_add_eq_zero, ← bit0] at h,
+  exact two_ne_zero h
+end
+
 private theorem thm3_2 (f1_eq_1 : f 1 = 1) (a b : ℝ) : f (a * b) = f a * f b :=
 begin
   revert a b; suffices : ∀ a b : ℝ, 0 ≤ a → f (a * b) = f a * f b,
@@ -248,12 +283,7 @@ begin
   rw [neg_sq, lem3_5 feq f_inj f0_eq_0, neg_mul, lem3_5 feq f_inj f0_eq_0] at h,
   ring_nf at h,
   rwa [mul_assoc, mul_eq_mul_left_iff, or_iff_left, mul_comm, eq_comm] at h,
-  clear h; intros h,
-  replace h : f 1 = f (-1) :=
-    by rw [lem3_5 feq f_inj f0_eq_0, f1_eq_1, eq_neg_iff_add_eq_zero, ← bit0, h],
-  replace h := f_inj h,
-  rw [eq_neg_iff_add_eq_zero, ← bit0] at h,
-  exact two_ne_zero h
+  exact lem3_6 feq f_inj f0_eq_0 f1_eq_1
 end
 
 private theorem thm3_3 (f1_eq_1 : f 1 = 1) (a : ℝ) (n : ℕ) : f (a ^ n) = f a ^ n :=
@@ -313,6 +343,121 @@ begin
     mul_comm v u, ← h0, thm3_3 feq f_inj f0_eq_0 f1_eq_1]; ring,
   rw [sub_right_inj, mul_comm, add_comm (1 : ℝ), sub_eq_add_neg, add_comm (1 : ℝ), neg_mul]
 end
+
+private lemma lem4_3 (t : ℝ) : f (t + 1) - f (t - 1) = (f 2 - 2) * f (root3 t ^ 2) + 2 :=
+begin
+  rcases eq_or_ne t 0 with rfl | h,
+  rw [zero_add, zero_sub, lem3_5 feq f_inj f0_eq_0, f1_eq_1, sub_neg_eq_add,
+      root3_zero, zero_pow zero_lt_two, f0_eq_0, mul_zero, zero_add, bit0],
+  set u := root3 t with hu,
+  have h0 := lem4_2 feq f_inj f0_eq_0 f1_eq_1 u⁻¹ u,
+  rw [inv_mul_cancel (root3_ne_zero h), sub_self, f0_eq_0, add_zero, ← bit0,
+      eq_sub_iff_add_eq, mul_sub_one, sub_add, sub_eq_add_neg, neg_sub] at h0,
+  replace h0 := congr_arg (λ x, f (u ^ 2) * x) h0; simp only [] at h0,
+  have fmul := thm3_2 feq f_inj f0_eq_0 f1_eq_1,
+  rw [mul_add, mul_add, mul_left_comm, ← fmul, ← fmul, ← fmul, mul_add, mul_sub (u ^ 2),
+      ← mul_pow, mul_inv_cancel (root3_ne_zero h), one_pow, eq_comm] at h0,
+  convert h0 using 1,
+  rw ← pow_succ'; change 2 + 1 with 3,
+  rw [cube_root3, add_comm, ← neg_sub t 1, lem3_5 feq f_inj f0_eq_0, sub_eq_add_neg],
+  rw [f1_eq_1, mul_one, add_comm, mul_comm]
+end
+
+private theorem lem4 (f2_eq_2 : f 2 = 2) (t : ℝ) : ∃ φ : ℝ →+* R, (φ : ℝ → R) = f :=
+begin
+  have fmul := thm3_2 feq f_inj f0_eq_0 f1_eq_1,
+  use f,
+  exact f1_eq_1,
+  exact fmul,
+  exact f0_eq_0,
+  swap,
+  rw ring_hom.coe_mk,
+  intros x y,
+  rcases eq_or_ne y 0 with rfl | h,
+  rw [f0_eq_0, add_zero, add_zero],
+  have h0 := lem4_3 feq f_inj f0_eq_0 f1_eq_1 (2 * x / y + 1),
+  rw [f2_eq_2, sub_self, zero_mul, zero_add, add_sub_cancel, add_assoc, ← bit0] at h0,
+  replace h0 := congr_arg (λ x, x * f y) h0; simp only [] at h0,
+  rwa [sub_mul, ← fmul, ← fmul, add_mul, div_mul_cancel _ h, sub_eq_iff_eq_add, ← mul_add,
+       fmul, fmul, f2_eq_2, ← mul_add, add_comm (f y), mul_eq_mul_left_iff, or_iff_left] at h0,
+  exact lem3_6 feq f_inj f0_eq_0 f1_eq_1
+end
+
+
+
+variable f2_ne_2 : f 2 ≠ 2
+include f2_ne_2
+
+private lemma lem5_1 (t : ℝ) :
+  f (root3 (t + 1) ^ 2) + f (root3 (t - 1) ^ 2) = f (root3 2) * f (root3 t ^ 2) + 2 :=
+begin
+  have X := lem4_3 feq f_inj f0_eq_0 f1_eq_1,
+  have h := congr_arg2 (λ x y, x + y) (X (t + 1)) (X (t - 1)); simp only [] at h,
+  rw [add_sub_cancel, sub_add_cancel, sub_add_sub_cancel,
+      sub_sub, add_assoc, ← bit0, add_add_add_comm, ← mul_add] at h,
+  replace X := congr_arg (λ x, f 2 * x) (X (t / 2)); simp only [] at X,
+  have fmul := thm3_2 feq f_inj f0_eq_0 f1_eq_1,
+  rw [mul_sub, ← fmul, ← fmul, mul_add_one, mul_sub_one, mul_div_cancel' t two_ne_zero, h] at X,
+  clear h,
+  rw [mul_add (f 2), ← mul_two, ← eq_sub_iff_add_eq, add_sub_assoc, ← sub_mul, mul_left_comm,
+      ← mul_add, mul_eq_mul_left_iff, sub_eq_zero, or_iff_left f2_ne_2] at X,
+  rw [X, ← fmul, ← fmul, ← root3_pow, ← root3_pow, ← root3_mul, mul_root3_eq_root3_pow3_mul],
+  congr' 3,
+  rw [div_pow, pow_succ, mul_assoc, mul_div_cancel'],
+  exact pow_ne_zero 2 two_ne_zero
+end
+
+private lemma lem5_2 : f (root3 2) = 2 :=
+begin
+  have h := lem5_1 feq f_inj f0_eq_0 f1_eq_1 f2_ne_2 1,
+  rw [sub_self, root3_zero, zero_pow zero_lt_two, f0_eq_0, add_zero, root3_one, one_pow,
+      f1_eq_1, mul_one, thm3_3 feq f_inj f0_eq_0 f1_eq_1, ← bit0, ← sub_eq_zero] at h,
+  set u := f (root3 2),
+  replace h : (u + 1) * (u - 2) = 0 := by rw ← h; ring,
+  rwa [mul_eq_zero, sub_eq_zero, add_eq_zero_iff_eq_neg, or_comm] at h,
+  cases h with h h,
+  exact h,
+  rw [← f1_eq_1, ← lem3_5 feq f_inj f0_eq_0] at h,
+  replace h := congr_arg (λ x, x ^ 3) (f_inj h),
+  simp only [one_pow, neg_pow_bit1, cube_root3] at h,
+  rw ← add_eq_zero_iff_eq_neg at h,
+  exfalso; exact three_ne_zero h
+end
+
+private lemma lem5_3 (t u : ℝ) :
+  f (t + u) - f (t - u) = 2 * (3 * f (root3 t ^ 2) * f (root3 u) + f u) :=
+begin
+  have f2_eq_8 : f 2 = 2 * 3 + 2 := by rw [← cube_root3 2, thm3_3 feq f_inj f0_eq_0 f1_eq_1,
+    lem5_2 feq f_inj f0_eq_0 f1_eq_1 f2_ne_2]; norm_num,
+  rcases eq_or_ne u 0 with rfl | h,
+  rw [add_zero, sub_zero, sub_self, root3_zero, f0_eq_0, mul_zero, add_zero, mul_zero],
+  have fmul := thm3_2 feq f_inj f0_eq_0 f1_eq_1,
+  have h0 := congr_arg (λ x, x * f u) (lem4_3 feq f_inj f0_eq_0 f1_eq_1 (t / u)),
+  simp only [] at h0,
+  rw [sub_mul, ← fmul, ← fmul, add_one_mul, sub_one_mul, div_mul_cancel t h] at h0,
+  rw [h0, f2_eq_8, add_sub_cancel]; clear h0,
+  rw [mul_assoc, ← mul_add_one, mul_assoc, add_one_mul, mul_assoc, mul_assoc]; congr' 3,
+  rw [← fmul, ← fmul, ← root3_pow, ← root3_pow, ← root3_mul, mul_comm,
+      mul_root3_eq_root3_pow3_mul, mul_comm, pow_succ' u, ← mul_assoc]; congr' 3,
+  rw [div_pow, div_mul_cancel _ (pow_ne_zero 2 h)]
+end
+
+private lemma lem5_4 (t u : ℝ) : f (root3 (t + u)) ^ 3 = (f (root3 t) + f (root3 u)) ^ 3 :=
+begin
+  have fpow := thm3_3 feq f_inj f0_eq_0 f1_eq_1,
+  rw [← fpow, cube_root3],
+  have h := lem5_3 feq f_inj f0_eq_0 f1_eq_1 f2_ne_2,
+  replace h := congr_arg2 (λ x y, x + y) (h t u) (h u t); simp only [] at h,
+  rw [← neg_sub u t, lem3_5 feq f_inj f0_eq_0, sub_neg_eq_add, add_add_sub_cancel,
+      add_comm u t, ← two_mul, ← mul_add, mul_eq_mul_left_iff,
+      or_iff_left (lem3_6 feq f_inj f0_eq_0 f1_eq_1)] at h,
+  nth_rewrite 2 ← cube_root3 u at h,
+  nth_rewrite 3 ← cube_root3 t at h,
+  rw [fpow, fpow, fpow, fpow] at h,
+  rw h; ring
+end
+
+
 
 
 
