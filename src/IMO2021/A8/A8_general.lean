@@ -459,6 +459,14 @@ end
 
 private theorem thm5 : ∃ φ : ℝ →+* R, f = λ x, φ x ^ 3 :=
 begin
+  use λ x, f (root3 x),
+  rw [root3_one, f1_eq_1],
+  intros x y,
+  rw [root3_mul, thm3_2 feq f_inj f0_eq_0 f1_eq_1],
+  rw [root3_zero, f0_eq_0],
+  swap,
+  rw ring_hom.coe_mk; funext x,
+  rw [← thm3_3 feq f_inj f0_eq_0 f1_eq_1, cube_root3],
   sorry
 end
 
