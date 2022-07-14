@@ -135,9 +135,9 @@ begin
        add_zero, mul_zero, add_zero, zero_mul, add_zero, eq_comm, sub_eq_zero, eq_comm] at feq
 end
 
-private lemma lem2_2 (h : ∀ x : ℝ, f (-x) = f x) : ∃ C : R, f = const ℝ C :=
+private lemma lem2_2 (h : ∀ x : ℝ, f (-x) = f x) : f = const ℝ (f 0) :=
 begin
-  use [f 0]; ext x,
+  ext x,
   suffices : ∃ y : ℝ, x = 2 * golden_ratio * y ^ 3,
   { cases this with y h0,
     replace feq := feq y (-y) (golden_ratio * y),
@@ -154,7 +154,7 @@ begin
   sorry
 end
 
-private theorem thm2 (h : ¬injective f) : ∃ C : R, f = const ℝ C :=
+private theorem thm2 (h : ¬injective f) : f = const ℝ (f 0) :=
 begin
   simp only [injective, not_forall] at h,
   rcases h with ⟨a, b, h, h0⟩,
@@ -363,7 +363,7 @@ begin
   rw [f1_eq_1, mul_one, add_comm, mul_comm]
 end
 
-private theorem lem4 (f2_eq_2 : f 2 = 2) (t : ℝ) : ∃ φ : ℝ →+* R, (φ : ℝ → R) = f :=
+private theorem thm4 (f2_eq_2 : f 2 = 2) : ∃ φ : ℝ →+* R, f = (φ : ℝ → R) :=
 begin
   have fmul := thm3_2 feq f_inj f0_eq_0 f1_eq_1,
   use f,
@@ -457,11 +457,10 @@ begin
   rw h; ring
 end
 
-
-
-
-
-
+private theorem thm5 : ∃ φ : ℝ →+* R, f = λ x, φ x ^ 3 :=
+begin
+  sorry
+end
 
 end f_inj_f0_eq_0
 
@@ -469,7 +468,57 @@ end results
 
 
 
-
+theorem final_solution (f : ℝ → R) : fn_eq f ↔
+  (∃ C : R, f = const ℝ C) ∨ ∃ (φ : ℝ →+* R) (C : R),
+   ((f = φ + const ℝ C) ∨ (f = (λ x, φ x ^ 3) + const ℝ C)) ∨
+   ((f = -φ + const ℝ C) ∨ (f = -(λ x, φ x ^ 3) + const ℝ C)) :=
+begin
+  split,
+  { intros feq,
+    by_cases h : injective f,
+    swap,
+    left; use (f 0); exact thm2 feq h,
+    replace feq := lem1_1 feq (-f 0),
+    replace h : injective (f + const ℝ (-f 0)) := λ x y h0,
+      by simp only [pi.add_apply, const_apply, add_left_inj] at h0; exact h h0,
+    set g := f + const ℝ (-f 0) with hg,
+    have h0 : g 0 = 0 := by simp only [g, pi.add_apply, const_apply, add_right_neg],
+    have h1 := thm3_1 feq h h0,
+    rw [sq_eq_one_iff] at h1,
+    right; cases h1 with h1 h1,
+    { cases eq_or_ne (g 2) 2 with h2 h2,
+      rcases thm4 feq h h0 h1 h2 with ⟨φ, h3⟩,
+      use [φ, (f 0)]; left; left,
+      rw [← h3, hg, add_assoc, pi.const_add (-f 0), neg_add_self, pi.const_zero, add_zero],
+      rcases thm5 feq h h0 h1 h2 with ⟨φ, h3⟩,
+      use [φ, (f 0)]; left; right,
+      rw [← h3, hg, add_assoc, pi.const_add (-f 0), neg_add_self, pi.const_zero, add_zero] },
+    { clear_value g; subst hg,
+      set g := -(f + const ℝ (-f 0)) with hg,
+      replace feq := lem1_2 feq,
+      replace h : injective g := λ x y h2,
+        by rw [hg, pi.neg_apply, pi.neg_apply, neg_inj] at h2; exact h h2,
+      nth_rewrite 2 ← neg_zero at h0,
+      rw [eq_neg_iff_eq_neg, eq_comm, ← pi.neg_apply (f + _) 0] at h0,
+      rw [eq_neg_iff_eq_neg, eq_comm, ← pi.neg_apply (f + _) 1] at h1,
+      rw ← hg at feq h0 h1,
+      cases eq_or_ne (g 2) 2 with h2 h2,
+      rcases thm4 feq h h0 h1 h2 with ⟨φ, h3⟩,
+      use [φ, (f 0)]; right; left,
+      rw [← h3, hg, neg_neg, add_assoc, pi.const_add (-f 0),
+          neg_add_self, pi.const_zero, add_zero],
+      rcases thm5 feq h h0 h1 h2 with ⟨φ, h3⟩,
+      use [φ, (f 0)]; right; right,
+      rw [← h3, hg, neg_neg, add_assoc, pi.const_add (-f 0),
+          neg_add_self, pi.const_zero, add_zero] } },
+  { rintros (⟨C, rfl⟩ | ⟨φ, C, h⟩),
+    simp [fn_eq],
+    suffices h0 : fn_eq φ ∧ fn_eq (λ x, φ x ^ 3),
+    { cases h0 with h0 h1,
+      rcases h with (rfl | rfl) | (rfl | rfl),
+      exacts [lem1_1 h0 C, lem1_1 h1 C, lem1_1 (lem1_2 h0) C, lem1_1 (lem1_2 h1) C] },
+    split; intros a b c; simp only [map_add, map_pow, map_mul]; ring },
+end
 
 end IMO2021A8
 end IMOSL
