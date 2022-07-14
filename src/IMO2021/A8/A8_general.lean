@@ -90,14 +90,19 @@ end root3
 
 namespace extra
 
-lemma exists_add_eq_mul_eq (x y : ℝ) (h : y ≤ 0) : ∃ u v : ℝ, u + v = x ∧ u * v = y :=
+lemma exists_add_eq_mul_eq (x y : ℝ) (h : 4 * y ≤ x ^ 2) : ∃ u v : ℝ, u + v = x ∧ u * v = y :=
 begin
   use [(x + sqrt (x ^ 2 - 4 * y)) / 2, (x - sqrt (x ^ 2 - 4 * y)) / 2]; split,
   rw [← add_div, add_add_sub_cancel, ← mul_two, mul_div_cancel x two_ne_zero],
   rw [div_mul_div_comm, ← sq_sub_sq, sq_sqrt, sub_sub_cancel, bit0, ← two_mul, mul_div_cancel_left],
   apply mul_ne_zero; exact two_ne_zero,
-  rw [le_sub_iff_add_le, zero_add],
-  exact le_trans (mul_nonpos_of_nonneg_of_nonpos zero_le_four h) (sq_nonneg x)
+  rwa sub_nonneg,
+end
+
+lemma exists_root_quad_strong (x y : ℝ) (h : 4 * y ≤ x ^ 2) : ∃ t : ℝ, t ^ 2 + x * t + y = 0 :=
+begin
+  rcases exists_add_eq_mul_eq x y h with ⟨u, v, h, h0⟩,
+  use -u; rw [← h, ← h0, sq, ← add_mul, neg_add_cancel_left, mul_comm, neg_mul, neg_add_self]
 end
 
 end extra
@@ -106,6 +111,9 @@ end extra
 
 
 section results
+
+/-- Useful definition for the case where f is not injective -/
+private def good (f : ℝ → R) (t : ℝ) := ∃ c : ℝ, c ≠ 0 ∧ f (c * t) = f c
 
 variables {f : ℝ → R} (feq : fn_eq f)
 include feq
@@ -122,6 +130,8 @@ begin
 end
 
 
+
+section f_not_inj
 
 private lemma lem2_1 {c : ℝ} (c_ne_0 : c ≠ 0) (h : f c = f 0) (x : ℝ) : f (-x) = f x :=
 begin
@@ -149,18 +159,135 @@ begin
   rw [cube_root3, mul_div_cancel' x (mul_ne_zero two_ne_zero gold_ne_zero)]
 end
 
-private lemma lem2_3 {a b : ℝ} (h : f a = f b) (h0 : a ≠ b) : ∃ c : ℝ, c ≠ 0 ∧ f c = f 0 :=
+private lemma lem2_3 {t : ℝ} (t_good : good f t) : good f t⁻¹ :=
 begin
-  sorry
+  rcases eq_or_ne t 0 with rfl | h,
+  rwa inv_zero,
+  rcases t_good with ⟨c, h0, h1⟩,
+  use c * t; split,
+  exact mul_ne_zero h0 h,
+  rw [h1, mul_assoc, mul_inv_cancel h, mul_one]
+end
+
+private lemma lem2_4 {t : ℝ} (t_ne_0 : t ≠ 0) (t_good : good f t) : good f (t ^ 4) :=
+begin
+  rcases t_good with ⟨c, c_ne_0, h⟩,
+  replace feq := feq (c * t) c (- c * t ^ 2),
+  rw [h, sub_self, zero_mul, zero_mul, eq_comm, sub_eq_zero] at feq,
+  ring_nf at feq,
+  use t * c ^ 3; split,
+  exact mul_ne_zero t_ne_0 (pow_ne_zero 3 c_ne_0),
+  rw [mul_comm, ← mul_assoc, ← pow_succ', feq]
+end
+
+private lemma lem2_5 (h : ∃ t : ℝ, (t ≤ 0 ∨ 2 < t) ∧ good f t) : good f 0 :=
+begin
+  rcases h with ⟨t, h, t_good⟩,
+  rcases eq_or_ne t 0 with rfl | t_ne_0,
+  exact t_good,
+  replace h : ∃ u : ℝ, u ^ 2 + t ^ 2 * u + t = 0 :=
+  begin
+    apply extra.exists_root_quad_strong,
+    cases h with h h,
+    exact le_trans (mul_nonpos_of_nonneg_of_nonpos zero_le_four h) (sq_nonneg _),
+    rw [← pow_mul, mul_two, ← bit0, pow_succ', mul_le_mul_right (lt_trans zero_lt_two h)],
+    refine le_trans _ (pow_le_pow_of_le_left zero_le_two (le_of_lt h) 3),
+    norm_num
+  end,
+  rcases h with ⟨u, h0⟩,
+  rcases t_good with ⟨c, c_ne_0, h⟩,
+  use ((t + u ^ 2) * t + u) * c ^ 3,
+  rw [mul_zero, and_comm]; split,
+  { replace feq := feq (c * t) c (c * u),
+    rw [h, sub_self, zero_mul, zero_mul, eq_comm, sub_eq_zero] at feq,
+    ring_nf at feq,
+    rwa [add_one_mul, add_comm, ← add_assoc, mul_assoc, mul_comm u, ← sq, h0, zero_mul] at feq },
+  { refine mul_ne_zero _ (pow_ne_zero 3 c_ne_0),
+    intros h1,
+    rw [add_right_comm, add_eq_zero_iff_eq_neg, add_comm] at h0,
+    rw [h0, neg_mul, neg_add_eq_zero, mul_right_comm, mul_left_eq_self₀, or_comm] at h1,
+    rcases h1 with rfl | h1,
+    rw [zero_pow zero_lt_two, add_zero, mul_zero, neg_zero] at h0,
+    exact t_ne_0 h0,
+    replace h1 := congr_arg root3 h1,
+    rw [← pow_succ', ← bit1, root3_cube, root3_one] at h1,
+    rw [h1, one_pow, one_mul, ← add_eq_zero_iff_eq_neg] at h0,
+    replace h1 : 4 * (1 + u ^ 2 + u) = (2 * u + 1) ^ 2 + 3 := by ring,
+    rw [h0, mul_zero, eq_comm, add_eq_zero_iff_eq_neg] at h1,
+    replace h0 : (0 : ℝ) ≤ -3 := by rw ← h1; exact sq_nonneg _,
+    exact not_lt_of_le h0 (by norm_num) }
+end
+
+private lemma lem2_6 (h : ∃ t : ℝ, 0 < t ∧ t < 1 ∧ good f t) : ∃ t : ℝ, 2 < t ∧ good f t :=
+begin
+  rcases h with ⟨t, t_gt_0, t_lt_1, h⟩,
+  replace h : ∀ n : ℕ, ∃ c : ℝ, c ≠ 0 ∧ f (c * t ^ (4 ^ n)) = f c :=
+  begin
+    intros n; induction n with n n_ih,
+    rcases h with ⟨c, h, h0⟩,
+    use c,
+    rw [and_iff_right h, pow_zero, pow_one, h0],
+    rw [pow_succ', pow_mul],
+    refine lem2_4 feq (pow_ne_zero _ (ne_of_gt t_gt_0)) n_ih
+  end,
+
+  obtain ⟨n, h0⟩ : ∃ n : ℕ, t ^ (4 ^ n) < 2⁻¹ :=
+  begin
+    obtain ⟨n, h0⟩ : ∃ n : ℕ, t ^ n < 2⁻¹ :=
+      exists_pow_lt_of_lt_one (inv_pos.mpr zero_lt_two) t_lt_1,
+    use n; refine lt_trans _ h0,
+    rw pow_lt_pow_iff_of_lt_one t_gt_0 t_lt_1,
+    refine nat.lt_pow_self (by norm_num) n
+  end,
+
+  replace t_gt_0 := pow_pos t_gt_0 (4 ^ n),
+  replace h := h n,
+  rcases h with ⟨c, h, h1⟩,
+  set u := t ^ 4 ^ n with hu,
+  use u⁻¹; split,
+  rwa lt_inv zero_lt_two t_gt_0,
+  use c * u; split,
+  exact mul_ne_zero h (ne_of_gt t_gt_0),
+  rw [h1, mul_assoc, mul_inv_cancel (ne_of_gt t_gt_0), mul_one]
+end
+
+private lemma lem2_7 (h : ∃ t : ℝ, t ≠ 1 ∧ good f t) : good f 0 :=
+begin
+  rcases h with ⟨t, h, h0⟩,
+  cases le_or_lt t 0 with h1 h1,
+  exact lem2_5 feq ⟨t, (by left; exact h1), h0⟩,
+  rw ne_iff_lt_or_gt at h,
+  cases h with h h,
+  rcases lem2_6 feq ⟨t, h1, h, h0⟩ with ⟨u, h2, h3⟩,
+  exact lem2_5 feq ⟨u, (by right; exact h2), h3⟩,
+  rw [← inv_one, gt_iff_lt, inv_lt zero_lt_one h1] at h,
+  rw ← inv_pos at h1,
+  rcases lem2_6 feq ⟨t⁻¹, h1, h, (lem2_3 feq h0)⟩ with ⟨u, h2, h3⟩,
+  exact lem2_5 feq ⟨u, (by right; exact h2), h3⟩
+end
+
+private lemma lem2_8 {a b : ℝ} (h : f a = f b) (h0 : a ≠ b) : ∃ c : ℝ, c ≠ 0 ∧ f c = f 0 :=
+begin
+  rcases eq_or_ne b 0 with rfl | h1,
+  exact ⟨a, h0, h⟩,
+  suffices : good f 0,
+  { rcases this with ⟨c, h1, h2⟩,
+    use c; rw [and_iff_right h1, ← h2, mul_zero] },
+  apply lem2_7 feq,
+  use a / b; split,
+  intros h2; exact h0 (eq_of_div_eq_one h2),
+  use b; rw [and_iff_right h1, mul_div_cancel' a h1, h]
 end
 
 private theorem thm2 (h : ¬injective f) : f = const ℝ (f 0) :=
 begin
   simp only [injective, not_forall] at h,
   rcases h with ⟨a, b, h, h0⟩,
-  rcases lem2_3 feq h h0 with ⟨c, h1, h2⟩,
+  rcases lem2_8 feq h h0 with ⟨c, h1, h2⟩,
   exact lem2_2 feq (lem2_1 feq h1 h2)
 end
+
+end f_not_inj
 
 
 
@@ -329,7 +456,8 @@ begin
     replace this := this _ y h,
     rwa [neg_sq, neg_mul, sub_neg_eq_add, ← sub_eq_add_neg, add_comm (f (1 - _))] at this },
   intros x y x_le_0,
-  obtain ⟨u, v, h, h0⟩ := extra.exists_add_eq_mul_eq y x x_le_0,
+  obtain ⟨u, v, h, h0⟩ : ∃ u v : ℝ, u + v = y ∧ u * v = x := extra.exists_add_eq_mul_eq y x
+      (le_trans (mul_nonpos_of_nonneg_of_nonpos zero_le_four x_le_0) (sq_nonneg y)),
   have h1 := lem4_1 feq f_inj f0_eq_0 f1_eq_1 u v,
   rw [h, h0] at h1,
   have h2 := lem4_1 feq f_inj f0_eq_0 f1_eq_1 (-u) (-v),
