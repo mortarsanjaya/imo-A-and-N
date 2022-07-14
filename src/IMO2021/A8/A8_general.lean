@@ -19,6 +19,67 @@ def fn_eq (f : ℝ → R) := ∀ a b c : ℝ, (f(a) - f(b)) * (f(b) - f(c)) * (f
 
 
 
+namespace extra
+
+lemma exists_add_eq_mul_eq (x y : ℝ) (h : y ≤ 0) : ∃ u v : ℝ, u + v = x ∧ u * v = y :=
+begin
+  use [(x + sqrt (x ^ 2 - 4 * y)) / 2, (x - sqrt (x ^ 2 - 4 * y)) / 2]; split,
+  rw [← add_div, add_add_sub_cancel, ← mul_two, mul_div_cancel x two_ne_zero],
+  rw [div_mul_div_comm, ← sq_sub_sq, sq_sqrt, sub_sub_cancel, bit0, ← two_mul, mul_div_cancel_left],
+  apply mul_ne_zero; exact two_ne_zero,
+  rw [le_sub_iff_add_le, zero_add],
+  exact le_trans (mul_nonpos_of_nonneg_of_nonpos zero_le_four h) (sq_nonneg x)
+end
+
+/-- Third root in ℝ -/
+noncomputable def root3 (x : ℝ) := ite (0 ≤ x) (x ^ (↑3 : ℝ)⁻¹) (- ((-x) ^ (↑3 : ℝ)⁻¹))
+
+lemma root3_cube (x : ℝ) : root3 (x ^ 3) = x :=
+begin
+  have zero_lt_three : 0 < 3 := nat.zero_lt_bit1 1,
+  simp only [root3, pow_bit1_nonneg_iff],
+  by_cases h : 0 ≤ x,
+  simp only [h, if_true],
+  exact pow_nat_rpow_nat_inv h zero_lt_three,
+  simp only [h, if_false],
+  rw [← neg_pow_bit1, pow_nat_rpow_nat_inv _ zero_lt_three, neg_neg],
+  rw [← lt_iff_not_le, ← neg_pos] at h,
+  exact le_of_lt h
+end
+
+lemma cube_root3 (x : ℝ) : (root3 x) ^ 3 = x :=
+begin
+  have zero_lt_three : 0 < 3 := nat.zero_lt_bit1 1,
+  simp only [root3],
+  by_cases h : 0 ≤ x,
+  simp only [h, if_true],
+  exact rpow_nat_inv_pow_nat h zero_lt_three,
+  simp only [h, if_false],
+  rw [neg_pow_bit1, rpow_nat_inv_pow_nat _ zero_lt_three, neg_neg],
+  rw [← lt_iff_not_le, ← neg_pos] at h,
+  exact le_of_lt h
+end
+
+lemma cube_inj : injective (λ x : ℝ, x ^ 3) :=
+begin
+  intros x y h; simp only [] at h,
+  rw [← root3_cube x, h, root3_cube]
+end
+
+lemma root3_inj : injective root3 :=
+  λ x y h, by rw [← cube_root3 x, h, cube_root3]
+
+lemma root3_mul (x y : ℝ) : root3 (x * y) = root3 x * root3 y :=
+  cube_inj (by simp only [mul_pow, cube_root3])
+
+lemma root3_inv (x : ℝ) : root3 x⁻¹ = (root3 x)⁻¹ :=
+  cube_inj (by simp only [inv_pow, cube_root3])
+
+end extra
+
+
+
+
 section results
 
 variables {f : ℝ → R} (feq : fn_eq f)
@@ -59,16 +120,8 @@ begin
     convert feq; clear feq; ring_nf,
     rw [h0, add_one_mul, ← sq, gold_sq, add_right_comm, add_sub_cancel, ← two_mul],
     rw [add_one_mul (-golden_ratio), neg_mul, add_assoc, ← sq, gold_sq, neg_add_self, zero_mul] },
-  revert x; suffices : ∀ x : ℝ, 0 ≤ x → ∃ y : ℝ, x = y ^ 3,
-  { intros x,
-    have h0 := mul_ne_zero two_ne_zero gold_ne_zero,
-    cases le_total 0 (x / (2 * golden_ratio)) with h1 h1,
-    obtain ⟨y, h2⟩ := this _ h1,
-    use y; rw [← h2, mul_div_cancel' x h0],
-    rw ← neg_nonneg at h1; obtain ⟨y, h2⟩ := this _ h1,
-    use (-y); rw [neg_pow_bit1, ← h2, neg_neg, mul_div_cancel' x h0] },
-  intros x h; use x ^ (↑3 : ℝ)⁻¹,
-  rw rpow_nat_inv_pow_nat h zero_lt_three
+  use extra.root3 (x / (2 * golden_ratio)),
+  rw [extra.cube_root3, mul_div_cancel' x (mul_ne_zero two_ne_zero gold_ne_zero)]
 end
 
 private lemma lem2_3 {a b : ℝ} (h : f a = f b) (h0 : a ≠ b) : ∃ c : ℝ, c ≠ 0 ∧ f c = f 0 :=
@@ -202,6 +255,68 @@ begin
   rw [eq_neg_iff_add_eq_zero, ← bit0] at h,
   exact two_ne_zero h
 end
+
+private theorem thm3_3 (f1_eq_1 : f 1 = 1) (a : ℝ) (n : ℕ) : f (a ^ n) = f a ^ n :=
+begin
+  induction n with n n_ih,
+  rw [pow_zero, pow_zero, f1_eq_1],
+  rw [pow_succ, pow_succ, thm3_2 feq f_inj f0_eq_0 f1_eq_1, n_ih]
+end
+
+
+
+
+variable f1_eq_1 : f 1 = 1
+include f1_eq_1
+
+private lemma lem4_1 (u v : ℝ) : (f u - 1) * (f v - 1) * (f (u * v) - 1)
+  = f ((u * v) ^ 2 + (u + v)) - f ((u + v) * (u * v) + 1) :=
+begin
+  have f_mul := thm3_2 feq f_inj f0_eq_0 f1_eq_1,
+  rcases eq_or_ne v 0 with rfl | h,
+  rw [mul_zero, f0_eq_0, zero_sub, mul_neg_one, mul_neg_one, neg_neg,
+      zero_pow zero_lt_two, zero_add, add_zero, mul_zero, zero_add, f1_eq_1],
+  have h0 := feq v (u * v) 1,
+  rw [f_mul, ← one_sub_mul, mul_comm _ (f v), one_pow, mul_one, one_mul, one_mul, mul_one] at h0,
+  have h1 : v * (u * v) ^ 2 + u * v + v ^ 2 = v * ((u * v) ^ 2 + (u + v)) := by ring,
+  have h2 : u * v * v ^ 2 + (u * v) ^ 2 + v = v * ((u + v) * (u * v) + 1) := by ring,
+  rw [h1, h2] at h0; clear h1 h2,
+  rw [f_mul, f_mul, f1_eq_1, ← mul_sub, mul_assoc, mul_assoc, mul_eq_mul_left_iff, ← f_mul] at h0,
+  cases h0 with h0 h0,
+  convert h0 using 1; ring,
+  exfalso; exact h (f_inj (by rw [h0, f0_eq_0]))
+end
+
+private lemma lem4_2 (x y : ℝ) : 2 * (f (x ^ 2) - 1) = 
+  (f (x ^ 2 + y) + f (x ^ 2 - y)) - (f (1 + x * y) + f (1 - x * y)) :=
+begin
+  revert x y; suffices : ∀ x y : ℝ, x ≤ 0 → 2 * (f (x ^ 2) - 1) = 
+    (f (x ^ 2 + y) + f (x ^ 2 - y)) - (f (1 + x * y) + f (1 - x * y)),
+  { intros x y,
+    cases le_total x 0 with h h,
+    exact this x y h,
+    rw ← neg_nonpos at h,
+    replace this := this _ y h,
+    rwa [neg_sq, neg_mul, sub_neg_eq_add, ← sub_eq_add_neg, add_comm (f (1 - _))] at this },
+  intros x y x_le_0,
+  obtain ⟨u, v, h, h0⟩ := extra.exists_add_eq_mul_eq y x x_le_0,
+  have h1 := lem4_1 feq f_inj f0_eq_0 f1_eq_1 u v,
+  rw [h, h0] at h1,
+  have h2 := lem4_1 feq f_inj f0_eq_0 f1_eq_1 (-u) (-v),
+  rw [neg_mul_neg, ← neg_add, h, h0, lem3_5 feq f_inj f0_eq_0,
+      lem3_5 feq f_inj f0_eq_0, ← neg_add', ← neg_add', neg_mul_neg] at h2,
+  replace h1 := congr_arg2 (λ x y, x + y) h1 h2; clear h2,
+  simp only [] at h1,
+  rw [sub_add_sub_comm, ← sub_eq_add_neg, ← add_mul] at h1,
+  convert h1 using 1; clear h1,
+  ring_nf; rw [mul_assoc, ← thm3_2 feq f_inj f0_eq_0 f1_eq_1,
+    mul_comm v u, ← h0, thm3_3 feq f_inj f0_eq_0 f1_eq_1]; ring,
+  rw [sub_right_inj, mul_comm, add_comm (1 : ℝ), sub_eq_add_neg, add_comm (1 : ℝ), neg_mul]
+end
+
+
+
+
 
 end f_inj_f0_eq_0
 
