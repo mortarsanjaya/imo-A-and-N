@@ -12,10 +12,9 @@ open_locale classical
 namespace IMOSL
 namespace IMO2021A8
 
-variables {R : Type*} [comm_ring R] [is_domain R]
-
-def fn_eq (f : ℝ → R) := ∀ a b c : ℝ, (f(a) - f(b)) * (f(b) - f(c)) * (f(c) - f(a))
-  = f(a * b ^ 2 + b * c ^ 2 + c * a ^ 2) - f(b * a ^ 2 + c * b ^ 2 + a * c ^ 2)
+def fn_eq {R : Type*} [comm_ring R] [is_domain R] (f : ℝ → R) :=
+  ∀ a b c : ℝ, (f(a) - f(b)) * (f(b) - f(c)) * (f(c) - f(a))
+    = f(a * b ^ 2 + b * c ^ 2 + c * a ^ 2) - f(b * a ^ 2 + c * b ^ 2 + a * c ^ 2)
 
 
 
@@ -69,7 +68,10 @@ lemma root3_one : root3 1 = 1 :=
   cube_inj (by simp only [cube_root3, one_pow])
 
 lemma root3_zero : root3 0 = 0 :=
-  cube_inj (by simp only [cube_root3]; rw [zero_pow (nat.zero_lt_bit1 1)])
+  cube_inj (by simp only [cube_root3, zero_pow (nat.zero_lt_bit1 1)])
+
+lemma root3_neg (x : ℝ) : root3 (-x) = -(root3 x) :=
+  cube_inj (by simp only [cube_root3, neg_pow_bit1])
 
 lemma root3_pow (x : ℝ) (n : ℕ) : root3 (x ^ n) = root3 x ^ n :=
 begin
@@ -105,12 +107,57 @@ begin
   use -u; rw [← h, ← h0, sq, ← add_mul, neg_add_cancel_left, mul_comm, neg_mul, neg_add_self]
 end
 
+lemma g_sum_zero_of_g_cube_sum_zero {R S} [add_comm_monoid R]
+    [comm_ring S] [is_domain S] (char_ne_3 : ring_char S ≠ 3)
+    {g : R → S} (h : ∀ x y z : R, x + y + z = 0 → (g x + g y) ^ 3 + g z ^ 3 = 0) :
+  ∀ x y z : R, x + y + z = 0 → g x + g y + g z = 0 :=
+begin
+  have three_ne_zero : (3 : S) ≠ 0 :=
+    λ h0, char_ne_3 (char_p.ring_char_of_prime_eq_zero nat.prime_three (by simp; exact h0)),
+
+  ---- First off we prove that the following result suffices:
+  ---- For any t, u, v ∈ S, if (t + u)^3 + v^3 = (u + v)^3 + t^3,
+  ----   then either t + u + v = 0, u = 0, or v = t.
+  revert g h,
+  suffices : ∀ t u v : S, (t + u) ^ 3 + v ^ 3 = 0 → (u + v) ^ 3 + t ^ 3 = 0 →
+    t + u + v = 0 ∨ u = 0 ∨ v = t,
+  { intros g h x y z sum_eq_0,
+    have hxyz := h x y z sum_eq_0,
+    rw [add_assoc, add_comm] at sum_eq_0,
+    have hyzx := h y z x sum_eq_0,
+    rw [add_assoc, add_comm] at sum_eq_0,
+    have hzxy := h z x y sum_eq_0,
+    clear h sum_eq_0,
+    rcases this _ _ _ hzxy hxyz with h | h | h,
+    rw [add_comm, ← add_assoc, h],
+    rw [h, zero_pow zero_lt_three, add_zero] at hyzx,
+    rw [h, zero_add]; exact pow_eq_zero hyzx,
+    rcases this _ _ _ hxyz hyzx with h0 | h0 | h0,
+    exact h0,
+    rw [h0, zero_pow zero_lt_three, add_zero] at hzxy,
+    rw [h0, add_zero, add_comm]; exact pow_eq_zero hzxy,
+    rw [h, h0] at hxyz ⊢; clear h h0 hzxy hyzx,
+    rw [← two_mul, mul_pow, ← add_one_mul, mul_eq_zero, or_comm] at hxyz,
+    cases hxyz with h h,
+    rw [pow_eq_zero h, add_zero, add_zero],
+    replace h : (3 : S) ^ 2 = 0 := by rw ← h; norm_num,
+    exfalso; exact three_ne_zero (pow_eq_zero h) },
+
+  intros t u v h h0,
+  rw [← h0, ← sub_eq_zero] at h; clear h0,
+  replace h : -((t + u + v) * (u * (v - t)) * 3) = 0 := by rw ← h; ring,
+  rwa [neg_eq_zero, mul_eq_zero, mul_eq_zero, mul_eq_zero,
+       sub_eq_zero, or_iff_left three_ne_zero] at h
+end
+
 end extra
 
 
 
 
 section results
+
+variables {R : Type*} [comm_ring R] [is_domain R]
 
 /-- Useful definition for the case where f is not injective -/
 private def good (f : ℝ → R) (t : ℝ) := ∃ c : ℝ, c ≠ 0 ∧ f (c * t) = f c
@@ -585,6 +632,30 @@ begin
   rw h; ring
 end
 
+private lemma lem5_5 (t u : ℝ) : f (root3 (t + u)) = (f (root3 t) + f (root3 u)) :=
+begin
+  revert t u,
+  suffices : ∀ t u v : ℝ, t + u + v = 0 → f (root3 t) + f (root3 u) + f (root3 v) = 0,
+  { intros t u,
+    replace this := this t u (-(t + u)) (by rw add_neg_self),
+    rwa [root3_neg, lem3_5 feq f_inj f0_eq_0, ← sub_eq_add_neg, sub_eq_zero, eq_comm] at this },
+
+  apply extra.g_sum_zero_of_g_cube_sum_zero,
+  { intros char_eq_3,
+    have h := lem5_4 feq f_inj f0_eq_0 f1_eq_1 f2_ne_2 1 1,
+    rw [← thm3_3 feq f_inj f0_eq_0 f1_eq_1, cube_root3, root3_one, f1_eq_1, ← bit0] at h,
+    apply f2_ne_2,
+    rw [h, ← sub_eq_zero]; norm_num,
+    rw ring_char.eq_iff at char_eq_3,
+    have cast3 : ↑(3 : ℕ) = (3 : R) := by simp only [nat.cast_bit1, nat.cast_one],
+    resetI; rw [bit0, ← cast3, char_p.cast_eq_zero R (3 : ℕ), add_zero] },
+
+  { intros x y z h,
+    rw add_eq_zero_iff_eq_neg at h,
+    rw [← lem5_4 feq f_inj f0_eq_0 f1_eq_1 f2_ne_2, h, root3_neg,
+        lem3_5 feq f_inj f0_eq_0, neg_pow_bit1, neg_add_self] }
+end
+
 private theorem thm5 : ∃ φ : ℝ →+* R, f = λ x, φ x ^ 3 :=
 begin
   use λ x, f (root3 x),
@@ -595,7 +666,7 @@ begin
   swap,
   rw ring_hom.coe_mk; funext x,
   rw [← thm3_3 feq f_inj f0_eq_0 f1_eq_1, cube_root3],
-  sorry
+  exact lem5_5 feq f_inj f0_eq_0 f1_eq_1 f2_ne_2
 end
 
 end f_inj_f0_eq_0
@@ -604,7 +675,7 @@ end results
 
 
 
-theorem final_solution (f : ℝ → R) : fn_eq f ↔
+theorem final_solution {R : Type*} [comm_ring R] [is_domain R] (f : ℝ → R) : fn_eq f ↔
   (∃ C : R, f = const ℝ C) ∨ ∃ (φ : ℝ →+* R) (C : R),
    ((f = φ + const ℝ C) ∨ (f = (λ x, φ x ^ 3) + const ℝ C)) ∨
    ((f = -φ + const ℝ C) ∨ (f = -(λ x, φ x ^ 3) + const ℝ C)) :=
