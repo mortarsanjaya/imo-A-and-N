@@ -19,10 +19,6 @@ def S (x : ℕ → ℝ) := 4 * (range 4).sum (λ i, x i ^ 3) - (range 4).sum (λ
 
 namespace extra
 
-lemma range_succ_add {β : Type*} [add_comm_group β] (f : ℕ → β) (n : ℕ) :
-    (range (n + 1)).sum f = f n + (range n).sum f :=
-  by rw [← sub_eq_iff_eq_add, sum_range_succ_sub_sum]
-
 /-- QM-AM inequality -/
 theorem QM_AM (x : ℕ → ℝ) (n : ℕ) :
   (range n).sum x ^ 2 ≤ n * (range n).sum (λ i, x i ^ 2) :=
@@ -47,8 +43,8 @@ theorem sq_sum_le_sum_sq (x : ℕ → ℝ) (h : ∀ n : ℕ, 0 ≤ x n) (n : ℕ
 begin
   induction n with n n_ih,
   rw [range_zero, sum_empty, sum_empty, zero_pow zero_lt_two],
-  rw [nat.succ_eq_add_one, range_succ_add, range_succ_add],
-  refine le_trans (add_le_add_left n_ih _) (pow_add_pow_le (h n) (sum_nonneg' h) two_ne_zero),
+  rw [sum_range_succ, sum_range_succ],
+  refine le_trans (add_le_add_right n_ih _) (pow_add_pow_le (sum_nonneg' h) (h n) two_ne_zero),
 end
 
 end extra
