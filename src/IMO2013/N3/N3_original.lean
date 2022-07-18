@@ -1,21 +1,6 @@
 import IMO2013.N3.N3_general data.pnat.prime data.pnat.factors data.finset.lattice
 
-/-!
-# IMO 2013 N3, Original Version
-
-Prove that there exists infinitely many positive integers n such that the largest prime
-divisor of n^4 + n^2 + 1 is equal to the largest prime divisor of (n + 1)^4 + (n + 1) + 1.
-
-## Solution
-
-Let f : ℕ+ → ℕ+ denote the largest prime divisor function.
-From the general version, it suffices to check that f(ab) = max{f(a), f(b)} for all a, b ∈ ℕ⁺.
-This is standard.
-
-## Implementation details
-
-We still need to define the largest divisor function and prove the desired property.
--/
+/-! # IMO 2013 N3, Original Version -/
 
 namespace IMOSL
 namespace IMO2013N3
