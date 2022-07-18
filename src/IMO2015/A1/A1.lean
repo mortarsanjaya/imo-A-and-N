@@ -58,9 +58,7 @@ theorem final_solution {f : ℕ → ℝ} (f_pos : ∀ n : ℕ, 0 < f n) (fineq :
   ∀ n : ℕ, 2 ≤ n → (n : ℝ) ≤ (range n).sum f :=
 begin
   apply nat.le_induction,
-  { rw [nat.cast_bit0, nat.cast_one],
-    change 2 with 1 + 1,
-    rw extra.range_succ_add,
+  { rw [nat.cast_bit0, nat.cast_one, bit0, bit0, extra.range_succ_add],
     refine le_trans _ (add_le_add_left (lem2 f_pos fineq 1) _),
     rw [nat.cast_one, one_div],
     exact extra.add_inv_ge_two (f_pos 1) },
