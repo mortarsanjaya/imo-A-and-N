@@ -55,8 +55,7 @@ begin
   { rw eq_univ_iff_forall; intros z,
     replace h3 := h3 (1 : ℤ) this z,
     rwa [one_pow, mul_one] at h3 },
-  have h4 : is_coprime (x ^ 2) (y ^ 2) := is_coprime.pow h,
-  rcases h4 with ⟨k, m, h4⟩,
+  obtain ⟨k, m, h4⟩ : is_coprime (x ^ 2) (y ^ 2) := is_coprime.pow h,
   rw [← one_pow 2, ← h4, add_sq, mul_assoc],
   refine h0 _ _ _ _ 2,
   exacts [h3 x h1 _, h3 y h2 _]
