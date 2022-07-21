@@ -12,8 +12,6 @@ def good (m n : ℤ) := ∀ A : set ℤ, admissible A → m ∈ A → n ∈ A �
 
 
 
-section results
-
 /-- Characterization of bad pairs -/
 private lemma bad_pairs (m n : ℤ) (h : good m n) : is_coprime m n :=
 begin
@@ -60,8 +58,6 @@ begin
   refine h0 _ _ _ _ 2,
   exacts [h3 x h1 _, h3 y h2 _]
 end
-
-end results
 
 
 
