@@ -38,13 +38,13 @@ end extra
 section results
 
 variables {R : Type*} [comm_ring R]
+variables {f g : R → R} (feq : fn_eq f g)
+include feq
 
-private lemma lem1_1 {f g : R → R} (feq : fn_eq f g) :
-    ∀ x y : R, f x - f y = (2 * y + x) * g x - (2 * x + y) * g y :=
+private lemma lem1_1 : ∀ x y : R, f x - f y = (2 * y + x) * g x - (2 * x + y) * g y :=
   λ x y, by rw [sub_eq_sub_iff_add_eq_add, ← feq, add_comm, feq, add_comm]
 
-private lemma lem1_2 (R2nzd : (2 : R) ∈ R⁰) {f g : R → R} (feq : fn_eq f g) :
-  ∃ A B : R, ∀ x : R, g x = A * x + B :=
+private lemma lem1_2 (R2nzd : (2 : R) ∈ R⁰) : ∃ A B : R, ∀ x : R, g x = A * x + B :=
 begin
   use [g 1 - g 0, g 0]; intros x,
   have h := congr_arg2 (λ x y, x + y) (lem1_1 feq x 1) (lem1_1 feq 0 x),
@@ -56,8 +56,12 @@ begin
        ← sub_eq_iff_eq_add, add_sub_assoc, ← mul_sub, add_comm, mul_comm, eq_comm] at h
 end
 
-private lemma lem2_1 {f g : R → R} (feq : fn_eq f g) {A B : R} (h : ∀ x : R, g x = A * x + B) :
-  ∀ x : R, f x = A * x ^ 2 - B * x + f 0 :=
+section g_linear
+
+variables {A B : R} (h : ∀ x : R, g x = A * x + B)
+include h
+
+private lemma lem2_1 : ∀ x : R, f x = A * x ^ 2 - B * x + f 0 :=
 begin
   intros x,
   have h0 := lem1_1 feq x 0,
@@ -65,8 +69,7 @@ begin
        mul_right_comm, mul_assoc, two_mul, add_sub_add_right_eq_sub, sub_eq_iff_eq_add] at h0
 end
 
-private lemma lem2_2 {f g : R → R} (feq : fn_eq f g) {A B : R} (h : ∀ x : R, g x = A * x + B) :
-  ∀ x : R, A * (A - 1) * x ^ 2 + -(A + 1) * B * x + (f 0 * (A - 1) + B) = 0 :=
+private lemma lem2_2 : ∀ x : R, A * (A - 1) * x ^ 2 + -(A + 1) * B * x + (f 0 * (A - 1) + B) = 0 :=
 begin
   intros x,
   have h0 := feq (-x) (2 * x),
@@ -75,9 +78,7 @@ begin
   nth_rewrite 1 ← h0; ring
 end
 
-private lemma lem2_3 (R2nzd : (2 : R) ∈ R⁰) {f g : R → R} (feq : fn_eq f g)
-    {A B : R} (h : ∀ x : R, g x = A * x + B) :
-  B = 0 ∧ A * (A - 1) = 0 ∧ f 0 * (A - 1) = 0 :=
+private lemma lem2_3 (R2nzd : (2 : R) ∈ R⁰) : B = 0 ∧ A * (A - 1) = 0 ∧ f 0 * (A - 1) = 0 :=
 begin
   rcases extra.poly_deg_2_zero R2nzd (lem2_2 feq h) with ⟨h0, h1, h2⟩,
   rw [add_eq_zero_iff_neg_eq] at h2,
@@ -85,6 +86,8 @@ begin
     rw [and_iff_right this, and_iff_right h0, ← neg_eq_zero, h2, this],
   rwa [← h2, neg_mul_neg, mul_left_comm, add_one_mul, h0, zero_add, ← neg_eq_zero, h2] at h1
 end
+
+end g_linear
 
 end results
 
@@ -97,8 +100,8 @@ theorem final_solution_general {R : Type*} [comm_ring R] (R2nzd : (2 : R) ∈ R�
 begin
   split,
   { intros feq,
-    rcases lem1_2 R2nzd feq with ⟨A, B, h⟩,
-    rcases lem2_3 R2nzd feq h with ⟨rfl, h0, h1⟩,
+    rcases lem1_2 feq R2nzd with ⟨A, B, h⟩,
+    rcases lem2_3 feq h R2nzd with ⟨rfl, h0, h1⟩,
     use [A, f 0]; rw [and_iff_left h1, and_iff_left h0]; split,
     funext x; rw [lem2_1 feq h, zero_mul, sub_zero],
     funext x; rw [h, add_zero] },
