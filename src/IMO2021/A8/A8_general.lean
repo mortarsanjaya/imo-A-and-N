@@ -736,8 +736,8 @@ theorem final_solution_char_ne_0 {R : Type*} [comm_ring R] [is_domain R]
 begin
   rw final_solution_general,
   apply or_iff_left,
-  -- rintros ⟨φ, -⟩; exact is_empty.false φ
   rw is_empty.exists_iff,
+  exact not_false
 end
 
 /-- Final solution, case R = ℝ -/
