@@ -74,8 +74,11 @@ end
 
 private lemma lem2_1 (f_inj : injective f) : f = λ x, 1 - x :=
 begin
-  have h : ∀ x : F, f (f x) + f x = 1 :=
-    λ x, by have h := feq x 0; rwa [mul_zero, f0_eq_1, mul_one, add_zero] at h,
+  have h : ∀ x : F, f (f x) + f x = 1 := begin
+    intros x,
+    have h := feq x 0,
+    rwa [mul_zero, f0_eq_1, mul_one, add_zero] at h
+  end,
   funext x,
   rw [← h x, eq_sub_iff_add_eq, add_comm, add_left_inj],
   apply f_inj,
