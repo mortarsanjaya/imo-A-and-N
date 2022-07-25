@@ -27,26 +27,24 @@ noncomputable def root3 (x : ℝ) := ite (0 ≤ x) (x ^ (↑3 : ℝ)⁻¹) (- ((
 
 lemma root3_cube (x : ℝ) : root3 (x ^ 3) = x :=
 begin
-  have zero_lt_three : 0 < 3 := nat.zero_lt_bit1 1,
   simp only [root3, pow_bit1_nonneg_iff],
   by_cases h : 0 ≤ x,
   simp only [h, if_true],
-  exact pow_nat_rpow_nat_inv h zero_lt_three,
+  exact pow_nat_rpow_nat_inv h three_ne_zero,
   simp only [h, if_false],
-  rw [← neg_pow_bit1, pow_nat_rpow_nat_inv _ zero_lt_three, neg_neg],
+  rw [← neg_pow_bit1, pow_nat_rpow_nat_inv _ three_ne_zero, neg_neg],
   rw [← lt_iff_not_le, ← neg_pos] at h,
   exact le_of_lt h
 end
 
 lemma cube_root3 (x : ℝ) : (root3 x) ^ 3 = x :=
 begin
-  have zero_lt_three : 0 < 3 := nat.zero_lt_bit1 1,
   simp only [root3],
   by_cases h : 0 ≤ x,
   simp only [h, if_true],
-  exact rpow_nat_inv_pow_nat h zero_lt_three,
+  exact rpow_nat_inv_pow_nat h three_ne_zero,
   simp only [h, if_false],
-  rw [neg_pow_bit1, rpow_nat_inv_pow_nat _ zero_lt_three, neg_neg],
+  rw [neg_pow_bit1, rpow_nat_inv_pow_nat _ three_ne_zero, neg_neg],
   rw [← lt_iff_not_le, ← neg_pos] at h,
   exact le_of_lt h
 end
