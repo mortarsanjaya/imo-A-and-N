@@ -161,32 +161,33 @@ end
 
 private lemma lem4_4 {a b : F} (h : f (a + 1) * f (b + 1) = 1) : a * b = 1 :=
 begin
-  have X : ∀ a b c d : F, f a = f b → f c = f d → a * c = b * d → f (a + c) = f (b + d) :=
-  begin
-    intros a b c d h0 h1 h2,
-    have h3 := feq a c, 
-    rwa [h0, h1, h2, ← feq b d, add_right_inj] at h3
-  end,
   have h0 : a ≠ 0 := by rintros rfl; rw [zero_add, lem1_4 feq, zero_mul] at h; exact zero_ne_one h,
   have h1 : b ≠ 0 := by rintros rfl; rw [zero_add, lem1_4 feq, mul_zero] at h; exact zero_ne_one h,
-  have h2 : (a + b + 1) * (a⁻¹ + b⁻¹ + 1) = (a + b + a * b) * (a⁻¹ + b⁻¹ + a⁻¹ * b⁻¹) :=
-    by field_simp [h0, h1]; ring,
-  replace h2 := X _ _ _ _ (lem4_3 feq f0_eq_1 h) (lem4_3 feq f0_eq_1
-    (by rw [lem4_2 feq f0_eq_1, lem4_2 feq f0_eq_1, ← mul_inv, h, inv_one])) h2,
-  clear X,
   let x := a + b⁻¹ + 1,
   let y := b + a⁻¹ + 1,
-  have h3 : x + y = (a + b + 1) + (a⁻¹ + b⁻¹ + 1) := by dsimp only [x, y]; ring,
-  have h4 : x * y + 1 = (a + b + a * b) + (a⁻¹ + b⁻¹ + a⁻¹ * b⁻¹) :=
-    by dsimp only [x, y]; rw ← sub_eq_zero; ring_nf; field_simp [h0, h1],
-  rw [← h3, ← h4, lem4_1 feq f0_eq_1] at h2; clear h3 h4,
+  have h2 : f (x + y) = 1 + f (x * y) :=
+  begin
+    have h2 : f (a + b + 1 + (a⁻¹ + b⁻¹ + 1)) = f (a + b + a * b + (a⁻¹ + b⁻¹ + a⁻¹ * b⁻¹)) :=
+    begin
+      have h2 := feq (a + b + 1) (a⁻¹ + b⁻¹ + 1),
+      have h3 : (a + b + 1) * (a⁻¹ + b⁻¹ + 1) = (a + b + a * b) * (a⁻¹ + b⁻¹ + a⁻¹ * b⁻¹) :=
+        by field_simp [h0, h1]; ring,
+      rwa [h3, lem4_3 feq f0_eq_1 h, lem4_3 feq f0_eq_1, ← feq (_ + _), add_right_inj] at h2,
+      rw [lem4_2 feq f0_eq_1, lem4_2 feq f0_eq_1, ← mul_inv, h, inv_one]
+    end,
+    have h3 : x + y = (a + b + 1) + (a⁻¹ + b⁻¹ + 1) := by dsimp only [x, y]; ring,
+    have h4 : x * y + 1 = (a + b + a * b) + (a⁻¹ + b⁻¹ + a⁻¹ * b⁻¹) :=
+    begin
+      dsimp only [x, y]; rw ← sub_eq_zero; ring_nf,
+      rw [inv_mul_cancel h0, mul_inv_cancel h1, ← add_assoc, ← bit0, char_two.two_eq_zero, add_zero]
+    end,
+    rwa [← h3, ← h4, lem4_1 feq f0_eq_1, add_comm (f _)] at h2
+  end,
   have h3 := feq x y,
-  rw [h2, add_comm _ (1 : F), ← add_assoc, add_left_eq_self, ← lem4_1 feq f0_eq_1,
+  rw [h2, ← add_assoc, add_left_eq_self, ← lem4_1 feq f0_eq_1,
       lem2_3 feq f0_eq_1, add_left_eq_self, mul_eq_zero] at h3,
-  dsimp only [x, y] at h3,
   cases h3 with h3 h3,
-  all_goals {
-    rwa [lem2_3 feq f0_eq_1, add_left_eq_self, ← char_two.sub_eq_add, sub_eq_zero] at h3 },
+  all_goals { rw [lem2_3 feq f0_eq_1, add_left_eq_self, ← char_two.sub_eq_add, sub_eq_zero] at h3 },
   rwa mul_eq_one_iff_eq_inv₀ h1,
   rwa [mul_comm, mul_eq_one_iff_eq_inv₀ h0]
 end
