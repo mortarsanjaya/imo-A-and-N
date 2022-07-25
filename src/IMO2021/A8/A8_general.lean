@@ -1,8 +1,10 @@
 import
   data.real.basic
-  algebra.algebra.basic
   data.real.golden_ratio
+  algebra.algebra.basic
   analysis.special_functions.pow
+  extra.real_hom.semifield_char0_hom
+  extra.real_hom.real_additive_End
 
 /-! # IMO 2021 A8, Generalized Version -/
 
@@ -675,7 +677,8 @@ end results
 
 
 
-theorem final_solution {R : Type*} [comm_ring R] [is_domain R] (f : ℝ → R) : fn_eq f ↔
+/-- Final solution -/
+theorem final_solution_general {R : Type*} [comm_ring R] [is_domain R] (f : ℝ → R) : fn_eq f ↔
   (∃ C : R, f = const ℝ C) ∨ ∃ (φ : ℝ →+* R) (C : R),
    ((f = φ + const ℝ C) ∨ (f = (λ x, φ x ^ 3) + const ℝ C)) ∨
    ((f = -φ + const ℝ C) ∨ (f = -(λ x, φ x ^ 3) + const ℝ C)) :=
@@ -725,6 +728,27 @@ begin
       rcases h with (rfl | rfl) | (rfl | rfl),
       exacts [lem1_1 h0 C, lem1_1 h1 C, lem1_1 (lem1_2 h0) C, lem1_1 (lem1_2 h1) C] },
     split; intros a b c; simp only [map_add, map_pow, map_mul]; ring },
+end
+
+/-- Final solution, case char(R) ≠ 0 -/
+theorem final_solution_char_ne_0 {R : Type*} [comm_ring R] [is_domain R]
+    (p : ℕ) [fact (p ≠ 0)] [char_p R p] (f : ℝ → R) : fn_eq f ↔ ∃ C : R, f = const ℝ C :=
+begin
+  rw final_solution_general,
+  apply or_iff_left,
+  -- rintros ⟨φ, -⟩; exact is_empty.false φ
+  rw is_empty.exists_iff,
+end
+
+/-- Final solution, case R = ℝ -/
+theorem final_solution_real (f : ℝ → ℝ) : fn_eq f ↔ (∃ C : ℝ, f = const ℝ C) ∨ ∃ C : ℝ,
+   ((f = id + const ℝ C) ∨ (f = (λ x, x ^ 3) + const ℝ C)) ∨
+   ((f = -id + const ℝ C) ∨ (f = -(λ x, x ^ 3) + const ℝ C)) :=
+begin
+  rw final_solution_general,
+  apply or_congr_right',
+  rw unique.exists_iff,
+  simp only [default, ring_hom.coe_one, id.def]
 end
 
 end IMO2021A8
