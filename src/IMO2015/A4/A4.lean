@@ -1,14 +1,14 @@
-import algebra.algebra.basic algebra.char_p.two
+import algebra.algebra.basic algebra.char_p.two ring_theory.non_zero_divisors
 
 /-! # IMO 2015 A4 (P5), Generalized Version -/
 
 open function
-open_locale classical
+open_locale non_zero_divisors classical
 
 namespace IMOSL
 namespace IMO2015A4
 
-variables {R : Type*} [ring R] [is_domain R]
+variables {R : Type*} [ring R]
 
 def fn_eq (f : R → R) := ∀ x y : R, f (x + f (x + y)) + f (x * y) = x + f (x + y) + f x * y
 
@@ -39,7 +39,8 @@ begin
 end
 
 /-- Case 1: f(0) ≠ 0 -/
-private theorem lem1_3 {f : R → R} (feq1 : fn_eq1 f) (f0_ne_0 : f 0 ≠ 0) : f = λ x, 2 - 2 * x :=
+private theorem case_f0_ne_0 [no_zero_divisors R]
+  {f : R → R} (feq1 : fn_eq1 f) (f0_ne_0 : f 0 ≠ 0) : f = λ x, 2 - 2 * x :=
 begin
   funext x,
   have h := feq1 0 (f x + 2 * x - 1),
@@ -50,33 +51,30 @@ end
 
 
 
-section case_char_ne_2
+section case_R2nzd
 
-variable char_ne_2 : ring_char R ≠ 2
-include char_ne_2
-
-variables {f : R → R} (feq1 : fn_eq1 f) (f0_eq_0 : f 0 = 0)
-include feq1 f0_eq_0
+variables (R2nzd : (2 : R) ∈ R⁰) {f : R → R} (feq1 : fn_eq1 f) (f0_eq_0 : f 0 = 0)
+include R2nzd feq1 f0_eq_0
 
 private lemma lem2_1 : f 1 = 0 :=
 begin
   have h := lem1_2 feq1 0,
   rw [f0_eq_0, zero_add, mul_zero, zero_sub] at h,
   have h0 := feq1 1 (-1),
-  rwa [add_neg_self, f0_eq_0, zero_add, two_mul, add_neg_cancel_right,
-       one_mul, h, sub_zero, mul_neg_one, eq_neg_iff_add_eq_zero, ← two_mul,
-       mul_eq_zero, or_iff_right (ring.two_ne_zero char_ne_2)] at h0
+  rw [add_neg_self, f0_eq_0, zero_add, two_mul, add_neg_cancel_right, one_mul, h, sub_zero,
+       mul_neg_one, eq_neg_iff_add_eq_zero, ← mul_two] at h0,
+  exact mem_non_zero_divisors_iff.mp R2nzd _ h0
 end
 
 private lemma lem2_2 (x : R) : f (f (1 + x) + 2 + x) = - f x :=
 begin
   have h := feq1 1 x,
-  rwa [one_mul, mul_one, lem2_1 char_ne_2 feq1 f0_eq_0, zero_mul, zero_sub] at h
+  rwa [one_mul, mul_one, lem2_1 R2nzd feq1 f0_eq_0, zero_mul, zero_sub] at h
 end
 
 private lemma lem2_3 (x : R) : f (f x + 2 * x + 1) = 0 :=
 begin
-  have lem2_1 := lem2_1 char_ne_2 feq1 f0_eq_0,
+  have lem2_1 := lem2_1 R2nzd feq1 f0_eq_0,
   have h := feq1 x 0,
   rw [add_zero, add_zero, mul_zero, mul_zero, f0_eq_0, sub_zero] at h,
   have h0 := feq1 1 (f x + 2 * x - 1),
@@ -86,25 +84,25 @@ end
 
 private lemma lem2_4 (x : R) : f (- x) = - (f x) :=
 begin
-  have h := lem2_3 char_ne_2 feq1 f0_eq_0 (x + -1),
+  have h := lem2_3 R2nzd feq1 f0_eq_0 (x + -1),
   rw [mul_add, two_mul (-1 : R), add_assoc, add_assoc, neg_add_cancel_comm] at h,
   have h0 := feq1 x (-1),
   rwa [add_assoc, h, eq_comm, sub_eq_zero, mul_neg_one, mul_neg_one, eq_comm] at h0
 end
 
-/-- Case 2: f(0) = 0, char(R) ≠ 2 -/
-private theorem lem2_5 : f = 0 :=
+/-- Case 2: f(0) = 0, 2 is not a (right) zero divisor in R -/
+private theorem case_f0_eq_0_R2nzd : f = 0 :=
 begin
   funext x,
-  have lem2_4 := lem2_4 char_ne_2 feq1 f0_eq_0,
+  have lem2_4 := lem2_4 R2nzd feq1 f0_eq_0,
   have h := feq1 (-1) (-x),
-  rwa [neg_mul_neg, one_mul, lem2_4, lem2_1 char_ne_2 feq1 f0_eq_0, neg_zero, zero_mul,
+  rwa [neg_mul_neg, one_mul, lem2_4, lem2_1 R2nzd feq1 f0_eq_0, neg_zero, zero_mul,
        zero_sub, ← neg_add, lem2_4, mul_neg_one, ← neg_add, ← neg_add, lem2_4,
-       lem2_2 char_ne_2 feq1 f0_eq_0, neg_neg, eq_neg_iff_add_eq_zero, ← two_mul,
-       mul_eq_zero, or_iff_right (ring.two_ne_zero char_ne_2)] at h
+       lem2_2 R2nzd feq1 f0_eq_0, neg_neg, eq_neg_iff_add_eq_zero, ← mul_two] at h,
+  exact mem_non_zero_divisors_iff.mp R2nzd _ h
 end
 
-end case_char_ne_2
+end case_R2nzd
 
 
 
@@ -150,7 +148,7 @@ begin
 end
 
 /-- Case 3: f(0) = 0, char(R) = 2 -/
-private theorem lem3_5 : f = 0 :=
+private theorem case_f0_eq_0_char_eq_2 : f = 0 :=
 begin
   funext x,
   have h := lem3_4 feq2 f0_eq_0 (x + 1),
@@ -165,8 +163,8 @@ end results
 
 
 
-/-- Final lem2_5ution -/
-theorem final_solution_general (f : R → R) : fn_eq f ↔ f = id ∨ f = λ x, 2 - x :=
+/-- Final solution -/
+theorem final_solution_domain [is_domain R] (f : R → R) : fn_eq f ↔ f = id ∨ f = λ x, 2 - x :=
 begin
   split,
   { intros h,
@@ -174,13 +172,16 @@ begin
     cases eq_or_ne ((f - id) 0) 0 with h0 h0,
     { left; rw ← sub_eq_zero,
       cases ne_or_eq (ring_char R) 2 with char_ne_2 char_eq_2,
-      exact lem2_5 char_ne_2 h h0,
-      rw ring_char.eq_iff at char_eq_2,
-      resetI,
-      simp only [fn_eq1, char_two.two_eq_zero, zero_mul, add_zero] at h,
-      exact lem3_5 h h0 },
+      { refine case_f0_eq_0_R2nzd _ h h0,
+        rw mem_non_zero_divisors_iff; intros x h,
+        rwa [mul_eq_zero, or_iff_left] at h,
+        rwa [bit0, add_eq_zero_iff_eq_neg, eq_comm, neg_one_eq_one_iff] },
+      { rw ring_char.eq_iff at char_eq_2,
+        resetI,
+        simp only [fn_eq1, char_two.two_eq_zero, zero_mul, add_zero] at h,
+        exact case_f0_eq_0_char_eq_2 h h0 } },
     { right; funext x,
-      have h1 : (f - id) x = 2 - 2 * x := by rw lem1_3 h h0,
+      have h1 : (f - id) x = 2 - 2 * x := by rw case_f0_ne_0 h h0,
       rwa [pi.sub_apply, id.def, two_mul, ← sub_sub, sub_left_inj] at h1 } },
   { rintros (rfl | rfl) x y; simp only [id.def],
     rw [← add_sub_assoc x, add_sub_add_left_eq_sub, sub_sub_cancel, sub_mul, sub_add_sub_comm,
