@@ -214,10 +214,10 @@ end case_char_eq_2
 private theorem thm5 : f = λ x, 1 - x :=
 begin
   apply lem2_1 feq f0_eq_1,
-  by_cases h : ring_char F = 2,
+  cases ne_or_eq (ring_char F) 2 with h h,
+  exact fn_thm3 feq f0_eq_1 h,
   rw ring_char.eq_iff at h,
-  exactI thm4 feq f0_eq_1,
-  exact fn_thm3 feq f0_eq_1 h
+  exactI thm4 feq f0_eq_1
 end
 
 end results
