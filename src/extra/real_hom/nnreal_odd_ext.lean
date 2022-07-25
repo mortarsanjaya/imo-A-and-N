@@ -1,4 +1,4 @@
-import data.real.basic data.real.nnreal extra.real_additive_End
+import data.real.basic data.real.nnreal extra.real_hom.real_additive_End
 
 /-!
 # Extension of function ℝ≥0 → α into an almost odd function ℝ → α
