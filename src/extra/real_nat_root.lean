@@ -73,11 +73,11 @@ begin
   rw [pow_succ, nat_root_bit1_mul, k_ih, pow_succ]
 end
 
-lemma mul_root3_eq_root3_pow3_mul (n : ℕ) (x y : ℝ) :
+lemma nat_root_bit1_left_mul (n : ℕ) (x y : ℝ) :
     x * nat_root (bit1 n) y = nat_root (bit1 n) (x ^ (bit1 n) * y) :=
   by rw [nat_root_bit1_mul, nat_root_pow_self_bit1]
 
-lemma root3_ne_zero (n : ℕ) {x : ℝ} (h : x ≠ 0) : nat_root (bit1 n) x ≠ 0 :=
+lemma nat_root_bit1_ne_zero (n : ℕ) {x : ℝ} (h : x ≠ 0) : nat_root (bit1 n) x ≠ 0 :=
   by contrapose! h; apply nat_root_bit1_inj; rw [h, nat_root_bit1_zero]
 
 end real
