@@ -14,15 +14,13 @@ open_locale nnreal classical
 namespace IMOSL
 namespace IMO2012A5
 
-variables {R : Type*} [comm_ring R] [is_domain R]
-
-def fn_eq (f : ℝ → R) := ∀ x y : ℝ, f (1 + x * y) - f(x + y) = f x * f y
+def fn_eq {R : Type*} [ring R] (f : ℝ → R) := ∀ x y : ℝ, f (1 + x * y) - f(x + y) = f x * f y
 
 
 
 section results
 
-variables {f : ℝ → R} (feq : fn_eq f)
+variables {R : Type*} [comm_ring R] [is_domain R] {f : ℝ → R} (feq : fn_eq f)
 include feq
 
 private lemma lem1_1 : f 1 = 0 :=
@@ -207,7 +205,7 @@ end results
 
 
 /-- Final solution -/
-theorem final_solution_general (f : ℝ → R) : fn_eq f ↔
+theorem final_solution_general {R : Type*} [comm_ring R] [is_domain R] (f : ℝ → R) : fn_eq f ↔
   f = 0 ∨ (∃ φ : ℝ →+* R, f = φ - 1) ∨ (∃ φ : ℝ≥0 →+* R, f = λ x : ℝ, φ (x.nnabs ^ 2) - 1) :=
 begin
   split,
@@ -234,8 +232,8 @@ begin
 end
 
 /-- Final solution, case char(R) ≠ 0 -/
-theorem final_solution_char_ne_0 (p : ℕ) [fact (p ≠ 0)] [char_p R p] (f : ℝ → R) :
-    fn_eq f ↔ f = 0 :=
+theorem final_solution_char_ne_0 {R : Type*} [comm_ring R] [is_domain R]
+    (p : ℕ) [fact (p ≠ 0)] [char_p R p] (f : ℝ → R) : fn_eq f ↔ f = 0 :=
   by rw [final_solution_general, is_empty.exists_iff, is_empty.exists_iff, or_false, or_false]
 
 /-- Final solution, case R = ℝ -/
