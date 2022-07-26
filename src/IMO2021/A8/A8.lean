@@ -5,6 +5,7 @@ import
   extra.real_nat_root
   extra.real_hom.semifield_char0_hom
   extra.real_hom.real_additive_End
+  extra.real_quadratic_sol
 
 /-! # IMO 2021 A8, Generalized Version -/
 
@@ -31,7 +32,7 @@ begin
   rwa sub_nonneg,
 end
 
-lemma exists_root_quad_strong (x y : ℝ) (h : 4 * y ≤ x ^ 2) : ∃ t : ℝ, t ^ 2 + x * t + y = 0 :=
+lemma exists_root_quadratic (x y : ℝ) (h : 4 * y ≤ x ^ 2) : ∃ t : ℝ, t ^ 2 + x * t + y = 0 :=
 begin
   rcases exists_add_eq_mul_eq x y h with ⟨u, v, h, h0⟩,
   use -u; rw [← h, ← h0, sq, ← add_mul, neg_add_cancel_left, mul_comm, neg_mul, neg_add_self]
@@ -164,7 +165,7 @@ begin
   exact t_good,
   replace h : ∃ u : ℝ, u ^ 2 + t ^ 2 * u + t = 0 :=
   begin
-    apply extra.exists_root_quad_strong,
+    apply extra.exists_root_quadratic,
     cases h with h h,
     exact le_trans (mul_nonpos_of_nonneg_of_nonpos zero_le_four h) (sq_nonneg _),
     rw [← pow_mul, mul_two, ← bit0, pow_succ', mul_le_mul_right (lt_trans zero_lt_two h)],
