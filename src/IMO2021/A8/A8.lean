@@ -23,47 +23,63 @@ def fn_eq {R : Type*} [comm_ring R] [is_domain R] (f : ℝ → R) :=
 
 namespace extra
 
-lemma g_sum_zero_of_g_cube_sum_zero {R S} [add_comm_monoid R]
-    [comm_ring S] [is_domain S] (char_ne_3 : ring_char S ≠ 3)
+variables {R : Type*} [add_comm_monoid R] {S : Type*} [comm_ring S] [is_domain S]
+
+private lemma add_cube_cube_add_eq (S3ne0 : (3 : S) ≠ 0) {t u v : S}
+    (h : (t + u) ^ 3 + v ^ 3 = (u + v) ^ 3 + t ^ 3) :
+  t + u + v = 0 ∨ u = 0 ∨ v = t :=
+begin
+  rw ← sub_eq_zero at h,
+  replace h : -((t + u + v) * (u * (v - t)) * 3) = 0 := by rw ← h; ring,
+  rwa [neg_eq_zero, mul_eq_zero, or_iff_left S3ne0, mul_eq_zero, mul_eq_zero, sub_eq_zero] at h
+end
+
+private lemma add_cube_cube_add_zero_triple {t u v : S} (h : (t + u) ^ 3 + v ^ 3 = 0)
+    (h0 : (u + v) ^ 3 + t ^ 3 = 0) (h1 : (v + t) ^ 3 + u ^ 3 = 0) : t + u + v = 0 :=
+begin
+  cases eq_or_ne ((3 : ℕ) : S) 0 with S3eq0 S3ne0,
+  { replace S3eq0 := char_p.ring_char_of_prime_eq_zero nat.prime_three S3eq0,
+    rw ring_char.eq_iff at S3eq0,
+    unfreezingI { rw ← add_pow_char at h },
+    exact pow_eq_zero h },
+  { rw [nat.cast_bit1, nat.cast_one] at S3ne0,
+    replace h1 : v + t + u = 0 ∨ t = 0 ∨ u = v :=
+      by rw ← h at h1; exact add_cube_cube_add_eq S3ne0 h1,
+    replace h : t + u + v = 0 ∨ u = 0 ∨ v = t :=
+      by rw ← h0 at h; exact add_cube_cube_add_eq S3ne0 h,
+    cases h with h h,
+    exact h,
+    rw [add_assoc, add_comm] at h1,
+    cases h1 with h1 h1,
+    exact h1,
+    rcases h with rfl | rfl,
+    { rw @eq_comm _ 0 v at h1,
+      rcases h1 with rfl | rfl,
+      rw [zero_pow zero_lt_three, add_zero, zero_add] at h0,
+      rw [zero_add, zero_add]; exact pow_eq_zero h0,
+      rw [add_zero, zero_pow zero_lt_three, zero_add] at h0,
+      rw [add_zero, add_zero]; exact pow_eq_zero h0 },
+    { rcases h1 with rfl | rfl,
+      rw [add_zero, zero_pow zero_lt_three, add_zero] at h0,
+      rw [zero_add, add_zero]; exact pow_eq_zero h0,
+      rw [← two_mul, mul_pow, ← add_one_mul, mul_eq_zero, or_iff_right] at h0,
+      rw [pow_eq_zero h0, add_zero, add_zero],
+      clear h0; intros h0,
+      replace h0 : (3 : S) ^ 2 = 0 := by rw ← h0; norm_num,
+      exact S3ne0 (pow_eq_zero h0) } },
+end
+
+lemma g_sum_zero_of_g_cube_sum_zero {R S} [add_comm_monoid R] [comm_ring S] [is_domain S]
     {g : R → S} (h : ∀ x y z : R, x + y + z = 0 → (g x + g y) ^ 3 + g z ^ 3 = 0) :
   ∀ x y z : R, x + y + z = 0 → g x + g y + g z = 0 :=
 begin
-  have three_ne_zero : (3 : S) ≠ 0 :=
-    λ h0, char_ne_3 (char_p.ring_char_of_prime_eq_zero nat.prime_three (by simp; exact h0)),
-
-  ---- First off we prove that the following result suffices:
-  ---- For any t, u, v ∈ S, if (t + u)^3 + v^3 = (u + v)^3 + t^3,
-  ----   then either t + u + v = 0, u = 0, or v = t.
-  revert g h,
-  suffices : ∀ t u v : S, (t + u) ^ 3 + v ^ 3 = 0 → (u + v) ^ 3 + t ^ 3 = 0 →
-    t + u + v = 0 ∨ u = 0 ∨ v = t,
-  { intros g h x y z sum_eq_0,
-    have hxyz := h x y z sum_eq_0,
-    rw [add_assoc, add_comm] at sum_eq_0,
-    have hyzx := h y z x sum_eq_0,
-    rw [add_assoc, add_comm] at sum_eq_0,
-    have hzxy := h z x y sum_eq_0,
-    clear h sum_eq_0,
-    rcases this _ _ _ hzxy hxyz with h | h | h,
-    rw [add_comm, ← add_assoc, h],
-    rw [h, zero_pow zero_lt_three, add_zero] at hyzx,
-    rw [h, zero_add]; exact pow_eq_zero hyzx,
-    rcases this _ _ _ hxyz hyzx with h0 | h0 | h0,
-    exact h0,
-    rw [h0, zero_pow zero_lt_three, add_zero] at hzxy,
-    rw [h0, add_zero, add_comm]; exact pow_eq_zero hzxy,
-    rw [h, h0] at hxyz ⊢; clear h h0 hzxy hyzx,
-    rw [← two_mul, mul_pow, ← add_one_mul, mul_eq_zero, or_comm] at hxyz,
-    cases hxyz with h h,
-    rw [pow_eq_zero h, add_zero, add_zero],
-    replace h : (3 : S) ^ 2 = 0 := by rw ← h; norm_num,
-    exfalso; exact three_ne_zero (pow_eq_zero h) },
-
-  intros t u v h h0,
-  rw [← h0, ← sub_eq_zero] at h; clear h0,
-  replace h : -((t + u + v) * (u * (v - t)) * 3) = 0 := by rw ← h; ring,
-  rwa [neg_eq_zero, mul_eq_zero, mul_eq_zero, mul_eq_zero,
-       sub_eq_zero, or_iff_left three_ne_zero] at h
+  intros x y z hs,
+  have hxyz := h x y z hs,
+  rw [add_assoc, add_comm] at hs,
+  have hyzx := h y z x hs,
+  rw [add_assoc, add_comm] at hs,
+  have hzxy := h z x y hs,
+  exact add_cube_cube_add_zero_triple hxyz hyzx hzxy
 end
 
 end extra
@@ -75,54 +91,57 @@ section results
 
 variables {R : Type*} [comm_ring R] [is_domain R]
 
-/-- Useful definition for the case where f is not injective -/
-private def good (f : ℝ → R) (t : ℝ) := ∃ c : ℝ, c ≠ 0 ∧ f (c * t) = f c
+private lemma lem1_1 {f : ℝ → R} (C : R) : fn_eq (f + const ℝ C) ↔ fn_eq f :=
+  by simp only [fn_eq, const_apply, add_sub_add_right_eq_sub, pi.add_apply]
 
-variables {f : ℝ → R} (feq : fn_eq f)
-include feq
-
-private lemma lem1_1 (C : R) : fn_eq (f + const ℝ C) :=
-  by simp only [fn_eq, const_apply, add_sub_add_right_eq_sub, pi.add_apply]; exact feq
-
-private lemma lem1_2 : fn_eq (-f) :=
+private lemma lem1_2 {f : ℝ → R} : fn_eq (-f) ↔ fn_eq f :=
 begin
-  intros a b c,
-  simp only [pi.neg_apply],
-  repeat { rw ← neg_sub' },
-  rw [neg_mul_neg, mul_neg, feq]
+  simp only [fn_eq, pi.neg_apply],
+  conv_lhs { find (_ = _) { rw [← neg_sub', ← neg_sub', neg_mul_neg,
+    ← neg_sub', ← neg_sub', mul_neg, neg_inj] } }
 end
 
 
 
 section f_not_inj
 
-private lemma lem2_1 {c : ℝ} (c_ne_0 : c ≠ 0) (h : f c = f 0) (x : ℝ) : f (-x) = f x :=
+/-- Useful definition for the case where f is not injective -/
+private def good (f : ℝ → R) (t : ℝ) := ∃ c : ℝ, c ≠ 0 ∧ f (c * t) = f c
+
+variables {f : ℝ → R} (feq : fn_eq f)
+include feq
+
+private lemma lem2_1 (t x : ℝ) (h : f (x * t) = f x) (d : ℝ) :
+  f (x ^ 3 * (t + d ^ 2 + d * t ^ 2)) = f (x ^ 3 * (t ^ 2 + d + t * d ^ 2)) :=
 begin
-  revert x; suffices : ∀ x : ℝ, f (c * x ^ 2) = f (x * c ^ 2),
-  { intros x,
-    have h0 := this (-(x / (c ^ 2))),
-    rwa [neg_sq, this, neg_mul, div_mul_cancel _ (pow_ne_zero 2 c_ne_0), eq_comm] at h0 },
-  intros x,
-  replace feq := feq x c 0,
-  rwa [h, sub_self, mul_zero, zero_mul, zero_pow zero_lt_two, mul_zero, add_zero, zero_mul,
-       add_zero, mul_zero, add_zero, zero_mul, add_zero, eq_comm, sub_eq_zero, eq_comm] at feq
+  replace feq := feq (x * t) x (x * d),
+  rwa [h, sub_self, zero_mul, zero_mul, eq_comm, sub_eq_zero, mul_right_comm, mul_pow,
+       ← mul_assoc, ← mul_add, mul_pow, mul_mul_mul_comm, ← mul_add, ← mul_assoc,
+       mul_right_comm x d, ← mul_add, mul_mul_mul_comm, ← mul_add, ← pow_succ] at feq
 end
 
-private lemma lem2_2 (h : ∀ x : ℝ, f (-x) = f x) : f = const ℝ (f 0) :=
+private lemma lem2_2 (h : good f 0) (x : ℝ) : f (-x) = f x :=
 begin
-  ext x,
-  suffices : ∃ y : ℝ, x = 2 * golden_ratio * y ^ 3,
-  { cases this with y h0,
-    replace feq := feq y (-y) (golden_ratio * y),
-    rw [h, sub_self, zero_mul, zero_mul, eq_comm, sub_eq_zero, neg_sq, eq_comm] at feq,
-    convert feq; clear feq; ring_nf,
-    rw [h0, add_one_mul, ← sq, gold_sq, add_right_comm, add_sub_cancel, ← two_mul],
-    rw [add_one_mul (-golden_ratio), neg_mul, add_assoc, ← sq, gold_sq, neg_add_self, zero_mul] },
-  use nat_root 3 (x / (2 * golden_ratio)),
-  rw [pow_nat_root_self_bit1, mul_div_cancel' x (mul_ne_zero two_ne_zero gold_ne_zero)]
+  rcases h with ⟨c, c_ne_0, h⟩,
+  replace h := lem2_1 feq 0 c h,
+  conv at h { find (_ = _) { rw [zero_pow two_pos, zero_add,
+    zero_add, zero_mul, add_zero, mul_zero, add_zero] } },
+  have h0 := h (-(x / c ^ 3)),
+  rwa [neg_sq, h, mul_neg, mul_div_cancel' _ (pow_ne_zero 3 c_ne_0), eq_comm] at h0
 end
 
-private lemma lem2_3 {t : ℝ} (t_good : good f t) : good f t⁻¹ :=
+private lemma lem2_3 (h : good f 0) : f = const ℝ (f 0) :=
+begin
+  replace h := lem2_2 feq h,
+  ext x; set y := nat_root 3 (x / (2 * golden_ratio)) with hy,
+  replace h : f (y * -1) = f y := by rw [mul_neg_one, h],
+  replace h := lem2_1 feq _ y h golden_ratio,
+  rwa [neg_one_sq, gold_sq, add_comm _ golden_ratio, neg_one_mul, add_neg_self, mul_zero, mul_one,
+       neg_add_cancel_comm_assoc, ← two_mul, hy, pow_nat_root_self_bit1, div_mul_cancel] at h,
+  exact mul_ne_zero two_ne_zero gold_ne_zero
+end
+
+private lemma lem2_4 {t : ℝ} (t_good : good f t) : good f t⁻¹ :=
 begin
   rcases eq_or_ne t 0 with rfl | h,
   rwa inv_zero,
@@ -132,122 +151,97 @@ begin
   rw [h1, mul_assoc, mul_inv_cancel h, mul_one]
 end
 
-private lemma lem2_4 {t : ℝ} (t_ne_0 : t ≠ 0) (t_good : good f t) : good f (t ^ 4) :=
+private lemma lem2_5 {t : ℝ} (t_ne_0 : t ≠ 0) (t_good : good f t) : good f (t ^ 4) :=
 begin
   rcases t_good with ⟨c, c_ne_0, h⟩,
-  replace feq := feq (c * t) c (- c * t ^ 2),
-  rw [h, sub_self, zero_mul, zero_mul, eq_comm, sub_eq_zero] at feq,
-  ring_nf at feq,
-  use t * c ^ 3; split,
-  exact mul_ne_zero t_ne_0 (pow_ne_zero 3 c_ne_0),
-  rw [mul_comm, ← mul_assoc, ← pow_succ', feq]
+  replace h := lem2_1 feq t c h (-t ^ 2),
+  rw [neg_sq, neg_mul, ← sq, ← sub_eq_add_neg, add_sub_cancel,
+      add_neg_self, zero_add, ← mul_assoc, ← pow_mul, two_mul, ← bit0] at h,
+  use c ^ 3 * t; split,
+  exact mul_ne_zero (pow_ne_zero 3 c_ne_0) t_ne_0,
+  rw h
 end
 
-private lemma lem2_5 (h : ∃ t : ℝ, (t ≤ 0 ∨ 2 < t) ∧ good f t) : good f 0 :=
+private lemma lem2_6 (h : ∃ t : ℝ, 0 < t ∧ t < 1 ∧ good f t) : ∃ t : ℝ, 2 < t ∧ good f t :=
+begin
+  rcases h with ⟨t, t_gt_0, t_lt_1, t_good⟩,
+  obtain ⟨n, h⟩ : ∃ n : ℕ, t ^ n < 2⁻¹ := exists_pow_lt_of_lt_one (inv_pos.mpr zero_lt_two) t_lt_1,
+  use (t ^ (4 ^ n))⁻¹; split,
+  { rw lt_inv two_pos (pow_pos t_gt_0 _),
+    refine lt_trans _ h,
+    rw pow_lt_pow_iff_of_lt_one t_gt_0 t_lt_1,
+    exact nat.lt_pow_self (by norm_num) n },
+  { apply lem2_4 feq,
+    clear h; induction n with n n_ih,
+    rwa [pow_zero, pow_one],
+    rw [pow_succ', pow_mul],
+    refine lem2_5 feq (pow_ne_zero _ (ne_of_gt t_gt_0)) n_ih }
+end
+
+private lemma lem2_7 (h : ∃ t : ℝ, (t ≤ 0 ∨ 2 < t) ∧ good f t) : good f 0 :=
 begin
   rcases h with ⟨t, h, t_good⟩,
   rcases eq_or_ne t 0 with rfl | t_ne_0,
   exact t_good,
+  have t_ne_1 : t ≠ 1 :=
+  begin
+    rintros rfl; cases h with h h,
+    rw ← not_lt at h; exact h one_pos,
+    exact lt_asymm one_lt_two h
+  end,
   replace h : ∃ u : ℝ, u ^ 2 + t ^ 2 * u + t = 0 :=
   begin
     apply extra.exists_root_quadratic,
     cases h with h h,
     exact le_trans (mul_nonpos_of_nonneg_of_nonpos zero_le_four h) (sq_nonneg _),
     rw [← pow_mul, mul_two, ← bit0, pow_succ', mul_le_mul_right (lt_trans zero_lt_two h)],
-    refine le_trans _ (pow_le_pow_of_le_left zero_le_two (le_of_lt h) 3),
-    norm_num
+    exact le_trans (by norm_num) (pow_le_pow_of_le_left zero_le_two (le_of_lt h) 3)
   end,
   rcases h with ⟨u, h0⟩,
   rcases t_good with ⟨c, c_ne_0, h⟩,
-  use ((t + u ^ 2) * t + u) * c ^ 3,
-  rw [mul_zero, and_comm]; split,
-  { replace feq := feq (c * t) c (c * u),
-    rw [h, sub_self, zero_mul, zero_mul, eq_comm, sub_eq_zero] at feq,
-    ring_nf at feq,
-    rwa [add_one_mul, add_comm, ← add_assoc, mul_assoc, mul_comm u, ← sq, h0, zero_mul] at feq },
-  { refine mul_ne_zero _ (pow_ne_zero 3 c_ne_0),
-    intros h1,
-    rw [add_right_comm, add_eq_zero_iff_eq_neg, add_comm] at h0,
-    rw [h0, neg_mul, neg_add_eq_zero, mul_right_comm, mul_left_eq_self₀, or_comm] at h1,
-    rcases h1 with rfl | h1,
-    rw [zero_pow zero_lt_two, add_zero, mul_zero, neg_zero] at h0,
-    exact t_ne_0 h0,
-    replace h1 := congr_arg (nat_root 3) h1,
-    rw [← pow_succ', ← bit1, nat_root_pow_self_bit1, nat_root_bit1_one] at h1,
-    rw [h1, one_pow, one_mul, ← add_eq_zero_iff_eq_neg] at h0,
-    replace h1 : 4 * (1 + u ^ 2 + u) = (2 * u + 1) ^ 2 + 3 := by ring,
-    rw [h0, mul_zero, eq_comm, add_eq_zero_iff_eq_neg] at h1,
-    replace h0 : (0 : ℝ) ≤ -3 := by rw ← h1; exact sq_nonneg _,
-    exact not_lt_of_le h0 (by norm_num) }
+  replace h := lem2_1 feq t c h u,
+  rw [add_comm t, add_right_comm, mul_comm u, h0, mul_zero] at h,
+  use c ^ 3 * (t ^ 2 + u + t * u ^ 2),
+  rw [and_comm, mul_zero, and_iff_right h, mul_ne_zero_iff]; split,
+  exact pow_ne_zero 3 c_ne_0,
+  clear h c_ne_0 c feq f; intros h,
+  rw [add_right_comm, add_eq_zero_iff_eq_neg] at h0 h,
+  rw [sq t, ← mul_add, add_comm t, h0, mul_neg, neg_inj, ← mul_assoc, mul_left_eq_self₀] at h,
+  rcases h with h | rfl,
+  { replace h := congr_arg (nat_root 3) h,
+    rw [nat_root_bit1_one, ← pow_succ, nat_root_pow_self_bit1] at h,
+    exact t_ne_1 h },
+  { rw [zero_pow two_pos, zero_add, mul_zero, neg_zero] at h0,
+    exact t_ne_0 h0 }
 end
 
-private lemma lem2_6 (h : ∃ t : ℝ, 0 < t ∧ t < 1 ∧ good f t) : ∃ t : ℝ, 2 < t ∧ good f t :=
+private lemma lem2_8 (h : ∃ t : ℝ, t ≠ 1 ∧ good f t) : good f 0 :=
 begin
-  rcases h with ⟨t, t_gt_0, t_lt_1, h⟩,
-  replace h : ∀ n : ℕ, ∃ c : ℝ, c ≠ 0 ∧ f (c * t ^ (4 ^ n)) = f c :=
-  begin
-    intros n; induction n with n n_ih,
-    rcases h with ⟨c, h, h0⟩,
-    use c,
-    rw [and_iff_right h, pow_zero, pow_one, h0],
-    rw [pow_succ', pow_mul],
-    refine lem2_4 feq (pow_ne_zero _ (ne_of_gt t_gt_0)) n_ih
-  end,
-
-  obtain ⟨n, h0⟩ : ∃ n : ℕ, t ^ (4 ^ n) < 2⁻¹ :=
-  begin
-    obtain ⟨n, h0⟩ : ∃ n : ℕ, t ^ n < 2⁻¹ :=
-      exists_pow_lt_of_lt_one (inv_pos.mpr zero_lt_two) t_lt_1,
-    use n; refine lt_trans _ h0,
-    rw pow_lt_pow_iff_of_lt_one t_gt_0 t_lt_1,
-    refine nat.lt_pow_self (by norm_num) n
-  end,
-
-  replace t_gt_0 := pow_pos t_gt_0 (4 ^ n),
-  replace h := h n,
-  rcases h with ⟨c, h, h1⟩,
-  set u := t ^ 4 ^ n with hu,
-  use u⁻¹; split,
-  rwa lt_inv zero_lt_two t_gt_0,
-  use c * u; split,
-  exact mul_ne_zero h (ne_of_gt t_gt_0),
-  rw [h1, mul_assoc, mul_inv_cancel (ne_of_gt t_gt_0), mul_one]
-end
-
-private lemma lem2_7 (h : ∃ t : ℝ, t ≠ 1 ∧ good f t) : good f 0 :=
-begin
-  rcases h with ⟨t, h, h0⟩,
-  cases le_or_lt t 0 with h1 h1,
-  exact lem2_5 feq ⟨t, (by left; exact h1), h0⟩,
-  rw ne_iff_lt_or_gt at h,
-  cases h with h h,
-  rcases lem2_6 feq ⟨t, h1, h, h0⟩ with ⟨u, h2, h3⟩,
-  exact lem2_5 feq ⟨u, (by right; exact h2), h3⟩,
-  rw [← inv_one, gt_iff_lt, inv_lt zero_lt_one h1] at h,
-  rw ← inv_pos at h1,
-  rcases lem2_6 feq ⟨t⁻¹, h1, h, (lem2_3 feq h0)⟩ with ⟨u, h2, h3⟩,
-  exact lem2_5 feq ⟨u, (by right; exact h2), h3⟩
-end
-
-private lemma lem2_8 {a b : ℝ} (h : f a = f b) (h0 : a ≠ b) : ∃ c : ℝ, c ≠ 0 ∧ f c = f 0 :=
-begin
-  rcases eq_or_ne b 0 with rfl | h1,
-  exact ⟨a, h0, h⟩,
-  suffices : good f 0,
-  { rcases this with ⟨c, h1, h2⟩,
-    use c; rw [and_iff_right h1, ← h2, mul_zero] },
   apply lem2_7 feq,
-  use a / b; split,
-  intros h2; exact h0 (eq_of_div_eq_one h2),
-  use b; rw [and_iff_right h1, mul_div_cancel' a h1, h]
+  rcases h with ⟨t, t_ne_1, t_good⟩,
+  cases le_or_lt t 0 with h h,
+  exact ⟨t, (by left; exact h), t_good⟩,
+  rw ne_iff_lt_or_gt at t_ne_1,
+  cases t_ne_1 with h0 h0,
+  rcases lem2_6 feq ⟨t, h, h0, t_good⟩ with ⟨u, h1, h2⟩,
+  exact ⟨u, (by right; exact h1), h2⟩,
+  rw [← inv_one, gt_iff_lt, inv_lt zero_lt_one h] at h0,
+  rw ← inv_pos at h,
+  rcases lem2_6 feq ⟨_, h, h0, lem2_4 feq t_good⟩ with ⟨u, h1, h2⟩,
+  exact ⟨u, (by right; exact h1), h2⟩
 end
 
 private theorem thm2 (h : ¬injective f) : f = const ℝ (f 0) :=
 begin
   simp only [injective, not_forall] at h,
   rcases h with ⟨a, b, h, h0⟩,
-  rcases lem2_8 feq h h0 with ⟨c, h1, h2⟩,
-  exact lem2_2 feq (lem2_1 feq h1 h2)
+  rcases eq_or_ne b 0 with rfl | h1,
+  rw [eq_comm, ← mul_zero a] at h,
+  exact lem2_3 feq ⟨a, h0, h⟩,
+  refine lem2_3 feq (lem2_8 feq _),
+  use (a / b); split,
+  intros h2; exact h0 (eq_of_div_eq_one h2),
+  use b; rw [and_iff_right h1, mul_div_cancel' a h1, h]
 end
 
 end f_not_inj
@@ -256,8 +250,8 @@ end f_not_inj
 
 section f_inj_f0_eq_0
 
-variables (f_inj : injective f) (f0_eq_0 : f 0 = 0)
-include f_inj f0_eq_0
+variables {f : ℝ → R} (feq : fn_eq f) (f_inj : injective f) (f0_eq_0 : f 0 = 0)
+include feq f_inj f0_eq_0
 
 private lemma lem3_1 (a b : ℝ) : (f a - f b) * f a * f b = f (b * a ^ 2) - f (a * b ^ 2) :=
 begin
@@ -268,9 +262,9 @@ end
 
 private lemma lem3_2 {a : ℝ} (h : a ≠ 0) : (f 1 - (f a + f (-a))) * f 1 = 1 :=
 begin
-  have h0 := congr_arg2 (λ x y, x - y)
-    (lem3_1 feq f_inj f0_eq_0 1 a)
-    (lem3_1 feq f_inj f0_eq_0 1 (-a)),
+  have h0 := lem3_1 feq f_inj f0_eq_0 1,
+  simp only [one_pow, mul_one, one_mul] at h0,
+  replace h0 := congr_arg2 (λ x y, x - y) (h0 a) (h0 (-a)),
   ring_nf at h0,
   rwa [add_comm (- _^2), ← sub_eq_add_neg, ← neg_sub (_ ^ 2), ← sub_eq_add_neg, sq_sub_sq,
        mul_comm (f a - _), ← sub_mul, mul_right_comm, mul_left_eq_self₀, or_iff_left] at h0,
@@ -366,11 +360,9 @@ begin
     rw [mul_one, f1_eq_1, mul_one] at h,
     rw [this, ← h] },
   intros a b,
-  have h := congr_arg2 (λ x y, x - y)
-    (lem3_1 feq f_inj f0_eq_0 a b)
-    (lem3_1 feq f_inj f0_eq_0 a (-b)),
-  simp only [] at h,
-  rw [neg_sq, lem3_5 feq f_inj f0_eq_0, neg_mul, lem3_5 feq f_inj f0_eq_0] at h,
+  have h := lem3_1 feq f_inj f0_eq_0 a,
+  replace h := congr_arg2 (λ x y, x - y) (h b) (h (-b)),
+  simp only [lem3_5 feq f_inj f0_eq_0, neg_mul] at h,
   ring_nf at h,
   rwa [mul_assoc, mul_eq_mul_left_iff, or_iff_left, mul_comm, eq_comm] at h,
   exact lem3_6 feq f_inj f0_eq_0 f1_eq_1
@@ -489,7 +481,6 @@ begin
   replace X := congr_arg (λ x, f 2 * x) (X (t / 2)); simp only [] at X,
   have fmul := thm3_2 feq f_inj f0_eq_0 f1_eq_1,
   rw [mul_sub, ← fmul, ← fmul, mul_add_one, mul_sub_one, mul_div_cancel' t two_ne_zero, h] at X,
-  clear h,
   rw [mul_add (f 2), ← mul_two, ← eq_sub_iff_add_eq, add_sub_assoc, ← sub_mul,
       mul_left_comm, ← mul_add, mul_eq_mul_left_iff, sub_eq_zero, or_iff_left f2_ne_2] at X,
   rw [X, ← fmul, ← fmul, ← nat_root_bit1_pow, ← nat_root_bit1_pow,
@@ -558,22 +549,11 @@ begin
     replace this := this t u (-(t + u)) (by rw add_neg_self),
     rwa [nat_root_bit1_neg, lem3_5 feq f_inj f0_eq_0,
          ← sub_eq_add_neg, sub_eq_zero, eq_comm] at this },
-
   apply extra.g_sum_zero_of_g_cube_sum_zero,
-  { intros char_eq_3,
-    have h := lem5_4 feq f_inj f0_eq_0 f1_eq_1 f2_ne_2 1 1,
-    rw [← thm3_3 feq f_inj f0_eq_0 f1_eq_1, pow_nat_root_self_bit1,
-        nat_root_bit1_one, f1_eq_1, ← bit0] at h,
-    apply f2_ne_2,
-    rw [h, ← sub_eq_zero]; norm_num,
-    rw ring_char.eq_iff at char_eq_3,
-    have cast3 : ↑(3 : ℕ) = (3 : R) := by simp only [nat.cast_bit1, nat.cast_one],
-    resetI; rw [bit0, ← cast3, char_p.cast_eq_zero R (3 : ℕ), add_zero] },
-
-  { intros x y z h,
-    rw add_eq_zero_iff_eq_neg at h,
-    rw [← lem5_4 feq f_inj f0_eq_0 f1_eq_1 f2_ne_2, h, nat_root_bit1_neg,
-        lem3_5 feq f_inj f0_eq_0, neg_pow_bit1, neg_add_self] }
+  intros x y z h,
+  rw add_eq_zero_iff_eq_neg at h,
+  rw [← lem5_4 feq f_inj f0_eq_0 f1_eq_1 f2_ne_2, h, nat_root_bit1_neg,
+      lem3_5 feq f_inj f0_eq_0, neg_pow_bit1, neg_add_self]
 end
 
 private theorem thm5 : ∃ φ : ℝ →+* R, f = λ x, φ x ^ 3 :=
@@ -595,78 +575,73 @@ end results
 
 
 
-/-- Final solution -/
 theorem final_solution_general {R : Type*} [comm_ring R] [is_domain R] (f : ℝ → R) : fn_eq f ↔
-  (∃ C : R, f = const ℝ C) ∨ ∃ (φ : ℝ →+* R) (C : R),
-   ((f = φ + const ℝ C) ∨ (f = (λ x, φ x ^ 3) + const ℝ C)) ∨
-   ((f = -φ + const ℝ C) ∨ (f = -(λ x, φ x ^ 3) + const ℝ C)) :=
+  (∃ C : R, f = const ℝ C) ∨
+  ((∃ (φ : ℝ →+* R) (C : R), f = φ + const ℝ C) ∨
+   (∃ (φ : ℝ →+* R) (C : R), f = (λ x, φ x ^ 3) + const ℝ C)) ∨
+  ((∃ (φ : ℝ →+* R) (C : R), f = -φ + const ℝ C) ∨
+   (∃ (φ : ℝ →+* R) (C : R), f = -(λ x, φ x ^ 3) + const ℝ C)) :=
 begin
   split,
   { intros feq,
     by_cases h : injective f,
     swap,
     left; use (f 0); exact thm2 feq h,
-    replace feq := lem1_1 feq (-f 0),
-    replace h : injective (f + const ℝ (-f 0)) := λ x y h0,
-      by simp only [pi.add_apply, const_apply, add_left_inj] at h0; exact h h0,
-    set g := f + const ℝ (-f 0) with hg,
-    have h0 : g 0 = 0 := by simp only [g, pi.add_apply, const_apply, add_right_neg],
+    right; set g := f - const ℝ (f 0) with hg,
+    rw [← lem1_1 (-f 0), ← pi.const_neg, ← sub_eq_add_neg, ← hg] at feq,
+    replace h : injective g := λ x y h0,
+      by simp only [g, pi.sub_apply, const_apply, sub_left_inj] at h0; exact h h0,
+    have h0 : g 0 = 0 := by rw [hg, pi.sub_apply, const_apply, sub_self],
     have h1 := thm3_1 feq h h0,
-    rw [sq_eq_one_iff] at h1,
-    right; cases h1 with h1 h1,
-    { cases eq_or_ne (g 2) 2 with h2 h2,
-      rcases thm4 feq h h0 h1 h2 with ⟨φ, h3⟩,
-      use [φ, (f 0)]; left; left,
-      rw [← h3, hg, add_assoc, pi.const_add (-f 0), neg_add_self, pi.const_zero, add_zero],
-      rcases thm5 feq h h0 h1 h2 with ⟨φ, h3⟩,
-      use [φ, (f 0)]; left; right,
-      rw [← h3, hg, add_assoc, pi.const_add (-f 0), neg_add_self, pi.const_zero, add_zero] },
-    { clear_value g; subst hg,
-      set g := -(f + const ℝ (-f 0)) with hg,
-      replace feq := lem1_2 feq,
+    rw sq_eq_one_iff at h1,
+    cases h1 with h1 h1,
+    { left; cases eq_or_ne (g 2) 2 with h2 h2,
+      left; rcases thm4 feq h h0 h1 h2 with ⟨φ, h3⟩; use [φ, (f 0)],
+      rw [← h3, hg, sub_add_cancel],
+      right; rcases thm5 feq h h0 h1 h2 with ⟨φ, h3⟩; use [φ, (f 0)],
+      rw [← h3, hg, sub_add_cancel] },
+    { right; clear_value g; subst hg,
+      set g := -(f - const ℝ (f 0)) with hg,
+      rw [← lem1_2, ← hg] at feq,
       replace h : injective g := λ x y h2,
         by rw [hg, pi.neg_apply, pi.neg_apply, neg_inj] at h2; exact h h2,
-      nth_rewrite 2 ← neg_zero at h0,
-      rw [eq_neg_iff_eq_neg, eq_comm, ← pi.neg_apply (f + _) 0] at h0,
-      rw [eq_neg_iff_eq_neg, eq_comm, ← pi.neg_apply (f + _) 1] at h1,
-      rw ← hg at feq h0 h1,
+      rw [← neg_eq_zero, ← pi.neg_apply (f - _) 0, ← hg] at h0,
+      rw [eq_neg_iff_eq_neg, eq_comm, ← pi.neg_apply (f - _) 1, ← hg] at h1,
       cases eq_or_ne (g 2) 2 with h2 h2,
-      rcases thm4 feq h h0 h1 h2 with ⟨φ, h3⟩,
-      use [φ, (f 0)]; right; left,
-      rw [← h3, hg, neg_neg, add_assoc, pi.const_add (-f 0),
-          neg_add_self, pi.const_zero, add_zero],
-      rcases thm5 feq h h0 h1 h2 with ⟨φ, h3⟩,
-      use [φ, (f 0)]; right; right,
-      rw [← h3, hg, neg_neg, add_assoc, pi.const_add (-f 0),
-          neg_add_self, pi.const_zero, add_zero] } },
-  { rintros (⟨C, rfl⟩ | ⟨φ, C, h⟩),
-    simp [fn_eq],
-    suffices h0 : fn_eq φ ∧ fn_eq (λ x, φ x ^ 3),
-    { cases h0 with h0 h1,
-      rcases h with (rfl | rfl) | (rfl | rfl),
-      exacts [lem1_1 h0 C, lem1_1 h1 C, lem1_1 (lem1_2 h0) C, lem1_1 (lem1_2 h1) C] },
-    split; intros a b c; simp only [map_add, map_pow, map_mul]; ring },
+      left; rcases thm4 feq h h0 h1 h2 with ⟨φ, h3⟩; use [φ, (f 0)],
+      rw [← h3, hg, neg_neg, sub_add_cancel],
+      right; rcases thm5 feq h h0 h1 h2 with ⟨φ, h3⟩; use [φ, (f 0)],
+      rw [← h3, hg, neg_neg, sub_add_cancel] } },
+  suffices : ∀ φ : ℝ →+* R, fn_eq φ ∧ fn_eq (λ x, φ x ^ 3),
+  { rintros (⟨C, rfl⟩ | (⟨φ, C, rfl⟩ | ⟨φ, C, rfl⟩) | (⟨φ, C, rfl⟩ | ⟨φ, C, rfl⟩)),
+    rw [← zero_add (const ℝ C), lem1_1],
+    intros a b c; simp only [pi.zero_apply, sub_zero, mul_zero],
+    all_goals { rw lem1_1 },
+    exacts [(this φ).left, (this φ).right, lem1_2.mpr (this φ).left, lem1_2.mpr (this φ).right] },
+  { intros φ; split,
+    all_goals {
+      intros a b c,
+      simp only [map_add, map_mul, map_pow],
+      ring
+    } }
 end
 
-/-- Final solution, case char(R) ≠ 0 -/
 theorem final_solution_char_ne_0 {R : Type*} [comm_ring R] [is_domain R]
     (p : ℕ) [fact (p ≠ 0)] [char_p R p] (f : ℝ → R) : fn_eq f ↔ ∃ C : R, f = const ℝ C :=
 begin
   rw final_solution_general,
   apply or_iff_left,
-  rw is_empty.exists_iff,
+  simp only [is_empty.exists_iff, or_false],
   exact not_false
 end
 
-/-- Final solution, case R = ℝ -/
-theorem final_solution_real (f : ℝ → ℝ) : fn_eq f ↔ (∃ C : ℝ, f = const ℝ C) ∨ ∃ C : ℝ,
-   ((f = id + const ℝ C) ∨ (f = (λ x, x ^ 3) + const ℝ C)) ∨
-   ((f = -id + const ℝ C) ∨ (f = -(λ x, x ^ 3) + const ℝ C)) :=
+theorem final_solution_real (f : ℝ → ℝ) : fn_eq f ↔ (∃ C : ℝ, f = const ℝ C) ∨
+   ((∃ C : ℝ, f = id + const ℝ C) ∨ (∃ C : ℝ, f = (λ x, x ^ 3) + const ℝ C)) ∨
+   ((∃ C : ℝ, f = -id + const ℝ C) ∨ (∃ C : ℝ, f = -(λ x, x ^ 3) + const ℝ C)) :=
 begin
   rw final_solution_general,
   apply or_congr_right',
-  rw unique.exists_iff,
-  simp only [default, ring_hom.coe_one, id.def]
+  simp only [unique.exists_iff, default, ring_hom.coe_one, id.def]
 end
 
 end IMO2021A8
