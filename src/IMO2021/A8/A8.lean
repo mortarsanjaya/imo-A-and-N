@@ -619,11 +619,7 @@ begin
     all_goals { rw lem1_1 },
     exacts [(this φ).left, (this φ).right, lem1_2.mpr (this φ).left, lem1_2.mpr (this φ).right] },
   { intros φ; split,
-    all_goals {
-      intros a b c,
-      simp only [map_add, map_mul, map_pow],
-      ring
-    } }
+    all_goals { intros a b c, simp only [map_add, map_mul, map_pow], ring } }
 end
 
 theorem final_solution_char_ne_0 {R : Type*} [comm_ring R] [is_domain R]
