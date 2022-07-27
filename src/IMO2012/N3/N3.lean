@@ -9,7 +9,7 @@ def good (m : ℕ) := 2 ≤ m ∧ ∀ n : ℕ, 2 * n ≤ m → m ≤ 3 * n → n
 
 
 
-private lemma prime_good (p : ℕ) (h : p.prime) : good p :=
+private lemma prime_implies_good (p : ℕ) (h : p.prime) : good p :=
 begin
   split,
   exact nat.prime.two_le h,
@@ -41,6 +41,7 @@ begin
     rw [nat.succ_eq_add_one, ← nat.choose_mul_succ_eq],
     use (n.choose k); rw mul_comm }
 end
+
 
 
 
