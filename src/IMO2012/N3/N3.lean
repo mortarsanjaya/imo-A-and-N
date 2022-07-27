@@ -1,4 +1,4 @@
-import data.nat.prime data.nat.choose.basic
+import data.nat.prime data.nat.choose.basic data.nat.parity
 
 /-! # IMO 2012 N3 -/
 
@@ -42,8 +42,42 @@ begin
     use (n.choose k); rw mul_comm }
 end
 
+private lemma good_implies_prime (m : ℕ) (h : good m) : nat.prime m :=
+begin
+  cases h with h h0,
+  let p := m.min_fac,
+  cases eq_or_ne p 2 with h1 h1,
+  { rw nat.min_fac_eq_two_iff at h1,
+    rcases h1 with ⟨k, rfl⟩,
+    replace h0 := h0 k (le_refl _) (nat.mul_le_mul_right k (by norm_num)),
+    rw [nat.sub_self, nat.choose_zero_right, nat.dvd_one] at h0,
+    rw [h0, mul_one]; exact nat.prime_two },
+  { obtain ⟨k, h2⟩ : p ∣ m := nat.min_fac_dvd m,
+    have h3 : nat.prime p := nat.min_fac_prime (by rintros rfl; exact not_lt_of_le h one_lt_two),
+    rw [ne.def, nat.min_fac_eq_two_iff, h2, nat.two_dvd_ne_zero, ← nat.odd_iff] at h1,
+    replace h1 := nat.odd.of_mul_right h1,
+    rcases h1 with ⟨k, rfl⟩,
+    rcases k.eq_zero_or_pos with rfl | h1,
+    rw [h2, mul_zero, zero_add, mul_one]; exact h3,
+    exfalso,
+    replace h0 : (p * k) ∣ (p * k).choose (m - 2 * (p * k)) :=
+    begin
+      apply h0,
+      rw [h2, mul_add_one, mul_left_comm]; exact le_self_add,
+      rw [h2, mul_add_one, mul_left_comm, bit1, add_one_mul 2],
+      exact nat.add_le_add_left (nat.le_mul_of_pos_right h1) _
+    end,
+    rw [h2, mul_left_comm, mul_add_one, nat.add_sub_cancel_left] at h0,
+    cases h0 with M h0,
+    sorry
+  }
+end
 
 
+
+/-- Final solution -/
+theorem final_solution : good = nat.prime :=
+  by ext n;  exact ⟨good_implies_prime n, prime_implies_good n⟩
 
 end IMO2012N3
 end IMOSL
