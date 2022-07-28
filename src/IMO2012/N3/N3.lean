@@ -16,8 +16,7 @@ begin
   rintros n h0 h1,
   have hn : 0 < n := pos_of_mul_pos_right (lt_of_lt_of_le h.pos h1) zero_le_three,
   rcases h.eq_two_or_odd with rfl | h2,
-  { rw ← nat.succ_le_iff at hn,
-    replace hn := nat.mul_le_mul_left 2 hn,
+  { replace hn := nat.mul_le_mul_left 2 hn,
     rw mul_one at hn,
     replace hn := le_antisymm h0 hn,
     rw nat.mul_right_eq_self_iff two_pos at hn,
@@ -68,9 +67,27 @@ begin
       exact nat.add_le_add_left (nat.le_mul_of_pos_right h1) _
     end,
     rw [h2, mul_left_comm, mul_add_one, nat.add_sub_cancel_left] at h0,
-    cases h0 with M h0,
-    sorry
-  }
+    replace h0 := mul_dvd_mul (nat.dvd_factorial h3.pos (le_refl p)) h0,
+    rw ← nat.desc_factorial_eq_factorial_mul_choose at h0,
+    nth_rewrite 1 ← nat.sub_add_cancel h1 at h0,
+    rw mul_add_one at h0,
+    nth_rewrite 3 ← nat.sub_add_cancel h3.pos at h0,
+    nth_rewrite 4 ← nat.sub_add_cancel h3.pos at h0,
+    rw [← add_assoc, nat.succ_desc_factorial_succ, add_assoc,
+        nat.sub_add_cancel h3.pos, ← mul_add_one, nat.sub_add_cancel h1,
+        mul_comm, nat.mul_dvd_mul_iff_left (mul_pos h3.pos h1)] at h0,
+    clear_value p; clear h h2 m; revert h0,
+    generalize_hyp h : p - 1 = r,
+    replace h : r ≤ p - 1 := ge_of_eq h,
+    induction r with r r_ih; intros h0,
+    rw [nat.desc_factorial_zero, nat.dvd_one] at h0,
+    rw h0 at h3; exact nat.not_prime_one h3,
+    rw [nat.succ_eq_add_one r, ← add_assoc, nat.succ_desc_factorial_succ, add_assoc,
+        ← nat.succ_eq_add_one, nat.prime.dvd_mul h3, ← nat.dvd_add_iff_right ⟨k - 1, rfl⟩] at h0,
+    cases h0 with h0 h0,
+    rw [← nat.add_le_add_iff_right, nat.sub_add_cancel h3.pos, ← nat.lt_iff_add_one_le] at h,
+    exact ne_of_gt (nat.succ_pos r) (nat.eq_zero_of_dvd_of_lt h0 h),
+    exact r_ih (le_trans (nat.le_succ r) h) h0 }
 end
 
 
