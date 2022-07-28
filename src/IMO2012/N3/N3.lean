@@ -94,7 +94,7 @@ end
 
 /-- Final solution -/
 theorem final_solution : good = nat.prime :=
-  by ext n;  exact ⟨good_implies_prime n, prime_implies_good n⟩
+  by ext n; exact ⟨good_implies_prime n, prime_implies_good n⟩
 
 end IMO2012N3
 end IMOSL
