@@ -16,7 +16,7 @@ namespace IMOSL
 namespace IMO2021A8
 
 def fn_eq {R : Type*} [comm_ring R] [is_domain R] (f : ℝ → R) :=
-  ∀ a b c : ℝ, (f(a) - f(b)) * (f(b) - f(c)) * (f(c) - f(a))
+  ∀ a b c : ℝ, (f a - f b) * (f b - f c) * (f c - f a)
     = f(a * b ^ 2 + b * c ^ 2 + c * a ^ 2) - f(b * a ^ 2 + c * b ^ 2 + a * c ^ 2)
 
 
