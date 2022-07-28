@@ -3,8 +3,8 @@ import
   algebra.char_p.basic
   extra.real_quadratic_sol
   extra.real_hom.semifield_char0_hom
-  extra.real_hom.nnreal_semifield
   extra.real_hom.nnreal_odd_ext
+  extra.nonneg_semifield
 
 /-! # IMO 2012 A5, Generalized Version -/
 

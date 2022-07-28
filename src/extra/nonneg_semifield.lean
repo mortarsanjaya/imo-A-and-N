@@ -1,4 +1,4 @@
-import algebra.field.basic algebra.order.nonneg
+import algebra.field.basic algebra.order.nonneg data.real.nnreal
 
 namespace IMOSL
 namespace extra
@@ -6,14 +6,14 @@ namespace extra
 /-!
 # A semifield instance for F≥0, where F is a linear ordered field
 
-TODO: Delete the instance when mathlib is updated with the same instance
+TODO:
+1. Delete the instance when mathlib is updated with the same instance.
+2. Delete the specific semifield instance for ℝ≥0.
 -/
-
-variable {α : Type*}
 
 namespace nonneg
 
-instance semifield [linear_ordered_field α] : semifield {x : α // 0 ≤ x} :=
+instance semifield {α : Type*} [linear_ordered_field α] : semifield {x : α // 0 ≤ x} :=
   subtype.coe_injective.semifield (coe : {x : α // 0 ≤ x} → α)
     rfl rfl (λ x y, rfl) (λ x y, rfl) (λ x, rfl) (λ x y, rfl) (λ _ _, rfl) (λ _ _, rfl)
     (λ x n, begin
@@ -26,6 +26,15 @@ instance semifield [linear_ordered_field α] : semifield {x : α // 0 ≤ x} :=
     (λ _, rfl)
   
 end nonneg
+
+
+
+namespace nnreal
+
+/-- Semifield instance for ℝ≥0; delete if possible -/
+noncomputable instance semifield : semifield nnreal := nonneg.semifield
+
+end nnreal
 
 end extra
 end IMOSL
