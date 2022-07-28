@@ -1,6 +1,6 @@
 import algebra.order.field
 
-/-! # IMO 2009 A5, Slightly Generalized Version -/
+/-! # IMO 2009 A5 -/
 
 open_locale classical
 
