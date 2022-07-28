@@ -21,7 +21,7 @@ def fn_eq {R : Type*} [comm_ring R] [is_domain R] (f : ℝ → R) :=
 
 
 
-namespace extra
+section extra
 
 variables {R : Type*} [add_comm_monoid R] {S : Type*} [comm_ring S] [is_domain S]
 
@@ -69,7 +69,7 @@ begin
       exact S3ne0 (pow_eq_zero h0) } },
 end
 
-lemma g_sum_zero_of_g_cube_sum_zero {R S} [add_comm_monoid R] [comm_ring S] [is_domain S]
+private lemma g_sum_zero_of_g_cube_sum_zero {R S} [add_comm_monoid R] [comm_ring S] [is_domain S]
     {g : R → S} (h : ∀ x y z : R, x + y + z = 0 → (g x + g y) ^ 3 + g z ^ 3 = 0) :
   ∀ x y z : R, x + y + z = 0 → g x + g y + g z = 0 :=
 begin
@@ -549,7 +549,7 @@ begin
     replace this := this t u (-(t + u)) (by rw add_neg_self),
     rwa [nat_root_bit1_neg, lem3_5 feq f_inj f0_eq_0,
          ← sub_eq_add_neg, sub_eq_zero, eq_comm] at this },
-  apply extra.g_sum_zero_of_g_cube_sum_zero,
+  apply g_sum_zero_of_g_cube_sum_zero,
   intros x y z h,
   rw add_eq_zero_iff_eq_neg at h,
   rw [← lem5_4 feq f_inj f0_eq_0 f1_eq_1 f2_ne_2, h, nat_root_bit1_neg,
