@@ -61,13 +61,12 @@ begin
   intros j; dsimp only [good_sup_ex],
   rw nat.add_mod_right,
   cases eq_or_ne (j % 2) 0 with h h,
-  { rw [nat.add_mod, if_pos h, h, zero_add, nat.one_mod, nat.one_mod, if_neg nat.one_ne_zero,
-        add_zero],
-    sorry },
-  { rw [if_neg h, add_zero, zero_add, nat.add_mod, nat.one_mod],
-    replace h : j % 2 = 1 := (or_iff_right h).mp (nat.mod_two_eq_zero_or_one j),
-    rw [h, if_pos (nat.mod_self 2), one_div, nnreal.inv_le two_ne_zero, mul_one],
-    exact one_le_two }
+  rw [nat.add_mod, if_pos h, h, zero_add, nat.one_mod, nat.one_mod,
+      if_neg nat.one_ne_zero, add_zero, add_halves],
+  rw [if_neg h, add_zero, zero_add, nat.add_mod, nat.one_mod],
+  replace h : j % 2 = 1 := (or_iff_right h).mp (nat.mod_two_eq_zero_or_one j),
+  rw [h, if_pos (nat.mod_self 2), one_div, nnreal.inv_le two_ne_zero, mul_one],
+  exact one_le_two
 end
 
 private lemma example_sum_is_bound (n : ℕ) : target_sum good_sup_ex n = (n : ℝ≥0) / 4 :=
