@@ -1,4 +1,4 @@
-import data.real.nnreal algebra.big_operators.intervals extra.nonneg_semifield
+import data.real.nnreal algebra.big_operators.intervals algebra.periodic extra.nonneg_semifield
 
 /-! # IMO 2010 A3, Generalized Version -/
 
@@ -81,7 +81,17 @@ begin
   rw [mul_zero, add_zero, div_mul_div_comm, mul_one, two_mul, ← bit0]
 end
 
+private lemma example_periodic (n : ℕ) : periodic good_sup_ex (2 * n) :=
+  λ x, by simp only [good_sup_ex, nat.add_mul_mod_self_left]
 
+
+
+/-- Final solution -/
+theorem final_solution (n : ℕ) :
+  Sup ((λ x : ℕ → ℝ≥0, target_sum x n) '' {x | good x ∧ periodic x (2 * n)}) = (n : ℝ≥0) / 4 :=
+begin
+  sorry
+end
 
 end IMO2010A3
 end IMOSL
