@@ -261,7 +261,7 @@ begin
   simp only [one_pow, mul_one, one_mul] at h0,
   replace h0 : (f a - f (-a)) * ((f 1 - (f a + f (-a))) * f 1) = f a - f (-a) :=
   begin
-    convert congr_arg2 (λ x y, x - y) (h0 a) (h0 (-a)) using 1,
+    convert congr_arg2 has_sub.sub (h0 a) (h0 (-a)) using 1,
     ring,
     rw [neg_sq, sub_sub_sub_cancel_right]
   end,
@@ -343,11 +343,12 @@ begin
     rwa [← h0, sq_sqrt h] at this },
   intros a b,
   have h := lem3_1 feq f_inj f0_eq_0 a,
-  replace h := congr_arg2 (λ x y, x - y) (h b) (h (-b)),
-  simp only [thm3_1 feq f_inj f0_eq_0, neg_mul] at h,
-  ring_nf at h,
-  rwa [mul_assoc, mul_eq_mul_left_iff, mul_comm, eq_comm] at h,
-  exact (or_iff_left R2ne0 feq f_inj f0_eq_0 f1_eq_1).mp h
+  replace h := congr_arg2 has_sub.sub (h b) (h (-b)),
+  simp only [neg_sq, neg_mul, mul_neg, sub_sub_sub_cancel_right,
+             sub_neg_eq_add, thm3_1 feq f_inj f0_eq_0] at h,
+  rwa [← add_mul, ← add_mul, sub_add_add_cancel, ← two_mul, mul_assoc (2 : R), ← sq,
+       mul_comm b, ← two_mul, mul_assoc, eq_comm, mul_eq_mul_left_iff] at h,
+  exact (or_iff_left (R2ne0 feq f_inj f0_eq_0 f1_eq_1)).mp h
 end
 
 private theorem thm3_4 (f1_eq_1 : f 1 = 1) (a : ℝ) (n : ℕ) : f (a ^ n) = f a ^ n :=
