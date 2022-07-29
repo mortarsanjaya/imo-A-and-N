@@ -87,8 +87,8 @@ private lemma example_periodic (n : ℕ) : periodic good_sup_ex (2 * n) :=
 
 
 /-- Final solution -/
-theorem final_solution (n : ℕ) :
-  Sup ((λ x : ℕ → ℝ≥0, target_sum x n) '' {x | good x ∧ periodic x (2 * n)}) = (n : ℝ≥0) / 4 :=
+theorem final_solution (n : ℕ) : is_lub ((λ x : ℕ → ℝ≥0, target_sum x n) ''
+  {x | good x ∧ periodic x (2 * n)}) ((n : ℝ≥0) / 4) :=
 begin
   sorry
 end
