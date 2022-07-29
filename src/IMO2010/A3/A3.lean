@@ -56,7 +56,7 @@ end
 
 private noncomputable def good_sup_ex (j : ℕ) : ℝ≥0 := ite (j % 2 = 0) (1 / 2) 0
 
-private lemma example_is_good (n : ℕ) : good good_sup_ex :=
+private lemma example_is_good : good good_sup_ex :=
 begin
   intros j; dsimp only [good_sup_ex],
   rw nat.add_mod_right,
@@ -90,7 +90,11 @@ private lemma example_periodic (n : ℕ) : periodic good_sup_ex (2 * n) :=
 theorem final_solution (n : ℕ) : is_lub ((λ x : ℕ → ℝ≥0, target_sum x n) ''
   {x | good x ∧ periodic x (2 * n)}) ((n : ℝ≥0) / 4) :=
 begin
-  sorry
+  dsimp [is_lub, upper_bounds, is_least, lower_bounds]; split,
+  rintros a ⟨x, ⟨h, -⟩, h0⟩,
+  rw ← h0; exact good_up_bound h n,
+  intros a h,
+  exact h ⟨good_sup_ex, ⟨example_is_good, example_periodic n⟩, example_sum_is_bound n⟩
 end
 
 end IMO2010A3
