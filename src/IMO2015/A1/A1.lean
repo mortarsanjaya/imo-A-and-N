@@ -13,17 +13,12 @@ def seq_ineq (f : ℕ → ℝ) := ∀ n : ℕ, (n.succ : ℝ) * f n / (f n ^ 2 +
 
 namespace extra
 
-lemma add_inv_ge_two {x : ℝ} (h : 0 < x) : (2 : ℝ) ≤ x + x⁻¹ :=
+lemma add_inv_ge_two {x : ℝ} (h : 0 < x) : (2 : ℝ) ≤ x⁻¹ + x :=
 begin
-  rw [← mul_le_mul_right h, add_mul, inv_mul_cancel (ne_of_gt h),
-      ← add_le_add_iff_left (-(2 * x)), neg_add_self],
+  rw [← mul_le_mul_right h, add_mul, inv_mul_cancel (ne_of_gt h), ← sub_nonneg],
   apply le_of_le_of_eq (sq_nonneg (x - 1)),
-  ring
+  rw [sub_sq', mul_one, one_pow, sq, add_comm]
 end
-
-lemma range_succ_add {β : Type*} [add_comm_group β] (f : ℕ → β) (n : ℕ) :
-    (range (n + 1)).sum f = f n + (range n).sum f :=
-  by rw [← sub_eq_iff_eq_add, sum_range_succ_sub_sum]
 
 end extra
 
@@ -58,19 +53,19 @@ theorem final_solution {f : ℕ → ℝ} (f_pos : ∀ n : ℕ, 0 < f n) (fineq :
   ∀ n : ℕ, 2 ≤ n → (n : ℝ) ≤ (range n).sum f :=
 begin
   apply nat.le_induction,
-  { rw [nat.cast_bit0, nat.cast_one, bit0, bit0, extra.range_succ_add],
-    refine le_trans _ (add_le_add_left (lem2 f_pos fineq 1) _),
+  { rw [nat.cast_bit0, nat.cast_one, bit0, bit0, sum_range_succ],
+    refine le_trans _ (add_le_add_right (lem2 f_pos fineq 1) _),
     rw [nat.cast_one, one_div],
     exact extra.add_inv_ge_two (f_pos 1) },
   { intros n h h0,
     cases le_or_lt 1 (f n) with h1 h1,
-    rw [extra.range_succ_add, nat.cast_add, nat.cast_one, add_comm],
-    exact add_le_add h1 h0,
-    rw extra.range_succ_add,
-    refine le_trans _ (add_le_add_left (lem2 f_pos fineq n) _),
+    rw [sum_range_succ, nat.cast_add, nat.cast_one],
+    exact add_le_add h0 h1,
+    rw sum_range_succ,
+    refine le_trans _ (add_le_add_right (lem2 f_pos fineq n) _),
     have h2 := le_trans one_le_two h,
-    rw [← nat.sub_add_cancel h2, nat.cast_add, nat.cast_add, nat.cast_one, nat.sub_add_cancel h2,
-        div_eq_mul_inv, add_one_mul, add_comm (f n), add_assoc, add_assoc, add_comm _ (f n)],
+    rw [← nat.sub_add_cancel h2, nat.cast_add, nat.cast_add, nat.cast_one,
+        nat.sub_add_cancel h2, div_eq_mul_inv, add_one_mul, add_assoc, add_assoc],
     refine add_le_add _ (extra.add_inv_ge_two (f_pos n)),
     rw [nat.cast_sub h2, nat.cast_one],
     nth_rewrite 0 ← mul_one (n - 1 : ℝ),
