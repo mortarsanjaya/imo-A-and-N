@@ -1,5 +1,8 @@
 import data.real.basic analysis.special_functions.pow
 
+namespace IMOSL
+namespace extra
+
 /-!
 # Natural root in ℝ
 
@@ -80,4 +83,13 @@ lemma nat_root_bit1_left_mul (n : ℕ) (x y : ℝ) :
 lemma nat_root_bit1_ne_zero (n : ℕ) {x : ℝ} (h : x ≠ 0) : nat_root (bit1 n) x ≠ 0 :=
   by contrapose! h; apply nat_root_bit1_inj; rw [h, nat_root_bit1_zero]
 
+lemma nat_root_bit1_eq_one_iff (n : ℕ) (x : ℝ) : nat_root (bit1 n) x = 1 ↔ x = 1 :=
+  ⟨λ h, nat_root_bit1_inj n (by rw [h, nat_root_bit1_one]), λ h, by rw [h, nat_root_bit1_one]⟩
+
+lemma pow_bit1_eq_one_iff (n : ℕ) (x : ℝ) : x ^ (bit1 n) = 1 ↔ x = 1 :=
+  ⟨λ h, pow_bit1_inj n (by simp only [h, one_pow]), λ h, by rw [h, one_pow]⟩
+
 end real
+
+end extra
+end IMOSL
