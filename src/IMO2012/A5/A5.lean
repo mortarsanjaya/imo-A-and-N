@@ -80,7 +80,7 @@ begin
   intros x h,
   obtain ⟨u, v, h0, h1⟩ : ∃ u v : ℝ, u + v = 1 ∧ u * v = x - 1 :=
   begin
-    refine extra.exists_add_eq_mul_eq _ _ (le_trans _ (sq_nonneg 1)),
+    refine extra.exists_add_eq_mul_eq (le_trans _ (sq_nonneg 1)),
     exact mul_nonpos_of_nonneg_of_nonpos zero_le_four (sub_nonpos_of_le (le_trans h zero_le_one))
   end,
   have h2 := feq (2 - u) (2 - v),

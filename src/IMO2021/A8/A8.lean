@@ -186,7 +186,7 @@ begin
   end,
   replace h : ∃ u : ℝ, u ^ 2 + t ^ 2 * u + t = 0 :=
   begin
-    apply extra.exists_root_quadratic,
+    apply extra.exists_root_quadr,
     cases h with h h,
     exact le_trans (mul_nonpos_of_nonneg_of_nonpos zero_le_four h) (sq_nonneg _),
     rw [← pow_mul, mul_two, ← bit0, pow_succ', mul_le_mul_right (lt_trans zero_lt_two h)],
@@ -393,7 +393,7 @@ begin
     replace this := this _ y h,
     rwa [neg_sq, neg_mul, sub_neg_eq_add, ← sub_eq_add_neg, add_comm (f (1 - _))] at this },
   intros x y x_le_0,
-  obtain ⟨u, v, h, h0⟩ : ∃ u v : ℝ, u + v = y ∧ u * v = x := extra.exists_add_eq_mul_eq y x
+  obtain ⟨u, v, h, h0⟩ : ∃ u v : ℝ, u + v = y ∧ u * v = x := extra.exists_add_eq_mul_eq
       (le_trans (mul_nonpos_of_nonneg_of_nonpos zero_le_four x_le_0) (sq_nonneg y)),
   have h1 := lem4_1 feq f_inj f0_eq_0 f1_eq_1 u v,
   rw [h, h0] at h1,
