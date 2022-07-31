@@ -1,9 +1,9 @@
 import
   data.real.sqrt
   algebra.char_p.basic
-  extra.real_quadratic_sol
   extra.real_hom.semifield_char0_hom
   extra.real_hom.nnreal_odd_ext
+  extra.real_prop.real_quadratic_sol
   extra.nonneg_semifield
 
 /-! # IMO 2012 A5, Generalized Version -/
