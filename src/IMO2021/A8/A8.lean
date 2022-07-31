@@ -2,10 +2,10 @@ import
   data.real.basic
   data.real.golden_ratio
   algebra.algebra.basic
-  extra.real_nat_root
   extra.real_hom.semifield_char0_hom
   extra.real_hom.real_additive_End
-  extra.real_quadratic_sol
+  extra.real_prop.real_nat_root
+  extra.real_prop.real_quadratic_sol
 
 /-! # IMO 2021 A8, Generalized Version -/
 
