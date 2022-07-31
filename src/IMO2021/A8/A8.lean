@@ -370,7 +370,35 @@ include f1_eq_1
 private lemma lem3_7 {t : ℝ} (h : t ≠ 0) :
   f (t ^ 2 + t⁻¹) + f (t ^ 2 - t⁻¹) = f 2 - 2 + 2 * f t ^ 2 :=
 begin
-  sorry
+  revert t h,
+  have fodd := lem3_3 feq f_inj f0_eq_0,
+  have fmul := lem3_5 feq f_inj f0_eq_0 f1_eq_1,
+  suffices : ∀ t : ℝ, t < 0 → f (t ^ 2 + t⁻¹) + f (t ^ 2 - t⁻¹) = f 2 - 2 + 2 * f t ^ 2,
+  { intros t h,
+    rw [ne_iff_lt_or_gt, gt_iff_lt, ← neg_neg_iff_pos] at h,
+    cases h with h h,
+    exact this t h,
+    replace this := this (-t) h,
+    rwa [neg_sq, ← neg_inv, fodd, neg_sq, add_comm, sub_neg_eq_add, ← sub_eq_add_neg] at this },
+  intros t h,
+  obtain ⟨x, h0⟩ := lem1_3 (lt_trans h (by norm_num)),
+  replace feq := feq 1 t,
+  conv at feq { find (_ = _) {
+    rw [f1_eq_1, one_mul, one_mul, one_pow, mul_one, mul_one, add_right_comm t] } },
+  have h1 : t + x ^ 2 = -x * t⁻¹ := by rw [eq_mul_inv_iff_mul_eq₀ (ne_of_lt h),
+    mul_comm, mul_add, ← sq, ← add_eq_zero_iff_eq_neg, h0],
+  rw add_eq_zero_iff_eq_neg at h0,
+  have h2 := congr_arg2 has_sub.sub (feq (-x)) (feq x),
+  rw [neg_sq, h0, h1, neg_add_self, f0_eq_0, zero_sub, sub_neg_eq_add, ← mul_add, ← two_mul,
+      fmul, fmul, add_comm ((-x * _)), neg_mul, ← sub_eq_add_neg, ← mul_sub, fmul, fodd] at h2,
+  replace h2 : (2 * f t ^ 2 - 2) * f x = (f (t⁻¹ + t ^ 2) + f (t ^ 2 - t⁻¹) - f 2) * f x :=
+    by convert h2; ring,
+  rw mul_eq_mul_right_iff at h2,
+  cases h2 with h2 h2,
+  rwa [add_comm t⁻¹, eq_sub_iff_add_eq', add_sub, add_sub_right_comm, eq_comm] at h2,
+  rw ← f0_eq_0 at h2; replace h2 := f_inj h2,
+  rw [h2, neg_zero, zero_mul, sq, zero_mul, add_zero] at h1,
+  exfalso; exact ne_of_lt h h1
 end
 
 private lemma lem3_8 : ∀ t u : ℝ, 2 * f (t ^ 3 + u ^ 3) =
