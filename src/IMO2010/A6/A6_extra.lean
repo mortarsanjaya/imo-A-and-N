@@ -1,4 +1,4 @@
-import data.nat.basic data.set.basic
+import data.nat.basic
 
 /-! # Characterization of functions f : ℕ → ℕ with f(f(n)) = f(n) + 1 for all n ∈ ℕ -/
 
