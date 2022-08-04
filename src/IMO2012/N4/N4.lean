@@ -79,6 +79,7 @@ begin
     rw [add_mul, mul_assoc, dvd_add_right ⟨_, rfl⟩, ← sq] at h2,
     exact prime.dvd_of_dvd_pow int.prime_two h2
   end,
+
   rw [← mul_zero (2 : ℤ), mul_lt_mul_left (two_pos : 0 < (2 : ℤ)), int.lt_iff_add_one_le,
       zero_add, le_iff_eq_or_lt, eq_comm, int.lt_iff_add_one_le, ← bit0] at h1,
   change (8 : ℤ) with (2 + 2) + (2 + 2) at h2,
@@ -97,9 +98,6 @@ begin
         add_assoc, le_add_iff_nonneg_right, ← two_mul],
     exact mul_nonneg zero_le_two (le_of_lt hn) },
 end
-
-
-
 
 end IMO2012N4
 end IMOSL
