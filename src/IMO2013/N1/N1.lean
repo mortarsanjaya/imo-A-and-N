@@ -6,8 +6,7 @@ namespace IMOSL
 namespace IMO2013N1
 
 /-- Final solution -/
-theorem final_solution (f : ℕ+ → ℕ+) :
-  (∀ m n : ℕ+, m ^ 2 + f n ∣ m * f m + n) ↔ f = id :=
+theorem final_solution (f : ℕ+ → ℕ+) : (∀ m n : ℕ+, m ^ 2 + f n ∣ m * f m + n) ↔ f = id :=
 begin
   symmetry; split,
   rintros rfl m n,
