@@ -1,4 +1,4 @@
-import IMO2020.N5.N5_extra.additive_map data.nat.factorization.basic
+import IMO2020.N5.N5_extra.additive_map data.nat.factorization.basic data.nat.modeq
 
 /-!
 # Good maps
@@ -143,14 +143,57 @@ begin
 end
 
 private lemma general7 {p : ℕ} (hp : p.prime) (h : good p f) {k m : ℕ}
-  (hk0 : 0 < k) (hkp : k < p) (hm0 : 0 < m) (hmp : m < p) : f (k * m % p) = f k + f m :=
+  (kpos : 0 < k) (hkp : k < p) (mpos : 0 < m) (hmp : m < p) : f (k * m % p) = f k + f m :=
 begin
-  revert m hm0 hmp; induction k using nat.strong_induction_on with k k_ih; intros m hm0 hmp,
+  revert m mpos hmp; induction k using nat.strong_induction_on with k k_ih; intros m mpos hmp,
   induction m using nat.strong_induction_on with m m_ih,
   simp only [] at k_ih m_ih, -- Delete this later
   cases lt_or_le (k * m) p with h0 h0,
-  rw [nat.mod_eq_of_lt h0, map_mul_add f hk0 hm0],
-  sorry
+  rw [nat.mod_eq_of_lt h0, map_mul_add f kpos mpos],
+  let c := p / m,
+  let d := p % m,
+  have X : ∀ a b : ℕ, 0 < b % a ↔ ¬a ∣ b :=
+    λ a b, by rw [zero_lt_iff, ne.def, nat.dvd_iff_mod_eq_zero],
+
+  have dpos : 0 < d :=
+  begin
+    rw X; intros h1,
+    rw [← nat.succ_le_iff, le_iff_eq_or_lt, eq_comm] at mpos,
+    rcases mpos with rfl | mpos,
+    rw mul_one at h0; exact not_le_of_lt hkp h0,
+    replace mpos := nat.min_fac_le_of_dvd mpos h1,
+    rw nat.prime.min_fac_eq hp at mpos; exact not_le_of_lt hmp mpos
+  end,
+  replace m_ih : f (k * d % p) = f k + f d :=
+    m_ih d (p.mod_lt mpos) dpos (lt_trans (p.mod_lt mpos) hmp),
+  have cpos : 0 < c :=
+    by rw [zero_lt_iff, ne.def, nat.div_eq_zero_iff mpos]; exact lt_asymm hmp,
+  replace h0 : c < k :=
+  begin
+    rw le_iff_lt_or_eq at h0,
+    rcases h0 with h0 | rfl,
+    rwa nat.div_lt_iff_lt_mul mpos,
+    simp only [d, nat.mul_mod_left, not_lt_zero'] at dpos,
+    exfalso; exact dpos
+  end,
+  replace k_ih := @k_ih c h0 cpos (lt_trans h0 hkp),
+  have h1 : c * m + d = p := nat.div_add_mod' p m,
+  have h2 : ∀ n : ℕ, 0 < n → n < p → ¬p ∣ n := λ n, nat.not_dvd_of_pos_of_lt,
+  have hcp := lt_trans h0 hkp,
+  have hdp := lt_trans (p.mod_lt mpos) hmp,
+  replace hkp := h2 k kpos hkp,
+  replace hmp := h2 m mpos hmp,
+  have hkcmp := hp.not_dvd_mul hkp (hp.not_dvd_mul (h2 c cpos hcp) hmp),
+  rw [← add_left_inj (f c), add_assoc, add_comm (f m), add_comm,
+      ← map_mul_add f cpos mpos, h _ d (mul_pos cpos mpos) dpos h1,
+      ← m_ih, ← k_ih (by rw X; exact hp.not_dvd_mul hkp hmp) (nat.mod_lt _ hp.pos),
+      ← nat.mod_eq_of_lt hcp, ← nat.mul_mod, mul_left_comm],
+  refine h _ _ _ _ _,
+  rw X; exact hkcmp,
+  rw X; refine hp.not_dvd_mul hkp (h2 d dpos hdp),
+  rw [← nat.add_mod_add_of_le_add_mod, ← mul_add, h1, nat.mul_mod_left, zero_add],
+  refine nat.le_mod_add_mod_of_dvd_add_of_not_dvd _ hkcmp,
+  rw [← mul_add, h1, mul_comm]; use k
 end
 
 theorem good_prime_mul_mod_p {p : ℕ} (hp : p.prime) (h : good p f) {k m : ℕ}
