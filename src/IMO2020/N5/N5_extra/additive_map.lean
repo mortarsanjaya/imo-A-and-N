@@ -41,7 +41,7 @@ variables {M : Type*} [add_comm_monoid M]
 
 instance : has_coe_to_fun (additive_map M) (λ _, ℕ → M) := ⟨additive_map.to_fun⟩
 
-@[simp] theorem to_fun_eq (f : additive_map M) : f.to_fun = f := rfl
+@[simp] theorem to_fun_eq_coe (f : additive_map M) : f.to_fun = f := rfl
 
 @[simp] theorem map_zero (f : additive_map M) : f 0 = 0 := f.map_zero'
 
