@@ -15,6 +15,32 @@ local infix ` ^^ `:100 := cup_pow
 
 
 
+section strict_mono
+
+private lemma strict_mono_eq_at_large_comm {f g : ℕ → ℕ} (hf : strict_mono f) (hg : strict_mono g)
+  (h : ∃ N : ℕ, ∀ n : ℕ, N ≤ n → f n = g n) (h0 : f ∘ g = g ∘ f) : f = g :=
+begin
+  cases h with N h,
+  ext n; have h1 := n.zero_le; revert h1 n,
+  refine nat.decreasing_induction (λ k h1 n h2, _) N.zero_le h,
+  rw [le_iff_lt_or_eq, ← nat.add_one_le_iff] at h2,
+  rcases h2 with h2 | rfl,
+  exact h1 n h2,
+  cases eq_or_lt_of_le (hf.id_le k) with h3 h3,
+  cases eq_or_lt_of_le (hg.id_le k) with h4 h4,
+  rw [← h3, ← h4],
+  { replace h1 := h1 (g k) h4,
+    rw [← comp_app f, h0, comp_app] at h1,
+    exact hg.injective h1 },
+  { replace h1 := h1 (f k) h3,
+    rw [← comp_app g, ← h0, comp_app] at h1,
+    exact hf.injective h1 }
+end
+
+end strict_mono
+
+
+
 section prop_lemmas
 
 private lemma count_true : nat.count (λ _, true) = id :=
@@ -43,8 +69,6 @@ begin
   intros h; refine count_prop_inj (λ n, _),
   exact galois_connection.l_unique (nat.count_nth_gc _ hp) (nat.count_nth_gc _ hq) (λ b, by rw h)
 end
-
-
 
 end prop_lemmas
 
@@ -90,14 +114,20 @@ private lemma nth_notin_strict_mono : strict_mono (nth_notin X) :=
 private lemma nth_notin_fn_inj : injective (nth_notin X) :=
   strict_mono.injective (nth_notin_strict_mono X)
 
-lemma nth_notin_empty : nth_notin ∅ = id :=
+private lemma nth_notin_empty : nth_notin ∅ = id :=
   by simp [nth_notin, nth_true]
 
-/-
-private lemma range_nth_notin_inj : set.range (nth_notin X) = set.range (nth_notin Y) ↔ X = Y :=
-  by let h := nth_notin_strict_mono;
-    rw [well_founded.eq_strict_mono_iff_eq_range is_well_order.wf (h X) (h Y), nth_notin_inj]
--/
+private lemma count_notin_large {n : ℕ} (h : X.max.get_or_else 0 < n) :
+  nat.count (λ x, x ∉ X) (n + X.card) = n :=
+begin
+  sorry
+end
+
+private lemma nth_notin_large {n : ℕ} (h : X.max.get_or_else 0 < n) :
+  nth_notin X n = n + X.card :=
+begin
+  sorry
+end
 
 end finset_lemmas
 
@@ -111,7 +141,7 @@ lemma cup_mul_empty (X : finset ℕ) : X ** ∅ = X :=
 lemma empty_cup_mul (X : finset ℕ) : ∅ ** X = X :=
   by rw [cup_mul, empty_union, nth_notin_empty, image_id]
 
-/- For any `X Y : finset ℕ`, `|X ** Y| = |X| + |Y|`. -/
+/-- For any `X Y : finset ℕ`, `|X ** Y| = |X| + |Y|`. -/
 lemma cup_mul_card (X Y : finset ℕ) : (X ** Y).card = X.card + Y.card :=
 begin
   rw [cup_mul, card_disjoint_union, card_image_of_injective Y (nth_notin_fn_inj X)],
@@ -122,7 +152,7 @@ begin
   exact h1 h0
 end
 
-/- Lemma 1 in the official solution: `f_{X ** Y} = f_X ∘ f_Y` -/
+/-- Lemma 1 in the official solution: `f_{X ** Y} = f_X ∘ f_Y` -/
 lemma cup_mul_range (X Y : finset ℕ) : nth_notin (X ** Y) = nth_notin X ∘ nth_notin Y :=
 begin
   rw ← well_founded.eq_strict_mono_iff_eq_range is_well_order.wf (nth_notin_strict_mono _),
@@ -133,15 +163,21 @@ begin
   exact nth_notin_fn_inj X
 end
 
-/- The `cup_mul` operation is associative. -/
+/-- The `cup_mul` operation is associative. -/
 theorem cup_mul_assoc (X Y Z : finset ℕ) : X ** Y ** Z = X ** (Y ** Z) :=
   by rw ← nth_notin_inj; repeat { rw cup_mul_range }
 
-/- Lemma 2 in the official solution: if X ** Y = Y ** X and |X| = |Y| then X = Y -/
+/-- Lemma 2 in the official solution: if X ** Y = Y ** X and |X| = |Y| then X = Y -/
 lemma cup_mul_comm_card_eq {X Y : finset ℕ} (h : X.card = Y.card) (h0 : X ** Y = Y ** X) :
   X = Y :=
 begin
-  sorry
+  rw ← nth_notin_inj at h0 ⊢,
+  rw [cup_mul_range, cup_mul_range] at h0,
+  refine strict_mono_eq_at_large_comm (nth_notin_strict_mono X) (nth_notin_strict_mono Y) _ h0,
+  use max (X.max.get_or_else 0) (Y.max.get_or_else 0) + 1; intros n h1,
+  rw [nat.succ_le_iff, max_lt_iff] at h1,
+  cases h1 with h1 h2,
+  rw [nth_notin_large X h1, nth_notin_large Y h2, h]
 end
 
 end cup_mul_lemmas
