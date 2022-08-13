@@ -117,16 +117,33 @@ private lemma nth_notin_fn_inj : injective (nth_notin X) :=
 private lemma nth_notin_empty : nth_notin ∅ = id :=
   by simp [nth_notin, nth_true]
 
-private lemma count_notin_large {n : ℕ} (h : X.max.get_or_else 0 < n) :
+private lemma count_notin_large {n : ℕ} (h : X.sup id < n) :
   nat.count (λ x, x ∉ X) (n + X.card) = n :=
 begin
-  sorry
+  have h0 := congr_arg card (filter_union_filter_neg_eq (λ x, x ∈ X) (range (n + X.card))),
+  rw [card_range, card_union_eq, ← nat.count_eq_card_filter_range,
+      ← nat.count_eq_card_filter_range, nat.count_eq_card_fintype] at h0,
+  work_on_goal 2 { rw disjoint_iff_inter_eq_empty, exact filter_inter_filter_neg_eq _ _ },
+  rw [← add_left_inj X.card, add_comm]; convert h0 using 2; clear h0,
+  suffices : ∀ k : ℕ, k ∈ X ↔ (k < n + X.card ∧ k ∈ X),
+    rw eq_comm; convert fintype.subtype_card X this, -- Why doesn't it work with `exact`???
+  simp only [iff_and_self]; intros k h0,
+  refine lt_of_le_of_lt (le_sup h0) (lt_trans h _),
+  rw [lt_add_iff_pos_right, pos_iff_ne_zero, ne.def, card_eq_zero],
+  rintros rfl; exact h0
 end
 
-private lemma nth_notin_large {n : ℕ} (h : X.max.get_or_else 0 < n) :
-  nth_notin X n = n + X.card :=
+private lemma nth_notin_large {n : ℕ} (h : X.sup id < n) : nth_notin X n = n + X.card :=
 begin
-  sorry
+  have h0 := nat_finset_infinite_compl X,
+  rw [nth_notin, eq_comm, eq_iff_le_not_lt]; split,
+  rw [← nat.count_le_iff_le_nth _ h0, count_notin_large X h],
+  rw [← nat.succ_le_iff, ← nat.count_le_iff_le_nth _ h0, nat.count_succ, count_notin_large X h,
+      add_le_iff_nonpos_right, nonpos_iff_eq_zero, ← ne.def, ite_ne_right_iff, and_comm],
+  refine ⟨one_ne_zero, λ h1, _⟩,
+  replace h1 : id (n + X.card) ≤ X.sup id := le_sup h1,
+  rw [id.def, ← not_lt] at h1,
+  exact h1 (lt_of_lt_of_le h le_self_add)
 end
 
 end finset_lemmas
@@ -174,7 +191,7 @@ begin
   rw ← nth_notin_inj at h0 ⊢,
   rw [cup_mul_range, cup_mul_range] at h0,
   refine strict_mono_eq_at_large_comm (nth_notin_strict_mono X) (nth_notin_strict_mono Y) _ h0,
-  use max (X.max.get_or_else 0) (Y.max.get_or_else 0) + 1; intros n h1,
+  use max (X.sup id) (Y.sup id) + 1; intros n h1,
   rw [nat.succ_le_iff, max_lt_iff] at h1,
   cases h1 with h1 h2,
   rw [nth_notin_large X h1, nth_notin_large Y h2, h]
