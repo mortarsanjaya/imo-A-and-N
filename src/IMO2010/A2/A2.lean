@@ -1,8 +1,6 @@
 import
-  algebra.big_operators.fin
   algebra.big_operators.ring
   analysis.mean_inequalities_pow
-  data.real.basic
 
 /-! # IMO 2010 A2 -/
 
