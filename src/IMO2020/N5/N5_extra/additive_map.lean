@@ -19,21 +19,13 @@ TODO: Implement module instances for `additive_map M` when `M` is a module over 
 namespace IMOSL
 namespace IMO2020N5
 
-
-
-structure additive_map (M : Type*) [add_comm_monoid M] :=
+structure additive_map (M : Type*) [has_zero M] [has_add M] :=
   (to_fun : ℕ → M) (map_zero' : to_fun 0 = 0)
   (map_mul_add' : ∀ x y : ℕ, 0 < x → 0 < y → to_fun (x * y) = to_fun x + to_fun y)
 
 
 
-
-
-
-
 namespace additive_map
-
-
 
 section add_comm_monoid
 
@@ -48,7 +40,7 @@ instance : has_coe_to_fun (additive_map M) (λ _, ℕ → M) := ⟨additive_map.
 @[simp] theorem map_mul_add (f : additive_map M) {x y : ℕ} (hx : 0 < x) (hy : 0 < y) :
   f (x * y) = f x + f y := f.map_mul_add' x y hx hy
 
-instance additive_map.fun_like {M : out_param Type*} [add_comm_monoid M] :
+instance fun_like {M : out_param Type*} [add_comm_monoid M] :
   fun_like (additive_map M) ℕ (λ _, M) :=
 { coe := λ f, f.to_fun,
   coe_injective' := λ f g h, by cases f; cases g; congr' }
@@ -75,8 +67,7 @@ instance : add_comm_monoid (additive_map M) :=
   add_assoc := λ f g h, by ext; simp only [add_apply, add_assoc],
   zero_add := λ f, by ext; rw [add_apply, zero_apply, zero_add],
   add_zero := λ f, by ext; rw [add_apply, zero_apply, add_zero],
-  .. additive_map.has_zero,
-  .. additive_map.has_add }
+  .. additive_map.has_zero, .. additive_map.has_add }
 
 end add_comm_monoid
 
@@ -109,12 +100,9 @@ instance : has_sub (additive_map G) := ⟨λ f g, ⟨(λ n, f n - g n), by simp 
 
 instance : add_comm_group (additive_map G) :=
 { add_left_neg := λ f, by ext; rw [add_apply, neg_apply, neg_add_self, zero_apply],
-  .. additive_map.add_comm_monoid,
-  .. additive_map.has_neg }
+  .. additive_map.add_comm_monoid, .. additive_map.has_neg }
 
 end add_comm_group
-
-
 
 end additive_map
 

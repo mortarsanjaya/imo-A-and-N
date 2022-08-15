@@ -15,7 +15,6 @@ Our aim is to determine all additive maps $f : \N^+ \to M$ that is $n$-good for 
 
 
 
-
 # 1. General results
 
 First, we prove that additive maps that are $n$-good for infinitely many $n$ must either be wide or $p$-strong for some $p$ prime.

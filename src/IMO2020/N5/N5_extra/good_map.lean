@@ -3,12 +3,15 @@ import IMO2020.N5.N5_extra.additive_map data.nat.factorization.basic data.nat.mo
 /-!
 # Good maps
 
-Let `f : additive_map M` be an additive map, where `M` is an additive commutative monoid.
-We say that `f` is `n`-good for some positive integer `n` if `f(k) = f(n - k)` for all `0 < k < n`.
-We say that `f` is wide if `f` is `p`-good for infinitely many `p` prime.
-We say that `f` is `p`-strong for some fixed prime `p` if `f` is `p^k`-good for all `k ≥ 0`.
+Let `f : ℕ → α` be a function, where `α` is an arbitrary type.
+We say that `f` is `n`-*good* for some positive integer `n` if
+  `f(k) = f(n - k)` for all positive integers `k < n`.
+We say that `f` is *wide* if `f` is `p`-good for infinitely many `p` prime.
+We say that `f` is `p`-*strong* for some `p : ℕ` if `f` is `p^k`-good for all `k ≥ 0`.
 
-This file provides all the above definitions, but only proves results for good maps.
+For convenience, we define the terminologies with respect any function `f : ℕ → α`.
+However, we are only going to prove results for additive maps on commutative cancellative monoids.
+Also, this file only proves results for good maps.
 The main results are as follows:
 * `f` is `n`-good for infinitely many `n` iff it is either wide or `p`-strong for some prime `p`.
 * If `f` is `p`-good for a prime `p`, then `f(km % p) = f(k) + f(m)` for any `0 < k, m < p`.
@@ -24,11 +27,11 @@ open_locale classical
 
 section defs
 
-variables {M : Type*} [add_comm_monoid M]
+variables {α : Type*}
 
-def good (n : ℕ) (f : additive_map M) := ∀ a b : ℕ, 0 < a → 0 < b → a + b = n → f a = f b
-def wide (f : additive_map M) := {p : ℕ | p.prime ∧ good p f}.infinite
-def strong {p : ℕ} (hp : p.prime) (f : additive_map M) := ∀ k : ℕ, good (p ^ k) f
+def good (n : ℕ) (f : ℕ → α) := ∀ a b : ℕ, 0 < a → 0 < b → a + b = n → f a = f b
+def wide (f : ℕ → α) := {p : ℕ | p.prime ∧ good p f}.infinite
+def strong (p : ℕ) (f : ℕ → α) := ∀ k : ℕ, good (p ^ k) f
 
 end defs
 
@@ -62,7 +65,7 @@ begin
   rwa [map_mul_add f ha hc, map_mul_add f hb hc, add_left_inj] at h0
 end
 
-private lemma general1 {p : ℕ} (hp : p.prime) (h : ¬strong hp f) :
+private lemma general1 {p : ℕ} (hp : p.prime) (h : ¬strong p f) :
   ∃ c : ℕ, ∀ k : ℕ, good (p ^ k) f ↔ k ≤ c :=
 begin
   simp only [strong, not_exists, not_forall] at h,
@@ -78,7 +81,7 @@ begin
     rwa [← hc, nat.lt_succ_iff] }
 end
 
-private lemma general2 (h : ∀ (p : ℕ) (hp : p.prime), ¬strong hp f) : ∃ x : ℕ → ℕ,
+private lemma general2 (h : ∀ (p : ℕ) (hp : p.prime), ¬strong p f) : ∃ x : ℕ → ℕ,
   (∀ p : ℕ, x p ≠ 0 → p.prime) ∧ ∀ (p : ℕ) (hp : p.prime) (k : ℕ), good (p ^ k) f ↔ k ≤ x p :=
 begin
   have h0 : ∀ p : nat.primes, ∃ kp : ℕ, (∀ k : ℕ, good (p ^ k) f ↔ k ≤ kp) :=
@@ -91,7 +94,7 @@ begin
   rw [dif_pos hp, h0]
 end
 
-private lemma general3 (h : ¬wide f) (h0 : ∀ (p : ℕ) (hp : p.prime), ¬strong hp f) : ∃ x : ℕ →₀ ℕ,
+private lemma general3 (h : ¬wide f) (h0 : ∀ (p : ℕ) (hp : p.prime), ¬strong p f) : ∃ x : ℕ →₀ ℕ,
   (∀ p : ℕ, x p ≠ 0 → p.prime) ∧ ∀ (p : ℕ) (hp : p.prime) (k : ℕ), good (p ^ k) f ↔ k ≤ x p :=
 begin
   simp only [wide, set.not_infinite] at h,
@@ -110,7 +113,7 @@ begin
 end
   
 theorem good_infinite_iff_wide_or_strong : {p : ℕ | good p f}.infinite ↔
-  wide f ∨ ∃ {p : ℕ} (hp : p.prime), strong hp f :=
+  wide f ∨ ∃ {p : ℕ} (hp : p.prime), strong p f :=
 begin
   refine ⟨(λ h, _), _⟩,
   { contrapose! h,
@@ -147,7 +150,6 @@ private lemma general7 {p : ℕ} (hp : p.prime) (h : good p f) {k m : ℕ}
 begin
   revert m mpos hmp; induction k using nat.strong_induction_on with k k_ih; intros m mpos hmp,
   induction m using nat.strong_induction_on with m m_ih,
-  simp only [] at k_ih m_ih, -- Delete this later
   cases lt_or_le (k * m) p with h0 h0,
   rw [nat.mod_eq_of_lt h0, map_mul_add f kpos mpos],
   let c := p / m,
