@@ -4,15 +4,16 @@ import IMO2020.N5.N5_extra.strong_map.basic data.zmod.basic number_theory.padics
 # Construction of `p`-strong maps
 
 We construct the `p`-strong map structure and also some important examples of `p`-strong maps.
-* Given `x : M`, the pure `p`-power strong map `ppow_map M p x` is the map
-  `n ↦ ν_p(n) • x` as a `p`-strong map.
+* We define `pcop_domain M p` as the set of maps `χ : additive (zmod p)ˣ →+ M` with `χ(-1) = 0`.
+  The set gets its domain name from the fact that it is used as the domain of another map below.
+* Given `x : M`, the pure `p`-power strong map `ppow_map M p x`
+    is the map `n ↦ ν_p(n) • x` as a `p`-strong map.
   Its corresponding homomorphism is `ppow_hom M p`.
-* Given `χ : additive (zmod p)ˣ →+ M` with `χ(-1) = 0`, the pure `p`-coprime strong map
-  `pcop_map M p χ` is the map `n ↦ χ((n / p^ν_p(n)) % p)` as a `p`-strong map.
+* Given `χ : pcop_domain M p`, the pure `p`-coprime strong map `pcop_map M p χ`
+    is the map `n ↦ χ((n / p^ν_p(n)) % p)` as a `p`-strong map.
   Its corresponding homomorphism is `pcop_hom M p`.
-* Given `(x, χ) : M × (additive (zmod p)ˣ →+ M)` with `χ(-1) = 0`, the mixed strong map
-  `pmix_map M p (x, χ)` is the `p`-strong map `ppow_map M p x + pcop_map M p χ`.
-  Its corresponding homomorphism is `pmix_hom M p`.
+* The strong homomorphism `pmix_hom M p` is the coproduct of `ppow_hom M p` and `pcop_hom M p`.
+  As a `p`-strong map, it equals `ppow_map M p x + pcop_map M p χ`.
 
 It turns out that `pmix_map M p` is a bijection.
 We prove this result and construct the isomorphism in `characterization.lean`.
@@ -185,8 +186,7 @@ instance : has_coe_to_fun (pcop_domain M p) (λ (_ : pcop_domain M p), (zmod p)�
 
 instance fun_like {M : out_param Type*} [add_comm_monoid M] {p : ℕ} :
   fun_like (pcop_domain M p) (zmod p)ˣ (λ _, M) :=
-{ coe := λ f, f.to_fun,
-  coe_injective' := λ f g h, begin cases f; cases g; simp at h; congr' end }
+  ⟨(λ f, f.to_fun), (λ f g h, by cases f; cases g; simp at h; congr')⟩
 
 instance has_coe_add_monoid_hom : has_coe (pcop_domain M p) (additive (zmod p)ˣ →+ M) :=
   ⟨pcop_domain.to_add_monoid_hom⟩
@@ -261,10 +261,7 @@ begin
 end
 
 /-- The pure `p`-power strong map, as a homomorphism -/
-def ppow_hom : M →+ strong_map M p :=
-{ to_fun := ppow_map M p,
-  map_zero' := ppow_map_zero M p,
-  map_add' := ppow_map_add M p }
+def ppow_hom : M →+ strong_map M p := ⟨ppow_map M p, ppow_map_zero M p, ppow_map_add M p⟩
 
 @[simp] theorem ppow_hom_val (x : M) (n : ℕ) : ppow_hom M p x n = padic_val_nat p n • x := rfl
 
@@ -276,9 +273,85 @@ def ppow_hom : M →+ strong_map M p :=
 
 
 
+/-- The pure `p`-coprime strong map -/
+def pcop_map (χ : pcop_domain M p) : strong_map M p :=
+{ to_fun := λ n, dite (n = 0) (λ _, 0) (λ (h : n ≠ 0), χ (zmod.pcop_part p n h)),
+  map_zero' := rfl,
+  map_mul_add' := λ x y hx hy, by rw [dif_neg hx, dif_neg hy, dif_neg (mul_ne_zero hx hy),
+    zmod.pcop_mul p hx hy, pcop_domain.map_mul_add χ],
+  strong' := λ k a b ha hb h, by simp only [];  rw [dif_neg ha, dif_neg hb,
+    ← zmod_pcop_part_add_eq_p_pow p ha hb h, ← neg_one_mul, pcop_domain.map_mul_add,
+    pcop_domain.map_neg_one, zero_add] }
+
+@[simp] theorem pcop_map_val (χ : pcop_domain M p) (n : ℕ) :
+  pcop_map M p χ n = dite (n = 0) (λ _, 0) (λ (h : n ≠ 0), χ (zmod.pcop_part p n h)) := rfl
+
+@[simp] theorem pcop_map_zero : pcop_map M p 0 = 0 :=
+  by ext; simp only [pcop_map_val, zero_apply, pcop_domain.zero_apply, dite_eq_ite, if_t_t]
+
+@[simp] theorem pcop_map_apply_zero (χ : pcop_domain M p) : pcop_map M p χ 0 = 0 :=
+  by simp only [pcop_map_val, eq_self_iff_true, dif_pos]
+
+@[simp] theorem pcop_map_apply_ne_zero (χ : pcop_domain M p) {n : ℕ} (h : n ≠ 0) :
+  pcop_map M p χ n = χ (zmod.pcop_part p n h) := by simp only [pcop_map_val, dif_neg h]
+
+@[simp] theorem pcop_map_add (χ φ : pcop_domain M p) :
+  pcop_map M p (χ + φ) = pcop_map M p χ + pcop_map M p φ :=
+begin
+  ext x; rcases eq_or_ne x 0 with rfl | h,
+  rw [add_apply, pcop_map_apply_zero, pcop_map_apply_zero, pcop_map_apply_zero, zero_add],
+  rw add_apply; repeat { rw pcop_map_apply_ne_zero M p _ h }; rw pcop_domain.add_apply
+end
+
+@[simp] theorem pcop_map_nsmul (n : ℕ) (χ : pcop_domain M p) :
+  pcop_map M p (n • χ) = n • pcop_map M p χ :=
+begin
+  ext x; rcases eq_or_ne x 0 with rfl | h,
+  rw [pcop_map_apply_zero, smul_def, pcop_map_apply_zero, smul_zero],
+  rw smul_def; repeat { rw pcop_map_apply_ne_zero M p _ h }; rw pcop_domain.nsmul_apply
+end
+
+theorem pcop_map_inj {χ φ : pcop_domain M p} : pcop_map M p χ = pcop_map M p φ ↔ χ = φ :=
+begin
+  refine ⟨λ h, _, λ h, by rw h⟩,
+  ext n; replace h := fun_like.congr_fun h (n : zmod p).val,
+  have h0 := n.ne_zero,
+  rw [ne.def, ← zmod.val_eq_zero, ← ne.def] at h0,
+  rw [pcop_map_apply_ne_zero M p χ h0, pcop_map_apply_ne_zero M p φ h0] at h,
+  suffices : n = zmod.pcop_part p (n : zmod p).val h0,
+    convert h,
+  rw [← units.eq_iff, zmod.pcop_part],
+  have h1 : ((n : zmod p).val : zmod p) = (n : zmod p) :=
+    by rw [zmod.nat_cast_val, zmod.cast_id', id.def],
+  replace h : p.coprime (n : zmod p).val := by rwa [(fact.out p.prime).coprime_iff_not_dvd,
+      ← zmod.nat_coe_zmod_eq_zero_iff_dvd, h1]; exact units.ne_zero n,
+  simp only [nat.eq_pcop_of_coprime (fact.out p.prime) h0 h, zmod.coe_unit_of_coprime, h1]
+end
+
+/-- The pure `p`-coprime strong map, as a homomorphism -/
+def pcop_hom : pcop_domain M p →+ strong_map M p :=
+  ⟨pcop_map M p, pcop_map_zero M p, pcop_map_add M p⟩
+
+@[simp] theorem pcop_hom_val (χ : pcop_domain M p) (n : ℕ) :
+  pcop_hom M p χ n = dite (n = 0) (λ _, 0) (λ (h : n ≠ 0), χ (zmod.pcop_part p n h)) := rfl
+
+theorem pcop_hom_apply_ne_zero (χ : pcop_domain M p) {n : ℕ} (h : n ≠ 0) :
+  pcop_hom M p χ n = χ (zmod.pcop_part p n h) := by simp only [pcop_hom_val, dif_neg h]
 
 
+/-- The mixed strong homomorphism -/
+def pmix_hom : M × pcop_domain M p →+ strong_map M p :=
+  add_monoid_hom.coprod (ppow_hom M p) (pcop_hom M p)
 
+theorem pmix_hom_pair' (pair : M × pcop_domain M p) :
+  pmix_hom M p pair = ppow_hom M p pair.fst + pcop_hom M p pair.snd := rfl
+
+@[simp] theorem pmix_hom_pair (c : M) (χ : pcop_domain M p) :
+  pmix_hom M p (c, χ) = ppow_hom M p c + pcop_hom M p χ := rfl
+
+@[simp] theorem pmix_hom_apply_ne_zero (c : M) (χ : pcop_domain M p) {n : ℕ} (h : n ≠ 0) :
+  pmix_hom M p (c, χ) n = padic_val_nat p n • c + χ (zmod.pcop_part p n h) :=
+  by rw [pmix_hom_pair, add_apply, ppow_hom_val, pcop_hom_apply_ne_zero]
 
 end strong_map
 
