@@ -73,6 +73,27 @@ end add_comm_monoid
 
 
 
+section mul_action
+
+variables {M : Type*} [add_comm_monoid M] {α : Type*} [monoid α] [distrib_mul_action α M]
+
+instance : has_smul α (additive_map M) := ⟨λ a f, ⟨λ x, a • f x,
+  by rw [map_zero, smul_zero], λ x y hx hy, by rw [map_mul_add f hx hy, smul_add]⟩⟩
+
+@[simp] theorem smul_def {a : α} {f : additive_map M} {x : ℕ} : (a • f) x = a • f x := rfl
+
+instance : mul_action α (additive_map M) :=
+{ one_smul := λ f, by ext; rw [smul_def, one_smul],
+  mul_smul := λ x y f, by ext; simp only [smul_def]; rw mul_smul }
+
+instance : distrib_mul_action α (additive_map M) :=
+{ smul_add := λ x f g, by ext; simp only [smul_def, add_apply]; rw smul_add,
+  smul_zero := λ x, by ext; rw [smul_def, zero_apply, smul_zero] }
+
+end mul_action
+
+
+
 section add_cancel_comm_monoid
 
 variables {M : Type*} [add_cancel_comm_monoid M]

@@ -4,8 +4,7 @@ import IMO2020.N5.N5_extra.good_map
 # `p`-strong additive maps
 
 We construct the type of `p`-strong additive maps here.
-The characterization of `p`-strong additive maps will be done in
-  `strong_map_characterizations.lean`.
+The characterization of `p`-strong additive maps will be done in `characterization.lean`.
 
 ## Implementation details
 
@@ -38,7 +37,7 @@ instance : has_coe_to_fun (strong_map M p) (λ (f : strong_map M p), ℕ → M) 
 
 @[simp] theorem map_zero (f : strong_map M p) : f 0 = 0 := f.map_zero'
 
-@[simp] theorem map_mul_add (f : strong_map M p) {x y : ℕ} (hx : 0 < x) (hy : 0 < y) :
+theorem map_mul_add (f : strong_map M p) {x y : ℕ} (hx : 0 < x) (hy : 0 < y) :
   f (x * y) = f x + f y := f.map_mul_add' x y hx hy
 
 theorem strong (f : strong_map M p) : strong p f := f.strong'
@@ -77,6 +76,27 @@ instance : add_comm_monoid (strong_map M p) :=
   .. strong_map.has_zero, .. strong_map.has_add }
 
 end add_comm_monoid
+
+
+
+section mul_action
+
+variables {M : Type*} [add_comm_monoid M] {p : ℕ} {α : Type*} [monoid α] [distrib_mul_action α M]
+
+instance : has_smul α (strong_map M p) :=
+  ⟨λ x f, ⟨x • f, λ k a b ha hb h, by simp; rw f.strong k a b ha hb h⟩⟩
+
+@[simp] theorem smul_def {a : α} {f : strong_map M p} {x : ℕ} : (a • f) x = a • f x := rfl
+
+instance : mul_action α (strong_map M p) :=
+{ one_smul := λ f, by ext; rw [smul_def, one_smul],
+  mul_smul := λ x y f, by ext; simp only [smul_def]; rw mul_smul }
+
+instance : distrib_mul_action α (strong_map M p) :=
+{ smul_add := λ x f g, by ext; simp only [smul_def, add_apply]; rw smul_add,
+  smul_zero := λ x, by ext; rw [smul_def, zero_apply, smul_zero] }
+
+end mul_action
 
 
 
