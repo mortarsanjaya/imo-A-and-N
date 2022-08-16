@@ -4,7 +4,7 @@ import algebra.module.basic
 # Additive maps
 
 Given a commutative additive monoid `M`, we define an additive map `f : ℕ → M` as
-  a map such that `f(0) = 0` and `f(xy) = f(x) + f(y)` for all `x, y > 0`.
+  a map such that `f(0) = 0` and `f(xy) = f(x) + f(y)` for all `x y : ℕ` non-zero.
 The set of additive maps form an additive monoid under pointwise addition.
 If $M$ has more structures, e.g. `M` is a group or a module,
   then the set of additive maps also has more structures.
@@ -21,7 +21,7 @@ namespace IMO2020N5
 
 structure additive_map (M : Type*) [has_zero M] [has_add M] :=
   (to_fun : ℕ → M) (map_zero' : to_fun 0 = 0)
-  (map_mul_add' : ∀ x y : ℕ, 0 < x → 0 < y → to_fun (x * y) = to_fun x + to_fun y)
+  (map_mul_add' : ∀ {x y : ℕ}, x ≠ 0 → y ≠ 0 → to_fun (x * y) = to_fun x + to_fun y)
 
 
 
@@ -37,8 +37,8 @@ instance : has_coe_to_fun (additive_map M) (λ _, ℕ → M) := ⟨additive_map.
 
 @[simp] theorem map_zero (f : additive_map M) : f 0 = 0 := f.map_zero'
 
-@[simp] theorem map_mul_add (f : additive_map M) {x y : ℕ} (hx : 0 < x) (hy : 0 < y) :
-  f (x * y) = f x + f y := f.map_mul_add' x y hx hy
+@[simp] theorem map_mul_add (f : additive_map M) {x y : ℕ} (hx : x ≠ 0) (hy : y ≠ 0) :
+  f (x * y) = f x + f y := f.map_mul_add' hx hy
 
 instance fun_like {M : out_param Type*} [add_comm_monoid M] :
   fun_like (additive_map M) ℕ (λ _, M) :=
@@ -99,7 +99,7 @@ section add_cancel_comm_monoid
 variables {M : Type*} [add_cancel_comm_monoid M]
 
 @[simp] theorem map_one_zero (f : additive_map M) : f 1 = 0 :=
-  by rw [← add_right_inj (f 1), ← map_mul_add f one_pos one_pos, mul_one, add_zero]
+  by rw [← add_right_inj (f 1), ← map_mul_add f one_ne_zero one_ne_zero, mul_one, add_zero]
 
 end add_cancel_comm_monoid
 

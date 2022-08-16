@@ -37,8 +37,8 @@ instance : has_coe_to_fun (strong_map M p) (λ (f : strong_map M p), ℕ → M) 
 
 @[simp] theorem map_zero (f : strong_map M p) : f 0 = 0 := f.map_zero'
 
-theorem map_mul_add (f : strong_map M p) {x y : ℕ} (hx : 0 < x) (hy : 0 < y) :
-  f (x * y) = f x + f y := f.map_mul_add' x y hx hy
+theorem map_mul_add (f : strong_map M p) {x y : ℕ} (hx : x ≠ 0) (hy : y ≠ 0) :
+  f (x * y) = f x + f y := f.map_mul_add' hx hy
 
 theorem strong (f : strong_map M p) : strong p f := f.strong'
 
@@ -105,7 +105,7 @@ section add_cancel_comm_monoid
 variables {M : Type*} [add_cancel_comm_monoid M] {p : ℕ}
 
 @[simp] theorem map_one_zero (f : strong_map M p) : f 1 = 0 :=
-  by rw [← add_right_inj (f 1), ← map_mul_add f one_pos one_pos, mul_one, add_zero]
+  by rw [← add_right_inj (f 1), ← map_mul_add f one_ne_zero one_ne_zero, mul_one, add_zero]
 
 end add_cancel_comm_monoid
 

@@ -1,5 +1,4 @@
-import IMO2020.N5.N5_extra.strong_map.basic
-  data.nat.log data.nat.modeq data.zmod.basic number_theory.padics.padic_val
+import IMO2020.N5.N5_extra.strong_map.basic data.zmod.basic number_theory.padics.padic_val
 
 /-!
 # Construction of `p`-strong maps
@@ -22,7 +21,7 @@ We prove this result and construct the isomorphism in `characterization.lean`.
 namespace IMOSL
 namespace IMO2020N5
 
-open additive_map
+open strong_map
 
 
 
@@ -48,10 +47,17 @@ include hp
 lemma coprime_p_pcop {n : ℕ} (hn : n ≠ 0) : p.coprime (pcop_part p n) :=
   nat.coprime_of_div_pow_factorization hp hn
 
+lemma eq_pcop_of_coprime {n : ℕ} (hn : n ≠ 0) (h : p.coprime n) : pcop_part p n = n :=
+begin
+  dsimp only [pcop_part],
+  rw [(nat.factorization_eq_zero_iff' n p).mpr, pow_zero, nat.div_one],
+  right; left; rwa ← hp.coprime_iff_not_dvd 
+end
+
 lemma eq_mul_ppow_pcop (n : ℕ) : p ^ (n.factorization p) * pcop_part p n = n :=
   nat.mul_div_cancel' (nat.pow_factorization_dvd n p)
 
-theorem pcop_part_mul (m n : ℕ) : pcop_part p (m * n) = pcop_part p m * pcop_part p n :=
+theorem pcop_mul (m n : ℕ) : pcop_part p (m * n) = pcop_part p m * pcop_part p n :=
 begin
   rcases eq_or_ne m 0 with rfl | hm,
   rw [zero_mul, pcop_zero p, zero_mul],
@@ -79,12 +85,12 @@ def pcop_part (n : ℕ) (h : n ≠ 0) : (zmod p)ˣ :=
 @[simp] lemma pcop_one : pcop_part p 1 one_ne_zero = 1 :=
   by simp only [pcop_part, nat.pcop_one, zmod.unit_of_coprime, nat.cast_one, inv_one]; refl
 
-theorem pcop_part_mul {m n : ℕ} (hm : m ≠ 0) (hn : n ≠ 0) :
+theorem pcop_mul {m n : ℕ} (hm : m ≠ 0) (hn : n ≠ 0) :
   pcop_part p (m * n) (mul_ne_zero hm hn) = pcop_part p m hm * pcop_part p n hn :=
 begin
   rw ← units.eq_iff,
   simp only [pcop_part, zmod.unit_of_coprime, units.coe_mk, units.coe_mul],
-  rw [nat.pcop_part_mul (fact.out p.prime), nat.cast_mul]
+  rw [nat.pcop_mul (fact.out p.prime), nat.cast_mul]
 end
 
 end zmod
@@ -93,24 +99,51 @@ end zmod
 
 section extra_lemmas
 
-private lemma padic_add_eq_p_pow' (p : ℕ) [fact (p.prime)] {a b k : ℕ}
-  (ha : 0 < a) (hb : 0 < b) (h : a + b = p ^ k) : padic_val_nat p a ≤ padic_val_nat p b :=
+variables (p : ℕ) [fact (p.prime)] {a b k : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) (h : a + b = p ^ k)
+include ha hb h
+
+private lemma padic_add_eq_p_pow' : padic_val_nat p a ≤ padic_val_nat p b :=
 begin
   suffices : ∀ n : ℕ, p ^ n ∣ a → p ^ n ∣ b,
   { replace this := this (padic_val_nat p a) pow_padic_val_nat_dvd,
-    rwa [padic_val_nat_dvd_iff, or_iff_right (ne_of_gt hb)] at this },
+    rwa [padic_val_nat_dvd_iff, or_iff_right hb] at this },
   intros n h0,
   rw [nat.dvd_add_iff_right h0, h, nat.pow_dvd_pow_iff_le_right (fact.out p.prime).one_lt],
   refine le_of_lt (lt_of_not_le (λ h1, _)),
   rw [← nat.pow_dvd_pow_iff_le_right (fact.out p.prime).one_lt, ← h] at h1,
-  replace h0 := nat.le_of_dvd ha (dvd_trans h1 h0),
-  rw [add_le_iff_nonpos_right, ← not_lt] at h0,
-  exact h0 hb
+  replace h0 := nat.le_of_dvd (zero_lt_iff.mpr ha) (dvd_trans h1 h0),
+  rw [add_le_iff_nonpos_right, le_zero_iff] at h0,
+  exact hb h0
 end
 
-lemma padic_add_eq_p_pow (p : ℕ) [fact (p.prime)] {a b k : ℕ}
-  (ha : 0 < a) (hb : 0 < b) (h : a + b = p ^ k) : padic_val_nat p a = padic_val_nat p b :=
+lemma padic_add_eq_p_pow : padic_val_nat p a = padic_val_nat p b :=
   le_antisymm (padic_add_eq_p_pow' p ha hb h) (padic_add_eq_p_pow' p hb ha (by rwa add_comm))
+
+lemma nat_pcop_part_add_eq_p_pow : p ∣ nat.pcop_part p a + nat.pcop_part p b :=
+begin
+  dsimp only [nat.pcop_part],
+  let h0 : ∀ n : ℕ, n.factorization p = padic_val_nat p n :=
+    λ n, nat.factorization_def n (fact.out p.prime),
+  rw [h0, padic_add_eq_p_pow p ha hb h, ← h0, ← nat.add_div_of_dvd_left, h, h0],
+  clear h0,  
+  work_on_goal 2 { exact nat.pow_factorization_dvd b p },
+  suffices : padic_val_nat p b < k,
+  { use p ^ (k - padic_val_nat p b - 1),
+    rw [← pow_succ, nat.pow_div (le_of_lt this) (fact.out p.prime).pos, nat.sub_add_cancel],
+    exact nat.sub_pos_of_lt this },
+  replace h : ¬p^k ∣ b := nat.not_dvd_of_pos_of_lt (zero_lt_iff.mpr hb)
+    (by rwa [← h, lt_add_iff_pos_left, zero_lt_iff]),
+  rw padic_val_nat_dvd_iff at h; contrapose! h,
+  right; exact h
+end
+
+lemma zmod_pcop_part_add_eq_p_pow : -zmod.pcop_part p a ha = zmod.pcop_part p b hb :=
+begin
+  rw ← units.eq_iff,
+  simp only [zmod.pcop_part, zmod.unit_of_coprime, units.coe_mk, units.coe_neg],
+  rw [← add_eq_zero_iff_neg_eq, ← nat.cast_add, zmod.nat_coe_zmod_eq_zero_iff_dvd],
+  exact nat_pcop_part_add_eq_p_pow p ha hb h
+end
 
 end extra_lemmas
 
@@ -183,6 +216,13 @@ instance : add_comm_monoid (pcop_domain M p) :=
   add_zero := λ f, by ext; rw [add_apply, zero_apply, add_zero],
   .. pcop_domain.has_zero, .. pcop_domain.has_add }
 
+@[simp] theorem nsmul_apply (n : ℕ) (f : pcop_domain M p) (x : (zmod p)ˣ) : (n • f) x = n • f x :=
+begin
+  induction n with n n_ih,
+  rw [zero_smul, zero_smul, zero_apply],
+  rw [nat.succ_eq_add_one, add_smul, one_smul, add_smul, one_smul, add_apply, n_ih]
+end
+
 end pcop_domain
 
 
@@ -193,7 +233,7 @@ variables (M : Type*) [add_comm_monoid M] (p : ℕ) [fact p.prime]
 def ppow_map (x : M) : strong_map M p :=
 { to_fun := λ n, padic_val_nat p n • x,
   map_zero' := by rw [padic_val_nat.zero, zero_smul],
-  map_mul_add' := λ x y hx hy, by rw [padic_val_nat.mul p (ne_of_gt hx) (ne_of_gt hy), add_smul],
+  map_mul_add' := λ x y hx hy, by rw [padic_val_nat.mul p hx hy, add_smul],
   strong' := λ k a b ha hb h, by simp only []; rw padic_add_eq_p_pow p ha hb h }
 
 @[simp] theorem ppow_map_val (x : M) (n : ℕ) : ppow_map M p x n = padic_val_nat p n • x := rfl
@@ -236,14 +276,9 @@ def ppow_hom : M →+ strong_map M p :=
 
 
 
-/-- The pure `p`-coprime strong map -/
-def pcop_map (χ : pcop_domain M p) : strong_map M p :=
-{ to_fun := λ n, dite (n = 0) (λ _, 0) (λ (h : n ≠ 0), χ (zmod.pcop_part p n h)),
-  map_zero' := rfl,
-  map_mul_add' := λ x y hx hy, begin
 
-  end,
-}
+
+
 
 end strong_map
 
