@@ -20,7 +20,7 @@ open_locale classical
 
 @[ancestor additive_map]
 structure strong_map (M : Type*) [has_zero M] [has_add M] (p : ℕ) extends additive_map M :=
-(strong' : strong p to_fun)
+(is_strong' : strong p to_fun)
 
 
 
@@ -40,7 +40,7 @@ instance : has_coe_to_fun (strong_map M p) (λ (f : strong_map M p), ℕ → M) 
 theorem map_mul_add (f : strong_map M p) {x y : ℕ} (hx : x ≠ 0) (hy : y ≠ 0) :
   f (x * y) = f x + f y := f.map_mul_add' hx hy
 
-theorem strong (f : strong_map M p) : strong p f := f.strong'
+theorem is_strong (f : strong_map M p) : strong p f := f.is_strong'
 
 instance fun_like {M : out_param Type*} [add_comm_monoid M] {p : ℕ} :
   fun_like (strong_map M p) ℕ (λ _, M) :=
@@ -63,8 +63,8 @@ instance : has_zero (strong_map M p) := ⟨⟨0, λ _ _ _ _ _ _, by simp⟩⟩
 
 @[simp] theorem zero_apply {x : ℕ} : (0 : strong_map M p) x = 0 := rfl
 
-instance : has_add (strong_map M p) :=
-  ⟨λ f g, ⟨f + g, λ k a b ha hb h, by simp; rw [f.strong k a b ha hb h, g.strong k a b ha hb h]⟩⟩
+instance : has_add (strong_map M p) := ⟨λ f g, ⟨f + g, λ k a b ha hb h,
+    by simp; rw [is_strong f k a b ha hb h, is_strong g k a b ha hb h]⟩⟩
 
 @[simp] theorem add_apply {f g : strong_map M p} {n : ℕ} : (f + g) n = f n + g n := rfl
 
@@ -84,7 +84,7 @@ section mul_action
 variables {M : Type*} [add_comm_monoid M] {p : ℕ} {α : Type*} [monoid α] [distrib_mul_action α M]
 
 instance : has_smul α (strong_map M p) :=
-  ⟨λ x f, ⟨x • f, λ k a b ha hb h, by simp; rw f.strong k a b ha hb h⟩⟩
+  ⟨λ x f, ⟨x • f, λ k a b ha hb h, by simp; rw is_strong f k a b ha hb h⟩⟩
 
 @[simp] theorem smul_def {a : α} {f : strong_map M p} {x : ℕ} : (a • f) x = a • f x := rfl
 
@@ -119,12 +119,12 @@ section add_comm_group
 variables {G : Type*} [add_comm_group G] {p : ℕ}
 
 instance : has_neg (strong_map G p) := ⟨λ f, ⟨-(f : additive_map G),
-  λ k a b ha hb h, by simp; exact f.strong k a b ha hb h⟩⟩
+  λ k a b ha hb h, by simp; exact is_strong f k a b ha hb h⟩⟩
 
 @[simp] theorem neg_apply {f : strong_map G p} {n : ℕ} : (-f) n = -(f n) := rfl
 
 instance : has_sub (strong_map G p) := ⟨λ f g, ⟨(f : additive_map G) - g,
-  λ k a b ha hb h, by simp; rw [f.strong k a b ha hb h, g.strong k a b ha hb h]⟩⟩
+  λ k a b ha hb h, by simp; rw [is_strong f k a b ha hb h, is_strong g k a b ha hb h]⟩⟩
 
 @[simp] theorem sub_apply {f g : strong_map G p} {n : ℕ} : (f - g) n = f n - g n := rfl
 
