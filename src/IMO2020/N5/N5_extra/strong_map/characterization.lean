@@ -262,6 +262,8 @@ def pmix_equiv : M × pcop_domain M p ≃+ strong_map M p :=
   right_inv := pmix_inv_if_right_inverse M p,
   .. pmix_hom M p }
 
+end pmix_equiv
+
 end strong_map
 
 end IMO2020N5
