@@ -273,6 +273,8 @@ def pmix_equiv : M × pcompl_hom M p ≃+ strong_map M p :=
 
 end pmix_equiv
 
+end strong_map
+
 
 
 
@@ -280,6 +282,10 @@ end pmix_equiv
 
 
 namespace additive_map
+
+open strong_map
+
+variables {M : Type*} [add_cancel_comm_monoid M] (p : ℕ) [fact p.prime]
 
 /-- Characterization of `p`-strong maps, in the language of additive maps. -/
 theorem pstrong_iff (f : additive_map M) : strong p f ↔ ∃ (c : M) (χ : pcompl_hom M p),
@@ -299,8 +305,6 @@ begin
 end
 
 end additive_map
-
-end strong_map
 
 end IMO2020N5
 end IMOSL
