@@ -105,7 +105,10 @@ section add_cancel_comm_monoid
 variables {M : Type*} [add_cancel_comm_monoid M] {p : ℕ}
 
 @[simp] theorem map_one_zero (f : strong_map M p) : f 1 = 0 :=
-  by rw [← add_right_inj (f 1), ← map_mul_add f one_ne_zero one_ne_zero, mul_one, add_zero]
+  additive_map.map_one_zero f
+
+@[simp] theorem map_pow_smul (f : strong_map M p) {x : ℕ} (hx : x ≠ 0) (n : ℕ) :
+  f (x ^ n) = n • f x := additive_map.map_pow_smul f hx n
 
 end add_cancel_comm_monoid
 

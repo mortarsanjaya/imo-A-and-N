@@ -36,23 +36,29 @@ def pcop_part (p n : ℕ) : ℕ := n / p ^ (n.factorization p)
 
 @[simp] lemma pcop_one (p : ℕ) : pcop_part p 1 = 1 := by simp [pcop_part]
 
+lemma pcop_ne_zero (p : ℕ) {n : ℕ} (h : n ≠ 0) : pcop_part p n ≠ 0 :=
+  nat.div_pow_factorization_ne_zero p h
+
 variables {p : ℕ} (hp : p.prime)
 include hp
 
-@[simp] lemma pcop_p : pcop_part p p = 1 := by dsimp only [pcop_part];
-  rw [nat.prime.factorization_self hp, pow_one, nat.div_self hp.pos]
+@[simp] lemma pcop_ppow (k : ℕ) : pcop_part p (p ^ k) = 1 :=
+  by rw [pcop_part, nat.prime.factorization_pow hp,
+         finsupp.single_eq_same, nat.div_self (pow_pos hp.pos k)]
+  
+@[simp] lemma pcop_p : pcop_part p p = 1 :=
+  by rw [pcop_part, nat.prime.factorization_self hp, pow_one, nat.div_self hp.pos]
 
-@[simp] lemma pcop_ppow (k : ℕ) : pcop_part p (p ^ k) = 1 := by dsimp only [pcop_part];
-  rw [nat.prime.factorization_pow hp, finsupp.single_eq_same, nat.div_self (pow_pos hp.pos k)]
+lemma not_dvd_p_pcop {n : ℕ} (hn : n ≠ 0) : ¬p ∣ pcop_part p n :=
+  nat.not_dvd_div_pow_factorization hp hn
 
 lemma coprime_p_pcop {n : ℕ} (hn : n ≠ 0) : p.coprime (pcop_part p n) :=
   nat.coprime_of_div_pow_factorization hp hn
 
 lemma eq_pcop_of_coprime {n : ℕ} (hn : n ≠ 0) (h : p.coprime n) : pcop_part p n = n :=
 begin
-  dsimp only [pcop_part],
-  rw [(nat.factorization_eq_zero_iff' n p).mpr, pow_zero, nat.div_one],
-  right; left; rwa ← hp.coprime_iff_not_dvd 
+  rw [pcop_part, (nat.factorization_eq_zero_iff' n p).mpr, pow_zero, nat.div_one],
+  right; left; rwa ← hp.coprime_iff_not_dvd
 end
 
 lemma eq_mul_ppow_pcop (n : ℕ) : p ^ (n.factorization p) * pcop_part p n = n :=
@@ -78,19 +84,38 @@ namespace zmod
 
 variables (p : ℕ) [fact (p.prime)]
 
-/-- The `p`-coprime part of a positive natural, embedded into `(zmod p)ˣ` -/
-def pcop_part (n : ℕ) (h : n ≠ 0) : (zmod p)ˣ :=
-  zmod.unit_of_coprime (nat.pcop_part p n)
-    (nat.coprime_comm.mp (nat.coprime_p_pcop (fact.out p.prime) h))
+/-- The `p`-coprime part of a positive natural, embedded into `(zmod p)ˣ`.
+  If `n = 0`, we define the `p`-coprime part to be `1` in `(zmod p)ˣ`. -/
+def pcop_part (n : ℕ) : (zmod p)ˣ :=
+  dite (n = 0) (λ _, 1) (λ h : n ≠ 0, zmod.unit_of_coprime (nat.pcop_part p n)
+    (nat.coprime_comm.mp (nat.coprime_p_pcop (fact.out p.prime) h)))
 
-@[simp] lemma pcop_one : pcop_part p 1 one_ne_zero = 1 :=
-  by simp only [pcop_part, nat.pcop_one, zmod.unit_of_coprime, nat.cast_one, inv_one]; refl
+@[simp] lemma pcop_zero : pcop_part p 0 = 1 :=
+  by rw [pcop_part, dif_pos rfl]
+
+@[simp] lemma pcop_one : pcop_part p 1 = 1 :=
+  by simp only [pcop_part, dif_neg (one_ne_zero : 1 ≠ 0),
+    zmod.unit_of_coprime, nat.pcop_one, nat.cast_one, inv_one]; refl
+
+@[simp] lemma pcop_ppow (k : ℕ) : pcop_part p (p ^ k) = 1 :=
+  let h := fact.out p.prime in by simp only [pcop_part, dif_neg (pow_ne_zero k h.ne_zero),
+    nat.pcop_ppow h, zmod.unit_of_coprime, nat.cast_one, inv_one]; refl
+  
+@[simp] lemma pcop_p : pcop_part p p = 1 :=
+  let h := fact.out p.prime in by simp only [pcop_part, dif_neg h.ne_zero,
+    nat.pcop_p h, zmod.unit_of_coprime, nat.cast_one, inv_one]; refl
+
+@[simp] lemma pcop_val {n : ℕ} (h : n ≠ 0) :
+  (zmod.pcop_part p n : zmod p).val = nat.pcop_part p n % p :=
+  by rw [zmod.pcop_part, dif_neg h, zmod.coe_unit_of_coprime, zmod.val_nat_cast]
 
 theorem pcop_mul {m n : ℕ} (hm : m ≠ 0) (hn : n ≠ 0) :
-  pcop_part p (m * n) (mul_ne_zero hm hn) = pcop_part p m hm * pcop_part p n hn :=
+  pcop_part p (m * n) = pcop_part p m * pcop_part p n :=
 begin
   rw ← units.eq_iff,
-  simp only [pcop_part, zmod.unit_of_coprime, units.coe_mk, units.coe_mul],
+  simp only [pcop_part, zmod.unit_of_coprime, units.coe_mul],
+  rw [dif_neg hm, dif_neg hn, dif_neg (mul_ne_zero hm hn)],
+  simp only [units.coe_mk],
   rw [nat.pcop_mul (fact.out p.prime), nat.cast_mul]
 end
 
@@ -138,11 +163,12 @@ begin
   right; exact h
 end
 
-lemma zmod_pcop_part_add_eq_p_pow : -zmod.pcop_part p a ha = zmod.pcop_part p b hb :=
+lemma zmod_pcop_part_add_eq_p_pow : -zmod.pcop_part p a = zmod.pcop_part p b :=
 begin
   rw ← units.eq_iff,
-  simp only [zmod.pcop_part, zmod.unit_of_coprime, units.coe_mk, units.coe_neg],
-  rw [← add_eq_zero_iff_neg_eq, ← nat.cast_add, zmod.nat_coe_zmod_eq_zero_iff_dvd],
+  simp only [zmod.pcop_part, zmod.unit_of_coprime, units.coe_neg],
+  rw [dif_neg ha, dif_neg hb, ← add_eq_zero_iff_neg_eq, units.coe_mk,
+      units.coe_mk, ← nat.cast_add, zmod.nat_coe_zmod_eq_zero_iff_dvd],
   exact nat_pcop_part_add_eq_p_pow p ha hb h
 end
 
@@ -201,17 +227,20 @@ theorem coe_inj {f g : pcop_domain M p} : (f : additive (zmod p)ˣ → M) = g �
 
 theorem ext_iff {f g : pcop_domain M p} : f = g ↔ ∀ x, f x = g x := ⟨λ h x, by rw h, ext⟩
 
-instance : has_zero (pcop_domain M p) := ⟨⟨0, by simp⟩⟩
+instance : has_zero (pcop_domain M p) :=
+  ⟨⟨0, by rw [add_monoid_hom.to_fun_eq_coe, add_monoid_hom.zero_apply]⟩⟩
 
 @[simp] theorem zero_apply {x : (zmod p)ˣ} : (0 : pcop_domain M p) x = 0 := rfl
 
-instance : has_add (pcop_domain M p) := ⟨λ f g, ⟨f + g, by simp⟩⟩
+instance : has_add (pcop_domain M p) :=
+  ⟨λ f g, ⟨f + g, by rw [add_monoid_hom.to_fun_eq_coe, add_monoid_hom.add_apply];
+    simp only [coe_add_monoid_hom, map_additive, map_neg_one, add_zero]⟩⟩
 
 @[simp] theorem add_apply {f g : pcop_domain M p} {x : (zmod p)ˣ} : (f + g) x = f x + g x := rfl
 
 instance : add_comm_monoid (pcop_domain M p) :=
-{ add_comm := λ f g, by ext; simp only [add_apply, add_comm],
-  add_assoc := λ f g h, by ext; simp only [add_apply, add_assoc],
+{ add_comm := λ f g, by ext; rw [add_apply, add_apply, add_comm],
+  add_assoc := λ f g h, by ext; simp only [add_apply]; rw add_assoc,
   zero_add := λ f, by ext; rw [add_apply, zero_apply, zero_add],
   add_zero := λ f, by ext; rw [add_apply, zero_apply, add_zero],
   .. pcop_domain.has_zero, .. pcop_domain.has_add }
@@ -275,25 +304,32 @@ def ppow_hom : M →+ strong_map M p := ⟨ppow_map M p, ppow_map_zero M p, ppow
 
 /-- The pure `p`-coprime strong map -/
 def pcop_map (χ : pcop_domain M p) : strong_map M p :=
-{ to_fun := λ n, dite (n = 0) (λ _, 0) (λ (h : n ≠ 0), χ (zmod.pcop_part p n h)),
+{ to_fun := λ n, ite (n = 0) 0 (χ (zmod.pcop_part p n)),
   map_zero' := rfl,
-  map_mul_add' := λ x y hx hy, by rw [dif_neg hx, dif_neg hy, dif_neg (mul_ne_zero hx hy),
+  map_mul_add' := λ x y hx hy, by rw [if_neg hx, if_neg hy, if_neg (mul_ne_zero hx hy),
     zmod.pcop_mul p hx hy, pcop_domain.map_mul_add χ],
-  strong' := λ k a b ha hb h, by simp only [];  rw [dif_neg ha, dif_neg hb,
+  strong' := λ k a b ha hb h, by simp only []; rw [if_neg ha, if_neg hb,
     ← zmod_pcop_part_add_eq_p_pow p ha hb h, ← neg_one_mul, pcop_domain.map_mul_add,
     pcop_domain.map_neg_one, zero_add] }
 
 @[simp] theorem pcop_map_val (χ : pcop_domain M p) (n : ℕ) :
-  pcop_map M p χ n = dite (n = 0) (λ _, 0) (λ (h : n ≠ 0), χ (zmod.pcop_part p n h)) := rfl
+  pcop_map M p χ n = ite (n = 0) 0 (χ (zmod.pcop_part p n)) := rfl
 
 @[simp] theorem pcop_map_zero : pcop_map M p 0 = 0 :=
-  by ext; simp only [pcop_map_val, zero_apply, pcop_domain.zero_apply, dite_eq_ite, if_t_t]
+  by ext; simp only [pcop_map_val, zero_apply, pcop_domain.zero_apply, if_t_t]
 
-@[simp] theorem pcop_map_apply_zero (χ : pcop_domain M p) : pcop_map M p χ 0 = 0 :=
-  by simp only [pcop_map_val, eq_self_iff_true, dif_pos]
+@[simp] theorem pcop_map_apply_zero (χ : pcop_domain M p) : pcop_map M p χ 0 = 0 := rfl
 
 @[simp] theorem pcop_map_apply_ne_zero (χ : pcop_domain M p) {n : ℕ} (h : n ≠ 0) :
-  pcop_map M p χ n = χ (zmod.pcop_part p n h) := by simp only [pcop_map_val, dif_neg h]
+  pcop_map M p χ n = χ (zmod.pcop_part p n) :=
+  by rw [pcop_map_val, if_neg h]
+
+@[simp] theorem pcop_map_ppow (χ : pcop_domain M p) (k : ℕ) : pcop_map M p χ (p ^ k) = 0 :=
+  by rw [pcop_map_apply_ne_zero M p χ (pow_ne_zero _ (fact.out p.prime).ne_zero),
+         zmod.pcop_ppow, pcop_domain.map_one]
+
+@[simp] theorem pcop_map_p (χ : pcop_domain M p) : pcop_map M p χ p = 0 :=
+  by rw [pcop_map_apply_ne_zero M p χ (fact.out p.prime).ne_zero, zmod.pcop_p, pcop_domain.map_one]
 
 @[simp] theorem pcop_map_add (χ φ : pcop_domain M p) :
   pcop_map M p (χ + φ) = pcop_map M p χ + pcop_map M p φ :=
@@ -318,9 +354,9 @@ begin
   have h0 := n.ne_zero,
   rw [ne.def, ← zmod.val_eq_zero, ← ne.def] at h0,
   rw [pcop_map_apply_ne_zero M p χ h0, pcop_map_apply_ne_zero M p φ h0] at h,
-  suffices : n = zmod.pcop_part p (n : zmod p).val h0,
+  suffices : n = zmod.pcop_part p (n : zmod p).val,
     convert h,
-  rw [← units.eq_iff, zmod.pcop_part],
+  rw [← units.eq_iff, zmod.pcop_part, dif_neg h0],
   have h1 : ((n : zmod p).val : zmod p) = (n : zmod p) :=
     by rw [zmod.nat_cast_val, zmod.cast_id', id.def],
   replace h : p.coprime (n : zmod p).val := by rwa [(fact.out p.prime).coprime_iff_not_dvd,
@@ -333,10 +369,18 @@ def pcop_hom : pcop_domain M p →+ strong_map M p :=
   ⟨pcop_map M p, pcop_map_zero M p, pcop_map_add M p⟩
 
 @[simp] theorem pcop_hom_val (χ : pcop_domain M p) (n : ℕ) :
-  pcop_hom M p χ n = dite (n = 0) (λ _, 0) (λ (h : n ≠ 0), χ (zmod.pcop_part p n h)) := rfl
+  pcop_hom M p χ n = ite (n = 0) 0 (χ (zmod.pcop_part p n)) := rfl
 
 theorem pcop_hom_apply_ne_zero (χ : pcop_domain M p) {n : ℕ} (h : n ≠ 0) :
-  pcop_hom M p χ n = χ (zmod.pcop_part p n h) := by simp only [pcop_hom_val, dif_neg h]
+  pcop_hom M p χ n = χ (zmod.pcop_part p n) := by rw [pcop_hom_val, if_neg h]
+
+@[simp] theorem pcop_hom_ppow (χ : pcop_domain M p) (k : ℕ) : pcop_hom M p χ (p ^ k) = 0 :=
+  by rw [pcop_hom_apply_ne_zero M p χ (pow_ne_zero k (fact.out p.prime).ne_zero),
+         zmod.pcop_ppow, pcop_domain.map_one]
+
+@[simp] theorem pcop_hom_p (χ : pcop_domain M p) : pcop_hom M p χ p = 0 :=
+  by rw [pcop_hom_apply_ne_zero M p χ (fact.out p.prime).ne_zero, zmod.pcop_p, pcop_domain.map_one]
+
 
 
 /-- The mixed strong homomorphism -/
@@ -350,8 +394,8 @@ theorem pmix_hom_pair' (pair : M × pcop_domain M p) :
   pmix_hom M p (c, χ) = ppow_hom M p c + pcop_hom M p χ := rfl
 
 @[simp] theorem pmix_hom_apply_ne_zero (c : M) (χ : pcop_domain M p) {n : ℕ} (h : n ≠ 0) :
-  pmix_hom M p (c, χ) n = padic_val_nat p n • c + χ (zmod.pcop_part p n h) :=
-  by rw [pmix_hom_pair, add_apply, ppow_hom_val, pcop_hom_apply_ne_zero]
+  pmix_hom M p (c, χ) n = padic_val_nat p n • c + χ (zmod.pcop_part p n) :=
+  by rw [pmix_hom_pair, add_apply, ppow_hom_val, pcop_hom_apply_ne_zero M p χ h]
 
 end strong_map
 

@@ -101,6 +101,15 @@ variables {M : Type*} [add_cancel_comm_monoid M]
 @[simp] theorem map_one_zero (f : additive_map M) : f 1 = 0 :=
   by rw [← add_right_inj (f 1), ← map_mul_add f one_ne_zero one_ne_zero, mul_one, add_zero]
 
+@[simp] theorem map_pow_smul (f : additive_map M) {x : ℕ} (hx : x ≠ 0) (n : ℕ) :
+  f (x ^ n) = n • f x :=
+begin
+  induction n with n n_ih,
+  rw [pow_zero, zero_smul, map_one_zero],
+  rw [pow_succ', map_mul_add f (pow_ne_zero _ hx) hx,
+      nat.succ_eq_add_one, n_ih, add_smul, one_smul]
+end
+
 end add_cancel_comm_monoid
 
 
