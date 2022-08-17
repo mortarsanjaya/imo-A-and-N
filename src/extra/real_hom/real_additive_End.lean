@@ -7,9 +7,7 @@ We prove some sufficient conditions forcing an additive map from ℝ to itself t
 In particular, we prove that a the endomorphism monoid End(ℝ) is trivial.
 That is, the only map φ : ℝ → ℝ that is additive and multiplicative with φ(1) = 1 is the identity.
 
-TODO:
-1. Close `sorry` in `real_add_End_monotone` for the monotone case.
-2. If φ is bounded at some non-trivial interval, then φ is linear.
+TODO: If φ is bounded at some non-trivial interval, then φ is linear.
 -/
 
 open real
