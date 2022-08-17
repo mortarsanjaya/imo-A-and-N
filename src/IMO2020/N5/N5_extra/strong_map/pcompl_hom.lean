@@ -21,6 +21,8 @@ structure pcompl_hom (M : Type*) [add_comm_monoid M] (p : ℕ) extends additive 
 
 namespace pcompl_hom
 
+section add_comm_monoid
+
 variables {M : Type*} [add_comm_monoid M] {p : ℕ}
 
 /-- Instead of coercing to `additive (zmod p)ˣ → M`,
@@ -81,6 +83,24 @@ begin
   rw [zero_smul, zero_smul, zero_apply],
   rw [nat.succ_eq_add_one, add_smul, one_smul, add_smul, one_smul, add_apply, n_ih]
 end
+
+end add_comm_monoid
+
+
+
+section add_cancel_comm_monoid
+
+variables {M : Type*} [add_cancel_comm_monoid M] {p : ℕ}
+
+@[simp] theorem map_pow_smul (f : pcompl_hom M p) {x : (zmod p)ˣ} {n : ℕ} : f (x ^ n) = n • f x :=
+begin
+  induction n with n n_ih,
+  rw [pow_zero, zero_smul, map_one],
+  rw [pow_succ', map_mul_add, n_ih, nat.succ_eq_add_one, add_smul, one_smul]
+end
+
+end add_cancel_comm_monoid
+
 
 end pcompl_hom
 
