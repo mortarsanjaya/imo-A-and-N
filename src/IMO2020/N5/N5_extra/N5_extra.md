@@ -139,7 +139,8 @@ On the other hand, we give a construction of a non-zero wide map below.
 > We take $p_{n + 1}$ to be a prime number greater than $p_n$ such > that $\left(\frac{k}{p_{n + 1}}\right) = \left(\frac{k}{p_n}\right)$ for all $k < p_n$.
 > We now show that such $p_{n + 1}$ must exist.
 >
-> __Proof__: It is well-known that $\left(\frac{a}{4a + b}\right) = \left(\frac{a}{b}\right)$ for all $a, b > 0$ with $\gcd(a, b) = 1$.
+> __Proof__:
+> It is well-known that $\left(\frac{a}{4a + b}\right) = \left(\frac{a}{b}\right)$ for all $a, b > 0$ with $\gcd(a, b) = 1$.
 > As a result, for any $k < p_n$ and $a > 0$, we have
 > $$ \left(\frac{k}{4a (p_n - 1)! + p_n}\right) = \left(\frac{k}{p_n}\right). $$
 > But $4(p_n - 1)!$ is coprime with $p_n$ since $p_n \geq p_1 = 5$, so Dirichlet's theorem on arithmetic progressions mean that we can take $a > 0$ such that $a (p_n - 1)! + p_n$ is prime.
@@ -166,31 +167,30 @@ Similar constructions should work, although it is not clear whether the correspo
 
 It turns out that a map cannot be $p$-strong for more than one value of $p$ unless the map is zero.
 Similarly, an additive map cannot be wide and also $p$-strong for some $p$ unless it is zero.
-We prove the result below, with the following lemma trivializing them.
+In fact, we have an even more general result, trivializing both the above results.
 
-> __Lemma 4.1__:
+> __Theorem 4.1__:
 > Let $p$ be a prime, and let $f : \N^+ \to M$ be a $p$-strong homomorphism.
-> Suppose that $f$ is $n$-good for some $n > p^2$ coprime with $p$.
+> Suppose that $f$ is $n$-good for some $n > p$ coprime with $p$.
 > Then $f \equiv 0$.
 >
 > __Proof__:
-> For any $n \in \N^+$, we can write $n = p^k t$ for some $k \geq 0$ and $t$ coprime with $p$.
-> Lemma 2.1 then yields $f(n) = k f(p) + f([t]_p)$ with $[t]_p < p$.
-> Thus it suffices to show that $f(n) = 0$ for any $n \leq p$.
+> Using characterizations of $p$-strong additive maps, we write $f = n \mapsto \nu_p(n) \cdot c + \chi(n/\nu_p(n))$ for some $c \in M$ and homomorphism $\chi : (\Z/p\Z)^* \to M$ with $\chi(-1) = 0$.
+> Clearly, we have $f = 0$ if and only if $c = 0$ and $\chi = 0$, if and only if $f(p) = 0$ and $f(k) = 0$ for each $k < p$.
+> Thus, it suffices to show that $f(k) = 0$ for each $k \leq p$.
 >
-> Since $f$ is $n$-good, for each $k \leq p$ we have $f(pk) = f(n - pk)$.
-> But since $\gcd(n, p) = 1$ and $f$ is $p$-strong, Lemma 4 yields $f(n - pk) = f([n]_p)$, which does not depend on $k$.
-> So, we get $f(p) + f(k) = f([n]_p) = f(p) + f(1) = f(p)$, which means $f(k) = 0$ for all $k \leq p$, as desired.
+> For any $0 < x < p$ such that $x \not\equiv n \pmod{p}$, we have $\chi(x) = \chi(n - x)$ since $f$ is $n$-good.
+> Then we have $\chi(nx^{-1} - 1) = 0$.
+> As $x$ ranges with the above restriction, the value of $nx^{-1} - 1$ modulo $p$ ranges over all non-zero values except $-1$ and $0$.
+> Thus, we get $f(k) = 0$ for $k < p - 1$.
+>
+> For $k = p - 1$, we get $f(p - 1) = f(1) = 0$ since $f$ is $p$-good.
+> Finally, for $k = p$, we get $f(p) = f(n - p) = f([n]_p) = 0$ since $f$ is $n$-good and $n$ is coprime with $p$.
 
-Indeed, if $f$ is $p$-strong and $q$-strong for some primes $p < q$, then we can apply Lemma 4.1 with $n = q^2$.
-If $f$ is wide and $p$-strong for some $p$, we can apply Lemma 4.1 by picking any suitable prime greater than $p^2$ for $n$.
+Indeed, if $f$ is $p$-strong and $q$-strong for some primes $p < q$, then we can apply Theorem 4.1 with $n = q$.
+If $f$ is wide and $p$-strong for some $p$, we can apply Theorem 4.1 by picking any suitable prime greater than $p$ for $n$.
 
-One can reduce the lower bound to $\frac{p(p - 1)}{2}$.
-The same proof above gives $f(k) = 0$ for all $k \leq \frac{p - 1}{2}$, and the fact that $f$ is $p$-good gives us $f(k) = 0$ for all $k < p$.
-Since $f$ is also $n$-good with $p \nmid n$, we get $f(p) = f(n - p) = f([n]_p) = 0$.
-
-Using Thue's lemma, one can reduce the bound even further to $n > p^{3/2}$.
-Indeed, direct computations now give $f(k) = 0$ just for $k < \sqrt{p}$.
-For $\sqrt{p} < k < p$, by Thue's lemma, there exists non-zero integers $a$ and $b$ such that $ak \equiv b \pmod{p}$ and $|a|, |b| < \sqrt{p}$.
-Now let $a' = a$ if $a > 0$ and $a' = p - a$ if $a < 0$; define $b'$ similarly.
-Then $f(a') = f(b') = 0$, and $a'b' \equiv \pm k \pmod{p}$, so $f(k) = 0$ as well by Lemma 2.1.
+Without using characterizations of $p$-strong maps, one could still obtain $f \equiv 0$ with bound $n > p^2$.
+The idea is that we have $f(kp) = f(n - kp) = f(n)$ for each $k < n/p$, so that $f(k) = 0$ for each $k < n/p$.
+A smart use of the $p$-good property brings the bound down to $n > \frac{p(p - 1)}{2}$.
+Using Thue's lemma, we can lower the bound even further to $n > p^{3/2}$.
