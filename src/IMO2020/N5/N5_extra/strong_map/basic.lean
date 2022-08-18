@@ -75,6 +75,14 @@ instance : add_comm_monoid (strong_map M p) :=
   add_zero := λ f, by ext; rw [add_apply, zero_apply, add_zero],
   .. strong_map.has_zero, .. strong_map.has_add }
 
+@[simp] theorem to_additive_map_inj {f g : strong_map M p} : (f : additive_map M) = g ↔ f = g :=
+  ⟨(λ h, by ext; rw [← coe_additive_map, h, coe_additive_map]), (λ h, by rw h)⟩
+
+instance : can_lift (additive_map M) (strong_map M p) :=
+{ coe := λ f, (f : additive_map M),
+  cond := λ f, strong p f,
+  prf := λ f h, ⟨⟨f, h⟩, rfl⟩ }
+
 end add_comm_monoid
 
 

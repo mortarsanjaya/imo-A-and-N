@@ -1,4 +1,4 @@
-import IMO2020.N5.N5_extra.good_map
+import IMO2020.N5.N5_extra.good_map IMO2020.N5.N5_extra.strong_map.characterization
 
 /-!
 # Distinction between wide and `p`-strong additive maps
@@ -15,7 +15,30 @@ namespace IMO2020N5
 
 
 
+namespace strong_map
+
+variables {M : Type*} [add_cancel_comm_monoid M] {p : ℕ} [fact p.prime] (f : strong_map M p)
+
+theorem zero_iff : f = 0 ↔ ∀ k : ℕ, k ≠ 0 → k ≤ p → f k = 0 :=
+begin
+  split,
+  rintros rfl k - -; rw strong_map.zero_apply,
+  intros h; ext x; rw strong_map.zero_apply,
+  rcases eq_or_ne x 0 with rfl | hx,
+  rw strong_map.map_zero,
+  rw [pstrong_val f hx, h p (fact.out p.prime).ne_zero (le_refl p), smul_zero, zero_add],
+  refine h _ _ (le_of_lt (nat.mod_lt _ (fact.out p.prime).pos)),
+  rw [ne.def, ← nat.dvd_iff_mod_eq_zero],
+  exact nat.not_dvd_ord_compl (fact.out p.prime) hx
+end
+
+end strong_map
+
+
+
 section distinction
+
+open strong_map
 
 variables {M : Type*} [add_cancel_comm_monoid M] {p : ℕ} (hp : p.prime)
 variables {f : additive_map M} (hs : strong p f)
@@ -25,6 +48,20 @@ include hp hs
 theorem pstrong_and_big_coprime_good_is_zero
   {n : ℕ} (h : p < n) (h0 : p.coprime n) (h1 : good n f) : f = 0 :=
 begin
+  haveI : fact p.prime := ⟨hp⟩,
+  lift f to strong_map M p using hs,
+  rw coe_additive_map at h1,
+  suffices : ∀ k : ℕ, k ≠ 0 → k < p → f k = 0,
+  { change (0 : additive_map M) with ↑(0 : strong_map M p),
+    rw [to_additive_map_inj, zero_iff]; intros k h2 h3,
+    rw [le_iff_lt_or_eq, eq_comm] at h3; rcases h3 with h3 | rfl,
+    exact this k h2 h3,
+    rw h1 p (n - p) h2 (ne_of_gt (tsub_pos_of_lt h)) (nat.add_sub_of_le (le_of_lt h)),
+    replace h0 : ¬p ∣ n - p := by rwa [nat.dvd_add_iff_left (dvd_refl p),
+      nat.sub_add_cancel (le_of_lt h), ← hp.coprime_iff_not_dvd],
+    rw pstrong_mod_p f h0; refine this _ _ (nat.mod_lt _ hp.pos),
+    rwa [ne.def, ← nat.dvd_iff_mod_eq_zero] },
+  intros k h2 h3,
   sorry
 end
 

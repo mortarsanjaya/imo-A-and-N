@@ -81,15 +81,18 @@ end
 
 open strong_map
 
-private theorem pstrong_mod_p (f : strong_map M p) {k : ℕ} (hkp : ¬(p : ℕ) ∣ k) : f k = f (k % p) :=
+theorem pstrong_mod_p (f : strong_map M p) {k : ℕ} (hkp : ¬(p : ℕ) ∣ k) : f k = f (k % p) :=
   pstrong_mod_p_induct f (is_strong f k) hkp (nat.lt_pow_self (fact.out p.prime).one_lt k)
 
-private theorem pstrong_val (f : strong_map M p) {x : ℕ} (h : x ≠ 0) :
-  f x = padic_val_nat p x • f p + f (zmod.pcop_part p x : zmod p).val :=
-  let hp := fact.out p.prime in by rw [zmod.pcop_part, dif_neg h, zmod.coe_unit_of_coprime,
-    zmod.val_nat_cast, ← pstrong_mod_p f (nat.not_dvd_ord_compl hp h), ← map_pow_smul f hp.ne_zero,
-    ← map_mul_add f (pow_ne_zero _ hp.ne_zero) (ne_of_gt (nat.ord_compl_pos p h)),
-    ← nat.factorization_def x hp, nat.ord_proj_mul_ord_compl_eq_self]
+/-- This is an important lemma, but I do not know where to move it. -/
+theorem pstrong_val (f : strong_map M p) {x : ℕ} (h : x ≠ 0) :
+  f x = padic_val_nat p x • f p + f (ord_compl[p] x % p) :=
+begin
+  have hp := fact.out p.prime,
+  rw [← pstrong_mod_p f (nat.not_dvd_ord_compl hp h), ← map_pow_smul f hp.ne_zero,
+      ← map_mul_add f (pow_ne_zero _ hp.ne_zero) (ne_of_gt (nat.ord_compl_pos p h)),
+      ← nat.factorization_def x hp, nat.ord_proj_mul_ord_compl_eq_self]
+end
 
 end extra_lemmas
 
@@ -247,8 +250,9 @@ begin
   intros f; ext x,
   rcases eq_or_ne x 0 with rfl | h,
   rw [map_zero, map_zero],
-  rw [pmix_inv_hom_pair, pmix_hom_apply, ppow_part_hom_apply,
-      pcop_part_hom_apply_eq_fn, ← pstrong_val f h]
+  rw [pmix_inv_hom_pair, pmix_hom_apply, ppow_part_hom_apply, pcop_part_hom_apply_eq_fn],
+  convert (pstrong_val f h).symm,
+  rw [zmod.pcop_part, dif_neg h, zmod.coe_unit_of_coprime, zmod.val_nat_cast]
 end
 
 end pmix_inv_hom
