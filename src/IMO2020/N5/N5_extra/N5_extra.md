@@ -139,7 +139,8 @@ On the other hand, we give a construction of a non-zero wide map below.
 > We take $p_{n + 1}$ to be a prime number greater than $p_n$ such > that $\left(\frac{k}{p_{n + 1}}\right) = \left(\frac{k}{p_n}\right)$ for all $k < p_n$.
 > We now show that such $p_{n + 1}$ must exist.
 >
-> __Proof__: It is well-known that $\left(\frac{a}{4a + b}\right) = \left(\frac{a}{b}\right)$ for all $a, b > 0$ with $\gcd(a, b) = 1$.
+> __Proof__:
+> It is well-known that $\left(\frac{a}{4a + b}\right) = \left(\frac{a}{b}\right)$ for all $a, b > 0$ with $\gcd(a, b) = 1$.
 > As a result, for any $k < p_n$ and $a > 0$, we have
 > $$ \left(\frac{k}{4a (p_n - 1)! + p_n}\right) = \left(\frac{k}{p_n}\right). $$
 > But $4(p_n - 1)!$ is coprime with $p_n$ since $p_n \geq p_1 = 5$, so Dirichlet's theorem on arithmetic progressions mean that we can take $a > 0$ such that $a (p_n - 1)! + p_n$ is prime.
