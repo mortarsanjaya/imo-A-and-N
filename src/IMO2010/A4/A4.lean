@@ -1,10 +1,4 @@
-import
-  data.nat.basic
-  data.int.basic
-  data.finset.basic
-  algebra.big_operators.basic
-  tactic.norm_num
-  data.nat.digits
+import data.finset.basic algebra.big_operators.basic data.nat.digits
 
 /-! # IMO 2010 A4 -/
 
@@ -12,15 +6,12 @@ namespace IMOSL
 namespace IMO2010A4
 
 open finset
-open_locale classical
 
 
 
 def x : ℕ → bool := nat.binary_rec ff (λ odd k, bxor (bor odd k.bodd))
 def bool_int (b : bool) : ℤ := cond b (-1) 1
 def S (n : ℕ) : ℤ := (range n).sum (bool_int ∘ x)
-
-
 
 private lemma bool_int_bnot (b : bool) : bool_int (!b) = - bool_int b :=
   by cases b; refl
@@ -56,7 +47,8 @@ begin
 end
 
 private lemma x_mul4_lem1 (k : ℕ) : x (4 * k + 1) = !(x (4 * k)) :=
-  by rw [bit0, ← two_mul, mul_assoc, x_mul2, x_mul2_add1, ← nat.bit0_val, nat.bodd_bit0, ff_bxor]
+  by rw [bit0, ← two_mul, mul_assoc, x_mul2, x_mul2_add1,
+         ← nat.bit0_val, nat.bodd_bit0, ff_bxor]
 
 private lemma x_mul4_lem2 (k : ℕ) : x (4 * k + 2) = x k :=
   by rw [bit0, ← two_mul, mul_assoc, ← mul_add_one, x_mul2, x_mul2_add1,
@@ -64,7 +56,7 @@ private lemma x_mul4_lem2 (k : ℕ) : x (4 * k + 2) = x k :=
 
 private lemma x_mul4_lem3 (k : ℕ) : x (4 * k + 3) = x k :=
   by rw [bit0, ← two_mul, bit1, ← add_assoc, mul_assoc,
-          ← mul_add_one, x_mul2_add1, x_mul2_add1, bnot_bnot]
+         ← mul_add_one, x_mul2_add1, x_mul2_add1, bnot_bnot]
 
 
 
@@ -101,9 +93,10 @@ private lemma S_zeroes_even {k : ℕ} (h : S k = 0) : k % 2 = 0 :=
 
 private lemma S_zeroes_iff (k : ℕ) : S k = 0 ↔ (k % 4 = 0 ∨ k % 4 = 2) ∧ (S (k / 4) = 0) :=
 begin
+  nth_rewrite 0 ← nat.div_add_mod k 4,
   generalizes [h : k / 4 = q, h0 : k % 4 = r],
   have h1 : r < 4 := by rw h0; exact nat.mod_lt k four_pos,
-  rw [← nat.div_add_mod k 4, ← h, ← h0]; clear h h0 k; split,
+  clear h h0 k; split,
   { intros h,
     refine (and_iff_left_of_imp _).mpr _,
     rintros (rfl | rfl),
@@ -149,9 +142,8 @@ theorem final_solution (k : ℕ) : 0 ≤ S k :=
 begin
   induction k with k k_ih,
   rw S_zero,
-  rw S_succ,
   rw [le_iff_lt_or_eq, int.lt_iff_add_one_le, zero_add, eq_comm] at k_ih,
-  cases k_ih with h h,
+  rw S_succ; cases k_ih with h h,
   rw ← add_neg_self (1 : ℤ); exact add_le_add h (bool_int_ge_neg_one _),
   rw [h, zero_add, bool_int_nonneg_iff]; exact S_zeroes_x_eq_ff h
 end
@@ -161,12 +153,10 @@ theorem final_solution_extra (k : ℕ) :
   S k = 0 ↔ ∀ c : ℕ, c ∈ nat.digits 4 k → c = 0 ∨ c = 2 :=
 begin
   induction k using nat.strong_induction_on with k k_ih,
-  simp only [] at k_ih, -- Delete this
   cases k.eq_zero_or_pos with h h,
   { rw [h, S_zero, eq_self_iff_true, true_iff, nat.digits_zero],
     intros c h0; exfalso; exact list.not_mem_nil c h0 },
-  { -- generalizes [h0 : k / 4 = q, h1 : k % 4 = r],
-    replace k_ih := k_ih (k / 4) (nat.div_lt_self h (by norm_num)),
+  { replace k_ih := k_ih (k / 4) (nat.div_lt_self h (by norm_num)),
     rw [S_zeroes_iff, k_ih, nat.digits_def' (by norm_num : 2 ≤ 4) h],
     simp only [list.mem_cons_iff, forall_eq_or_imp] }
 end
