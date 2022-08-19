@@ -2,11 +2,11 @@ import algebra.ring.basic ring_theory.non_zero_divisors tactic.ring
 
 /-! # IMO 2011 A3, Generalized Version -/
 
-open function
-open_locale non_zero_divisors
-
 namespace IMOSL
 namespace IMO2011A3
+
+open function
+open_locale non_zero_divisors
 
 def fn_eq {R : Type*} [ring R] (f g : R → R) := ∀ x y : R, g (f (x + y)) = f x + (2 * x + y) * g y
 
@@ -27,8 +27,8 @@ begin
   rw [neg_pow_bit0, one_pow, mul_one, mul_neg_one, add_neg_eq_zero] at h0,
   rw [h0, and_self],
   replace h1 := h 1,
-  rwa [one_pow, mul_one, mul_one, h0, ← two_mul,
-       mul_left_mem_non_zero_divisors_eq_zero_iff R2nzd] at h1
+  rw [one_pow, mul_one, mul_one, h0, ← two_mul] at h1,
+  exact (mul_left_mem_non_zero_divisors_eq_zero_iff R2nzd).mp h1
 end
 
 end extra
@@ -47,13 +47,10 @@ private lemma lem1_1 : ∀ x y : R, f x - f y = (2 * y + x) * g x - (2 * x + y) 
 private lemma lem1_2 (R2nzd : (2 : R) ∈ R⁰) : ∃ A B : R, ∀ x : R, g x = A * x + B :=
 begin
   use [g 1 - g 0, g 0]; intros x,
-  have h := congr_arg2 (λ x y, x + y) (lem1_1 feq x 1) (lem1_1 feq 0 x),
-  simp only [] at h; rw [sub_add_sub_cancel', lem1_1 feq] at h,
-  simp only [add_zero, mul_one, zero_add, mul_zero, one_mul] at h,
-  rwa [sub_add_sub_comm, add_comm, add_mul, ← add_assoc, add_sub_add_right_eq_sub, add_one_mul,
-       sub_eq_iff_eq_add, ← sub_sub, sub_add_cancel, mul_assoc, mul_assoc, ← mul_add, ← mul_sub,
-       mul_cancel_left_mem_non_zero_divisor R2nzd, eq_sub_iff_add_eq, add_comm _ (g x),
-       ← sub_eq_iff_eq_add, add_sub_assoc, ← mul_sub, add_comm, mul_comm, eq_comm] at h
+  rw [eq_comm, ← sub_eq_zero, ← mul_left_mem_non_zero_divisors_eq_zero_iff R2nzd, eq_comm],
+  have h := congr_arg2 has_add.add (lem1_1 feq x 1) (lem1_1 feq 0 x),
+  rw [sub_add_sub_cancel', lem1_1 feq, ← sub_eq_zero] at h,
+  nth_rewrite 0 ← h; ring
 end
 
 section g_linear
@@ -64,9 +61,9 @@ include h
 private lemma lem2_1 : ∀ x : R, f x = A * x ^ 2 - B * x + f 0 :=
 begin
   intros x,
-  have h0 := lem1_1 feq x 0,
-  rwa [mul_zero, zero_add, add_zero, h, mul_comm, add_mul, mul_assoc, ← sq, h, mul_zero, zero_add,
-       mul_right_comm, mul_assoc, two_mul, add_sub_add_right_eq_sub, sub_eq_iff_eq_add] at h0
+  replace feq := lem1_1 feq x 0,
+  rw [sub_eq_iff_eq_add, h, h] at feq,
+  rw feq; ring
 end
 
 private lemma lem2_2 : ∀ x : R, A * (A - 1) * x ^ 2 + -(A + 1) * B * x + (f 0 * (A - 1) + B) = 0 :=
@@ -81,7 +78,7 @@ end
 private lemma lem2_3 (R2nzd : (2 : R) ∈ R⁰) : B = 0 ∧ A * (A - 1) = 0 ∧ f 0 * (A - 1) = 0 :=
 begin
   rcases extra.poly_deg_2_zero R2nzd (lem2_2 feq h) with ⟨h0, h1, h2⟩,
-  rw [add_eq_zero_iff_neg_eq] at h2,
+  rw add_eq_zero_iff_neg_eq at h2,
   suffices : B = 0,
     rw [and_iff_right this, and_iff_right h0, ← neg_eq_zero, h2, this],
   rwa [← h2, neg_mul_neg, mul_left_comm, add_one_mul, h0, zero_add, ← neg_eq_zero, h2] at h1
@@ -121,18 +118,16 @@ begin
   { rintros ⟨A, C, rfl, rfl, h, h0⟩,
     rw [mul_eq_zero, sub_eq_zero] at h h0,
     rcases h with rfl | rfl,
-    simp only [] at h0; rw [or_iff_left, zero_mul, zero_add] at h0,
-    left; simp only [h0, zero_mul, zero_add],
-    rw and_self; refl,
-    exact zero_ne_one,
-    clear h0; right; simp only [one_mul]; split,
-    use C,
-    refl },
+    simp only [or_false, zero_ne_one, zero_add, zero_mul] at h0,
+    left; simp only [h0, zero_mul, zero_add, and_self]; refl,
+    right; simp only [one_mul],
+    exact ⟨⟨C, rfl⟩, rfl⟩ },
   { rintros (⟨rfl, rfl⟩ | ⟨⟨C, rfl⟩, rfl⟩),
     use [0, 0]; simp only [zero_mul, pi.zero_apply, add_zero],
     rw [← and_assoc, and_self, and_self]; split; refl,
     use [1, C]; simp only [one_mul],
-    rw [sub_self, mul_zero, and_self]; repeat { split } }
+    rw [sub_self, mul_zero, and_self],
+    exact ⟨rfl, rfl, rfl⟩ }
 end
 
 end IMO2011A3
