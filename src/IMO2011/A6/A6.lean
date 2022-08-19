@@ -1,37 +1,39 @@
-import data.real.basic
+import algebra.order.field tactic.linarith
 
 /-! # IMO 2011 A6 (P3) -/
 
 namespace IMOSL
 namespace IMO2011A6
 
-def fn_ineq (f : ℝ → ℝ) := ∀ x y : ℝ, f (x + y) ≤ y * f x + f (f x)
+variables {F : Type*} [linear_ordered_field F]
+
+def fn_ineq (f : F → F) := ∀ x y : F, f (x + y) ≤ y * f x + f (f x)
 
 
 
 section results
 
-variables {f : ℝ → ℝ} (fineq : fn_ineq f)
+variables {f : F → F} (fineq : fn_ineq f)
 include fineq
 
-private lemma fn_lem1 (t x : ℝ) : f t ≤ t * f x - x * f x + f (f x) :=
+private lemma fn_lem1 (t x : F) : f t ≤ t * f x - x * f x + f (f x) :=
 begin
-  have h := fineq x (t - x),
-  rwa [add_sub_cancel'_right, sub_mul] at h
+  replace fineq := fineq x (t - x),
+  rwa [add_sub_cancel'_right, sub_mul] at fineq
 end
 
-private lemma fn_lem2 (x : ℝ) (h : x < 0) : 0 ≤ f x :=
+private lemma fn_lem2 (x : F) (h : x < 0) : 0 ≤ f x :=
 begin
   have h0 : x * f x ≤ 0 :=
     by linarith [(fn_lem1 fineq (f (2 * f x)) x), (fn_lem1 fineq (f x) (2 * f x))],
   rwa [← div_le_iff_of_neg' h, zero_div] at h0
 end
 
-private lemma fn_lem3 (x : ℝ) : f x ≤ 0 :=
+private lemma fn_lem3 (x : F) : f x ≤ 0 :=
 begin
   rw ← not_lt; intros h,
   let M := x - f (f x) / f x,
-  have h0 : ∀ t : ℝ, t < M → f t < 0,
+  have h0 : ∀ t : F, t < M → f t < 0,
   { intros t h0,
     apply lt_of_le_of_lt (fn_lem1 fineq t x),
     rwa [← sub_mul, ← lt_neg_iff_add_neg, ← lt_div_iff h,
@@ -47,13 +49,13 @@ end results
 
 
 /-- Final solution -/
-theorem final_solution {f : ℝ → ℝ} (fineq : fn_ineq f) (x : ℝ) (h : x ≤ 0) : f x = 0 :=
+theorem final_solution {f : F → F} (fineq : fn_ineq f) (x : F) (h : x ≤ 0) : f x = 0 :=
 begin
   apply le_antisymm (fn_lem3 fineq x),
   rw le_iff_lt_or_eq at h,
   rcases h with h | rfl,
   exact fn_lem2 fineq x h,
-  cases exists_lt (0 : ℝ) with x h,
+  cases exists_lt (0 : F) with x h,
   replace h := le_antisymm (fn_lem2 fineq x h) (fn_lem3 fineq x),
   have h0 := fineq x 0,
   rwa [zero_mul, zero_add, add_zero, ← h] at h0
