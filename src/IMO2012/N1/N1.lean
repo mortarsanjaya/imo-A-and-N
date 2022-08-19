@@ -2,10 +2,10 @@ import ring_theory.int.basic
 
 /-! # IMO 2012 N1 -/
 
-open set int
-
 namespace IMOSL
 namespace IMO2012N1
+
+open set int
 
 def admissible (A : set ℤ) := ∀ x y : ℤ, x ∈ A → y ∈ A → ∀ k : ℤ, x ^ 2 + k * (x * y) + y ^ 2 ∈ A
 def good (m n : ℤ) := ∀ A : set ℤ, admissible A → m ∈ A → n ∈ A → A = set.univ
@@ -16,27 +16,16 @@ def good (m n : ℤ) := ∀ A : set ℤ, admissible A → m ∈ A → n ∈ A �
 private lemma bad_pairs (m n : ℤ) (h : good m n) : is_coprime m n :=
 begin
   rw ← int.gcd_eq_one_iff_coprime,
-  let c := ↑(int.gcd m n),
+  let c : ℤ := int.gcd m n,
   let S := {k : ℤ | c ∣ k},
-  have step1 : admissible S :=
-  begin
-    intros x y h h0 k,
-    rw mem_set_of_eq at h h0 ⊢,
-    rw ← mul_assoc,
-    repeat { apply dvd_add },
-    exacts [dvd_pow h two_ne_zero, dvd_mul_of_dvd_right h0 _, dvd_pow h0 two_ne_zero]
-  end,
-  have step2 : (1 : ℤ) ∈ S :=
-  begin
-    rw h S step1,
-    exact mem_univ 1,
-    all_goals { rw mem_set_of_eq },
-    exacts [int.gcd_dvd_left m n, int.gcd_dvd_right m n]
-  end,
-  rw mem_set_of_eq at step2,
-  apply nat.eq_one_of_dvd_one,
-  change (1 : ℕ) with (1 : ℤ).nat_abs,
-  exact dvd_nat_abs_of_of_nat_dvd step2
+  suffices : (1 : ℤ) ∈ S,
+    exact nat.eq_one_of_dvd_one (dvd_nat_abs_of_of_nat_dvd this),
+  rw h S _ (int.gcd_dvd_left m n) (int.gcd_dvd_right m n),
+  exact mem_univ 1,
+  intros x y h h0 k,
+  rw ← mul_assoc,
+  repeat { apply dvd_add },
+  exacts [dvd_pow h two_ne_zero, dvd_mul_of_dvd_right h0 _, dvd_pow h0 two_ne_zero]
 end
 
 /-- Characterization of good pairs -/
@@ -55,8 +44,7 @@ begin
     rwa [one_pow, mul_one] at h3 },
   obtain ⟨k, m, h4⟩ : is_coprime (x ^ 2) (y ^ 2) := is_coprime.pow h,
   rw [← one_pow 2, ← h4, add_sq, mul_assoc],
-  refine h0 _ _ _ _ 2,
-  exacts [h3 x h1 _, h3 y h2 _]
+  exact h0 _ _ (h3 x h1 _) (h3 y h2 _) 2
 end
 
 
