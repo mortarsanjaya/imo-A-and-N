@@ -2,10 +2,10 @@ import algebra.order.field
 
 /-! # IMO 2009 A5 -/
 
-open_locale classical
-
 namespace IMOSL
 namespace IMO2009A5
+
+open_locale classical
 
 variables {F : Type*} [linear_ordered_field F]
 
@@ -27,8 +27,7 @@ begin
   rw ← not_lt; intros h,
   cases exists_lt (min (x - f 0) ((- f 0 - x - 1) / f x)) with y h0,
   rw lt_min_iff at h0; cases h0 with h0 h1,
-  rw [← not_le, div_le_iff h, sub_right_comm, sub_le_iff_le_add] at h1,
-  apply h1; clear h1,
+  revert h1; rw [imp_false, not_lt, div_le_iff h, sub_right_comm, sub_le_iff_le_add],
   refine le_trans _ (fbad x y),
   rw [sub_eq_add_neg, add_comm, add_neg_le_iff_le_add],
   refine le_trans _ (lem1 fbad _),
@@ -50,8 +49,7 @@ begin
   by_contra fbad; simp only [not_exists, not_lt] at fbad,
   cases exists_gt (max 0 (- f (-1) - 1)) with y h,
   rw max_lt_iff at h; cases h with h h0,
-  rw [sub_lt_iff_lt_add, neg_lt, ← not_le, ← zero_sub (y + 1)] at h0,
-  apply h0; clear h0,
+  revert h0; rw [sub_lt_iff_lt_add, neg_lt, imp_false, not_lt, ← zero_sub (y + 1)],
   let x := f y - 1,
   have h0 := le_trans (lem1 fbad x) (add_le_of_nonpos_right (lem2 fbad 0)),
   calc f (-1) = f (x - f y) : by rw [sub_sub_cancel_left]
