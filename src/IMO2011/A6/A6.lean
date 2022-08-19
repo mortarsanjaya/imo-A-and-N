@@ -24,9 +24,8 @@ end
 
 private lemma fn_lem2 (x : F) (h : x < 0) : 0 ≤ f x :=
 begin
-  have h0 : x * f x ≤ 0 :=
-    by linarith [(fn_lem1 fineq (f (2 * f x)) x), (fn_lem1 fineq (f x) (2 * f x))],
-  rwa [← div_le_iff_of_neg' h, zero_div] at h0
+  refine nonneg_of_mul_nonpos_right _ h,
+  linarith [(fn_lem1 fineq (f (2 * f x)) x), (fn_lem1 fineq (f x) (2 * f x))]
 end
 
 private lemma fn_lem3 (x : F) : f x ≤ 0 :=
