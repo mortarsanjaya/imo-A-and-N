@@ -1,11 +1,11 @@
-import data.nat.basic tactic.wlog
+import data.nat.basic
 
 /-! # IMO 2010 A6 -/
 
-open_locale classical
-
 namespace IMOSL
 namespace IMO2010A6
+
+open_locale classical
 
 def good (f g : ℕ → ℕ) := ∀ n : ℕ, f (g n) = (f n).succ
 
@@ -22,7 +22,10 @@ end
 private lemma lem2 {f g : ℕ → ℕ} (h : good f g) {x y : ℕ} (h0 : g x = g y) : f x = f y :=
   by rw [← nat.succ_inj', ← h, ← h, h0]
 
-private lemma lem3 {f g : ℕ → ℕ} (h : good g f) {a : ℕ}
+private lemma lem3 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {x y : ℕ} :
+  f x = f y ↔ g x = g y := ⟨lem2 h0, lem2 h⟩
+
+private lemma lem4 {f g : ℕ → ℕ} (h : good g f) {a : ℕ}
   (ha : ∀ k : ℕ, k ∈ set.range f ↔ a ≤ k) : a.succ ≤ f a :=
 begin
   have h1 : a ≤ f a := by rw ← ha; use a,
@@ -34,58 +37,50 @@ begin
   exfalso; exact one_ne_zero h
 end
 
-private lemma lem4 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a b : ℕ} (h1 : a ≤ b)
+private lemma lem5 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a b : ℕ} (h1 : a ≤ b)
   (ha : ∀ k : ℕ, k ∈ set.range f ↔ a ≤ k) (hb : ∀ k : ℕ, k ∈ set.range g ↔ b ≤ k) : a = b :=
 begin
   obtain ⟨x, h2⟩ : ∃ x : ℕ, f a = f x + 1 :=
   begin
-    have h2 := lem3 h0 ha,
-    rw nat.succ_eq_add_one at h2,
-    have h3 := le_trans (le_add_self : 1 ≤ a + 1) h2,
-    replace h2 := le_tsub_of_add_le_right h2,
-    rw ← ha at h2; cases h2 with x h2,
-    use x; rw [h2, nat.sub_add_cancel h3]
+    have h2 := lem4 h0 ha,
+    rw [nat.succ_eq_add_one, le_iff_exists_add] at h2,
+    cases h2 with c h2,
+    obtain ⟨x, h3⟩ : a + c ∈ set.range f := (ha (a + c)).mpr le_self_add,
+    use x; rw [h2, h3, add_right_comm]
   end,
   obtain ⟨c, h3⟩ := (ha a).mpr (le_refl a),
   obtain ⟨d, h4⟩ := (ha (g x)).mpr (le_trans h1 (by rw ← hb; use x)),
-  rw [← nat.succ_eq_add_one, ← h, ← h3, ← h4] at h2,
-  replace h2 := lem2 h0 h2,
-  rw [h0, h0, nat.succ_inj'] at h2,
-  replace h2 := lem2 h h2,
+  rw [← nat.succ_eq_add_one, ← h, ← h3, ← h4, lem3 h h0, h0, h0, nat.succ_inj', lem3 h0 h] at h2,
   refine le_antisymm h1 _,
   rw [← h3, h2, h4, ← hb]; use x
 end
 
-private lemma lem5 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a b : ℕ}
+private lemma lem6 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a b : ℕ}
   (ha : ∀ k : ℕ, k ∈ set.range f ↔ a ≤ k) (hb : ∀ k : ℕ, k ∈ set.range g ↔ b ≤ k) : a = b :=
 begin
   cases le_total a b with h1 h1,
-  exact lem4 h h0 h1 ha hb,
-  rw lem4 h0 h h1 hb ha
+  exact lem5 h h0 h1 ha hb,
+  rw lem5 h0 h h1 hb ha
 end
 
-private lemma lem6 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a : ℕ}
+private lemma lem7 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a : ℕ}
   (ha : ∀ k : ℕ, k ∈ set.range f ↔ a ≤ k) (ha' : ∀ k : ℕ, k ∈ set.range g ↔ a ≤ k) : f a = a.succ :=
 begin
-  have h1 := lem3 h0 ha,
+  have h1 := lem4 h0 ha,
   rw [le_iff_eq_or_lt, ← nat.succ_le_iff] at h1,
   cases h1 with h1 h1,
   rw h1,
   obtain ⟨x, h2⟩ : ∃ x : ℕ, f a = f x + 1 + 1 :=
   begin
-    rw [nat.succ_eq_add_one, nat.succ_eq_add_one, add_assoc] at h1,
-    have h2 := le_trans (le_add_self : 1 + 1 ≤ a + (1 + 1)) h1,
-    replace h1 := le_tsub_of_add_le_right h1,
-    rw ← ha at h1; cases h1 with x h1,
-    use x; rw [h1, nat.sub_add_cancel h2]
+    rw [nat.succ_eq_add_one, nat.succ_eq_add_one, add_assoc, le_iff_exists_add] at h1,
+    cases h1 with c h1,
+    obtain ⟨x, h2⟩ : a + c ∈ set.range f := (ha (a + c)).mpr le_self_add,
+    use x; rw [h1, h2, add_right_comm]
   end,
   rw [← nat.succ_eq_add_one, ← nat.succ_eq_add_one, ← h, ← h] at h2,
   obtain ⟨c, h3⟩ := (ha a).mpr (le_refl a),
   obtain ⟨d, h4⟩ := (ha (g (g x))).mpr (by rw ← ha'; use (g x)),
-  rw [← h3, ← h4] at h2,
-  replace h2 := lem2 h0 h2,
-  rw [h0, h0, nat.succ_inj'] at h2,
-  replace h2 := lem2 h h2,
+  rw [← h3, ← h4, lem3 h h0, h0, h0, nat.succ_inj', lem3 h0 h] at h2,
   obtain ⟨e, h5⟩ := (ha (g x)).mpr (by rw ← ha'; use x),
   rw [h3, h4, ← h5, h0, eq_comm] at h2,
   replace h2 := le_of_le_of_eq (nat.succ_le_succ_iff.mpr (by rw ← ha'; use e)) h2,
@@ -100,11 +95,11 @@ theorem final_solution {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) : f = 
 begin
   cases lem1 h with a h1,
   cases lem1 h0 with b h2,
-  have h3 := lem5 h h0 h1 h2; subst h3,
+  have h3 := lem6 h h0 h1 h2; subst h3,
   suffices : ∀ n : ℕ, a ≤ n → (f n = n.succ ∧ g n = n.succ),
     ext n; rw [← nat.succ_inj', ← h, (this (g n) (by rw ← h2; use n)).left],
   intros n; apply nat.le_induction; clear n,
-  exact ⟨lem6 h h0 h1 h2, lem6 h0 h h2 h1⟩,
+  exact ⟨lem7 h h0 h1 h2, lem7 h0 h h2 h1⟩,
   rintros n h3 ⟨h4, h5⟩; split,
   rw [← nat.succ_eq_add_one, ← h5, h, h4, h5],
   rw [← nat.succ_eq_add_one, ← h4, h0, h5, h4]
