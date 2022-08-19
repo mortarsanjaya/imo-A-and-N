@@ -1,39 +1,35 @@
-import data.int.gcd data.set.finite tactic.ring
+import data.int.gcd data.set.finite
 
 /-! # IMO 2012 N4 -/
 
-open function
-open_locale classical
-
 namespace IMOSL
 namespace IMO2012N4
+
+open function
+open_locale classical
 
 def friendly (a : ℤ) := ∃ m n : ℤ, 0 < m ∧ 0 < n ∧ (m ^ 2 + n) * (n ^ 2 + m) = a * (m - n) ^ 3
 
 
 
-private lemma friendly_1mod4 (k : ℤ) (h : 0 < k) : friendly (4 * k + 1) :=
-begin
-  use [2 * k + 1, k],
-  rw and_iff_right h; split,
-  exact add_pos (mul_pos two_pos h) one_pos,
-  ring
-end
+private lemma friendly_1mod4 {k : ℤ} (h : 0 < k) : friendly (4 * k + 1) :=
+  ⟨2 * k + 1, k, add_pos (mul_pos two_pos h) one_pos, h, by ring⟩
 
 
 
 /- Final solution for part 1 -/
-theorem final_solution_part1 : 500 ≤ fintype.card {a : fin 2012 // friendly (a + 1)} :=
+theorem final_solution_part1 (n : ℕ) :
+  n ≤ fintype.card {a : fin (4 * n + 1) // friendly (a + 1)} :=
 begin
-  let f : fin 500 → {a : fin 2012 // friendly (a + 1)} := λ (n : fin 500),
-  ⟨ { val := 4 * (n + 1),
-      property := lt_trans ((mul_lt_mul_left four_pos).mpr (add_lt_add_right n.is_lt 1))
-        (by norm_num) },
-    by simp only [int.coe_nat_bit0, nat.cast_add, nat.cast_one, nat.cast_mul,
-      fin.coe_mk, coe_coe]; exact friendly_1mod4 _ (nat.cast_add_one_pos _)⟩,
+  let f : fin n → {a : fin (4 * n + 1) // friendly (a + 1)} :=
+    λ (j : fin n), ⟨⟨4 * (j + 1), _⟩, _⟩,
+  rotate,
+  { rw [nat.lt_succ_iff, mul_le_mul_left, nat.succ_le_iff],
+    exacts [j.is_lt, zero_lt_four] },
+  { simp; apply friendly_1mod4,
+    rw [← nat.cast_one, ← nat.cast_add, nat.cast_pos]; exact (j : ℕ).succ_pos },
   suffices : injective f,
-  { rw ← fintype.card_fin 500,
-    exact fintype.card_le_of_injective f this },
+    convert fintype.card_le_of_injective f this; rw fintype.card_fin n,
   intros x y h; simp only [f, subtype.mk_eq_mk] at h,
   rwa [mul_eq_mul_left_iff, add_left_inj, ← fin.ext_iff, or_iff_left] at h,
   exact four_ne_zero
