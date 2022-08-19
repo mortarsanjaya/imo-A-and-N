@@ -5,13 +5,13 @@ import data.nat.choose.basic data.nat.parity
 namespace IMOSL
 namespace IMO2012N3
 
-def good (m : ℕ) := 2 ≤ m ∧ ∀ n : ℕ, 2 * n ≤ m → m ≤ 3 * n → n ∣ n.choose (m - 2 * n)
+def good (m : ℕ) := 1 < m ∧ ∀ n : ℕ, 2 * n ≤ m → m ≤ 3 * n → n ∣ n.choose (m - 2 * n)
 
 
 
-private lemma prime_implies_good (p : ℕ) (h : p.prime) : good p :=
+private theorem prime_implies_good (p : ℕ) (h : p.prime) : good p :=
 begin
-  refine ⟨nat.prime.two_le h, λ n h0 h1, _⟩,
+  refine ⟨nat.prime.one_lt h, λ n h0 h1, _⟩,
   replace h1 : 0 < n := pos_of_mul_pos_right (lt_of_lt_of_le h.pos h1) zero_le_three,
   rcases h.eq_two_or_odd with rfl | h2,
   { replace h1 := nat.mul_le_mul_left 2 h1,
@@ -35,53 +35,51 @@ begin
     exact dvd_mul_left (n + 1) (nat.choose n k) }
 end
 
-private lemma good_implies_prime (m : ℕ) (h : good m) : nat.prime m :=
+private lemma lem1 {m : ℕ} (h : 1 < m) : 2 ∣ m ∨ ∃ p k : ℕ, p.prime ∧ m = p * (2 * k + 1) :=
 begin
-  cases h with h h0,
   let p := m.min_fac,
-  cases eq_or_ne p 2 with h1 h1,
-  { rw nat.min_fac_eq_two_iff at h1,
-    rcases h1 with ⟨k, rfl⟩,
-    replace h0 := h0 k (le_refl _) (nat.mul_le_mul_right k (by norm_num)),
-    rw [nat.sub_self, nat.choose_zero_right, nat.dvd_one] at h0,
-    rw [h0, mul_one]; exact nat.prime_two },
-  { obtain ⟨k, h2⟩ : p ∣ m := nat.min_fac_dvd m,
-    have h3 : nat.prime p := nat.min_fac_prime (by rintros rfl; exact not_lt_of_le h one_lt_two),
-    rw [ne.def, nat.min_fac_eq_two_iff, h2, nat.two_dvd_ne_zero, ← nat.odd_iff] at h1,
-    replace h1 := nat.odd.of_mul_right h1,
-    rcases h1 with ⟨k, rfl⟩,
-    rcases k.eq_zero_or_pos with rfl | h1,
-    rw [h2, mul_zero, zero_add, mul_one]; exact h3,
-    exfalso,
-    replace h0 : (p * k) ∣ (p * k).choose (m - 2 * (p * k)) :=
-    begin
-      apply h0,
-      rw [h2, mul_add_one, mul_left_comm]; exact le_self_add,
-      rw [h2, mul_add_one, mul_left_comm, bit1, add_one_mul 2],
-      exact nat.add_le_add_left (nat.le_mul_of_pos_right h1) _
-    end,
-    rw [h2, mul_left_comm, mul_add_one, nat.add_sub_cancel_left] at h0,
-    replace h0 := mul_dvd_mul (nat.dvd_factorial h3.pos (le_refl p)) h0,
-    rw ← nat.desc_factorial_eq_factorial_mul_choose at h0,
-    nth_rewrite 1 ← nat.sub_add_cancel h1 at h0,
-    rw mul_add_one at h0,
-    nth_rewrite 3 ← nat.sub_add_cancel h3.pos at h0,
-    nth_rewrite 4 ← nat.sub_add_cancel h3.pos at h0,
-    rw [← add_assoc, nat.succ_desc_factorial_succ, add_assoc,
-        nat.sub_add_cancel h3.pos, ← mul_add_one, nat.sub_add_cancel h1,
-        mul_comm, nat.mul_dvd_mul_iff_left (mul_pos h3.pos h1)] at h0,
-    clear_value p; clear h h2 m; revert h0,
-    generalize_hyp h : p - 1 = r,
-    replace h : r ≤ p - 1 := ge_of_eq h,
-    induction r with r r_ih; intros h0,
-    rw [nat.desc_factorial_zero, nat.dvd_one] at h0,
-    rw h0 at h3; exact nat.not_prime_one h3,
-    rw [nat.succ_eq_add_one r, ← add_assoc, nat.succ_desc_factorial_succ, add_assoc,
-        ← nat.succ_eq_add_one, nat.prime.dvd_mul h3, ← nat.dvd_add_iff_right ⟨k - 1, rfl⟩] at h0,
-    cases h0 with h0 h0,
-    rw [← nat.add_le_add_iff_right, nat.sub_add_cancel h3.pos, ← nat.lt_iff_add_one_le] at h,
-    exact ne_of_gt (nat.succ_pos r) (nat.eq_zero_of_dvd_of_lt h0 h),
-    exact r_ih (le_trans (nat.le_succ r) h) h0 }
+  cases eq_or_ne p 2 with h0 h0,
+  left; rwa ← nat.min_fac_eq_two_iff,
+  rw [ne.def, nat.min_fac_eq_two_iff, nat.two_dvd_ne_zero, ← nat.odd_iff] at h0,
+  obtain ⟨c, h1⟩ : p ∣ m := nat.min_fac_dvd m,
+  rw h1 at h0; replace h0 := nat.odd.of_mul_right h0,
+  rcases h0 with ⟨k, rfl⟩,
+  right; exact ⟨p, k, nat.min_fac_prime (ne_of_gt h), h1⟩
+end
+
+private lemma lem2 {p : ℕ} (h : p.prime) (k r : ℕ) (h0 : r < p) :
+  ¬p ∣ (p * k + r).desc_factorial r :=
+begin
+  induction r with r r_ih; intros h1,
+  rw [nat.desc_factorial_zero, nat.dvd_one] at h1,
+  rw h1 at h; exact nat.not_prime_one h,
+  rw [nat.succ_eq_add_one r, ← add_assoc, nat.succ_desc_factorial_succ, add_assoc,
+      ← nat.succ_eq_add_one, nat.prime.dvd_mul h, ← nat.dvd_add_iff_right ⟨k, rfl⟩,
+      or_iff_left (r_ih (lt_trans (lt_add_one r) h0))] at h1,
+  exact nat.not_dvd_of_pos_of_lt r.succ_pos h0 h1
+end
+
+private theorem good_implies_prime (m : ℕ) (h : good m) : nat.prime m :=
+begin
+  cases h with h0 h,
+  replace h0 := lem1 h0,
+  rcases h0 with ⟨k, rfl⟩ | ⟨p, k, hp, rfl⟩,
+  { replace h := h k (le_refl _) (nat.mul_le_mul_right k (by norm_num)),
+    rw [nat.sub_self, nat.choose_zero_right, nat.dvd_one] at h,
+    rw [h, mul_one]; exact nat.prime_two },
+  { rcases k.eq_zero_or_pos with rfl | h0,
+    rwa [mul_zero, zero_add, mul_one],
+    replace h := h (p * k),
+    rw [mul_add_one, bit1, add_one_mul 2, mul_left_comm, nat.add_sub_cancel_left] at h,
+    replace h := h le_self_add (by rw [add_le_add_iff_left]; exact nat.le_mul_of_pos_right h0),
+    exfalso; rw [← nat.succ_le_iff, le_iff_exists_add] at h0,
+    rcases h0 with ⟨k, rfl⟩,
+    apply lem2 hp k (p - 1) (nat.sub_lt hp.pos one_pos),
+    rw [← nat.mul_dvd_mul_iff_left (mul_pos hp.pos k.succ_pos), nat.mul_succ],
+    nth_rewrite 4 ← nat.sub_add_cancel hp.pos,
+    rw [← add_assoc, ← nat.succ_desc_factorial_succ, add_assoc, nat.sub_add_cancel hp.pos,
+        nat.desc_factorial_eq_factorial_mul_choose, ← mul_add_one, add_comm, mul_comm],
+    exact mul_dvd_mul (nat.dvd_factorial hp.pos (le_refl p)) h }
 end
 
 
