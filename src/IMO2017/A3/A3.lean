@@ -20,7 +20,7 @@ variables {M : Type*} [monoid M] [fintype M]
 /-- There exists m, k ∈ ℕ such that 0 < k and f^m = f^{m + k} -/
 lemma exists_pow_eq (x : M) : ∃ m k : ℕ, 0 < k ∧ x ^ (m + k) = x ^ m :=
 begin
-  have h := not_injective_infinite_fintype (λ n : ℕ, x ^ n),
+  have h := not_injective_infinite_finite (λ n : ℕ, x ^ n),
   simp_rw [injective, not_forall] at h,
   rcases h with ⟨m, n, h, h0⟩,
   wlog h1 : m < n := lt_or_gt_of_ne h0 using [m n, n m],

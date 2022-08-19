@@ -172,7 +172,7 @@ end
 /-- Lemma 1 in the official solution: `f_{X ** Y} = f_X ∘ f_Y` -/
 lemma cup_mul_range (X Y : finset ℕ) : nth_notin (X ** Y) = nth_notin X ∘ nth_notin Y :=
 begin
-  rw ← well_founded.eq_strict_mono_iff_eq_range is_well_order.wf (nth_notin_strict_mono _),
+  rw ← well_founded.eq_strict_mono_iff_eq_range is_well_founded.wf (nth_notin_strict_mono _),
   work_on_goal 2 { exact strict_mono.comp (nth_notin_strict_mono _) (nth_notin_strict_mono _) },
   rw [range_nth_notin_eq_compl, set.range_comp, range_nth_notin_eq_univ_diff, set.image_diff,
       set.image_univ, range_nth_notin_eq_univ_diff, set.diff_diff, ← set.compl_eq_univ_diff,
@@ -185,8 +185,7 @@ theorem cup_mul_assoc (X Y Z : finset ℕ) : X ** Y ** Z = X ** (Y ** Z) :=
   by rw ← nth_notin_inj; repeat { rw cup_mul_range }
 
 /-- Lemma 2 in the official solution: if X ** Y = Y ** X and |X| = |Y| then X = Y -/
-lemma cup_mul_comm_card_eq {X Y : finset ℕ} (h : X.card = Y.card) (h0 : X ** Y = Y ** X) :
-  X = Y :=
+lemma cup_mul_comm_card_eq {X Y : finset ℕ} (h : X.card = Y.card) (h0 : X ** Y = Y ** X) : X = Y :=
 begin
   rw ← nth_notin_inj at h0 ⊢,
   rw [cup_mul_range, cup_mul_range] at h0,

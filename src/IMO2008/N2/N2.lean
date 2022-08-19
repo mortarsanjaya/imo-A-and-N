@@ -12,7 +12,7 @@ theorem final_solution_part1 (N : ℕ) :
   ∃ a b : ℕ, a ≠ b ∧ (∀ k : ℕ, k < N → even (card_factors ((a + k) * (b + k)))) :=
 begin
   let f : ℕ → (fin N) → (zmod 2) := λ (a : ℕ) (k : fin N), card_factors (a + k),
-  have h : ¬injective f := not_injective_infinite_fintype f,
+  have h : ¬injective f := not_injective_infinite_finite f,
   simp only [injective, not_forall] at h,
   rcases h with ⟨a, b, h, h0⟩,
   refine ⟨a, b, h0, (λ n h1, _)⟩,
