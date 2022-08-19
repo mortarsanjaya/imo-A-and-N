@@ -240,10 +240,8 @@ theorem final_solution_char_ne_0 {R : Type*} [comm_ring R] [is_domain R]
 theorem final_solution_real (f : ℝ → ℝ) : fn_eq f ↔ f = 0 ∨ (f = id - 1) ∨ (f = λ x, x ^ 2 - 1) :=
 begin
   rw [final_solution_general, unique.exists_iff, unique.exists_iff],
-  unfold default,
-  rw ring_hom.coe_one,
-  refine or_congr_right' (or_congr_right' _),
-  conv_lhs { to_rhs, funext, rw [coe_to_real_hom, coe_pow, real.coe_nnabs, sq_abs] }
+  unfold default; congr',
+  funext; rw [nnreal.coe_to_real_hom, nnreal.coe_pow, real.coe_nnabs, pow_bit0_abs]
 end
 
 end IMO2012A5

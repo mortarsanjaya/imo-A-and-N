@@ -3,9 +3,9 @@ import
   data.real.golden_ratio
   algebra.algebra.basic
   extra.real_hom.semifield_char0_hom
-  extra.real_hom.real_additive_End
   extra.real_prop.real_nat_root
   extra.real_prop.real_quadratic_sol
+  algebra.order.complete_field
 
 /-! # IMO 2021 A8, Generalized Version -/
 
@@ -555,11 +555,7 @@ end
 theorem final_solution_real (f : ℝ → ℝ) : fn_eq f ↔ (∃ C : ℝ, f = const ℝ C) ∨
   ((∃ C : ℝ, f = id + const ℝ C) ∨ (∃ C : ℝ, f = (λ x, x ^ 3) + const ℝ C)) ∨
   ((∃ C : ℝ, f = -id + const ℝ C) ∨ (∃ C : ℝ, f = -(λ x, x ^ 3) + const ℝ C)) :=
-begin
-  rw final_solution_general,
-  apply or_congr_right',
-  simp only [unique.exists_iff, default, ring_hom.coe_one, id.def]
-end
+  by simp only [final_solution_general, unique.exists_iff]; congr'
 
 end IMO2021A8
 end IMOSL
