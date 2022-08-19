@@ -2,11 +2,11 @@ import data.real.nnreal algebra.big_operators.intervals algebra.periodic extra.n
 
 /-! # IMO 2010 A3, Generalized Version -/
 
-open finset function
-open_locale nnreal
-
 namespace IMOSL
 namespace IMO2010A3
+
+open finset function
+open_locale nnreal
 
 def good (x : ℕ → ℝ≥0) := ∀ j : ℕ, x j + x (j + 1) + x (j + 2) ≤ 1
 
@@ -42,47 +42,42 @@ begin
       one_mul, add_assoc, ← mul_add, add_comm (x (2 * n + 1 + 2))],
   refine le_trans (add_le_add_left (mul_le_mul_of_nonneg_left (h _) (zero_le _)) _) _,
   rw [mul_one, add_right_comm, mul_comm _ (x _), add_assoc _ 1, ← add_mul, add_comm, ← sq],
-  set c := x (2 * n + 1) + x (2 * n + 2) with hc,
-  rw ← hc; clear_value c; clear hc h n x,
-  rw ← nnreal.coe_le_coe; rcases c with ⟨c, h⟩,
-  simp only [one_div, nonneg.coe_add, nonneg.coe_one, nonneg.coe_inv,
-             subtype.coe_mk, nonneg.mk_pow, nnreal.coe_bit0],
-  refine le_of_sub_nonneg (le_of_le_of_eq (sq_nonneg (c - 2⁻¹)) _),
-  rw [sub_sq, add_sub_right_comm, mul_right_comm, mul_inv_cancel (two_ne_zero : (2 : ℝ) ≠ 0),
-      one_mul, sq (2 : ℝ)⁻¹, ← mul_inv, two_mul, ← bit0],
+  generalize : x (2 * n + 1) + x (2 * n + 2) = c,
+  rcases c with ⟨c, h⟩,
+  rw [← nnreal.coe_le_coe, nonneg.coe_add, nonneg.mk_pow, subtype.coe_mk, subtype.coe_mk,
+      nonneg.coe_div, nnreal.coe_bit0, nnreal.coe_bit0, nonneg.coe_one, one_div, ← sub_nonneg],
+  convert (sq_nonneg (c - 2⁻¹)),
+  rw [sub_sq', mul_right_comm, mul_inv_cancel, one_mul, sq (2 : ℝ)⁻¹, ← mul_inv, two_mul, ← bit0],
+  exact two_ne_zero
 end
 
 
 
-private noncomputable def good_sup_ex (j : ℕ) : ℝ≥0 := ite (j % 2 = 0) (1 / 2) 0
+private noncomputable def good_sup (j : ℕ) : ℝ≥0 := ite (even j) (1 / 2) 0
 
-private lemma example_is_good : good good_sup_ex :=
+private lemma good_sup1 : good good_sup :=
 begin
-  intros j; dsimp only [good_sup_ex],
-  rw nat.add_mod_right,
-  cases eq_or_ne (j % 2) 0 with h h,
-  rw [nat.add_mod, if_pos h, h, zero_add, nat.one_mod, nat.one_mod,
-      if_neg nat.one_ne_zero, add_zero, add_halves],
-  rw [if_neg h, add_zero, zero_add, nat.add_mod, nat.one_mod],
-  replace h : j % 2 = 1 := (or_iff_right h).mp (nat.mod_two_eq_zero_or_one j),
-  rw [h, if_pos (nat.mod_self 2), one_div, nnreal.inv_le two_ne_zero, mul_one],
+  intros j; simp only [good_sup, nat.even_add_one, not_not],
+  rw [ite_not, apply_ite2 has_add.add, add_zero, zero_add, apply_ite2 has_add.add,
+      add_zero, ← add_div, ← bit0, div_self (two_ne_zero : (2 : ℝ≥0) ≠ 0)],
+  by_cases h : even j,
+  rw if_pos h,
+  rw [if_neg h, one_div, nnreal.inv_le two_ne_zero, mul_one],
   exact one_le_two
 end
 
-private lemma example_sum_is_bound (n : ℕ) : target_sum good_sup_ex n = (n : ℝ≥0) / 4 :=
+private lemma good_sup2 (n : ℕ) : target_sum good_sup n = (n : ℝ≥0) / 4 :=
 begin
   induction n with n n_ih,
   rw [target_sum_zero, nat.cast_zero, zero_div],
-  rw [target_sum_succ, nat.succ_eq_add_one, nat.cast_add,
-      nat.cast_one, add_div, n_ih, add_right_inj],
-  dsimp only [good_sup_ex],
-  rw [nat.add_mod_right, nat.add_mod_right, nat.add_mod, nat.mul_mod_right, zero_add],
-  simp only [nat.one_ne_zero, if_true, eq_self_iff_true, if_false, nat.one_mod],
-  rw [mul_zero, add_zero, div_mul_div_comm, mul_one, two_mul, ← bit0]
+  rw [target_sum_succ, nat.succ_eq_add_one, nat.cast_add, nat.cast_one, add_div, n_ih],
+  simp only [good_sup, nat.even_add_one, not_not, add_right_inj],
+  rw [ite_not, apply_ite2 has_mul.mul, apply_ite2 has_mul.mul, apply_ite2 has_add.add,
+      mul_zero, add_zero, zero_add, if_t_t, ← mul_div_mul_comm, mul_one, two_mul, ← bit0]
 end
 
-private lemma example_periodic (n : ℕ) : periodic good_sup_ex (2 * n) :=
-  λ x, by simp only [good_sup_ex, nat.add_mul_mod_self_left]
+private lemma good_sup3 (n : ℕ) : periodic good_sup (2 * n) :=
+  λ x, by simp only [good_sup, nat.even_add, two_mul, iff_self, iff_true]
 
 
 
@@ -90,11 +85,9 @@ private lemma example_periodic (n : ℕ) : periodic good_sup_ex (2 * n) :=
 theorem final_solution (n : ℕ) : is_lub ((λ x : ℕ → ℝ≥0, target_sum x n) ''
   {x | good x ∧ periodic x (2 * n)}) ((n : ℝ≥0) / 4) :=
 begin
-  dsimp [is_lub, upper_bounds, is_least, lower_bounds]; split,
-  rintros a ⟨x, ⟨h, -⟩, h0⟩,
-  rw ← h0; exact good_up_bound h n,
-  intros a h,
-  exact h ⟨good_sup_ex, ⟨example_is_good, example_periodic n⟩, example_sum_is_bound n⟩
+  refine ⟨λ a h, _, λ a h, h ⟨good_sup, ⟨good_sup1, good_sup3 n⟩, good_sup2 n⟩⟩,
+  rcases h with ⟨x, ⟨h, -⟩, rfl⟩,
+  exact good_up_bound h n
 end
 
 end IMO2010A3
