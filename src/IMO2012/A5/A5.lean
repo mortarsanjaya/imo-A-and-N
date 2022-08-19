@@ -1,6 +1,5 @@
 import
   data.real.sqrt
-  algebra.char_p.basic
   extra.real_hom.semifield_char0_hom
   extra.real_hom.nnreal_odd_ext
   extra.real_prop.real_quadratic_sol
@@ -8,11 +7,11 @@ import
 
 /-! # IMO 2012 A5, Generalized Version -/
 
-open function nnreal
-open_locale nnreal classical
-
 namespace IMOSL
 namespace IMO2012A5
+
+open function nnreal
+open_locale nnreal
 
 def fn_eq {R : Type*} [ring R] (f : ℝ → R) := ∀ x y : ℝ, f (1 + x * y) - f(x + y) = f x * f y
 
@@ -25,8 +24,8 @@ include feq
 
 private lemma lem1_1 : f 1 = 0 :=
 begin
-  have h := feq 1 1,
-  rwa [mul_one, sub_self, zero_eq_mul_self] at h
+  replace feq := feq 1 1,
+  rwa [mul_one, sub_self, zero_eq_mul_self] at feq
 end
 
 private lemma lem1_2 (h : f 0 ≠ -1) : f = 0 :=
@@ -38,10 +37,8 @@ begin
 end
 
 private lemma lem1_3 (x : ℝ) : f x - f (-x) = f (-1) * f (1 - x) :=
-begin
-  have h := feq (-1) (1 - x),
-  rwa [neg_one_mul, neg_sub, add_sub_cancel'_right, ← add_sub_assoc, neg_add_self, zero_sub] at h
-end
+  by rw [← feq, neg_one_mul, neg_sub, add_sub_cancel'_right,
+         ← add_sub_assoc, neg_add_self, zero_sub]
 
 
 
@@ -71,12 +68,11 @@ begin
     have h0 := this 0 (le_refl 0),
     rw [← h0, zero_add, h, lem2_1 feq fneg1_ne_0, sub_neg_eq_add, ← bit0] at this,
     clear h0; intros x,
-    rw ← sub_eq_iff_eq_add',
-    cases le_or_lt x 0 with h0 h0,
-    exact this x h0,
-    rw [← neg_sub, sub_eq_add_neg, ← lem2_2 feq fneg1_ne_0, ← sub_sub, sub_sub_cancel_left,
-        neg_add, ← lem2_2 feq fneg1_ne_0, ← sub_eq_add_neg, sub_eq_add_neg 2 x, add_comm, this],
-    exact le_of_lt (neg_lt_zero.mpr h0) },
+    cases le_total x 0 with h0 h0,
+    rw [← sub_eq_iff_eq_add', this x h0],
+    rw [← this (-x) (by rwa neg_nonpos), add_comm (-x), ← sub_eq_add_neg,
+        lem2_2 feq fneg1_ne_0, ← add_sub_assoc, add_neg_self, zero_sub,
+        ← lem2_2 feq fneg1_ne_0, sub_neg_eq_add, add_comm] },
   intros x h,
   obtain ⟨u, v, h0, h1⟩ : ∃ u v : ℝ, u + v = 1 ∧ u * v = x - 1 :=
   begin
@@ -84,11 +80,13 @@ begin
     exact mul_nonpos_of_nonneg_of_nonpos zero_le_four (sub_nonpos_of_le (le_trans h zero_le_one))
   end,
   have h2 := feq (2 - u) (2 - v),
-  rwa [lem2_2 feq fneg1_ne_0, lem2_2 feq fneg1_ne_0, neg_mul_neg, sub_add_sub_comm,
-       mul_sub, sub_mul, sub_mul, sub_sub, ← add_sub_assoc (u * 2), mul_comm u 2,
-       ← mul_add, ← feq, h0, h1, ← sub_add, add_comm, add_comm 1 (x - 1), add_assoc,
-       sub_add_cancel, ← mul_sub, bit0, add_sub_cancel, mul_one, add_sub_assoc,
-       add_sub_cancel, ← bit0, ← bit1, add_comm 2 x, sub_eq_sub_iff_sub_eq_sub] at h2
+  rw [lem2_2 feq fneg1_ne_0, lem2_2 feq fneg1_ne_0, neg_mul_neg, ← feq, h1,
+      sub_add_sub_comm, h0, sub_eq_sub_iff_sub_eq_sub, add_sub_cancel'_right] at h2,
+  convert h2 using 3,
+  work_on_goal 2 { rw [eq_sub_iff_add_eq, bit1, add_assoc, ← bit0] },
+  rw [add_comm (1 : ℝ), ← sub_eq_sub_iff_add_eq_add, ← h1, sub_mul, mul_sub,
+      mul_sub, ← sub_add, sub_sub, mul_comm u 2, ← mul_add, add_comm v u, h0,
+      mul_one, two_mul, add_sub_cancel, add_sub_cancel']
 end
 
 private lemma lem2_4 (x : ℝ) : f (-x) = -(2 + f x) :=
@@ -134,10 +132,7 @@ variable (fneg1_eq_0 : f (-1) = 0)
 include fneg1_eq_0
 
 private lemma lem3_1 (x : ℝ) : f (-x) = f x :=
-begin
-  have h := lem1_3 feq x,
-  rwa [fneg1_eq_0, zero_mul, sub_eq_zero, eq_comm] at h
-end
+  by rw [eq_comm, ← sub_eq_zero, lem1_3 feq x, fneg1_eq_0, zero_mul]
 
 private lemma lem3_2 (u v : ℝ≥0) : f (1 + v / 4) - f (1 - v / 4) = f (sqrt (u + v)) - f (sqrt u) :=
 begin
@@ -219,11 +214,8 @@ begin
     simp only [pi.zero_apply]; rw [sub_zero, mul_zero],
     simp only [pi.sub_apply, pi.one_apply, map_add],
     rw [map_one, add_sub_cancel', map_mul, add_sub_assoc, ← sub_sub, sub_one_mul, mul_sub_one],
-    replace h : f = λ x, (φ : ℝ →+* R) (x ^ 2) - 1 :=
-    begin
-      subst h; funext x,
-      rw [← extra.nnreal_ring_hom.coe_fn_apply, nnreal.coe_pow, real.coe_nnabs, pow_bit0_abs]
-    end,
+    conv at h { congr, skip, funext,
+      rw [← extra.nnreal_ring_hom.coe_fn_apply, nnreal.coe_pow, real.coe_nnabs, pow_bit0_abs] },
     subst h; simp only [],
     rw [add_sq, add_sq, one_pow, mul_one, sub_sub_sub_cancel_right, add_right_comm, mul_assoc,
         add_right_comm (x ^ 2), map_add, map_add, map_add, add_sub_add_right_eq_sub,
