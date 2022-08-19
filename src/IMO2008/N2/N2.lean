@@ -2,12 +2,12 @@ import data.nat.parity number_theory.arithmetic_function data.zmod.basic
 
 /-! # IMO 2008 N2 -/
 
-open nat.arithmetic_function function
-
 namespace IMOSL
 namespace IMO2008N2
 
-/- Final solution, part 1 -/
+open nat.arithmetic_function function
+
+/-- Final solution, part 1 -/
 theorem final_solution_part1 (N : ℕ) :
   ∃ a b : ℕ, a ≠ b ∧ (∀ k : ℕ, k < N → even (card_factors ((a + k) * (b + k)))) :=
 begin
@@ -26,43 +26,39 @@ begin
   rw [card_factors_mul h2 h3, nat.even_add, nat.even_iff, nat.even_iff, h]
 end
 
-/- Final solution, part 2 -/
+private lemma lem1 {u v : ℕ} (hu : 0 < u) (hv : 0 < v) :
+  even (card_factors (u * v)) ↔ (even (card_factors u) ↔ even (card_factors v)) :=
+  by rw [card_factors_mul (ne_of_gt hu) (ne_of_gt hv), nat.even_add]
+
+/-- Final solution, part 2 -/
 theorem final_solution_part2 {a b : ℕ} (h : ∀ k : ℕ, even (card_factors ((a + k) * (b + k)))) :
   a = b :=
 begin
   wlog h0 : a ≤ b := le_total a b using [a b, b a],
-  swap,
-  rw eq_comm; refine this (λ k, _),
-  rw mul_comm; exact h k,
-  rw le_iff_exists_add at h0,
-  rcases h0 with ⟨c, rfl⟩,
+  work_on_goal 2 { rw this (λ k, by rw mul_comm; exact h k) },
+  rw le_iff_exists_add at h0; rcases h0 with ⟨c, rfl⟩,
   by_contra h0,
-  rw [self_eq_add_right, ← ne.def] at h0,
-  suffices : ∀ k : ℕ, a.succ ≤ k → (even (card_factors k) ↔ even (card_factors (k + 1))),
-  { have h1 : ∀ k : ℕ, a.succ ≤ k → (even (card_factors k) ↔ even (card_factors a.succ)) :=
-    begin
-      intros k,
-      refine nat.le_induction (by refl) _ k,
-      clear k; intros k h1 h2,
-      rw [← this k h1, h2]
-    end,
-    rcases a.succ.exists_infinite_primes with ⟨p, h2, h3⟩,
-    have h4 := h1 p h2,
-    rw [card_factors_apply_prime h3, ← h1 (p ^ 2), card_factors_apply_prime_pow h3] at h4,
-    simp only [false_iff, not_true, even_two, nat.not_even_one] at h4; exact h4,
-    rw sq; exact le_trans h2 (nat.le_mul_self p) },
-  intros k h1,
-  rw [le_iff_exists_add, nat.succ_eq_add_one] at h1,
-  rcases h1 with ⟨k, rfl⟩,
-  replace h := h (a * (c - 1) + (1 + k) * c),
-  have h1 : a + 1 + k ≠ 0 := ne_of_gt (by rw add_right_comm; exact (a + k).succ_pos),
-  have h2 : a + 1 + k + 1 ≠ 0 := ne_of_gt (a + 1 + k).succ_pos,
-  rw [add_comm a c, add_assoc, ← add_assoc a, ← mul_one_add, add_comm 1, nat.sub_add_cancel
-        (by rwa [nat.succ_le_iff, zero_lt_iff]), ← add_mul, ← one_add_mul, ← add_assoc,
-      add_comm 1, mul_mul_mul_comm, card_factors_mul (mul_ne_zero h1 h2) (mul_ne_zero h0 h0),
-      nat.even_add, card_factors_mul h0 h0] at h,
-  simp only [even_add_self, iff_true] at h,
-  rwa [← nat.even_add, ← card_factors_mul h1 h2]
+  rw [self_eq_add_right, ← ne.def, ← zero_lt_iff] at h0,
+  replace h : ∀ k : ℕ, a ≤ k → (even (card_factors k) ↔ even (card_factors a)) :=
+  begin
+    suffices : ∀ k : ℕ, a ≤ k → (even (card_factors k) ↔ even (card_factors (k + 1))),
+    { refine (λ k, nat.le_induction (by refl) _ k),
+      intros n h1 h2; rw [← this n h1, h2] },
+    intros k h1,
+    rcases k.eq_zero_or_pos with rfl | h2,
+    rw [nat.arithmetic_function.map_zero, zero_add, card_factors_one],
+    replace h1 : a ≤ k * c := le_trans h1 ((le_mul_iff_one_le_right h2).mpr h0),
+    rw le_iff_exists_add at h1; cases h1 with m h1,
+    replace h := h m,
+    rw [add_right_comm, ← h1, ← add_one_mul, mul_mul_mul_comm,
+        lem1 (mul_pos h2 k.succ_pos) (mul_pos h0 h0), lem1 h2 k.succ_pos] at h,
+    rw [h, card_factors_mul (ne_of_gt h0) (ne_of_gt h0)]; exact even_add_self _
+  end,
+  rcases a.exists_infinite_primes with ⟨p, h1, h2⟩,
+  replace h0 := h p h1,
+  rw [card_factors_apply_prime h2, ← h (p ^ 2), card_factors_apply_prime_pow h2] at h0,
+  simp only [false_iff, not_true, even_two, nat.not_even_one] at h0; exact h0,
+  rw sq; exact le_trans h1 (nat.le_mul_self p)
 end
 
 end IMO2008N2
