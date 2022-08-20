@@ -1,4 +1,4 @@
-import IMO2013.N3.N3_general data.pnat.prime data.pnat.factors data.finset.lattice
+import IMO2013.N3.N3_general data.pnat.factors
 
 /-! # IMO 2013 N3, Original Version -/
 
