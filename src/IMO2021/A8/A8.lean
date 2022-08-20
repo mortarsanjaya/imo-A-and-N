@@ -1,19 +1,17 @@
 import
-  data.real.basic
   data.real.golden_ratio
-  algebra.algebra.basic
+  algebra.order.complete_field
   extra.real_hom.semifield_char0_hom
   extra.real_prop.real_nat_root
   extra.real_prop.real_quadratic_sol
-  algebra.order.complete_field
+  
 
 /-! # IMO 2021 A8, Generalized Version -/
 
-open function real IMOSL.extra.real
-open_locale classical
-
 namespace IMOSL
 namespace IMO2021A8
+
+open function real IMOSL.extra.real
 
 def fn_eq {R : Type*} [ring R] (f : ℝ → R) := ∀ a b c : ℝ, (f a - f b) * (f b - f c) * (f c - f a)
   = f(a * b ^ 2 + b * c ^ 2 + c * a ^ 2) - f(b * a ^ 2 + c * b ^ 2 + a * c ^ 2)
