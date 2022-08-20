@@ -1,4 +1,4 @@
-import algebra.order.group order.basic
+import algebra.order.group
 
 /-! # IMO 2017 A8, Generalized Version -/
 
