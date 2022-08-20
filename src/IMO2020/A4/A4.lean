@@ -1,8 +1,6 @@
 import
   analysis.mean_inequalities
   analysis.special_functions.pow
-  algebra.big_operators.ring
-  tactic.polyrith
 
 /-! # IMO 2020 A4 (P2), Generalized Version -/
 
