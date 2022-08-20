@@ -1,15 +1,11 @@
-import
-  algebra.order.field
-  algebra.big_operators.intervals
-  algebra.big_operators.order
-  algebra.big_operators.ring
+import algebra.big_operators.intervals algebra.big_operators.order algebra.big_operators.ring
 
 /-! # IMO 2021 A5 -/
 
-open finset
-
 namespace IMOSL
 namespace IMO2021A5
+
+open finset
 
 variables {F : Type*} [linear_ordered_field F]
 
@@ -17,8 +13,7 @@ private lemma bound1 {a : ℕ → F} (h : ∀ n : ℕ, 0 < a n) {n : ℕ} (h0 : 
   a n / (1 - a n) * ((range n).sum a) ^ 2 ≤ (((range n.succ).sum a) ^ 3 - ((range n).sum a) ^ 3) / 3 :=
 begin
   rcases nat.eq_zero_or_pos n with rfl | h1,
-  rw [range_zero, range_one, sum_empty, sum_singleton,
-      zero_pow two_pos, mul_zero, zero_pow three_pos, sub_zero],
+  rw [sum_range_zero, sum_range_one, zero_pow two_pos, mul_zero, zero_pow three_pos, sub_zero],
   exact div_nonneg (pow_nonneg (le_of_lt (h 0)) 3) zero_le_three,
   rw [sum_range_succ, add_comm] at h0 ⊢,
   have h2 : 0 ≤ (range n).sum a := sum_nonneg (λ i _, le_of_lt (h i)),
@@ -29,7 +24,7 @@ begin
   suffices : x / (1 - x) * y ^ 2 ≤ x ^ 2 * y + x * y ^ 2,
   { apply le_trans this,
     rw ← sub_nonneg; ring_nf,
-    refine mul_nonneg (div_nonneg zero_le_one zero_le_three) (pow_nonneg (le_of_lt h) 3) },
+    exact mul_nonneg (div_nonneg zero_le_one zero_le_three) (pow_nonneg (le_of_lt h) 3) },
   rw [← le_sub_iff_add_le', le_iff_eq_or_lt] at h0,
   rcases h0 with rfl | h0,
   { rw le_iff_eq_or_lt at h2,
