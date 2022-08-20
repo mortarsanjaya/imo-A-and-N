@@ -1,4 +1,4 @@
-import data.pnat.basic data.nat.basic algebra.group_power.basic
+import data.pnat.basic data.int.basic algebra.group_power.basic
 
 /-! # IMO 2013 N1 -/
 
@@ -19,16 +19,17 @@ begin
     rw [pnat.dvd_iff, pnat.add_coe, pnat.mul_coe, nat.dvd_add_right ⟨_, rfl⟩, ← pnat.dvd_iff] at h,
     exact pnat.le_of_dvd h },
   { replace h := pnat.le_of_dvd (h n n),
-    rw [← pnat.coe_le_coe, ← not_lt] at h ⊢,
-    intros h0; apply h; clear h,
-    rw [sq, pnat.add_coe, pnat.add_coe, pnat.mul_coe, pnat.mul_coe],
-    set x := (n : ℕ); clear_value x,
-    have h := lt_of_le_of_lt (nat.succ_le_iff.mpr (f n).pos) h0,
-    have h1 := le_of_lt h,
-    set y := (f n : ℕ); clear_value y,
-    rw [← nat.sub_add_cancel h1, add_one_mul, add_one_mul, nat.sub_add_cancel h1,
-        add_right_comm, add_lt_add_iff_right, add_lt_add_iff_right],
-    exact (mul_lt_mul_left (nat.sub_pos_of_lt h)).mpr h0 }
+    have h0 : 1 ≤ n := n.one_le,
+    rw [le_iff_eq_or_lt, eq_comm] at h0,
+    rcases h0 with rfl | h0,
+    exact (f 1).one_le,
+    rw [← pnat.coe_le_coe, ← int.coe_nat_le_coe_nat_iff] at h ⊢,
+    simp only [sq, pnat.add_coe, pnat.mul_coe, int.coe_nat_add, int.coe_nat_mul] at h,
+    generalizes [hx : ((f n : ℕ) : ℤ) = x, hy : ((n : ℕ) : ℤ) = y],
+    rw [← pnat.coe_lt_coe, ← int.coe_nat_lt_coe_nat_iff, ← hy, ← sub_pos] at h0,
+    rw [← hx, ← hy, ← sub_nonneg, add_sub_add_comm, ← mul_sub,
+        ← neg_sub x y, ← neg_one_mul, ← add_mul, ← sub_eq_add_neg] at h,
+    rwa [← sub_nonneg, ← mul_nonneg_iff_right_nonneg_of_pos h0] }
 end
 
 end IMO2013N1
