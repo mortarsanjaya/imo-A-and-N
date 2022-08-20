@@ -1,11 +1,9 @@
-import data.nat.parity number_theory.basic data.fintype.basic data.set.finite
+import number_theory.basic
 
 /-! # IMO 2014 N4 -/
 
 namespace IMOSL
 namespace IMO2014N4
-
-
 
 private theorem case_odd {n : ℕ} (h : 1 < n) (h0 : odd n) (m : ℕ) : odd (n ^ (n ^ m) / (n ^ m)) :=
   by rw nat.pow_div (le_of_lt (nat.lt_pow_self h m)) (lt_trans one_pos h); exact h0.pow
