@@ -71,20 +71,16 @@ theorem final_solution (f : ℤ → ℤ) :
 begin
   split,
   { intros feq,
-    let A := f (-1) + 1,
-    let B := f 0,
-    have h : ∀ x : ℤ, f x = A * x + B := fn_lem2 feq,
-    cases eq_or_ne A 0 with h0 h0,
+    have h := fn_lem2 feq,
+    cases eq_or_ne (f (-1) + 1) 0 with h0 h0,
     { simp only [h0, zero_mul, zero_add] at h,
-      simp only [A] at h0,
-      rw [add_eq_zero_iff_eq_neg, h] at h0,
       left; funext x,
-      rw [h, h0, pi.neg_apply, pi.one_apply] },
+      rw [h, ← h (-1), pi.neg_apply, pi.one_apply, ← add_eq_zero_iff_eq_neg, h0] },
     { right; funext x,
       have h1 := fn_lem1 feq x,
       rwa [h, h (x + 1), add_left_inj, mul_eq_mul_left_iff, or_iff_left h0] at h1 } },
-  { rintros (rfl | rfl); intros x y; simp,
-    rw [← sub_sub, sub_add_cancel, sub_sub, add_sub_add_right_eq_sub] }
+  { rintros (rfl | rfl) x y; simp,
+    rw [← add_sub_right_comm, sub_sub] }
 end
 
 end IMO2015A2
