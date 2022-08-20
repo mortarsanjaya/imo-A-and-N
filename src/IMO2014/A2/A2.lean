@@ -1,10 +1,4 @@
-import
-  algebra.order.archimedean
-  algebra.order.ring
-  algebra.invertible
-  algebra.group_power.order
-  logic.function.iterate
-  tactic.positivity
+import algebra.order.archimedean tactic.positivity
 
 /-! # IMO 2014 A2 -/
 
