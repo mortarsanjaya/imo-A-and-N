@@ -1,11 +1,11 @@
-import data.fintype.card algebra.group.defs
+import data.fintype.card tactic.abel
 
 /-! # IMO 2017 A3 -/
 
-open function set
-
 namespace IMOSL
 namespace IMO2017A3
+
+open function set
 
 def elt_prop {M : Type*} [monoid M] [fintype M] (x : M) := ∀ y : M, x * y * x = y * x * y → y = x
 
@@ -46,15 +46,13 @@ begin
   rcases exists_pow_eq x with ⟨m, k, h, h0⟩,
   suffices : ∃ l : ℕ, m < l ∧ k ∣ l,
   { rcases this with ⟨l, h1, n, h2⟩,
-    use l; split,
-    exact pos_of_gt h1,
+    refine ⟨l, pos_of_gt h1, _⟩,
     rcases le_iff_exists_add.mp (le_of_lt h1) with ⟨c, h3⟩,
     have h4 := pow_preperiod_mul h (pow_preperiod_add h h0 c) n,
     rwa [← h3, mul_comm, ← h2, ← mul_two, mul_comm] at h4 },
-  use m + (k - (m % k)),
   replace h := nat.mod_lt m h,
-  rw [lt_add_iff_pos_right, tsub_pos_iff_lt, and_iff_right h,
-      ← nat.add_sub_assoc (le_of_lt h), add_comm, nat.add_sub_assoc (nat.mod_le _ _)],
+  refine ⟨m + (k - (m % k)), by rwa [lt_add_iff_pos_right, tsub_pos_iff_lt], _⟩,
+  rw [← nat.add_sub_assoc (le_of_lt h), add_comm, nat.add_sub_assoc (nat.mod_le _ _)],
   exact (nat.dvd_add (dvd_refl k) (nat.dvd_sub_mod m))
 end
 
@@ -94,27 +92,26 @@ end extra
 
 
 
-private lemma elt_prop_main_claim {M : Type*} [monoid M] [fintype M]
-  {x : M} (h : elt_prop x) : ∃ m : ℕ, 1 < m ∧ x ^ m = x :=
+private lemma elt_prop_main_claim {M : Type*} [monoid M] [fintype M] {x : M} (h : elt_prop x) :
+  ∃ m : ℕ, 1 < m ∧ x ^ m = x :=
 begin
   rcases extra.exists_pow_idempotent x with ⟨m, h0, h1⟩,
-  use m + 1; split,
-  exact nat.succ_lt_succ h0,
-  apply h,
-  rw [← pow_one x, ← pow_mul, one_mul, ← pow_add, add_comm, ← pow_add, ← pow_add, ← pow_add,
-      add_comm _ (m + 1), ← add_assoc, add_right_comm m 1 (m + 1), ← add_assoc, ← two_mul,
-      add_assoc, add_assoc, add_assoc, add_assoc, pow_add, pow_add x (2 * m), h1]
+  refine ⟨m + 1, nat.succ_lt_succ h0, h _ _⟩,
+  rw [← pow_succ', ← pow_succ, ← pow_succ', ← pow_add],
+  replace h1 := congr_arg (has_mul.mul (x ^ 3)) h1,
+  rw [← pow_add, ← pow_add, eq_comm] at h1; convert h1 using 2; abel,
+  rw [smul_eq_mul, smul_eq_mul, mul_one, add_comm]
 end
 
 
 
 /-- Final solution -/
-theorem final_solution {S : Type*} [fintype S] [decidable_eq S]
-  {f : S → S} (fprop : elt_prop f) : range (f^[2]) = range f :=
+theorem final_solution {S : Type*} [fintype S] [decidable_eq S] {f : S → S} (fprop : elt_prop f) :
+  range (f^[2]) = range f :=
 begin
-  have h := elt_prop_main_claim fprop,
-  conv at h { find (_ ^ _ = _) { rw extra.pow_eq_iterate } },
-  exact extra.range_sq_eq_range_of_iter_eq_self f h
+  refine extra.range_sq_eq_range_of_iter_eq_self f _,
+  rcases elt_prop_main_claim fprop with ⟨m, h, h0⟩,
+  exact ⟨m, h, by rw [← extra.pow_eq_iterate, h0]⟩
 end
 
 end IMO2017A3
