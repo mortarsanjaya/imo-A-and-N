@@ -27,14 +27,13 @@ begin
 end
 
 /-- A criterion for two linear polynomials to be equal -/
-lemma linear_eq_match {a b c d : ℤ} (h : ∀ x : ℤ, a * x + b = c * x + d) :
-  a = c ∧ b = d :=
+lemma linear_eq_match {a b c d : ℤ} (h : ∀ x : ℤ, a * x + b = c * x + d) : a = c ∧ b = d :=
 begin
   have h0 := h 0,
   rw [mul_zero, mul_zero, zero_add, zero_add] at h0,
   have h1 := h 1,
   rw [mul_one, mul_one, h0, add_left_inj] at h1,
-  exact and.intro h1 h0,
+  exact and.intro h1 h0
 end
 
 end extra
