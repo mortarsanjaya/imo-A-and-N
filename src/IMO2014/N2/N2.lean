@@ -27,8 +27,7 @@ private lemma good_y_le_x {x y : ℤ} (h : good x y) (h0 : y ≤ x) : ∃ m : �
 begin
   obtain ⟨n, rfl⟩ : ∃ n : ℤ, x = n + y := ⟨x - y, by rw sub_add_cancel⟩,
   rw le_add_iff_nonneg_left at h0,
-  dsimp only [good] at h,
-  rw [add_sub_cancel, abs_eq_self.mpr h0, ← add_left_inj (-7 * n ^ 2)] at h; ring_nf at h,
+  rw [good, add_sub_cancel, abs_eq_self.mpr h0, ← add_left_inj (-7 * n ^ 2)] at h; ring_nf at h,
   replace h : (2 * y + n) ^ 2 = (n - 2) ^ 2 * (4 * n + 1) :=
     by convert (congr_arg (λ c, 4 * c + n ^ 2) h); ring,
   obtain ⟨c, h1⟩ : n - 2 ∣ 2 * y + n :=
@@ -49,15 +48,13 @@ begin
       use 2 * n; rw [← mul_assoc, two_mul, ← bit0]
     end,
     rw [mul2_add1_sq, add_left_inj, mul_eq_mul_left_iff, or_comm] at h,
-    cases h with h h,
+    rcases h with h | rfl,
     exfalso; exact four_ne_zero h,
-    subst h; use m,
     rw [← eq_sub_iff_add_eq, mul_add_one, add_sub_assoc, sub_sub_cancel_left,
         ← sub_eq_add_neg, mul_left_comm, ← mul_sub_one, mul_eq_mul_left_iff, or_comm] at h1,
     cases h1 with h1,
     exfalso; exact two_ne_zero h1,
-    unfold good_pair,
-    rw [h1, prod.mk.inj_iff],
+    use m; rw [good_pair, h1, prod.mk.inj_iff],
     split; ring }
 end
 
@@ -66,16 +63,9 @@ begin
   suffices : 0 ≤ (m + 1) * m,
   { unfold good good_pair; ring_nf,
     rw abs_eq_self.mpr this; ring },
-  have h0 := sq_nonneg (2 * m + 1),
-  rw [mul2_add1_sq, le_iff_lt_or_eq, ← int.add_one_le_iff, add_le_add_iff_right] at h0,
-  cases h0 with h0 h0,
-  { rw [add_one_mul, ← sq],
-    rwa zero_le_mul_left (four_pos : 0 < (4 : ℤ)) at h0 },
-  { rw [eq_comm, add_eq_zero_iff_eq_neg] at h0,
-    replace h0 : 4 ∣ (-1 : ℤ) := ⟨m ^ 2 + m, h0.symm⟩,
-    rw dvd_neg at h0,
-    replace h0 := int.eq_one_of_dvd_one zero_le_four h0,
-    exfalso; revert h0; norm_num }
+  cases le_or_lt 0 m with h h,
+  exact mul_nonneg (add_nonneg h zero_le_one) h,
+  exact mul_nonneg_of_nonpos_of_nonpos (by rwa int.add_one_le_iff) (le_of_lt h)
 end
 
 
@@ -90,9 +80,7 @@ begin
     left; exact good_y_le_x h h0,
     right; exact good_y_le_x (good_swap h) h0 },
   { rintros (⟨m, h⟩ | ⟨m, h⟩),
-    all_goals {
-      have h0 := good_pair_is_good m,
-      rwa ← h at h0 },
+    all_goals { have h0 := good_pair_is_good m; rwa ← h at h0 },
     exact good_swap h0 }
 end
 
