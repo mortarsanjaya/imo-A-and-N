@@ -1,11 +1,11 @@
-import data.nat.nth data.finset.basic
+import data.nat.nth
 
 /-! # IMO 2017 C7 -/
 
-open finset function
-
 namespace IMOSL
 namespace IMO2017C7
+
+open finset function
 
 noncomputable def nth_notin (X : finset ℕ) := nat.nth (λ n, n ∉ X)
 noncomputable def cup_mul (X Y : finset ℕ) := X ∪ image (nth_notin X) Y
