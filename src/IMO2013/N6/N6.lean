@@ -2,10 +2,10 @@ import data.rat.default tactic.fin_cases
 
 /-! # IMO 2013 N6 -/
 
-open function
-
 namespace IMOSL
 namespace IMO2013N6
+
+open function
 
 def fn_eq (f : ℚ → ℤ) := ∀ (x : ℚ) (a : ℤ) (b : ℕ+), f ((x + a) / b) = f (((f x : ℚ) + a) / b)
 
@@ -45,9 +45,8 @@ begin
       lift (-a) to ℕ using h0 with x h0,
       replace h1 := this x a b,
       rw [h1, ← int.cast_coe_nat, h0, int.cast_neg, add_neg_self, zero_div] } },
-  intros n; induction n with n n_ih,
-  intros a b; rw [nat.cast_zero, add_zero],
-  intros a b,
+  intros n; induction n with n n_ih; intros a b,
+  rw [nat.cast_zero, add_zero],
   have h1 := feq 0 a b,
   rw [zero_add, h, ← feq, add_comm, ← int.cast_one, ← int.cast_add] at h1,
   rw [h1, n_ih, int.cast_add, nat.cast_succ, add_right_comm, add_assoc, int.cast_one]
@@ -130,7 +129,6 @@ begin
   suffices : ((b : ℚ)⁻¹ + 1) / ↑(b + 1) = (b : ℚ)⁻¹,
     rwa [b_ih, int.cast_zero, zero_add, ← coe_coe, div_eq_mul_inv (a : ℚ),
          ← mul_add_one, mul_div_assoc, this, ← div_eq_mul_inv, b_ih, eq_comm] at feq,
-  clear b_ih feq h1 a h0 h f,
   simp only [pnat.one_coe, nat.cast_add, pnat.add_coe, nat.cast_one, coe_coe],
   generalize h : ((b : ℕ) : ℚ) = k,
   replace h : 0 < k := by rw [← h, nat.cast_pos]; exact pnat.pos b,
@@ -174,36 +172,30 @@ begin
     right; replace h := lem2 feq h,
     cases lem3 feq h with h0 h0,
     left; exact lem5 feq h h0,
-    right; let g := λ x, -f (-x),
-    replace h0 : g (1 / 2) = 0 :=
-    begin
-      dsimp only [g],
-      replace feq := feq (1 / 2) (-1) 1,
-      rwa [h0, int.cast_neg, add_right_neg, zero_div, coe_coe, pnat.one_coe,
-           int.cast_one, nat.cast_one, div_one, ← sub_eq_add_neg, div_sub_one,
-           bit0, sub_add_cancel', neg_div, ← int.cast_zero, h, ← neg_eq_zero] at feq,
-      exact two_ne_zero
-    end,
-    replace feq : fn_eq g := λ x a b, by rw [neg_inj, ← neg_div, ← neg_div,
-      neg_add, neg_add, int.cast_neg, neg_neg, ← int.cast_neg, feq],
-    ext x,
-    replace h := congr_fun (lem5 feq (λ m, by rw [neg_eq_iff_neg_eq, ← int.cast_neg, h]) h0) (-x),
-    rwa [neg_eq_iff_neg_eq, neg_neg, int.floor_neg, neg_neg, eq_comm] at h },
-  { rintros (⟨C, rfl⟩ | h),
+    right; suffices : (λ x, -f (-x)) = int.floor,
+    { ext x; convert congr_arg has_neg.neg (congr_fun this (-x)),
+      rw [neg_neg, neg_neg] },
+    refine lem5 (λ x a b, _) (λ m, _) _,
+    rw [neg_inj, ← neg_div, ← neg_div, neg_add, neg_add,
+        int.cast_neg, neg_neg, ← int.cast_neg, feq],
+    rw [← int.cast_neg, h, neg_neg],
+    rw [neg_eq_zero, ← h 0],
+    convert feq (1 / 2) (-1) 1; field_simp,
+    rw [bit0, neg_add, ← add_assoc, add_neg_self, zero_add],
+    rw [h0, int.cast_one, add_neg_self] },
+  suffices : fn_eq int.floor,
+  { rintros (⟨C, rfl⟩ | rfl | rfl),
     intros x a b; rw const_apply,
-    suffices : fn_eq int.floor,
-    { rcases h with rfl | rfl,
-      exact this,
-      intros x a b,
-      replace this := this (-x) (-a) b,
-      rwa [int.cast_neg, ← neg_add, neg_div, int.floor_neg, int.floor_neg,
-           int.cast_neg, ← neg_add, neg_div, int.floor_neg, neg_inj] at this },
-    clear h; intros x a b,
-    rw floor_eq_floor_iff; intros k,
-    have h : 0 < (b : ℚ) := by rw [coe_coe, nat.cast_pos]; exact b.pos,
-    rw [le_div_iff h, le_div_iff h, ← sub_le_iff_le_add, ← sub_le_iff_le_add,
-        coe_coe, ← int.cast_coe_nat, ← coe_coe b, ← int.cast_mul,
-        ← int.cast_sub, int.cast_le, int.le_floor] }
+    exact this,
+    intros x a b,
+    replace this := this (-x) (-a) b,
+    rwa [int.cast_neg, ← neg_add, neg_div, int.floor_neg, int.floor_neg,
+         int.cast_neg, ← neg_add, neg_div, int.floor_neg, neg_inj] at this },
+  intros x a b,
+  rw floor_eq_floor_iff; intros k,
+  have h : 0 < (b : ℚ) := by rw [coe_coe, nat.cast_pos]; exact b.pos,
+  rw [le_div_iff h, le_div_iff h, ← sub_le_iff_le_add, ← sub_le_iff_le_add, coe_coe,
+      ← int.cast_coe_nat, ← coe_coe b, ← int.cast_mul, ← int.cast_sub, int.cast_le, int.le_floor]
 end
 
 end IMO2013N6
