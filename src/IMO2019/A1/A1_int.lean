@@ -2,11 +2,10 @@ import IMO2019.A1.A1_general data.int.basic algebra.algebra.basic
 
 /-! # IMO 2019 A1 (P1), Integer Version -/
 
-open function
-open_locale classical
-
 namespace IMOSL
 namespace IMO2019A1
+
+open function
 
 def fn_eq_int (g : ℤ → ℤ) (s : ℤ) (f : ℤ → ℤ) := ∀ x y : ℤ, f (g x) + s * f y = f (f (x + y))
 

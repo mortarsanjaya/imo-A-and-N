@@ -2,10 +2,10 @@ import algebra.module.basic
 
 /-! # IMO 2019 A1 (P1), Generalized Version -/
 
-open function
-
 namespace IMOSL
 namespace IMO2019A1
+
+open function
 
 variables {G : Type*} [add_comm_group G]
 
