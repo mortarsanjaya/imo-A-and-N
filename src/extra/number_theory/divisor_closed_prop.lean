@@ -32,6 +32,19 @@ def strong (p : ℕ) (P : ℕ → Prop) := ∀ k : ℕ, P (p ^ k)
 
 section results
 
+/-- If `P` is wide, then `P(n)` holds for infinitely many `n`,
+  even if `P` is not divisor-closed. -/
+theorem infinite_pred_of_wide {P : ℕ → Prop} (h0 : wide P) : (set_of P).infinite :=
+  by refine set.infinite.mono (λ x h1, _) h0; exact h1.2
+
+/-- If `P` is `p`-strong for some `p ≥ 2`, not necessarily prime, then
+  `P(n)` holds for infinitely many `n`, even if `P` is not divisor-closed. -/
+theorem infinite_pred_of_strong {P : ℕ → Prop} {p : ℕ} (h0 : 2 ≤ p) (h1 : strong p P) :
+  (set_of P).infinite :=
+  set.infinite_of_injective_forall_mem (nat.pow_right_injective h0) h1
+
+
+
 variables {P : ℕ → Prop} [decidable_pred P] (h : divisor_closed P)
 include h
 
@@ -113,11 +126,38 @@ begin
   exact h2.2
 end
 
-/-- If `P` is wide, then `P(n)` holds for infinitely many `n`. -/
-theorem infinite_pred_of_wide (h0 : wide P) : (set_of P).infinite :=
+/-- Assuming choice, if `P(n)` holds for infinitely many `n`, then
+  `P` is either wide or `p`-strong for some `p` prime. -/
+theorem dc_wide_or_strong_of_infinite (h0 : (set_of P).infinite) :
+  wide P ∨ ∃ p : ℕ, p.prime ∧ strong p P :=
 begin
-  refine set.infinite.mono (λ x h1, _) h0,
-  simp? at h1,
+  by_cases h1 : ¬P 1,
+  rcases set.infinite.exists_nat_lt h0 0 with ⟨n, h2, h3⟩,
+  exfalso; exact h1 (dc_at_one h (ne_of_gt h3) h2),
+  contrapose! h0,
+  rw not_not at h1,
+  replace h0 := dc_not_wide_strong_aoc_finsupp h h0.1 h0.2 h1,
+  clear h1; rcases h0 with ⟨x, h0, h1⟩,
+  suffices : ∃ N : ℕ, 0 < N ∧ ∀ n : ℕ, P n → n = 0 ∨ n ∣ N,
+  { rcases this with ⟨N, hN, this⟩,
+    refine not_not.mpr (set.finite.subset (finset.range N.succ).finite_to_set (λ n h2, _)),
+    rw [finset.mem_coe, finset.mem_range, nat.lt_succ_iff],
+    rcases this n h2 with rfl | h2,
+    exacts [N.zero_le, nat.le_of_dvd hN h2] },
+  use x.prod has_pow.pow,
+  rw and_iff_left_of_imp,
+  { refine nat.prod_pow_pos_of_zero_not_mem_support (λ h2, _),
+    rw finsupp.mem_support_iff at h2,
+    exact nat.not_prime_zero (h0 0 h2) },
+  { intros h2 n h3,
+    rcases eq_or_ne n 0 with rfl | h4,
+    left; refl,
+    rw [or_iff_right h4, ← nat.factorization_le_iff_dvd h4 (ne_of_gt h2),
+        nat.prod_pow_factorization_eq_self (by simp; exact h0), finsupp.le_iff],
+    rintros p h5,
+    replace h5 : p.prime := nat.prime_of_mem_factorization h5,
+    rw [nat.factorization_def n h5, ← h1 p h5],
+    exact h n h4 h3 _ pow_padic_val_nat_dvd }
 end
 
 /-- Assuming choice, `P(n)` holds for infinitely many `n` iff
@@ -125,37 +165,9 @@ end
 theorem dc_infinite_iff_wide_or_strong :
   (set_of P).infinite ↔ wide P ∨ ∃ p : ℕ, p.prime ∧ strong p P :=
 begin
-  refine iff.symm ⟨_, λ h0, _⟩,
-  { rintros (h0 | ⟨p, hp, h0⟩),
-    refine set.infinite.mono (λ x h1, _) h0; exact h1.2,
-    exact set.infinite_of_injective_forall_mem (nat.pow_right_injective hp.two_le) h0 },
-  by_cases h1 : ¬P 1,
-  { rcases set.infinite.exists_nat_lt h0 0 with ⟨n, h2, h3⟩,
-    exfalso; exact h1 (dc_at_one h (ne_of_gt h3) h2) },
-  { contrapose! h0,
-    rw not_not at h1,
-    replace h0 := dc_not_wide_strong_aoc_finsupp h h0.1 h0.2 h1,
-    clear h1; rcases h0 with ⟨x, h0, h1⟩,
-    suffices : ∃ N : ℕ, 0 < N ∧ ∀ n : ℕ, P n → n = 0 ∨ n ∣ N,
-    { rcases this with ⟨N, hN, this⟩,
-      refine not_not.mpr (set.finite.subset (finset.range N.succ).finite_to_set (λ n h2, _)),
-      rw [finset.mem_coe, finset.mem_range, nat.lt_succ_iff],
-      rcases this n h2 with rfl | h2,
-      exacts [N.zero_le, nat.le_of_dvd hN h2] },
-    use x.prod has_pow.pow,
-    rw and_iff_left_of_imp,
-    { refine nat.prod_pow_pos_of_zero_not_mem_support (λ h2, _),
-      rw finsupp.mem_support_iff at h2,
-      exact nat.not_prime_zero (h0 0 h2) },
-    { intros h2 n h3,
-      rcases eq_or_ne n 0 with rfl | h4,
-      left; refl,
-      rw [or_iff_right h4, ← nat.factorization_le_iff_dvd h4 (ne_of_gt h2),
-          nat.prod_pow_factorization_eq_self (by simp; exact h0), finsupp.le_iff],
-      rintros p h5,
-      replace h5 : p.prime := nat.prime_of_mem_factorization h5,
-      rw [nat.factorization_def n h5, ← h1 p h5],
-      exact h n h4 h3 _ pow_padic_val_nat_dvd } }
+  refine ⟨dc_wide_or_strong_of_infinite h, λ h0, _⟩,
+  rcases h0 with h0 | ⟨p, hp, h0⟩,
+  exacts [infinite_pred_of_wide h0, infinite_pred_of_strong hp.two_le h0]
 end
 
 end results
