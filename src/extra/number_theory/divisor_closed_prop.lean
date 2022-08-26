@@ -113,6 +113,13 @@ begin
   exact h2.2
 end
 
+/-- If `P` is wide, then `P(n)` holds for infinitely many `n`. -/
+theorem infinite_pred_of_wide (h0 : wide P) : (set_of P).infinite :=
+begin
+  refine set.infinite.mono (λ x h1, _) h0,
+  simp? at h1,
+end
+
 /-- Assuming choice, `P(n)` holds for infinitely many `n` iff
   `P` is either wide or `p`-strong for some `p` prime. -/
 theorem dc_infinite_iff_wide_or_strong :
