@@ -3,7 +3,7 @@ import data.nat.factorization.basic
 /-!
 # Divisor-closed proposition
 
-We say that a `Prop`-valued map `P : ℕ → Prop` is divisor-closed if for any positive
+We say that a predicatef `P : ℕ → Prop` is divisor-closed if for any positive
   integer `n` for which `P(n)` holds, we also have `P(d)` for any factor `d` of `n`. 
 We also define the following terminologies; most of their purposes are in number theory problems.
 * We say that `P` is *wide* if `P(p)` holds for infinitely many primes `p`.
@@ -52,7 +52,7 @@ include h
 lemma dc_at_one {n : ℕ} (h0 : n ≠ 0) (h1 : P n) : P 1 :=
   h n h0 h1 1 (one_dvd n)
 
-/-- An if-and-only-if criterion for a divisor-closed `Prop` map to be `p`-strong; `p ≠ 0`. -/
+/-- An if-and-only-if criterion for a divisor-closed predicate to be `p`-strong; `p ≠ 0`. -/
 theorem dc_not_strong_iff {p : ℕ} (h0 : p ≠ 0) :
   ¬strong p P ↔ (∃ c : ℕ, ∀ k : ℕ, P (p ^ k) ↔ k < c) :=
 begin
@@ -67,7 +67,7 @@ begin
     exact lt_irrefl c }
 end
 
-/-- Using choice, given a `Prop` map `P` that is not `p`-strong for any `p` prime, construct a
+/-- Using choice, given a predicate `P` that is not `p`-strong for any `p` prime, construct a
   map `x : nat.primes → ℕ` such that `P(p^k) → k < x_p` for any `k : ℕ` and `p` prime. -/
 theorem dc_not_strong_aoc_map_iff (h0 : ∀ p : ℕ, p.prime → ¬strong p P) :
   ∃ x : ℕ → ℕ, (∀ p : ℕ, x p ≠ 0 → p.prime) ∧
@@ -82,7 +82,7 @@ begin
   rw [dif_pos hp, ← h1, subtype.coe_mk]
 end
 
-/-- Using choice, given a `Prop` map `P` that is not `p`-strong for any `p` prime, construct a
+/-- Using choice, given a predicate `P` that is not `p`-strong for any `p` prime, construct a
   map `x : nat.primes → ℕ` such that `P(p^k) → k ≤ x_p` for any `k : ℕ` and `p` prime.
 This is just a weak version of `dc_not_strong_aoc_map_iff`. -/
 theorem dc_not_strong_aoc_map (h0 : ∀ p : ℕ, p.prime → ¬strong p P) :
@@ -93,7 +93,7 @@ begin
   exact ⟨x, h1, λ p hp k h3, le_of_lt ((h2 p hp k).mp h3)⟩
 end
 
-/-- Using choice, given a `Prop` map `P` that is not `p`-strong for any `p` prime, under the
+/-- Using choice, given a predicate `P` that is not `p`-strong for any `p` prime, under the
   condition `P(1)`, construct a map `x : nat.primes → ℕ` such that `P(p^k) ↔ k ≤ x_p` for any
   `k : ℕ` and `p` prime. -/
 theorem dc_not_strong_aoc_map_iff' (h0 : ∀ p : ℕ, p.prime → ¬strong p P) (h1 : P 1) :
@@ -107,7 +107,7 @@ begin
   rwa [nat.succ_le_iff, ← h3 p hp, pow_zero]
 end
 
-/-- Using choice, given a `Prop` map `P` that is neither wide nor `p`-strong for any `p` prime,
+/-- Using choice, given a predicate `P` that is neither wide nor `p`-strong for any `p` prime,
   under the condition `P(1)`, construct a finitely-supported map `x : nat.primes → ℕ` such that
   `P(p^k) ↔ k ≤ x_p` for any `k : ℕ` and `p` prime. -/
 theorem dc_not_wide_strong_aoc_finsupp
