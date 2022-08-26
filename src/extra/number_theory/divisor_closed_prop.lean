@@ -3,7 +3,7 @@ import data.nat.factorization.basic
 /-!
 # Divisor-closed proposition
 
-We say that a predicatef `P : ℕ → Prop` is divisor-closed if for any positive
+We say that a predicate `P : ℕ → Prop` is divisor-closed if for any positive
   integer `n` for which `P(n)` holds, we also have `P(d)` for any factor `d` of `n`. 
 We also define the following terminologies; most of their purposes are in number theory problems.
 * We say that `P` is *wide* if `P(p)` holds for infinitely many primes `p`.
@@ -11,9 +11,32 @@ We also define the following terminologies; most of their purposes are in number
 We defined `p`-strong generally to avoid complications.
 However, its main usage comes when `p` is prime.
 
-The main result we will prove is that `P(n)` holds for infinitely many positive integers `n`
-  if and only if `P` is either wide or `p`-strong for some prime `p`.
+For convenience, we say that `P` is infinite if `P(n)` holds for infinitely many `n : ℕ`.
+The main result we will prove is that a divisor-closed predicate `P` is
+  infinite if and only if  `P` is either wide or `p`-strong for some prime `p`.
 Note that we need axiom of choice to prove this result.
+
+**Proof**
+
+Clearly wide and `p`-strong predicates for any `p ≥ 2` are infinite.
+Thus, it remains to prove the converse.
+Let `P` be a divisor-closed predicate.
+Suppose that `P` is neither wide or `p`-strong for any `p` prime.
+Note that, if `P(n)` holds for some `n`, then `P(1)` must hold since `P` is divisor-closed.
+Thus it is clear that `P` is not infinite if `P(1)` does not hold.
+For the rest of the proof, we assume that `P(1)` holds.
+
+For each `p` prime, since `P` is divisor-closed but not `p`-strong, there exists
+  `x_p : ℕ` such that `P(p^k) ↔ k ≤ x_p` for any `k : ℕ`.
+Indeed, we just take the maximum `k` such that `P(p^k)` holds.
+Axiom of choice gives us a map `x : p ↦ x_p` with the domain being the set of primes.
+Now, since `P` is not wide, `P(p)`, equivalently `x_p ≥ 1`, holds for finitely many primes `p`.
+
+Finally, let `N = ∏ p, p^{x_p}`; the product is taken over primes `p` for which `x_p ≥ 1`.
+If a positive integer `n` does not divide `N`, then `x_p < ν_p(n)` for some `p` prime.
+Then `P(p^{ν_p(n)})` does not hold, so `P(n)` does not hold either.
+Thus, for any `n` such that `P(n)` holds, we necessarily have `n ∣ N`.
+There are finitely many such `n`, so `P` is not infinite, as desired.
 -/
 
 namespace IMOSL
