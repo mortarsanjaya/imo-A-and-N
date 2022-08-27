@@ -1,4 +1,4 @@
-import IMO2020.N5.N5_extra.strong_map.basic data.zmod.basic
+import data.zmod.basic
 
 /-!
 # `p`-complement homomorphism
@@ -13,7 +13,6 @@ namespace IMOSL
 namespace IMO2020N5
 
 /-- The type of maps `χ : additive (zmod p)ˣ →+ M` for which `χ(-1) = 0` -/
-@[ancestor strong_map]
 structure pcompl_hom (M : Type*) [add_comm_monoid M] (p : ℕ) extends additive (zmod p)ˣ →+ M :=
   (map_neg_one' : to_fun (additive.of_mul (-1)) = 0)
 

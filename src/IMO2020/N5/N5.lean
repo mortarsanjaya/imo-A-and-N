@@ -8,7 +8,7 @@ import
 namespace IMOSL
 namespace IMO2020N5
 
-open additive_map
+open additive_map extra
 open_locale classical
 
 
@@ -17,7 +17,7 @@ variables {M : Type*} [add_cancel_comm_monoid M] [no_zero_smul_divisors ℕ M]
 
 
 
-private lemma lem1 {f : additive_map M} {p : ℕ} (h : p.prime) (h0 : good p f)
+private lemma lem1 {f : additive_map M} {p : ℕ} (h : p.prime) (h0 : good f p)
   {k : ℕ} (h1 : k < p) : f k = 0 :=
 begin
   rcases k.eq_zero_or_pos with rfl | h2,
@@ -33,7 +33,7 @@ begin
   exfalso; exact ne_of_gt (nat.totient_pos h.pos) h4
 end
 
-private lemma lem2 {f : additive_map M} (h : wide f) : f = 0 :=
+private lemma lem2 {f : additive_map M} (h : wide (good f)) : f = 0 :=
 begin
   ext k,
   obtain ⟨p, ⟨h0, h1⟩, h2⟩ := set.infinite.exists_nat_lt h k,
@@ -52,7 +52,7 @@ instance pcompl_hom_unique {p : ℕ} [fact (0 < p)] : unique (pcompl_hom M p) :=
   end }
 
 private lemma lem3 (f : additive_map M) (p : ℕ) [fact p.prime] :
-  strong p f ↔ ∃ c : M, ⇑f = λ n, padic_val_nat p n • c :=
+  strong p (good f) ↔ ∃ c : M, ⇑f = λ n, padic_val_nat p n • c :=
 begin
   rw pstrong_iff,
   simp only [unique.exists_iff, default, pcompl_hom.zero_apply, add_zero],
@@ -62,7 +62,7 @@ end
 
 
 /-- Final solution -/
-theorem final_solution (f : additive_map M) : {p : ℕ | good p f}.infinite ↔
+theorem final_solution (f : additive_map M) : (set_of (good f)).infinite ↔
   f = 0 ∨ ∃ (p : ℕ) (h : p.prime) (c : M), c ≠ 0 ∧ ⇑f = λ n, padic_val_nat p n • c :=
 begin
   rw good_infinite_iff_wide_or_strong; split,

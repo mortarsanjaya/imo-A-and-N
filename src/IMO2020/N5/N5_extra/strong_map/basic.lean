@@ -15,12 +15,12 @@ This is similar to the file `additive_map.lean`.
 namespace IMOSL
 namespace IMO2020N5
 
-open additive_map
+open additive_map extra
 open_locale classical
 
 @[ancestor additive_map]
 structure strong_map (M : Type*) [has_zero M] [has_add M] (p : ℕ) extends additive_map M :=
-(is_strong' : strong p to_fun)
+(is_strong' : strong p (good to_fun))
 
 
 
@@ -40,7 +40,7 @@ instance : has_coe_to_fun (strong_map M p) (λ (f : strong_map M p), ℕ → M) 
 theorem map_mul_add (f : strong_map M p) {x y : ℕ} (hx : x ≠ 0) (hy : y ≠ 0) :
   f (x * y) = f x + f y := f.map_mul_add' hx hy
 
-theorem is_strong (f : strong_map M p) : strong p f := f.is_strong'
+theorem is_strong (f : strong_map M p) : strong p (good f) := f.is_strong'
 
 instance fun_like {M : out_param Type*} [add_comm_monoid M] {p : ℕ} :
   fun_like (strong_map M p) ℕ (λ _, M) :=
@@ -80,7 +80,7 @@ instance : add_comm_monoid (strong_map M p) :=
 
 instance : can_lift (additive_map M) (strong_map M p) :=
 { coe := λ f, (f : additive_map M),
-  cond := λ f, strong p f,
+  cond := λ f, strong p (good f),
   prf := λ f h, ⟨⟨f, h⟩, rfl⟩ }
 
 end add_comm_monoid

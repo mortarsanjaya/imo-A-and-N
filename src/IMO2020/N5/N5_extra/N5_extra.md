@@ -6,47 +6,29 @@ Thus, our formatting style will be different.
 Fix a commutative (additive) cancellative monoid $M$.
 Denote $\N^+ = \{1, 2, 3, \ldots\}$.
 We call a function $f : \N^+ \to M$ *additive* if $f(xy) = f(x) + f(y)$ for every $x, y \in \N^+$.
-Given an additive map $f : \N^+ \to M$,
-1. we say that $f$ is *$n$-good* for a positive integer $n$ if $f(k) = f(n - k)$ for all $k < n$,
-2. we say that $f$ is *wide* if $f$ is $p$-good for infinitely many primes $p$,
-3. for a prime $p$, we say that $f$ is *$p$-strong* if $f$ is $p^k$-good for every $k \geq 1$.
+Given a function $f : \N^+ \to M$, a positive integer $n$ is said to be *$f$-good* if $f(k) = f(n - k)$ for all $k < n$.
+Our aim is to determine all additive maps $f : \N^+ \to M$ with infinite many $f$-good positive integers.
 
-Our aim is to determine all additive maps $f : \N^+ \to M$ that is $n$-good for infinitely many $n \in \N^+$.
+We will borrow terminologies introduced in the extra file `extra/number_theory/divisor_closed_prop.lean`.
+For this `.md` file only, we say that $f : \N^+ \to M$ is wide if the $f$-good predicate is wide.
+Similarly, for any $p$ prime, we say that $f$ is $p$-strong if the $f$-good predicate is strong.
 
 
 
 # 1. General results
 
-First, we prove that additive maps that are $n$-good for infinitely many $n$ must either be wide or $p$-strong for some $p$ prime.
-The converse obviously holds.
+Let $f : \N^+ \to M$ be an additive map.
+It is easy to see that the set of $f$-good positive integers is divisor-closed.
+Indeed, fix an arbitrary $f$-good positive integer $n$ and let $d$ be a factor of $n$.
+Then for any $k < d$,
+$$ f(k) + f(n/d) = f(nk/d) = f(n - nk/d) = f(d - k) + f(n/d). $$
+Cancelling $f(n/d)$ from both sides shows us that $d$ is $f$-good.
+By the result in `extra/number_theory/divisor_closed_prop.lean`, $f$ is either wide or $p$-strong for some $p$ prime.
 
-> __Lemma 1.1__:
-> Let $f : \N^+ \to M$ be an additive map and $n$ be a positive integer such that $f$ is $n$-good.
-> Then $f$ is $d$-good for any $d \in \N^+$ such that $d \mid n$.
->
-> __Proof__:
-> For any $k < d$,
-> $$ f(k) + f(n/d) = f(nk/d) = f(n - nk/d) = f(d - k) + f(n/d). $$
-> Cancelling $f(n/d)$ from both sides finishes the proof of the lemma.
+Next, we show a property of $f$ when a prime is $f$-good.
 
-> __Theorem 1.2__:
-> Suppose that there are infinitely many positive integers $n$ for which $f$ is $n$-good.
-> Then, $f$ is either wide or $p$-strong for some prime $p$.
->
-> __Proof__:
-> Suppose that $f$ is not $p$-strong for any prime $p$.
-> For each prime $p$, there exists an integer $a_p \geq 0$ such that $f$ is $p^{a_p}$-good but not $p^{a_p + 1}$-good.
-> Then for each positive integer $n$ for which $f$ is $n$-good, by Lemma 1.1, we have $\nu_p(n) \leq a_p$.
->
-> If $f$ is not wide either, then $a_p = 0$ for all but finitely many $p$.
-> But then every positive integer $n$ such that $f$ is $n$-good must divide $\prod_p p^{a_p} < \infty$.
-> The product can be taken only over primes $p$ for which $f$ is $p$-good.
-> A contradiction, showing that the lemma holds.
-
-Next, we show that if $f$ is $p$-good for some prime $p$, then $f$ is well-behaved in the following sense.
-
-> __Lemma 1.3__:
-> Let $p$ be a prime for which $f$ is $p$-good.
+> __Lemma 1__:
+> Let $p$ be an $f$-good prime.
 > Then, for any positive integers $k, m < p$, we have $f([km]_p) = f(k) + f(m)$.
 >
 > __Proof__:
@@ -66,13 +48,11 @@ Next, we show that if $f$ is $p$-good for some prime $p$, then $f$ is well-behav
 > Cancelling out $f(k)$ gives us the desired equality $f([k_0 m_0]_p) = f(k_0) + f(m_0)$.
 > Induction step is complete; the lemma is proved.
 
-In particular, this also means that $f([k^t]_p) = t f(k)$ for any $0 < k < p$ and $t \geq 0$, if $f$ is $p$-good with $p$ being a prime.
-
 
 
 # 2. Results on $p$-strong maps
 
-The following lemma, together with Lemma 1.3, allows us to characterize $p$-strong maps for any prime $p$.
+The following lemma, together with Lemma 1, allows us to characterize $p$-strong maps for any prime $p$.
 
 > __Lemma 2.1__:
 > Let $f : \N^+ \to M$ be a $p$-strong additive map.
@@ -89,7 +69,7 @@ The following lemma, together with Lemma 1.3, allows us to characterize $p$-stro
 > Then we have $f(k) + f(n) = f(kn) = f(p^{a + 1} - kn)$, where $p^{a + 1} - kn < n$ by construction of $k$.
 > But also, since $k < p$ and $\gcd(n, p) = 1$, we have $\gcd(p^{a + 1} - kn, p) = 1$.
 > Applying induction hypothesis, we get $f(k) + f(n) = f([-kn]_p) = f([kn]_p)$.
-> But since $k < p$, Lemma 1.3 gives us $f([kn]_p) = f(k) + f([n]_p)$.
+> But since $k < p$, Lemma 1 gives us $f([kn]_p) = f(k) + f([n]_p)$.
 > Cancelling $f(k)$ out from both sides gives us $f(n) = f([n]_p)$.
 > Induction step is complete; the lemma is proved.
 
@@ -106,29 +86,17 @@ The following lemma, together with Lemma 1.3, allows us to characterize $p$-stro
 > Then $f(p^k t) = kc + f([t]_p)$ for all $k \geq 0$ and $t$ coprime with $p$ by additivity and Lemma 2.1.
 > There is a well-defined function $\chi : (\Z/p\Z)^* \to M$ given by $\chi(\overline{t}) = f([t]_p)$, since for any $t, t' \geq 0$,
 > $$ \overline{t} = \overline{t'} \iff t \equiv t' \pmod{p} \iff [t]_p = [t']_p. $$
-> Lemma 1.3 shows that $\chi$ must be a homomorphism: $\chi(km) = \chi(k) + \chi(m)$ for any $k, m \in (\Z/p\Z)^*$.
-> Finally, $\chi(-1) = f(p - 1) = 0$, since $f$ is $p$-good.
-
-Note that $\chi$ and $c$ uniquely determines $f$.
-This brings us to the following structural result.
-
-> __Theorem 2.3__:
-> Let $S_p(M)$ be the set of $p$-strong additive maps from $\N^+$ to $M$.
-> Then $S_p(M)$ is a commutative cancellative monoid under pointwise addition, and it is isomorphic to $M \times \text{Hom}(\Z/\frac{p - 1}{2}\Z, M)$.
->
-> __Proof__:
-> It is easy to check that $S_p(M)$ is a commutative cancellative monoid; all the properties are inherited from $M$.
-> By Theorem 2.2, $S_p(M) \cong M \times G$, where $G$ is the monoid of maps $\chi : (\Z/p\Z)^* \to M$ such that $\chi(-1) = 0$.
-> It is easy to see that $G \cong \text{Hom}((\Z/p\Z)^* / \{-1, 1\}, M)$.
-> Finally, $(\Z/p\Z)^* / \{-1, 1\} \cong \Z/\frac{p - 1}{2}\Z$.
+> Lemma 1 shows that $\chi$ must be a homomorphism: $\chi(km) = \chi(k) + \chi(m)$ for any $k, m \in (\Z/p\Z)^*$.
+> Finally, $\chi(-1) = f(p - 1) = 0$, since $p$ is $f$-good.
 
 
 
 # 3. Results on wide maps
 
 Unlike $p$-strong maps, wide maps are rather sporadic, except for the case where $M$ is torsion-free, where zero is the only wide map.
-Indeed, by Lemma 1.3 and Fermat's little theorem, given a prime $p$ and a $p$-good additive map $f$, we have $(p - 1) f(k) = f([k^{p - 1}]_p) = f(1) = 0$ for any $0 < k < p$.
-Then, when $M$ is torsion-free, we get $f(k) = 0$ for all $0 < k < p$.
+Indeed, let $f$ be an additive map and $p$ be an $f$-good prime.
+Then by Lemma 1 and Fermat's little theorem, we have $(p - 1) f(k) = f([k^{p - 1}]_p) = f(1) = 0$ for any $0 < k < p$.
+When $M$ is torsion-free, we get $f(k) = 0$ for all $0 < k < p$.
 If $f$ is wide, for each $k > 0$ we get $f(k) = 0$ by taking $p$ large enough.
 
 On the other hand, we give a construction of a non-zero wide map below.
@@ -152,9 +120,8 @@ On the other hand, we give a construction of a non-zero wide map below.
 > $$ g(k) g(m) = \left(\frac{k}{p_n}\right) \left(\frac{m}{p_n}\right) = \left(\frac{km}{p_n}\right) = g(km). $$
 > We set $f(k) = 1$ if $g(k) = -1$ and $f(k) = 0$ if $g(k) = 1$.
 > Working modulo $2$, since $g$ is multiplicative, $f$ is additive.
-> Furthermore, for each $n \geq 1$, $f$ is $p_n$-good since one can also check that $g$ is $p_n$-good.
-> Thus, $f$ is wide.
-> But $f \neq 0$, since $f(2) = 1$.
+> We also have $f \neq 0$, since $f(2) = 1$.
+> Finally, it is easy to see that $p_n$ is $f$-good for each $n \geq 1$, which implies that $f$ is wide.
 
 My comment: I think it is possible to construct a non-zero wide additive map whenever $M$ is not torsion-free.
 To show this property, it suffices to construct one for $M = \Z/p\Z$ for any prime $p$.
@@ -170,8 +137,8 @@ Similarly, an additive map cannot be wide and also $p$-strong for some $p$ unles
 In fact, we have an even more general result, trivializing both the above results.
 
 > __Theorem 4.1__:
-> Let $p$ be a prime, and let $f : \N^+ \to M$ be a $p$-strong homomorphism.
-> Suppose that $f$ is $n$-good for some $n > p$ coprime with $p$.
+> Let $p$ be a prime, and let $f : \N^+ \to M$ be a $p$-strong additive map.
+> Suppose that there exists an $f$-good positive integer $n > p$ coprime with $p$.
 > Then $f \equiv 0$.
 >
 > __Proof__:
@@ -179,18 +146,18 @@ In fact, we have an even more general result, trivializing both the above result
 > Clearly, we have $f = 0$ if and only if $c = 0$ and $\chi = 0$, if and only if $f(p) = 0$ and $f(k) = 0$ for each $k < p$.
 > Thus, it suffices to show that $f(k) = 0$ for each $k \leq p$.
 >
-> For any $0 < x < p$ such that $x \not\equiv n \pmod{p}$, we have $\chi(x) = \chi(n - x)$ since $f$ is $n$-good.
+> For any $0 < x < p$ such that $x \not\equiv n \pmod{p}$, we have $\chi(x) = \chi(n - x)$ since $n$ is $f$-good.
 > Then we have $\chi(nx^{-1} - 1) = 0$.
 > As $x$ ranges with the above restriction, the value of $nx^{-1} - 1$ modulo $p$ ranges over all non-zero values except $-1$ and $0$.
 > Thus, we get $f(k) = 0$ for $k < p - 1$.
 >
-> For $k = p - 1$, we get $f(p - 1) = f(1) = 0$ since $f$ is $p$-good.
-> Finally, for $k = p$, we get $f(p) = f(n - p) = f([n]_p) = 0$ since $f$ is $n$-good and $n$ is coprime with $p$.
+> For $k = p - 1$, we get $f(p - 1) = f(1) = 0$ since $p$ is $f$-good.
+> Finally, for $k = p$, we get $f(p) = f(n - p) = f([n]_p) = 0$ since $n$ is $f$-good and coprime with $p$.
 
 Indeed, if $f$ is $p$-strong and $q$-strong for some primes $p < q$, then we can apply Theorem 4.1 with $n = q$.
 If $f$ is wide and $p$-strong for some $p$, we can apply Theorem 4.1 by picking any suitable prime greater than $p$ for $n$.
 
 Without using characterizations of $p$-strong maps, one could still obtain $f \equiv 0$ with bound $n > p^2$.
 The idea is that we have $f(kp) = f(n - kp) = f(n)$ for each $k < n/p$, so that $f(k) = 0$ for each $k < n/p$.
-A smart use of the $p$-good property brings the bound down to $n > \frac{p(p - 1)}{2}$.
+A smart use of the $p$ being $f$-good brings the bound down to $n > \frac{p(p - 1)}{2}$.
 Using Thue's lemma, we can lower the bound even further to $n > p^{3/2}$.

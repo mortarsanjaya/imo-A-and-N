@@ -207,12 +207,12 @@ end strong_map
 
 namespace additive_map
 
-open strong_map
+open strong_map extra
 
 variables {M : Type*} [add_cancel_comm_monoid M] (p : ℕ) [fact p.prime]
 
 /-- Characterization of `p`-strong maps, in the language of additive maps. -/
-theorem pstrong_iff (f : additive_map M) : strong p f ↔ ∃ (c : M) (χ : pcompl_hom M p),
+theorem pstrong_iff (f : additive_map M) : strong p (good f) ↔ ∃ (c : M) (χ : pcompl_hom M p),
   ∀ n : ℕ, f n = padic_val_nat p n • c + χ (zmod.pcop_part p n) :=
 begin
   split,

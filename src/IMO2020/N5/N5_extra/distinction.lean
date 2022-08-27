@@ -32,7 +32,7 @@ begin
   exact nat.not_dvd_ord_compl (fact.out p.prime) hx
 end
 
-theorem big_coprime_good_mod {n : ℕ} (h : p < n) (h0 : p.coprime n) (h1 : good n f)
+theorem big_coprime_good_mod {n : ℕ} (h : p < n) (h0 : p.coprime n) (h1 : good f n)
   {x y : ℕ} (hx : ¬p ∣ x) (hy : ¬p ∣ y) (h2 : (x + y) % p = n % p) : f x = f y :=
 begin
   have X : ∀ a b : ℕ, b % a ≠ 0 ↔ ¬a ∣ b := λ a b, by rw [ne.def, nat.dvd_iff_mod_eq_zero],
@@ -51,14 +51,14 @@ end strong_map
 
 section distinction
 
-open strong_map
+open strong_map extra
 
 variables {M : Type*} [add_cancel_comm_monoid M] {p : ℕ} (hp : p.prime)
-variables {f : additive_map M} (hs : strong p f)
+variables {f : additive_map M} (hs : strong p (good f))
 include hp hs
 
 /-- If a `p`-strong map `f` is `n`-good for some `n > p` coprime with `p`, then `f = 0`. -/
-theorem pstrong_big_coprime_is_zero {n : ℕ} (h : p < n) (h0 : p.coprime n) (h1 : good n f) :
+theorem pstrong_big_coprime_is_zero {n : ℕ} (h : p < n) (h0 : p.coprime n) (h1 : good f n) :
   f = 0 :=
 begin
   haveI : fact p.prime := ⟨hp⟩,
@@ -105,21 +105,22 @@ begin
   use n * y; rw [mul_assoc, mul_comm y, nat.mul_mod, h4, mul_one, nat.mod_mod]
 end
 
-private lemma pstrong_qgood_is_zero {q : ℕ} (hq : q.prime) (h : p < q) (h0 : good q f) : f = 0 :=
+private lemma pstrong_qgood_is_zero {q : ℕ} (hq : q.prime) (h : p < q) (h0 : good f q) : f = 0 :=
 begin
   refine pstrong_big_coprime_is_zero hp hs h _ h0,
   rw nat.coprime_primes hp hq; exact ne_of_lt h
 end
 
 /-- If a `p`-strong map `f` is wide, then `f = 0`. -/
-theorem pstrong_wide_is_zero (h : wide f) : f = 0 :=
+theorem pstrong_wide_is_zero (h : wide (good f)) : f = 0 :=
 begin
   rcases h.exists_nat_lt p with ⟨q, ⟨hq, h0⟩, h1⟩,
   exact pstrong_qgood_is_zero hp hs hq h1 h0
 end
 
 /-- If a `p`-strong map `f` is `q`-strong for some prime `q ≠ p`, then `f = 0`. -/
-theorem pstrong_qstrong_is_zero {q : ℕ} (hq : q.prime) (h : p ≠ q) (h0 : strong q f) : f = 0 :=
+theorem pstrong_qstrong_is_zero {q : ℕ} (hq : q.prime) (h : p ≠ q) (h0 : strong q (good f)) :
+  f = 0 :=
 begin
   wlog h1 : p < q := lt_or_gt_of_ne h using [p q, q p],
   replace h0 := h0 1,

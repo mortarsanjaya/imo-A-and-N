@@ -7,7 +7,7 @@ namespace IMO2020N5
 
 variables {M : Type*} [add_cancel_comm_monoid M] {p : ℕ} [fact p.prime]
 
-private lemma pstrong_mod_p_induct (f : additive_map M) {a : ℕ} (h : good (p ^ a) f)
+private lemma pstrong_mod_p_induct (f : additive_map M) {a : ℕ} (h : good f (p ^ a))
   {k : ℕ} (hkp : ¬(p : ℕ) ∣ k) (h0 : k < p ^ a) : f k = f (k % p) :=
 begin
   have hp := fact.out p.prime,
@@ -20,7 +20,7 @@ begin
   intros n hn1 n_ih h k h0 h1,
   induction k using nat.strong_induction_on with k k_ih,
   cases lt_or_le k (p ^ n) with h2 h2,
-  exact n_ih (good_factor f (pow_ne_zero _ hp.ne_zero) h ⟨p, pow_succ' p n⟩) h0 h2,
+  exact n_ih (good_dc f _ (pow_ne_zero _ hp.ne_zero) h _ ⟨p, pow_succ' p n⟩) h0 h2,
   clear n_ih,
 
   let c := p ^ (n + 1) / k,
@@ -51,7 +51,7 @@ begin
   have h6 : ¬p ∣ d := λ h6, by rw nat.dvd_add_right h6 at h3; exact h5 h3,
   have h7 : d < k := (p ^ (n + 1)).mod_lt (zero_lt_iff.mpr hk),
   replace k_ih := k_ih d h7 h6 (lt_trans h7 h1),
-  replace h : good p f := good_factor f (pow_ne_zero _ hp.ne_zero) h ⟨p ^ n, by rw pow_succ⟩,
+  replace h : good f p := good_dc f _ (pow_ne_zero _ hp.ne_zero) h _ ⟨p ^ n, by rw pow_succ⟩,
   rw [k_ih, ← nat.mod_eq_of_lt h2, ← good_prime_mul_mod_p f hp h h4 h0,
       h (c * k % p) (d % p) (by rwa X) (by rwa X)],
   rw [add_comm, ← nat.add_mod_add_of_le_add_mod, nat.mod_eq_zero_of_dvd h3, zero_add],

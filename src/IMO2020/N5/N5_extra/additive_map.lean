@@ -6,14 +6,10 @@ import algebra.module.basic
 Given a commutative additive monoid `M`, we define an additive map `f : ℕ → M` as
   a map such that `f(0) = 0` and `f(xy) = f(x) + f(y)` for all `x y : ℕ` non-zero.
 The set of additive maps form an additive monoid under pointwise addition.
-If $M$ has more structures, e.g. `M` is a group or a module,
-  then the set of additive maps also has more structures.
 
 ## Implementation details
 
 We mimic the implementation from some files in `mathlib` such as `nat.arithmetic_function`.
-
-TODO: Implement module instances for `additive_map M` when `M` is a module over some semiring.
 -/
 
 namespace IMOSL
