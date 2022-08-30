@@ -1,6 +1,6 @@
 import data.nat.parity number_theory.arithmetic_function data.zmod.basic
 
-/-! # IMO 2008 N2 -/
+/-! # IMO 2009 N2 -/
 
 namespace IMOSL
 namespace IMO2008N2
