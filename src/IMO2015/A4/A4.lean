@@ -153,7 +153,7 @@ end results
 
 
 /-- Final solution -/
-theorem final_solution_domain [is_domain R] (f : R → R) : fn_eq f ↔ f = id ∨ f = λ x, 2 - x :=
+theorem final_solution [is_domain R] (f : R → R) : fn_eq f ↔ f = id ∨ f = λ x, 2 - x :=
 begin
   split,
   { intros h,
