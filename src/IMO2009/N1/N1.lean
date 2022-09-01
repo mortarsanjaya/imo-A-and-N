@@ -1,26 +1,11 @@
-import algebra.ring.basic algebra.periodic data.zmod.basic data.nat.periodic
+import data.zmod.basic extra.periodic.big_operators data.nat.periodic
 
 /-! # IMO 2009 N1 (P1) -/
 
 namespace IMOSL
 namespace IMO2009N1
 
-open function finset
-
-section extra
-
-lemma periodic_prod_const {M : Type*} [comm_monoid M] {a : ℕ → M} {n : ℕ}
-  (h : periodic a n) (k : ℕ) : (range n).prod (λ m, a (m + k)) = (range n).prod a :=
-begin
-  induction k with k k_ih,
-  simp only [add_zero],
-  conv_lhs { congr, skip, funext, rw [nat.succ_eq_one_add, ← add_assoc] },
-  cases n with n n,
-  rw [prod_range_zero, prod_range_zero],
-  rw [prod_range_succ, add_comm, h, ← k_ih, prod_range_succ', zero_add]
-end
-
-end extra
+open function finset extra
 
 
 

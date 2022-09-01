@@ -1,34 +1,18 @@
-import
-  data.real.basic
-  algebra.periodic
-  algebra.big_operators.intervals
-  algebra.group.defs
-  data.nat.periodic
-  tactic.fin_cases
+import data.real.basic extra.periodic.big_operators data.nat.periodic tactic.fin_cases
 
 /-! # IMO 2018 A2 (P2) -/
 
-open finset function
-open_locale classical
-
 namespace IMOSL
 namespace IMO2018A2
+
+open finset function extra
+open_locale classical
 
 def good (a : ℕ → ℝ) := ∀ i : ℕ, a i * a (i + 1) + 1 = a (i + 2)
 
 
 
 section extra
-
-lemma periodic_sum_const {M : Type*} [add_cancel_comm_monoid M] {a : ℕ → M} {n : ℕ}
-  (h : periodic a n) (k : ℕ) : (range n).sum (λ m, a (m + k)) = (range n).sum a :=
-begin
-  induction k with k k_ih,
-  simp only [add_zero],
-  conv_lhs { congr, skip, funext, rw [nat.succ_eq_one_add, ← add_assoc] },
-  rw [← k_ih, ← add_left_inj (a (n + k)), ← sum_range_succ,
-      add_comm n, h, sum_range_succ', zero_add]
-end
 
 lemma sum_nonneg_eq_zero {M : Type*} [linear_ordered_add_comm_group M] {a : ℕ → M}
   (h : ∀ i : ℕ, 0 ≤ a i) {n : ℕ} (h0 : (range n).sum a = 0) {j : ℕ} (h1 : j < n) : a j = 0 :=
