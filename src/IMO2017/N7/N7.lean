@@ -1,4 +1,8 @@
-import ring_theory.polynomial.homogeneous ring_theory.coprime.basic data.mv_polynomial.comm_ring
+import
+  ring_theory.polynomial.homogeneous
+  ring_theory.coprime.basic
+  data.mv_polynomial.comm_ring
+  data.nat.totient
 
 /-! # IMO 2017 N7 (P6) -/
 
@@ -42,6 +46,14 @@ begin
     rwa [neg_mul_comm, eq_comm, mul_right_inj' ha] at h1 }
 end
 
+private lemma int_exists_pow_modeq_one_of_coprime {a b : ℤ} (h : is_coprime a b) :
+  ∃ K : ℕ, 0 < K ∧ a ^ K ≡ 1 [ZMOD b] :=
+begin
+  sorry
+end
+
+
+
 private lemma homogeneous_smul_eval {σ R : Type*} [comm_ring R]
   (f : σ → R) (r : R) {φ : mv_polynomial σ R} {n : ℕ} (h : φ.is_homogeneous n) :
   eval (r • f) φ = r ^ n * eval f φ :=
@@ -51,6 +63,15 @@ begin
   simp only [smul_eq_mul, pi.smul_apply, mul_pow],
   rw [mul_left_comm, prod_mul_distrib, prod_pow_eq_pow_sum]; congr,
   exact h (mem_support_iff.mp hd)
+end
+
+private lemma homogeneous_pow {σ R : Type*} [comm_ring R]
+  (k : ℕ) {φ : mv_polynomial σ R} {n : ℕ} (h : φ.is_homogeneous n) :
+  (φ ^ k).is_homogeneous (k * n) :=
+begin
+  induction k with k k_ih,
+  rw [pow_zero, zero_mul]; exact is_homogeneous_one σ R,
+  rw [pow_succ', nat.succ_mul]; exact is_homogeneous.mul k_ih h
 end
 
 
@@ -66,42 +87,34 @@ end
 private lemma CCX_eval (u v : ℤ) (c : bool → ℤ) : eval c (CCX u v) = u * c tt + v * c ff :=
   by simp only [CCX, map_add, map_mul, eval_C, eval_X]
 
+private lemma CCX_prod_is_homogeneous_card (xy : finset (bool → ℤ)) :
+  (xy.prod (λ p, CCX (p ff) (-p tt))).is_homogeneous xy.card :=
+begin
+  induction xy using finset.induction_on with c xy h h0,
+  rw [prod_empty, card_empty]; exact is_homogeneous_one bool ℤ,
+  rw [prod_insert h, card_insert_of_not_mem h, add_comm],
+  exact is_homogeneous.mul (CCX_is_homogeneous_one _ _) h0
+end
+
+private lemma CCX_prod_eval_eq_zero_of_mem {xy : finset (bool → ℤ)} {p : bool → ℤ} (h : p ∈ xy) :
+  eval p (xy.prod (λ p, CCX (p ff) (-p tt))) = 0 :=
+begin
+  rw [eval_prod, prod_eq_zero_iff],
+  refine ⟨p, h, _⟩,
+  rw [CCX_eval, neg_mul, mul_comm, add_neg_self]
+end
+
 end extra
 
 
 
-
-
-
-
-variables (xy : finset (bool → ℤ)) (h : ∀ p : bool → ℤ, p ∈ xy → is_coprime (p tt) (p ff))
-include h
-
-private lemma lem1 {c : bool → ℤ} (h0 : is_coprime (c tt) (c ff))
-  (h1 : ∀ p : bool → ℤ, p ∈ xy → (c ≠ p ∧ c ≠ -p)) : ∃ φ : mv_polynomial bool ℤ,
-  is_homogeneous φ xy.card ∧ (∀ p : bool → ℤ, p ∈ xy → eval p φ = 0) ∧ eval c φ ≠ 0 :=
-begin
-  refine ⟨xy.prod (λ p, CCX (p ff) (-p tt)), _, λ p h2, _, _⟩,
-  { convert is_homogeneous.prod xy _ (λ _, 1) (λ i _, _),
-    rw [sum_const, smul_eq_mul, mul_one],
-    exact CCX_is_homogeneous_one _ _ },
-  { rw [eval_prod, prod_eq_zero_iff],
-    refine ⟨p, h2, _⟩,
-    rw [CCX_eval, neg_mul, ← sub_eq_add_neg, mul_comm, sub_self] },
-  { rw [eval_prod, prod_ne_zero_iff],
-    rintros p h2 h3,
-    rw [CCX_eval, neg_mul, ← sub_eq_add_neg, sub_eq_zero, mul_comm] at h3,
-    rcases int_is_coprime_mul_eq h0 (h p h2) h3 with ⟨h4, h5⟩ | ⟨h4, h5⟩,
-    refine (h1 p h2).1 _; ext b; cases b; assumption,
-    refine (h1 p h2).2 _; ext b; cases b; assumption }
-end
-
-
-
 /-- Final solution -/
-theorem final_solution : ∃ (φ : mv_polynomial bool ℤ) (d : ℕ),
-  0 < d ∧ is_homogeneous φ d ∧ ∀ p : bool → ℤ, p ∈ xy → mv_polynomial.eval p φ = 1 :=
+theorem final_solution {xy : finset (bool → ℤ)}
+  (h : ∀ p : bool → ℤ, p ∈ xy → is_coprime (p tt) (p ff)) :
+  ∃ (φ : mv_polynomial bool ℤ) (d : ℕ),
+    0 < d ∧ is_homogeneous φ d ∧ ∀ p : bool → ℤ, p ∈ xy → mv_polynomial.eval p φ = 1 :=
 begin
+
   -- First we solve the case xy = ∅ and the inductive base case |xy| = 1.
   induction xy using finset.induction_on with c xy hcxy xy_ih,
   exact ⟨0, 1, one_pos, is_homogeneous_zero bool ℤ 1, λ p h0, by exfalso; exact h0⟩,
@@ -110,27 +123,52 @@ begin
   refine ⟨CCX u v, 1, one_pos, CCX_is_homogeneous_one _ _, λ p h1, _⟩,
   rw [mem_insert, or_iff_left (not_mem_empty p)] at h1,
   rw [CCX_eval, h1, h0],
-  
-  -- Now we focus on the induction step.
-  -- But first separate the case where (x_n, y_n) = ± (x_i, y_i) for some i < n.
+  rw ← card_pos at hxy,
+
+  /-
+  Now we focus on the induction step.
+  Set ρ = ∏ [p ∈ xy] (λ p, p_f X - p_t Y). 
+  The desired polynomial is φ^K + Mρ (uc_t + vc_f)^L for some K L : ℕ and M : ℤ.
+  The sufficient properties for its construction is Kd = |xy| + L and ρ(c) ∣ φ(c)^K - 1.
+  Simplifying, it suffices to prove that there exists K such that |xy| ≤ Kd and ρ(c) ∣ φ(c)^K - 1.
+  -/
   simp only [mem_insert, forall_eq_or_imp] at h,
   cases h with hc_cop hxy_cop,
   replace xy_ih := xy_ih hxy_cop,
   rcases xy_ih with ⟨φ, d, hd0, hd1, h0⟩,
-  by_cases h1 : ∃ p : bool → ℤ, p ∈ xy ∧ (c = p ∨ c = -p),
-  rcases h1 with ⟨p, h1, rfl | rfl⟩,
-  exfalso; exact hcxy h1,
-  refine ⟨φ ^ 2, 2 * d, mul_pos two_pos hd0, _, λ q h2, _⟩,
-  rw [sq, two_mul]; exact is_homogeneous.mul hd1 hd1,
-  rw [mem_insert, or_comm] at h2; rcases h2 with h2 | rfl,
-  rw [map_pow, h0 q h2, one_pow],
-  rw [map_pow, ← neg_one_smul ℤ p, homogeneous_smul_eval p _ hd1, h0 p h1,
-      mul_one, ← pow_mul, mul_comm, pow_mul, neg_one_sq, one_pow],
+  let ρ := xy.prod (λ p, CCX (p ff) (-p tt)),
+  suffices : ∃ K : ℕ, xy.card ≤ K * d ∧ eval c ρ ∣ (eval c φ) ^ K - 1,
+  { rcases this with ⟨K, h1, M, h2⟩,
+    rcases hc_cop with ⟨u, v, hc_cop⟩,
+    rw le_iff_exists_add at h1; cases h1 with L h1,
+    refine ⟨φ ^ K + C (-M) * ρ * (CCX u v) ^ L, xy.card + L, _, is_homogeneous.add _ _, λ p hp, _⟩,
+    exact lt_of_lt_of_le hxy (self_le_add_right _ _),
+    rw ← h1; exact homogeneous_pow K hd1,
+    { rw ← nat.zero_add xy.card,
+      refine is_homogeneous.mul (is_homogeneous.mul (is_homogeneous_C bool (-M)) _) _,
+      exact CCX_prod_is_homogeneous_card xy,
+      convert homogeneous_pow L (CCX_is_homogeneous_one u v); rw mul_one },
+    { simp only [map_add, map_mul, map_pow, C_neg, map_neg, neg_mul, eval_C],
+      rw mem_insert at hp; rcases hp with rfl | h3,
+      rw [CCX_eval, hc_cop, one_pow, mul_one, mul_comm, ← h2, neg_sub, add_comm, sub_add_cancel],
+      rw [h0 p h3, one_pow, CCX_prod_eval_eq_zero_of_mem h3,
+          mul_zero, zero_mul, neg_zero, add_zero] } },
 
-  -- This is the main case we work with.
-  simp only [not_exists, not_or_distrib, not_and] at h1,
-  replace h1 := lem1 xy hxy_cop hc_cop h1,
-  rcases h1 with ⟨ρ, hρ, hρxy, hρc⟩,
+  -- One can reduce one step further: only need to show that φ(c) and ρ(c) are coprime.
+  suffices : is_coprime (eval c φ) (eval c ρ),
+  { rcases int_exists_pow_modeq_one_of_coprime this with ⟨K, h1, h2⟩,
+    refine ⟨xy.card * K, _, _⟩,
+    rw mul_assoc; exact nat.le_mul_of_pos_right (mul_pos h1 hd0),
+    rw [mul_comm, pow_mul, ← int.modeq_iff_dvd],
+    convert int.modeq.symm (int.modeq.pow xy.card h2); rw one_pow },
+
+  -- Next, reduce to coprimality with respect to each p ∈ xy, then chore.
+  rw eval_prod; refine is_coprime.prod_right (λ p hp, _),
+  rw CCX_eval,
+  replace h0 := h0 p hp,
+  clear hcxy hxy hxy_cop ρ hp,
+
+  -- To be continued...
   sorry
 end
 
