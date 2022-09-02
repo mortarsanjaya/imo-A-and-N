@@ -3,6 +3,7 @@ import
   ring_theory.coprime.basic
   data.mv_polynomial.comm_ring
   data.nat.totient
+  field_theory.finite.basic
 
 /-! # IMO 2017 N7 (P6) -/
 
@@ -49,7 +50,37 @@ end
 private lemma int_exists_pow_modeq_one_of_coprime {a b : ℤ} (h : is_coprime a b) :
   ∃ K : ℕ, 0 < K ∧ a ^ K ≡ 1 [ZMOD b] :=
 begin
-  sorry
+  rcases eq_or_ne b 0 with rfl | h0,
+  rw is_coprime_zero_right at h; exact ⟨2, two_pos, by rw int.is_unit_sq h⟩,
+  replace h0 := int.nat_abs_pos_of_ne_zero h0,
+  refine ⟨b.nat_abs.totient, nat.totient_pos h0, int.modeq.symm _⟩,
+  rw [int.modeq_iff_dvd, ← int.nat_abs_dvd],
+  rw int.coprime_iff_nat_coprime at h,
+  generalize_hyp : b.nat_abs = n at h h0 ⊢; clear b,
+  rw [← nat.succ_le_iff, le_iff_eq_or_lt] at h0,
+  rcases h0 with rfl | h0,
+  rw nat.cast_one; exact one_dvd _,
+  rw [← nat.succ_le_iff, le_iff_eq_or_lt] at h0,
+  rcases h0 with rfl | h0,
+  { rw [nat.coprime_comm, nat.prime.coprime_iff_not_dvd nat.prime_two] at h,
+    rw [nat.cast_succ, nat.cast_one, nat.totient_two, pow_one, ← bit0],
+    apply int.dvd_sub_of_mod_eq,
+    rwa [← int.not_even_iff, ← int.nat_abs_even, nat.even_iff, ← nat.dvd_iff_mod_eq_zero] },
+  replace h := nat.modeq.pow_totient h,
+  obtain ⟨c, h1⟩ := nat.totient_even h0,
+  rw [h1, ← two_mul] at h ⊢,
+  rw [pow_mul, ← int.nat_abs_sq, ← pow_mul, ← nat.cast_pow],
+  change (1 : ℤ) with ((1 : ℕ) : ℤ),
+  rw [← int.modeq_iff_dvd, int.coe_nat_modeq_iff],
+  exact nat.modeq.symm h
+end
+
+private lemma int_coprime_iff_not_exists_prime_dvd (a b : ℤ) :
+  is_coprime a b ↔ ∀ p : ℕ, p.prime → ¬((p : ℤ) ∣ a ∧ (p : ℤ) ∣ b) :=
+begin
+  conv_rhs { find (¬_) { rw [← int.nat_abs_dvd_iff_dvd, int.nat_abs_of_nat,
+    ← int.nat_abs_dvd_iff_dvd, int.nat_abs_of_nat, ← nat.dvd_gcd_iff] } },
+  rw [← nat.eq_one_iff_not_exists_prime_dvd, int.coprime_iff_nat_coprime]
 end
 
 
@@ -166,9 +197,13 @@ begin
   rw eval_prod; refine is_coprime.prod_right (λ p hp, _),
   rw CCX_eval,
   replace h0 := h0 p hp,
-  clear hcxy hxy hxy_cop ρ hp,
+  replace hxy_cop := hxy_cop p hp,
+  clear hcxy hxy ρ hp hd0 xy,
 
-  -- To be continued...
+  -- Now prove the coprimality result.
+  rw int_coprime_iff_not_exists_prime_dvd at hc_cop hxy_cop ⊢,
+  intros q hq; replace hxy_cop := hxy_cop q hq; replace hc_cop := hc_cop q hq,
+  repeat { rw [← zmod.int_coe_zmod_eq_zero_iff_dvd] at hc_cop hxy_cop ⊢ },
   sorry
 end
 
