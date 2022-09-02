@@ -242,8 +242,8 @@ begin
     by cases h1 with s h1; exact cycle_sum5 (λ i, (h1 i).1) (λ i, (h1 i).2.1) (λ i, (h1 i).2.2) hx,
   rcases h1 with ⟨c, h1, h2, h3⟩,
   replace h3 := int.prime.dvd_mul' h h3,
-  rw [or_iff_left h0] at h3,
-  have random : n ∣ c := by library_search,
+  rw [or_iff_left h0, int.coe_nat_dvd] at h3,
+  exact nat.not_dvd_of_pos_of_lt h1 h2 h3
 end
 
 
