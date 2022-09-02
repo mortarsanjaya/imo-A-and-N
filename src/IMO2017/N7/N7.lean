@@ -4,6 +4,7 @@ import
   data.mv_polynomial.comm_ring
   data.nat.totient
   field_theory.finite.basic
+  data.zmod.basic
 
 /-! # IMO 2017 N7 (P6) -/
 
@@ -85,9 +86,12 @@ end
 
 
 
-private lemma homogeneous_smul_eval {σ R : Type*} [comm_ring R]
-  (f : σ → R) (r : R) {φ : mv_polynomial σ R} {n : ℕ} (h : φ.is_homogeneous n) :
-  eval (r • f) φ = r ^ n * eval f φ :=
+section is_homogeneous
+
+variables {σ R : Type*} [comm_ring R]
+
+private lemma homogeneous_smul_eval (f : σ → R) (r : R) {φ : mv_polynomial σ R}
+  {n : ℕ} (h : φ.is_homogeneous n) : eval (r • f) φ = r ^ n * eval f φ :=
 begin
   rw [eval_eq, eval_eq, mul_sum],
   refine finset.sum_congr rfl (λ d hd, _),
@@ -96,8 +100,18 @@ begin
   exact h (mem_support_iff.mp hd)
 end
 
-private lemma homogeneous_pow {σ R : Type*} [comm_ring R]
-  (k : ℕ) {φ : mv_polynomial σ R} {n : ℕ} (h : φ.is_homogeneous n) :
+private lemma homogeneous_smul_eval₂ {S : Type*} [comm_ring S] (ρ : R →+* S)
+  (f : σ → S) (r : S) {φ : mv_polynomial σ R} {n : ℕ} (h : φ.is_homogeneous n) :
+  eval₂ ρ (r • f) φ = r ^ n * eval₂ ρ f φ :=
+begin
+  rw [eval₂_eq, eval₂_eq, mul_sum],
+  refine finset.sum_congr rfl (λ d hd, _),
+  simp only [smul_eq_mul, pi.smul_apply, mul_pow],
+  rw [mul_left_comm, prod_mul_distrib, prod_pow_eq_pow_sum]; congr,
+  exact h (mem_support_iff.mp hd)
+end
+
+private lemma homogeneous_pow (k : ℕ) {φ : mv_polynomial σ R} {n : ℕ} (h : φ.is_homogeneous n) :
   (φ ^ k).is_homogeneous (k * n) :=
 begin
   induction k with k k_ih,
@@ -105,35 +119,89 @@ begin
   rw [pow_succ', nat.succ_mul]; exact is_homogeneous.mul k_ih h
 end
 
+end is_homogeneous
 
 
-private noncomputable def CCX (u v : ℤ) : mv_polynomial bool ℤ := C u * X tt + C v * X ff
 
-private lemma CCX_is_homogeneous_one (u v : ℤ) : (CCX u v).is_homogeneous 1 :=
+section CCX
+
+section comm_ring
+
+variables {R : Type*} [comm_ring R]
+
+private noncomputable def CCX (u v : R) : mv_polynomial bool R := C u * X tt + C v * X ff
+
+private lemma CCX_is_homogeneous_one (u v : R) : (CCX u v).is_homogeneous 1 :=
 begin
   refine is_homogeneous.add _ _; rw ← zero_add 1,
-  all_goals { exact is_homogeneous.mul (is_homogeneous_C bool _) (is_homogeneous_X ℤ _) }
+  all_goals { exact is_homogeneous.mul (is_homogeneous_C bool _) (is_homogeneous_X R _) }
 end
 
-private lemma CCX_eval (u v : ℤ) (c : bool → ℤ) : eval c (CCX u v) = u * c tt + v * c ff :=
+private lemma CCX_eval (u v : R) (c : bool → R) : eval c (CCX u v) = u * c tt + v * c ff :=
   by simp only [CCX, map_add, map_mul, eval_C, eval_X]
 
-private lemma CCX_prod_is_homogeneous_card (xy : finset (bool → ℤ)) :
+private lemma CCX_prod_is_homogeneous_card [decidable_eq R] (xy : finset (bool → R)) :
   (xy.prod (λ p, CCX (p ff) (-p tt))).is_homogeneous xy.card :=
 begin
   induction xy using finset.induction_on with c xy h h0,
-  rw [prod_empty, card_empty]; exact is_homogeneous_one bool ℤ,
+  rw [prod_empty, card_empty]; exact is_homogeneous_one bool R,
   rw [prod_insert h, card_insert_of_not_mem h, add_comm],
   exact is_homogeneous.mul (CCX_is_homogeneous_one _ _) h0
 end
 
-private lemma CCX_prod_eval_eq_zero_of_mem {xy : finset (bool → ℤ)} {p : bool → ℤ} (h : p ∈ xy) :
+private lemma CCX_prod_eval_eq_zero_of_mem [decidable_eq R] [is_domain R]
+  {xy : finset (bool → R)} {p : bool → R} (h : p ∈ xy) :
   eval p (xy.prod (λ p, CCX (p ff) (-p tt))) = 0 :=
 begin
   rw [eval_prod, prod_eq_zero_iff],
   refine ⟨p, h, _⟩,
   rw [CCX_eval, neg_mul, mul_comm, add_neg_self]
 end
+
+end comm_ring
+
+
+
+section field
+
+variables {F : Type*} [field F]
+
+private lemma CCX_eval_eq_zero_iff_exists_eq_smul (p : bool → F) (u v : F) :
+  eval p (CCX u v) = 0 ↔ p = 0 ∨ ∃ α : F, u = α * p ff ∧ v = -α * p tt :=
+begin
+  rw [CCX_eval, add_eq_zero_iff_eq_neg, ← neg_mul],
+  cases eq_or_ne (p tt) 0 with h h,
+  { rw [h, mul_zero, zero_eq_mul],
+    cases eq_or_ne (p ff) 0 with h0 h0,
+    rw [h0, eq_self_iff_true, or_true, true_iff],
+    left; ext b; cases b; assumption,
+    rw [iff_false_intro h0, or_false, neg_eq_zero, or_iff_right],
+    work_on_goal 2 { rintros rfl; exact h0 rfl },
+    refine ⟨λ h1, ⟨u / p ff, (div_mul_cancel _ h0).symm, by rw [mul_zero, h1]⟩, λ h1, _⟩,
+    rcases h1 with ⟨α, rfl, rfl⟩,
+    rw mul_zero },
+  { rw or_iff_right,
+    work_on_goal 2 { rintros rfl; exact h rfl },
+    refine ⟨λ h1, ⟨-v / p tt, _, _⟩, λ h1, _⟩,
+    rw [← mul_div_right_comm, ← h1, mul_div_cancel _ h],
+    rw [neg_div, neg_neg, div_mul_cancel _ h],
+    rcases h1 with ⟨α, rfl, rfl⟩,
+    rw [neg_mul α, neg_neg, mul_right_comm] }
+end
+
+end field
+
+end CCX
+
+
+
+section zmod
+
+private lemma CCX_eval_zmod_cast (p : ℕ) (u v : ℤ) (c : bool → ℤ) :
+  (eval c (CCX u v) : zmod p) = eval (coe ∘ c) (CCX (u : zmod p) v) :=
+  by simp only [CCX_eval, function.comp_app, int.cast_add, int.cast_mul]
+
+end zmod
 
 end extra
 
@@ -195,16 +263,37 @@ begin
 
   -- Next, reduce to coprimality with respect to each p ∈ xy, then chore.
   rw eval_prod; refine is_coprime.prod_right (λ p hp, _),
-  rw CCX_eval,
   replace h0 := h0 p hp,
   replace hxy_cop := hxy_cop p hp,
   clear hcxy hxy ρ hp hd0 xy,
 
   -- Now prove the coprimality result.
   rw int_coprime_iff_not_exists_prime_dvd at hc_cop hxy_cop ⊢,
-  intros q hq; replace hxy_cop := hxy_cop q hq; replace hc_cop := hc_cop q hq,
-  repeat { rw [← zmod.int_coe_zmod_eq_zero_iff_dvd] at hc_cop hxy_cop ⊢ },
-  sorry
+  intros q hq h1; replace hxy_cop := hxy_cop q hq; replace hc_cop := hc_cop q hq,
+  repeat { rw ← zmod.int_coe_zmod_eq_zero_iff_dvd at hc_cop hxy_cop h1 },
+  haveI : fact q.prime := ⟨hq⟩,
+  cases h1 with h1 h2,
+  rw [CCX_eval_zmod_cast, CCX_eval_eq_zero_iff_exists_eq_smul] at h2,
+  rcases h2 with h2 | ⟨α, h2⟩,
+  exact hc_cop ⟨congr_fun h2 tt, congr_fun h2 ff⟩,
+  revert h0; suffices : (eval p φ : zmod q) = 0,
+  { intros h0,
+    rw [zmod.int_coe_zmod_eq_zero_iff_dvd, h0] at this,
+    replace this := int.eq_one_of_dvd_one q.cast_nonneg this,
+    rw nat.cast_eq_one at this,
+    rw this at hq; exact nat.not_prime_one hq },
+  clear hc_cop hxy_cop,
+  rw [eval, ← int.coe_cast_ring_hom, map_eval₂_hom,
+      coe_eval₂_hom, ring_hom_comp_triple.comp_eq] at h1 ⊢,
+  replace h2 : (λ i, int.cast_ring_hom (zmod q) (p i))
+    = α • (λ i, int.cast_ring_hom (zmod q) (c i)) :=
+  begin
+    cases h2 with h2 h3,
+    rw [neg_mul, int.cast_neg, neg_inj] at h3,
+    ext b; rw [ring_hom.eq_int_cast, pi.smul_apply, smul_eq_mul, ring_hom.eq_int_cast],
+    cases b; assumption
+  end,
+  rw [h2, homogeneous_smul_eval₂ _ _ _ hd1, h1, mul_zero]
 end
 
 end IMO2017N7
