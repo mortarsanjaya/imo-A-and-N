@@ -34,7 +34,7 @@ end
 
 
 
-/-- Rinal solution -/
+/-- Final solution -/
 theorem final_solution (x : R) (h : x ≤ 0) : f x = 0 :=
 begin
   have h0 : ∀ y : R, y < 0 → f y = 0 :=
