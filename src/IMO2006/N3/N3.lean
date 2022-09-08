@@ -70,30 +70,6 @@ end
 
 
 
-private def nat_max_range (f : ℕ → ℕ) (n : ℕ) : ℕ :=
-  (image f (range n.succ)).max' ⟨f 0, mem_image.mpr ⟨0, mem_range.mpr n.succ_pos, rfl⟩⟩
-
-private lemma nat_max_range_zero (f : ℕ → ℕ) : nat_max_range f 0 = f 0 :=
-  by simp only [nat_max_range, range_one, image_singleton, max'_singleton]
-
-private lemma nat_max_range_mono (f : ℕ → ℕ) : monotone (nat_max_range f) :=
-begin
-  intros a b h; unfold nat_max_range,
-  refine max'_le _ _ _ (λ x h0, _),
-  rw mem_image at h0; rcases h0 with ⟨c, h0, rfl⟩,
-  refine le_max' _ _ (mem_image.mpr ⟨c, _, rfl⟩),
-  rw mem_range at h0 ⊢,
-  exact lt_of_lt_of_le h0 (nat.succ_le_succ_iff.mpr h)
-end
-
-private lemma nat_max_range_lt_succ_iff (f : ℕ → ℕ) (n : ℕ) :
-  nat_max_range f n < nat_max_range f n.succ ↔ nat_max_range f n < f n.succ :=
-begin
-  sorry
-end
-
-
-
 def f (n : ℕ) : ℚ := ((g n : ℤ) : ℚ) / ((n : ℤ) : ℚ)
 
 /-- Final solution, part 1 -/
@@ -109,8 +85,26 @@ begin
     refine lt_of_lt_of_le _ h; norm_num,
     exact n.succ_pos },
   refine set.infinite_of_not_bdd_above _,
-  simp only [bdd_above, upper_bounds, set.nonempty, not_exists, set.mem_set_of, not_forall],
-  sorry
+  simp [bdd_above, upper_bounds, set.nonempty],
+  intros b,
+
+  -- We take x to be the minimal natural with |d(x + 1)| > b.
+  have h : ∃ y : ℕ, b + 1 < y.succ.divisors.card :=
+    ⟨2 ^ (b + 1) - 1, by rw [nat.succ_eq_add_one, nat.sub_add_cancel (nat.one_le_pow' _ 1),
+      nat.divisors_prime_pow nat.prime_two, card_map, card_range, nat.lt_succ_iff] ⟩,
+  use nat.find h; rw [and_comm, and_iff_left_of_imp],
+  work_on_goal 2 { rintros ⟨-, h0⟩; exact pos_of_gt h0 },
+  refine ⟨λ m h0, lt_of_le_of_lt _ (nat.find_spec h), _⟩,
+  { cases m with m m,
+    rw [nat.divisors_zero, card_empty]; exact nat.zero_le _,
+    have h1 := nat.find_min h h0,
+    exact le_of_not_lt h1 },
+  { rw ← not_le; intros h0,
+    replace h0 : ∃ y, y ≤ b ∧ b + 1 < y.succ.divisors.card := ⟨nat.find h, h0, nat.find_spec h⟩,
+    clear h; rcases h0 with ⟨y, h, h0⟩,
+    revert h; refine not_le_of_lt (nat.succ_lt_succ_iff.mp (lt_of_lt_of_le h0 _)),
+    rw nat.divisors; convert finset.card_filter_le _ _,
+    rw [nat.card_Ico, nat.add_sub_cancel] }
 end
 
 /-- Final solution, part 2 -/
