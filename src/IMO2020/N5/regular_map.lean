@@ -1,4 +1,4 @@
-import IMO2020.N5.additive_map.basic extra.number_theory.ord_compl_zmod
+import IMO2020.N5.additive_map extra.number_theory.ord_compl_zmod
 
 /-!
 # `p`-regular maps
@@ -8,14 +8,16 @@ Given `(c, χ) : M × (additive (zmod p)ˣ →+ M)`, the *regular map* `regular_
   additive map given by `p^k t ↦ k • c + χ(t : (zmod p)ˣ)` for any `k ≥ 1` and `t` coprime with `p`.
 We will show that map `regular_map M p` is additive and injective with `regular_map M p 0 = 0`.
 Then, we construct `regular_hom M p` as a bundled homomorphism version of `regular_map M p`.
+
 We also define the predicate `is_regular_map M p` and prove an equivalent condition:
   an additive map is regular iff `f(t) = f(t % p)` for any `t` coprime with `p`.
+Lastly, we prove that `is_regular_map M p f` and `is_regular_map M q f` for `p ≠ q` yields `f = 0`.
 -/
 
 namespace IMOSL
 namespace IMO2020N5
 
-open extra additive function
+open extra additive
 
 
 
@@ -95,7 +97,7 @@ theorem map_pair_zero : regular_map M p 0 = 0 :=
   by ext x; rw [map_def, prod.fst_zero, smul_zero, zero_add, prod.snd_zero,
                 add_monoid_hom.zero_apply, additive_map.zero_apply, if_t_t]
 
-theorem injective : injective (regular_map M p) :=
+theorem injective : function.injective (regular_map M p) :=
 begin
   rintros ⟨c, χ⟩ ⟨d, ρ⟩ h,
   rw fun_like.ext_iff at h,
@@ -127,8 +129,17 @@ def regular_hom (M : Type*) [add_comm_monoid M] (p : ℕ) [fact p.prime] :
 def is_regular_map (M : Type*) [add_comm_monoid M] (p : ℕ) [fact p.prime] (f : additive_map M) :=
   ∃ pair : M × (additive (zmod p)ˣ →+ M), f = regular_map M p pair
 
-theorem is_regular_map_iff {M : Type*} [add_comm_monoid M] {p : ℕ} [fact p.prime]
-  (f : additive_map M) : is_regular_map M p f ↔ ∀ t : ℕ, t.coprime p → f t = f (t % p) :=
+
+
+namespace is_regular_map
+
+variables {M : Type*} [add_comm_monoid M] {p q : ℕ} [fact p.prime] [fact q.prime]
+
+/-- The zero additive map is `p`-regular -/
+theorem zero : is_regular_map M p 0 := ⟨0, map_pair_zero.symm⟩
+
+/-- An equivalent condition for `p`-regularity -/
+theorem iff (f : additive_map M) : is_regular_map M p f ↔ ∀ t : ℕ, t.coprime p → f t = f (t % p) :=
 begin
   have hp := fact.out p.prime,
   refine ⟨λ h t h0, _, λ h, ⟨⟨f p, ⟨λ x, f (to_mul x : zmod p).val, _, λ x y, _⟩⟩, _⟩⟩,
@@ -151,6 +162,80 @@ begin
         zmod.ord_compl.map_ne_zero_val h0, ← h],
     rw nat.coprime_comm; exact nat.coprime_ord_compl hp h0 }
 end
+
+/-- Condition for two `p`-regular maps to be equal -/
+theorem ext_iff_at_le_p {f g : additive_map M} (hf : is_regular_map M p f)
+  (hg : is_regular_map M p g) : f = g ↔ ∀ k : ℕ, 0 < k → k ≤ p → f k = g k :=
+begin
+  refine ⟨λ h k _ _, by rw h, λ h, _⟩,
+  ext n; rcases eq_or_ne n 0 with rfl | h0,
+  rw [additive_map.map_zero, additive_map.map_zero],
+  have hp := fact.out p.prime,
+  have h1 : ord_proj[p] n ≠ 0 := pow_ne_zero _ hp.ne_zero,
+  have h2 : ord_compl[p] n ≠ 0 := ne_of_gt (nat.ord_compl_pos p h0),
+  rw [← nat.ord_proj_mul_ord_compl_eq_self n p, additive_map.map_mul f h1 h2,
+      additive_map.map_pow, additive_map.map_mul g h1 h2, additive_map.map_pow],
+  rw iff at hf hg,
+  have h3 : (ord_compl[p] n).coprime p := nat.coprime.symm (nat.coprime_ord_compl hp h0),
+  rw [hf _ h3, hg _ h3, h _ hp.pos (le_refl p), h _ _ (le_of_lt (nat.mod_lt _ hp.pos))],
+  rwa [zero_lt_iff, ne.def, ← nat.dvd_iff_mod_eq_zero, ← hp.coprime_iff_not_dvd, nat.coprime_comm]
+end
+
+/-- Condition for a `p`-regular map to be zero -/
+theorem zero_iff_at_le_p {f : additive_map M} (hf : is_regular_map M p f) :
+  f = 0 ↔ ∀ k : ℕ, 0 < k → k ≤ p → f k = 0 :=
+  by rw ext_iff_at_le_p hf zero; simp only [additive_map.zero_apply]
+
+/-- (Private) small lemma for values of `p`-regular map at two `nat` congruent modulo `p` -/
+private lemma map_modeq_coprime {f : additive_map M} (hf : is_regular_map M p f)
+  {m n : ℕ} (h : m % p = n % p) (h0 : n.coprime p) : f m = f n :=
+begin
+  rw iff at hf,
+  rw [hf n h0, ← h, ← hf],
+  unfold nat.coprime at h0 ⊢,
+  rw ← nat.modeq at h,
+  rw [nat.modeq.gcd_eq_of_modeq h, h0]
+end
+
+/-- Distinction between `p`-regular and `q`-regular for `p ≠ q` -/
+theorem distinction {f : additive_map M} (hpf : is_regular_map M p f) (hqf : is_regular_map M q f)
+  (h : p ≠ q) : f = 0 :=
+begin
+  rw ne_iff_lt_or_gt at h,
+  unfreezingI { wlog : p < q := h using [p q, q p] },
+  work_on_goal 2 { exact this hqf hpf },
+  have hp := fact.out p.prime,
+  have hq := fact.out q.prime,
+  have hpq := (nat.coprime_primes hp hq).mpr (ne_of_lt h),
+
+  rw zero_iff_at_le_p hpf,
+  suffices : ∃ c : M, f p + c = 0,
+  { cases this with c h0,
+    replace hpf : ∀ k : ℕ, f (q + k * p) = f q :=
+      λ k, map_modeq_coprime hpf (by rw nat.add_mul_mod_self_right) hpq.symm,
+    suffices : ∀ k : ℕ, 0 < k → k ≤ p → f q = f k + f p,
+    { intros k h1 h2,
+      rw [← add_zero (f k), ← h0, ← add_assoc, ← this k h1 h2,
+          this 1 one_pos (le_of_lt hp.one_lt), additive_map.map_one, zero_add] },
+    intros k h1 h2,
+    rw [← hpf k, ← additive_map.map_mul f (ne_of_gt h1) hp.ne_zero],
+    apply map_modeq_coprime hqf,
+    rw nat.add_mod_left,
+    refine nat.coprime.mul _ hpq,
+    rw [nat.coprime_comm, hq.coprime_iff_not_dvd],
+    exact nat.not_dvd_of_pos_of_lt h1 (lt_of_le_of_lt h2 h) },
+  
+  obtain ⟨n, h0⟩ := nat.exists_mul_mod_eq_one_of_coprime hpq hq.one_lt,
+  use f n,
+  rw ← nat.mod_eq_of_lt hq.one_lt at h0,
+  rw [← additive_map.map_mul f hp.ne_zero, map_modeq_coprime hqf h0 q.coprime_one_left],
+  exact f.map_one,
+  rintros rfl,
+  rw [mul_zero, nat.zero_mod, nat.mod_eq_of_lt hq.one_lt] at h0,
+  revert h0; exact zero_ne_one
+end
+
+end is_regular_map
 
 end IMO2020N5
 end IMOSL

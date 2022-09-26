@@ -1,4 +1,4 @@
-import algebra.module.basic
+import algebra.module.basic data.nat.factorization.basic
 
 /-!
 # Additive maps
@@ -54,6 +54,18 @@ theorem coe_inj {f g : additive_map M} : (f : ℕ → M) = g ↔ f = g :=
 
 theorem ext_iff {f g : additive_map M} : f = g ↔ ∀ x, f x = g x := ⟨λ h x, by rw h, ext⟩
 
+theorem ext_iff_primes {f g : additive_map M} : f = g ↔ ∀ p : ℕ, p.prime → f p = g p :=
+begin
+  refine ⟨λ h _ _, by rw h, λ h, ext (nat.rec_on_mul _ _ h (λ a b ha hb, _))⟩,
+  rw [additive_map.map_zero, additive_map.map_zero],
+  rw [additive_map.map_one, additive_map.map_one],
+  rcases eq_or_ne a 0 with rfl | ha0,
+  rw [zero_mul, ha],
+  rcases eq_or_ne b 0 with rfl | hb0,
+  rw [mul_zero, hb],
+  rw [additive_map.map_mul f ha0 hb0, additive_map.map_mul g ha0 hb0, ha, hb]
+end
+
 end basic
 
 
@@ -90,6 +102,38 @@ begin
   rw [hx, pow_succ, zero_mul, map_zero, smul_zero],
   rw [pow_succ', map_mul f (pow_ne_zero _ hx) hx, nat.succ_eq_add_one, n_ih, add_smul, one_smul]
 end
+
+theorem map_prod_finset (f : additive_map M) {α : Type*} [decidable_eq α] {S : finset α} {g : α → ℕ}
+  (hS : ∀ x, x ∈ S → g x ≠ 0) : f (S.prod g) = S.sum (λ x, f (g x)) :=
+begin
+  induction S using finset.induction with a S h h0,
+  rw [finset.prod_empty, finset.sum_empty, additive_map.map_one],
+  replace hS : g a ≠ 0 ∧ ∀ x : α, x ∈ S → g x ≠ 0 :=
+    ⟨hS a (S.mem_insert_self a), λ x hx, hS x (finset.mem_insert_of_mem hx)⟩,
+  rw [finset.prod_insert h, finset.sum_insert h, ← h0 hS.2, additive_map.map_mul f hS.1],
+  rw finset.prod_ne_zero_iff; exact hS.2
+end
+
+theorem map_factorization (f : additive_map M) (n : ℕ) :
+  f n = n.factorization.sum (λ p k, k • f p) :=
+begin
+  revert n; refine nat.rec_on_mul _ _ (λ p hp, _) (λ a b ha hb, _),
+  rw [nat.factorization_zero, finsupp.sum_zero_index, additive_map.map_zero],
+  rw [nat.factorization_one, finsupp.sum_zero_index, additive_map.map_one],
+  rw [hp.factorization, finsupp.sum_single_index, one_nsmul],
+  rw zero_smul,
+  rcases eq_or_ne a 0 with rfl | ha0,
+  rw [zero_mul, ha],
+  rcases eq_or_ne b 0 with rfl | hb0,
+  rw [mul_zero, hb],
+  rw [additive_map.map_mul f ha0 hb0, nat.factorization_mul ha0 hb0,
+      finsupp.sum_add_index, ← ha, ← hb],
+  rintros c -; rw zero_smul,
+  rintros c - d1 d2; rw add_smul
+end
+
+theorem zero_iff_primes {f : additive_map M} : f = 0 ↔ ∀ p : ℕ, p.prime → f p = 0 :=
+  by rw ext_iff_primes; simp only [additive_map.zero_apply]
 
 end add_comm_monoid
 
