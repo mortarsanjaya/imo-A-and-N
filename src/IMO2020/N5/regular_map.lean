@@ -30,8 +30,9 @@ def regular_map (M : Type*) [add_comm_monoid M] (p : ℕ) [fact p.prime]
   map_one' := by rw [if_neg (one_ne_zero : 1 ≠ 0), padic_val_nat.one,
     zero_smul, zero_add, zmod.ord_compl.map_one, of_mul_one, map_zero],
   map_mul' := λ x y hx hy,
-    by rw [if_neg (mul_ne_zero hx hy), if_neg hx, if_neg hy, add_add_add_comm, ← add_smul,
-      ← padic_val_nat.mul p hx hy, ← map_add, ← of_mul_mul, zmod.ord_compl.map_mul hx hy] }
+    by rw [if_neg (mul_ne_zero hx hy), if_neg hx, if_neg hy, add_add_add_comm,
+           ← add_smul, ← @padic_val_nat.mul p x y _inst_2 hx hy, ← map_add,
+           ← of_mul_mul, zmod.ord_compl.map_mul hx hy] }
 
 
 
