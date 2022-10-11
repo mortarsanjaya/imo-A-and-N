@@ -104,7 +104,7 @@ begin
     clear h; rcases h0 with ⟨y, h, h0⟩,
     revert h; refine not_le_of_lt (nat.succ_lt_succ_iff.mp (lt_of_lt_of_le h0 _)),
     rw nat.divisors; convert finset.card_filter_le _ _,
-    rw [nat.card_Ico, nat.add_sub_cancel] }
+    rw list.length_range' }
 end
 
 /-- Final solution, part 2 -/
