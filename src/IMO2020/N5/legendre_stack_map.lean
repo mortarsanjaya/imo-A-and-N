@@ -74,10 +74,11 @@ begin
   exact p.stacking n
 end
 
-/-- For any `m : ℤ` and `j k : ℕ` with `|m| < min{p_j, p_k}`, we have `(m | p_j) = (m | p_k)`. -/
-theorem legendre_invariant {m : ℤ} {j k : ℕ} (hj : m.nat_abs < p j) (hk : m.nat_abs < p k) :
-  J(m | p j) = J(m | p k) :=
+/-- For any `b : ℤ` and `k m : ℕ` with `|b| < min{p_k, p_m}`, we have `(b | p_k) = (b | p_m)`. -/
+theorem legendre_invariant {b : ℤ} {k m : ℕ} (hk : b.nat_abs < p k) (hm : b.nat_abs < p m) :
+  J(b | p k) = J(b | p m) :=
 begin
+  wlog : k ≤ m,
   sorry
 end
 
