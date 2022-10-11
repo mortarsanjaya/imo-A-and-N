@@ -3,7 +3,7 @@ import algebra.module.basic data.nat.factorization.basic
 /-!
 # Additive maps
 
-Given a commutative additive monoid `M`, we define an additive map `f : ℕ → M` as
+Given a commutative additive monoid `M`, we define an **additive map** `f : ℕ → M` as
   a map such that `f(0) = f(1) = 0` and `f(xy) = f(x) + f(y)` for all `x y : ℕ` non-zero.
 The set of additive maps form an additive monoid under pointwise addition.
 

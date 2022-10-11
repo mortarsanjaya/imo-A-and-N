@@ -4,7 +4,7 @@ import IMO2020.N5.additive_map extra.number_theory.ord_compl_zmod
 # `p`-regular maps
 
 Fix a commutative additive monoid `M` and a prime `p`.
-Given `(c, χ) : M × (additive (zmod p)ˣ →+ M)`, the *regular map* `regular_map M p (c, χ)` is the
+Given `(c, χ) : M × (additive (zmod p)ˣ →+ M)`, the **regular map** `regular_map M p (c, χ)` is the
   additive map given by `p^k t ↦ k • c + χ(t : (zmod p)ˣ)` for any `k ≥ 1` and `t` coprime with `p`.
 We will show that map `regular_map M p` is additive and injective with `regular_map M p 0 = 0`.
 Then, we construct `regular_hom M p` as a bundled homomorphism version of `regular_map M p`.
@@ -114,6 +114,43 @@ end
 theorem inj : regular_map M p pair = regular_map M p pair' ↔ pair = pair' :=
   ⟨λ h, injective h, congr_arg _⟩
 
+theorem fst_eq_iff : pair.1 = pair'.1 ↔ regular_map M p pair p = regular_map M p pair' p :=
+  by rw [map_p, map_p]
+
+theorem fst_eq_zero_iff : pair.1 = 0 ↔ regular_map M p pair p = 0 := by rw map_p
+
+theorem snd_eq_iff : pair.2 = pair'.2 ↔
+  ∀ k : ℕ, k ≠ 0 → k < p → regular_map M p pair k = regular_map M p pair' k :=
+begin
+  rcases pair with ⟨c, χ⟩; rcases pair' with ⟨c', χ'⟩,
+  simp only []; split,
+  { rintros rfl k h h0,
+    rw [map_ne_zero _ h, map_ne_zero _ h, padic_val_nat.eq_zero_of_not_dvd, zero_smul, zero_smul],
+    exact nat.not_dvd_of_pos_of_lt (zero_lt_iff.mpr h) h0 },
+  { intros h; ext x,
+    have h0 : (to_mul x : zmod p).val ≠ 0 :=
+      by rw [ne.def, zmod.val_eq_zero]; exact units.ne_zero _,
+    replace h := h (to_mul x : zmod p).val h0 (to_mul x : zmod p).val_lt,
+    replace h0 := zmod.val_coe_unit_coprime (to_mul x),
+    suffices : zmod.unit_of_coprime (to_mul x : zmod p).val h0 = to_mul x,
+      rwa [map_coprime _ h0, map_coprime _ h0, this] at h,
+    rw [units.ext_iff, zmod.coe_unit_of_coprime, zmod.nat_cast_val, zmod.cast_id', id.def] }
+end
+
+theorem snd_eq_zero_iff : pair.2 = 0 ↔ ∀ k : ℕ, k ≠ 0 → k < p → regular_map M p pair k = 0 :=
+  by convert snd_eq_iff pair 0; simp only [map_pair_zero, additive_map.zero_apply]
+
+theorem eq_iff : pair = pair' ↔
+  ∀ k : ℕ, k ≠ 0 → k ≤ p → regular_map M p pair k = regular_map M p pair' k :=
+begin
+  rw [prod.ext_iff, fst_eq_iff, snd_eq_iff],
+  refine ⟨λ h k h1 h2, _,
+    λ h, ⟨h p (fact.out p.prime).ne_zero (le_refl p), λ k h0 h1, h k h0 (le_of_lt h1)⟩⟩,
+  rw le_iff_eq_or_lt at h2; rcases h2 with h2 | h2,
+  rw [h2, h.1],
+  exact h.2 k h1 h2
+end
+
 end regular_map
 
 
@@ -165,25 +202,16 @@ end
 
 /-- Condition for two `p`-regular maps to be equal -/
 theorem ext_iff_at_le_p {f g : additive_map M} (hf : is_regular_map M p f)
-  (hg : is_regular_map M p g) : f = g ↔ ∀ k : ℕ, 0 < k → k ≤ p → f k = g k :=
+  (hg : is_regular_map M p g) : f = g ↔ ∀ k : ℕ, k ≠ 0 → k ≤ p → f k = g k :=
 begin
-  refine ⟨λ h k _ _, by rw h, λ h, _⟩,
-  ext n; rcases eq_or_ne n 0 with rfl | h0,
-  rw [additive_map.map_zero, additive_map.map_zero],
-  have hp := fact.out p.prime,
-  have h1 : ord_proj[p] n ≠ 0 := pow_ne_zero _ hp.ne_zero,
-  have h2 : ord_compl[p] n ≠ 0 := ne_of_gt (nat.ord_compl_pos p h0),
-  rw [← nat.ord_proj_mul_ord_compl_eq_self n p, additive_map.map_mul f h1 h2,
-      additive_map.map_pow, additive_map.map_mul g h1 h2, additive_map.map_pow],
-  rw iff at hf hg,
-  have h3 : (ord_compl[p] n).coprime p := nat.coprime.symm (nat.coprime_ord_compl hp h0),
-  rw [hf _ h3, hg _ h3, h _ hp.pos (le_refl p), h _ _ (le_of_lt (nat.mod_lt _ hp.pos))],
-  rwa [zero_lt_iff, ne.def, ← nat.dvd_iff_mod_eq_zero, ← hp.coprime_iff_not_dvd, nat.coprime_comm]
+  rcases hf with ⟨⟨c, χ⟩, rfl⟩,
+  rcases hg with ⟨⟨c', χ'⟩, rfl⟩,
+  rw [regular_map.inj, regular_map.eq_iff]
 end
 
 /-- Condition for a `p`-regular map to be zero -/
 theorem zero_iff_at_le_p {f : additive_map M} (hf : is_regular_map M p f) :
-  f = 0 ↔ ∀ k : ℕ, 0 < k → k ≤ p → f k = 0 :=
+  f = 0 ↔ ∀ k : ℕ, k ≠ 0 → k ≤ p → f k = 0 :=
   by rw ext_iff_at_le_p hf zero; simp only [additive_map.zero_apply]
 
 /-- (Private) small lemma for values of `p`-regular map at two `nat` congruent modulo `p` -/
@@ -213,17 +241,17 @@ begin
   { cases this with c h0,
     replace hpf : ∀ k : ℕ, f (q + k * p) = f q :=
       λ k, map_modeq_coprime hpf (by rw nat.add_mul_mod_self_right) hpq.symm,
-    suffices : ∀ k : ℕ, 0 < k → k ≤ p → f q = f k + f p,
+    suffices : ∀ k : ℕ, k ≠ 0 → k ≤ p → f q = f k + f p,
     { intros k h1 h2,
       rw [← add_zero (f k), ← h0, ← add_assoc, ← this k h1 h2,
-          this 1 one_pos (le_of_lt hp.one_lt), additive_map.map_one, zero_add] },
+          this 1 one_ne_zero (le_of_lt hp.one_lt), additive_map.map_one, zero_add] },
     intros k h1 h2,
-    rw [← hpf k, ← additive_map.map_mul f (ne_of_gt h1) hp.ne_zero],
+    rw [← hpf k, ← additive_map.map_mul f h1 hp.ne_zero],
     apply map_modeq_coprime hqf,
     rw nat.add_mod_left,
     refine nat.coprime.mul _ hpq,
     rw [nat.coprime_comm, hq.coprime_iff_not_dvd],
-    exact nat.not_dvd_of_pos_of_lt h1 (lt_of_le_of_lt h2 h) },
+    exact nat.not_dvd_of_pos_of_lt (zero_lt_iff.mpr h1) (lt_of_le_of_lt h2 h) },
   
   obtain ⟨n, h0⟩ := nat.exists_mul_mod_eq_one_of_coprime hpq hq.one_lt,
   use f n,

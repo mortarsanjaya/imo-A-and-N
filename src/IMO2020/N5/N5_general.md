@@ -209,10 +209,13 @@ We use the same trick as in Lemma 1.2, except we have cancellation to shorten th
 
 We use $\N \to M$ to represent the additive maps, taking advantage of the better `nat` API.
 The additive maps are defined in `additive_map.lean`, with an additional criterion $f(0) = 0$ on top of $f(xy) = f(x) + f(y)$ and $f(1) = 0$.
-The $p$-regular maps, together with their properties, p$-regularity predicate, and distinction results are defined in `additive_map/regular_map.lean`.
+The $p$-regular maps, together with their properties, $p$-regularity predicate, and distinction results are defined in `regular_map.lean`.
+The non-zero wide map from Theorem 2.4 is constructed in `legendre_stack_map.lean` using a more general construction.
 The rest of the results are put into `N5_general.lean`.
 
-The non-zero sporadic map construction done above for $M$ with a $2$-torsion element requires Dirichlet's theorem on arithmetic progressions, which has not been implemented in Lean at the time of writing.
+Note that only the construction of the wide map from Theorem 2.4 as an additive map is put into `legendre_stack_map.lean`.
+The proof of it being wide is still in `N5_general.lean`.
+Furthermore, a concrete construction requires Dirichlet's theorem on arithmetic progressions, which has not been implemented in Lean at the time of writing.
 We will state the theorem but use the placeholder `sorry` in its proof.
 
 We also need some extra code to define $p$-regular maps.
