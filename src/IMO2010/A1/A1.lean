@@ -52,7 +52,7 @@ begin
         intros h1; rw [h1, floor_zero]
       end,
       have h1 := feq ↑(2 : ℤ) 2⁻¹,
-      rwa [floor_coe, cast_bit0, cast_one, h0, cast_zero, mul_zero, mul_inv_cancel] at h1,
+      rwa [int.floor_int_cast, cast_bit0, cast_one, h0, cast_zero, mul_zero, mul_inv_cancel] at h1,
       exact two_ne_zero } },
   { rintros (rfl | ⟨C, h, rfl⟩) x y,
     rw [pi.zero_apply, pi.zero_apply, zero_mul],

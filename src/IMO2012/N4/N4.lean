@@ -1,4 +1,4 @@
-import data.int.gcd data.set.finite
+import data.int.gcd data.set.finite data.nat.prime tactic.ring
 
 /-! # IMO 2012 N4 -/
 
@@ -30,7 +30,8 @@ begin
     rw [← nat.cast_one, ← nat.cast_add, nat.cast_pos]; exact (j : ℕ).succ_pos },
   suffices : injective f,
     convert fintype.card_le_of_injective f this; rw fintype.card_fin n,
-  intros x y h; simp only [f, subtype.mk_eq_mk] at h,
+  intros x y h,
+  simp only [f, fin.mk_eq_mk] at h,
   rwa [mul_eq_mul_left_iff, add_left_inj, ← fin.ext_iff, or_iff_left] at h,
   exact four_ne_zero
 end

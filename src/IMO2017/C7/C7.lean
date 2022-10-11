@@ -86,7 +86,7 @@ end
 
 private lemma range_nth_notin_eq_compl : set.range (nth_notin X) = Xᶜ :=
 begin
-  ext n; rw [set.mem_range, set.mem_compl_eq, mem_coe],
+  ext n; rw [set.mem_range, set.mem_compl_iff, mem_coe],
   refine ⟨_, (λ h, ⟨nat.count (λ n, n ∉ X) n, _⟩)⟩,
   rintros ⟨y, rfl⟩,
   exact nat.nth_mem_of_infinite (λ n, n ∉ X) (nat_finset_infinite_compl X) y,
@@ -165,7 +165,7 @@ begin
   rw disjoint_right; intros a h1 h0,
   rw ← mem_coe at h1,
   replace h1 : a ∈ set.range (nth_notin X) := coe_image_subset_range h1,
-  rw [range_nth_notin_eq_compl, set.mem_compl_eq, finset.mem_coe] at h1,
+  rw [range_nth_notin_eq_compl, set.mem_compl_iff, finset.mem_coe] at h1,
   exact h1 h0
 end
 

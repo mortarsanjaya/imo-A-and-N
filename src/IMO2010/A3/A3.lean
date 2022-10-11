@@ -14,7 +14,7 @@ def good (x : ℕ → ℝ≥0) := ∀ j : ℕ, x j + x (j + 1) + x (j + 2) ≤ 1
 
 section extra
 
-noncomputable def target_sum (x : ℕ → ℝ≥0) (n : ℕ) := (range (2 * n)).sum (λ i, x i * x (i + 2))
+def target_sum (x : ℕ → ℝ≥0) (n : ℕ) := (range (2 * n)).sum (λ i, x i * x (i + 2))
 
 private lemma target_sum_zero (x : ℕ → ℝ≥0) : target_sum x 0 = 0 :=
   by rw [target_sum, mul_zero, range_zero, sum_empty]
