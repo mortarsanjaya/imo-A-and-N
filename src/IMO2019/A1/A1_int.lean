@@ -1,4 +1,4 @@
-import IMO2019.A1.A1_general data.int.basic algebra.algebra.basic
+import IMO2019.A1.A1_general data.int.basic algebra.algebra.basic tactic.ring
 
 /-! # IMO 2019 A1 (P1), Integer Version -/
 
