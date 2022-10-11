@@ -86,7 +86,7 @@ begin
   let p : fin 3 := ⟨i % 3, i.mod_lt three_pos⟩,
   fin_cases p using hp,
   all_goals {
-    rw ← set_coe.ext_iff at hp,
+    rw fin.ext_iff at hp,
     simp [p] at hp,
     rw hp; norm_num }
 end
@@ -147,7 +147,7 @@ begin
       let p : fin 3 := ⟨i % 3, i.mod_lt three_pos⟩,
       fin_cases p using hp,
       all_goals {
-        rw ← set_coe.ext_iff at hp,
+        rw fin.ext_iff at hp,
         simp [p] at hp,
         rw hp; assumption } } },
   { have h : periodic good_ex 3 := λ i, by simp only [good_ex, nat.add_mod_right],
