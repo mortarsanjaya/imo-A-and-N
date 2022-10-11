@@ -1,5 +1,5 @@
 import
-  ring_theory.polynomial.homogeneous
+  ring_theory.mv_polynomial.homogeneous
   ring_theory.coprime.basic
   data.mv_polynomial.comm_ring
   data.nat.totient
@@ -290,7 +290,7 @@ begin
   begin
     cases h2 with h2 h3,
     rw [neg_mul, int.cast_neg, neg_inj] at h3,
-    ext b; rw [ring_hom.eq_int_cast, pi.smul_apply, smul_eq_mul, ring_hom.eq_int_cast],
+    ext b; rw [eq_int_cast, pi.smul_apply, smul_eq_mul, eq_int_cast],
     cases b; assumption
   end,
   rw [h2, homogeneous_smul_eval₂ _ _ _ hd1, h1, mul_zero]
