@@ -73,7 +73,7 @@ begin
   replace h2 := lem3 h h2,
   have h3 : n ≤ (n + 1) * d + n + c := by rw add_right_comm; exact le_add_self,
   replace h3 := lem1 h h3,
-  rw [h1, h2, nat.le_zero_iff, add_eq_zero_iff] at h3,
+  rw [h1, h2, le_zero_iff, add_eq_zero_iff] at h3,
   exact ne_of_gt d.succ_pos h3.2
 end
 
