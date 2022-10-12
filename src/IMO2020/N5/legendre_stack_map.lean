@@ -124,21 +124,33 @@ theorem legendre_equiv_nat {b k m : ℕ} (hk : b < p k) (hm : b < p m) : J(b | p
   by wlog : k ≤ m; exact legendre_equiv_nat' p hk case
 
 /-- An invariant for `p` based on congruence mod `4`, taking values `-1` or `1`. -/
-def mod4_invariant := J(-1 | p 0)
+def χ₄ := χ₄ (p 0)
 
-/-- For any `k : ℕ`, `(-1 | p k) = mod4_invariant p`. -/
-theorem legendre_equiv_mod4 (k : ℕ) : J(-1 | p k) = p.mod4_invariant :=
-  eq_comm.mp (legendre_equiv_int' p (p.is_prime 0).one_lt k.zero_le)
+/-- For any `k : ℕ`, `(-1 | p k) = χ₄ p`. -/
+theorem legendre_equiv_χ₄ (k : ℕ) : J(-1 | p k) = p.χ₄ :=
+begin
+  rw [← legendre_equiv_int' p _ k.zero_le, jacobi_sym.at_neg_one (p.odd 0), χ₄],
+  rw [int.nat_abs_neg, int.nat_abs_one]; exact (p.is_prime 0).one_lt
+end
+
+/-- `χ₄ p = ± 1`. -/
+theorem χ₄_eq_one_or_neg_one : p.χ₄ = 1 ∨ p.χ₄ = -1 :=
+begin
+  rw ← p.legendre_equiv_χ₄ 0,
+  apply jacobi_sym.eq_one_or_neg_one,
+  rw [int.gcd_eq_nat_abs, int.nat_abs_of_nat, int.nat_abs_neg, int.nat_abs_one, nat.gcd_one_left]
+end
+
+/-- For any `b : ℤ` and `k : ℕ`, `(-b | p k) = χ₄ p * (b | p k)` -/
+theorem legendre_neg (b : ℤ) (k : ℕ) : J(-b | p k) = χ₄ p * J(b | p k) :=
+  by rw [← legendre_equiv_χ₄ p k, ← jacobi_sym.mul_left, neg_one_mul]
 
 
 
 section monoid_map
 
-variables {M : Type*} [add_comm_monoid M] (c : M) (hc : 2 • c = 0)
-include hc
-
 /-- The Legendre stack map associated with `p` and `c` as an additive map. -/
-def map : additive_map M :=
+def map {M : Type*} [add_monoid M] (c : M) (hc : 2 • c = 0) : additive_map M :=
 { to_fun := λ n, ite (J(n | p n) = -1) c 0,
   map_zero' := by rw [nat.cast_zero, legendre_zero_left, if_neg (by norm_num : (0 : ℤ) ≠ -1)],
   map_one' := by rw [nat.cast_one, jacobi_sym.one_left, if_neg (by norm_num : (1 : ℤ) ≠ -1)],
@@ -154,18 +166,79 @@ def map : additive_map M :=
   end }
 
 
+variables {M : Type*} [add_comm_monoid M] {c : M} (hc : 2 • c = 0)
+include hc
 
-/-- The map is zero if `c = 0`. -/
-theorem map_is_zero (h : 2 • 0 = 0) : p.map 0 h = 0 :=
-begin
-  sorry
-end
+theorem map_val (n : ℕ) : p.map c hc n = ite (J(n | p n) = -1) c 0 := rfl
+
+theorem map_val' {n k : ℕ} (h : n < p k) : p.map c hc n = ite (J(n | p k) = -1) c 0 :=
+  by rw [map_val, p.legendre_equiv_nat (p.self_lt n) h]
 
 /-- The map is never zero if `c ≠ 0`. -/
-theorem map_is_non_zero : p.map c hc = 0 :=
+theorem map_is_non_zero (h : c ≠ 0) : p.map c hc ≠ 0 :=
 begin
-  sorry
+  haveI : fact (p 0).prime := ⟨p.is_prime 0⟩,
+  obtain ⟨a, ha, h0⟩ : ∃ a : ℕ, a < p 0 ∧ ¬is_square ((a : ℤ) : zmod (p 0)) :=
+  begin
+    suffices : ∃ a : zmod (p 0), ¬is_square a,
+    { cases this with a h0,
+      refine ⟨a.val, val_lt a, _⟩,
+      rwa [zmod.nat_cast_val, zmod.int_cast_cast, zmod.cast_id', id.def] },
+    refine finite_field.exists_nonsquare (λ h0, _),
+    rw zmod.ring_char_zmod_n at h0,
+    have h1 := p.odd 0,
+    rw [h0, nat.odd_iff_not_even] at h1,
+    exact h1 even_two
+  end,
+  rw [← zmod.nonsquare_iff_jacobi_sym_eq_neg_one, legendre_equiv_nat' p ha a.zero_le] at h0,
+  intros h1; replace h1 := fun_like.congr_fun h1 a,
+  rw [additive_map.zero_apply, p.map_val, if_pos h0] at h1,
+  exact h h1
 end
+
+/-- The map is zero iff `c = 0`. -/
+theorem map_is_zero_iff : p.map c hc = 0 ↔ c = 0 :=
+begin
+  split; intros h,
+  by_contra h0; exact p.map_is_non_zero hc h0 h,
+  ext n; rw [additive_map.zero_apply, map_val, h, if_t_t]
+end
+
+theorem map_mul_mod {a b m : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) (ha0 : a < p m) (hb0 : b < p m) :
+  p.map c hc a + p.map c hc b = p.map c hc (a * b % p m) :=
+begin
+  rw [p.map_val, p.map_val, p.map_val' hc (nat.mod_lt _ (p.is_prime m).pos),
+      int.coe_nat_mod, ← jacobi_sym.mod_left, nat.cast_mul, jacobi_sym.mul_left,
+      p.legendre_equiv_nat ha0 (p.self_lt a), p.legendre_equiv_nat hb0 (p.self_lt b)],
+  have X : (1 : ℤ) ≠ -1 := by norm_num,
+  cases legendre_ne_zero p ha with ha1 ha1; cases legendre_ne_zero p hb with hb1 hb1,
+  all_goals { simp only [ha1, hb1, if_true, eq_self_iff_true, if_false, X,
+    zero_add, add_zero, one_mul, mul_one, neg_mul_neg] },
+  rw [← two_nsmul, ← hc]
+end
+
+theorem map_p_sub {n k : ℕ} (h : n ≠ 0) (h0 : n < p k) :
+  p.map c hc (p k - n) = ite (p.χ₄ = -1) c 0 + p.map c hc n :=
+begin
+  have h1 : 0 < n := by rwa zero_lt_iff,
+  rw [p.map_val' hc (nat.sub_lt (lt_trans h1 h0) h1), nat.cast_sub (le_of_lt h0),
+      sub_eq_add_neg, jacobi_sym.mod_left, int.add_mod_self_left, ← jacobi_sym.mod_left,
+      ← neg_one_mul, jacobi_sym.mul_left, p.legendre_equiv_χ₄ k, p.map_val' hc h0,
+      p.legendre_equiv_nat h0 (p.self_lt n)],
+  have X : (1 : ℤ) ≠ -1 := by norm_num,
+  cases legendre_ne_zero p h with h2 h2; cases p.χ₄_eq_one_or_neg_one with h3 h3,
+  all_goals { simp only [h2, h3, if_true, eq_self_iff_true, if_false, X,
+    zero_add, add_zero, one_mul, mul_one, neg_mul_neg] },
+  rw [← two_nsmul, ← hc]
+end
+
+theorem map_p_sub_χ₄_eq_one (h : p.χ₄ = 1) {n k : ℕ} (h0 : n ≠ 0) (h1 : n < p k)  :
+  p.map c hc (p k - n) = p.map c hc n :=
+  by rw [p.map_p_sub hc h0 h1, h, if_neg (by norm_num : (1 : ℤ) ≠ -1), zero_add]
+
+theorem map_p_sub_χ₄_eq_neg_one (h : p.χ₄ = -1) {n k : ℕ} (h0 : n ≠ 0) (h1 : n < p k)  :
+  p.map c hc (p k - n) = c + p.map c hc n :=
+  by rw [p.map_p_sub hc h0 h1, h, if_pos rfl]
 
 end monoid_map
 
