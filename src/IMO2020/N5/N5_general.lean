@@ -1,7 +1,7 @@
 import
   IMO2020.N5.regular_map
+  IMO2020.N5.legendre_stack_map
   extra.number_theory.divisor_closed_prop
-  field_theory.finite.basic
 
 /-! # IMO 2020 N5, Generalized Version -/
 
@@ -38,7 +38,14 @@ begin
   exact hb h0
 end
 
+/-- There exists a Legendre stack `p` with `p.χ₄ = 1`. -/
+theorem exists_legendre_stack_χ₄_eq_one : ∃ p : legendre_stack, p.χ₄ = 1 := sorry
+
 end extra_lemmas
+
+
+
+
 
 
 
@@ -77,6 +84,10 @@ theorem good_infinite_iff_wide_or_strong :
   dc_infinite_iff_wide_or_strong (good_dc f)
 
 end infinite_good_iff
+
+
+
+
 
 
 
@@ -163,6 +174,10 @@ begin
 end
 
 end good_prime_props
+
+
+
+
 
 
 
@@ -291,6 +306,10 @@ end pstrong_maps
 
 
 
+
+
+
+
 section torsion_free
 
 variables {M : Type*} [add_cancel_comm_monoid M] [no_zero_smul_divisors ℕ M]
@@ -359,29 +378,43 @@ end torsion_free
 
 
 
+
+
+
+
 section wide_map_construction
-
-/-- General construction of a non-zero multiplicative map ℕ → {-1, 1} -/
-def general_int_map (p : ℕ → ℕ) : ℕ → ℤ
-| 0 := (0 : ℤ)
-| (n+1) := zmod.jacobi_sym n.succ (p n)
-
-
-
-
-namespace wide_maps
 
 variables {M : Type*} [add_comm_monoid M]
 
+private lemma wide_if_χ₄_eq_one {c : M} (hc : 2 • c = 0) {p : legendre_stack} (h : p.χ₄ = 1) :
+  wide (good (p.map c hc)) :=
+begin
+  refine set.infinite_of_injective_forall_mem p.ascending.injective (λ n, ⟨p.is_prime n, _⟩),
+  intros a b ha hb h0,
+  replace hb : a < p n := by rwa [← h0, lt_add_iff_pos_right, zero_lt_iff],
+  rw [eq_comm, add_comm, ← nat.sub_eq_iff_eq_add (le_of_lt hb)] at h0,
+  rw [← p.map_p_sub_χ₄_eq_one hc h ha hb, h0]
+end
 
+/-- Non-zero wide map exists over `M` if `M` is not 2-torsion free. -/
+theorem exists_nonzero_wide_if_not_two_torsion_free (h : ∃ c : M, c ≠ 0 ∧ 2 • c = 0) :
+  ∃ f : additive_map M, f ≠ 0 ∧ wide (good f) :=
+begin
+  rcases h with ⟨c, h, hc⟩,
+  cases exists_legendre_stack_χ₄_eq_one with p hp,
+  exact ⟨p.map c hc, p.map_is_non_zero hc h, wide_if_χ₄_eq_one hc hp⟩
+end
 
-/-- General construction of a non-zero wide map over monoids with a 2-torsion element -/
-def general_wide_map2 {p : ℕ → ℕ} (h : ∀ n : ℕ, (p n).prime) (h0 : strict_mono p)
-  {c : M} (hc : 2 • c = 0) : additive_map M :=
-  sorry
+/-- Non-zero wide map exists over `zmod 2`. -/
+theorem exists_nonzero_wide_zmod2 : ∃ f : additive_map (zmod 2), f ≠ 0 ∧ wide (good f) :=
+  exists_nonzero_wide_if_not_two_torsion_free
+    ⟨1, one_ne_zero, by rw [nat.smul_one_eq_coe, nat.cast_two]; refl⟩
 
-end wide_maps
 end wide_map_construction
+
+
+
+
 
 
 
