@@ -83,9 +83,10 @@ private lemma good_sup3 (n : ℕ) : periodic good_sup (2 * n) :=
 
 /-- Final solution -/
 theorem final_solution (n : ℕ) :
-  is_lub ((λ x : ℕ → ℝ≥0, target_sum x n) '' {x | good x ∧ periodic x (2 * n)}) ((n : ℝ≥0) / 4) :=
+  is_greatest ((λ x : ℕ → ℝ≥0, target_sum x n) '' {x | good x ∧ periodic x (2 * n)})
+    ((n : ℝ≥0) / 4) :=
 begin
-  refine ⟨λ a h, _, λ a h, h ⟨good_sup, ⟨good_sup1, good_sup3 n⟩, good_sup2 n⟩⟩,
+  refine ⟨⟨good_sup, ⟨good_sup1, good_sup3 n⟩, good_sup2 n⟩, λ a h, _⟩,
   rcases h with ⟨x, ⟨h, -⟩, rfl⟩,
   exact good_up_bound h n
 end
