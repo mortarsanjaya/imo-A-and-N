@@ -27,7 +27,7 @@ begin
   all_goals { funext i; rw [← nat.cast_two, rpow_nat_cast, sq_sqrt] }
 end
 
-private lemma special_ineq {q : ℝ≥0} (hq : 0 < q) (x c : ℝ≥0) :
+private lemma lem1 {q : ℝ≥0} (hq : 0 < q) (x c : ℝ≥0) :
   2 * c * sqrt x + c ^ 2 * q * (x + q)⁻¹ ≤ x + q + c ^ 2 :=
 begin
   have X := add_pos_of_nonneg_of_pos (zero_le x) hq,
@@ -39,6 +39,16 @@ begin
   rw [← nnreal.coe_le_coe, nnreal.coe_mul, nnreal.coe_mul, nnreal.coe_add, nnreal.coe_pow,
       nnreal.coe_pow, nnreal.coe_bit0, nnreal.coe_one, mul_right_comm],
   exact two_mul_le_add_sq ↑r ↑s
+end
+
+private lemma lem2 (a b : ℝ≥0) : (a ^ 2 / b) ^ (3⁻¹ : ℝ) = a / (a * b) ^ (3⁻¹ : ℝ) :=
+begin
+  have X : (3 : ℝ) ≠ 0 := three_ne_zero,
+  rw [← rpow_eq_rpow_iff X, inv_eq_one_div, rpow_self_rpow_inv X,
+      div_rpow, rpow_self_rpow_inv X, ← div_div],
+  congr; rcases eq_or_ne a 0 with rfl | ha,
+  rw [sq, zero_mul, div_zero],
+  rw [eq_div_iff ha, ← pow_succ', ← rpow_nat_cast, ← bit1, nat.cast_bit1, nat.cast_one]
 end
 
 end extra_lemmas
@@ -116,7 +126,7 @@ begin
   replace hn : 0 < (n : ℝ≥0) := nat.cast_pos.mpr hn,
   rw [← mul_le_mul_left hn, mul_add, mul_left_comm, ← nsmul_eq_mul, ← ht,
       mul_left_comm, ← nsmul_eq_mul, ← hr, mul_sum, mul_sum, ← sum_add_distrib],
-  refine le_of_le_of_eq (sum_le_sum (λ i _, special_ineq hq (a i) c)) _,
+  refine le_of_le_of_eq (sum_le_sum (λ i _, lem1 hq (a i) c)) _,
   rw [sum_add_distrib, sum_const, sum_add_distrib, sum_const,
       hp, card_range, ← smul_add, ← smul_add, ← nsmul_eq_mul]
 end
@@ -184,9 +194,44 @@ theorem final_solution_case_q_le_p {q p : ℝ≥0} (hq : 0 < q) (h : q ≤ p) (n
   ((2 * n) • ((p + q) / (4 * q)) ^ (3⁻¹ : ℝ)) :=
 begin
   refine ⟨_, λ c h, _⟩,
-  { sorry
+  { obtain ⟨u, v, h0, h1⟩ : ∃ u v : ℝ≥0, u + v = 2 * p ∧ u * v = q ^ 2 :=
+    begin
+      let x := sqrt (p ^ 2 - q ^ 2),
+      have hx : x ≤ p := by rw sqrt_le_iff; exact tsub_le_self,
+      refine ⟨p + x, p - x, _, _⟩,
+      rw [add_assoc, add_tsub_cancel_of_le hx, two_mul],
+      rw [← nnreal.coe_eq, nnreal.coe_mul, nnreal.coe_add, nnreal.coe_sub hx, ← sq_sub_sq,
+          ← nnreal.coe_pow, ← nnreal.coe_pow, sq_sqrt, nnreal.coe_sub, sub_sub_cancel],
+      rwa [← sqrt_le_iff, sqrt_sq]
+    end,
 
-  },
+    refine ⟨λ n, ite (even n) u v, ⟨_, λ i, _⟩, _⟩,
+    { induction n with n n_ih,
+      rw [mul_zero, sum_range_zero, zero_smul],
+      rw [nat.mul_succ, sum_range_add, n_ih, sum_range_succ, sum_range_one, add_zero],
+      simp only [nat.even_add_one, if_true, if_false, even.mul_right even_two n, not_true],
+      rw [h0, add_smul, nsmul_eq_mul 2, nat.cast_two] },
+    simp only [nat.even_add, even.mul_right even_two n, iff_true],
+    suffices h2 : (u / (v + q)) ^ (3⁻¹ : ℝ) + (v / (u + q)) ^ (3⁻¹ : ℝ) =
+      2 • ((p + q) / (4 * q)) ^ (3⁻¹ : ℝ),
+    { simp only [target_sum, nat.even_add_one, ite_not],
+      induction n with n n_ih,
+      rw [mul_zero, zero_smul, sum_range_zero],
+      rw [nat.mul_succ, sum_range_add, n_ih, add_smul, sum_range_succ, sum_range_one, add_zero],
+      simp only [nat.even_add_one, if_true, if_false, even.mul_right even_two n, not_true, h2] }, 
+    { obtain ⟨x, rfl⟩ : ∃ x : ℝ≥0, x ^ 2 = u := ⟨sqrt u, by rw sq_sqrt⟩,
+      obtain ⟨y, rfl⟩ : ∃ y : ℝ≥0, y ^ 2 = v := ⟨sqrt v, by rw sq_sqrt⟩,
+      rw [← mul_pow, sq_eq_sq (zero_le (x * y)) (zero_le q)] at h1,
+      rw [← add_left_inj (2 * x * y), ← add_sq', mul_assoc, ← mul_add, h1] at h0,
+      rw [nsmul_eq_mul, ← rpow_inv_rpow_self three_ne_zero ↑2, nat.cast_two, ← inv_eq_one_div,
+          ← mul_rpow, mul_comm, mul_comm 4 q, lem2, lem2, ← div_div, div_mul_comm],
+      change (4 : ℝ≥0) with (2 + 2 : ℝ≥0),
+      rw [← two_mul, ← sq, ← rpow_nat_cast 2, nat.cast_two, ← rpow_sub two_ne_zero,
+          bit1, add_sub_cancel', rpow_one, ← bit1, ← mul_div_assoc, ← h0, lem2, ← h1],
+      convert (add_div x y (((x + y) * (x * y)) ^ (3⁻¹ : ℝ))).symm using 4,
+      rw [sq, ← add_mul, add_comm, mul_left_comm],
+      rw [sq, ← mul_add, ← mul_assoc, mul_comm, mul_comm y x] } },
+    
   { rcases h with ⟨a, ⟨h0, h1⟩, rfl⟩,
     rcases n.eq_zero_or_pos with rfl | hn,
     unfold target_sum; rw [mul_zero, sum_range_zero, zero_smul],
