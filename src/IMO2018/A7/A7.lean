@@ -27,12 +27,18 @@ begin
   all_goals { funext i; rw [← nat.cast_two, rpow_nat_cast, sq_sqrt] }
 end
 
-
-
 private lemma special_ineq {q : ℝ≥0} (hq : 0 < q) (x c : ℝ≥0) :
   2 * c * sqrt x + c ^ 2 * q * (x + q)⁻¹ ≤ x + q + c ^ 2 :=
 begin
-  sorry
+  have X := add_pos_of_nonneg_of_pos (zero_le x) hq,
+  rw [← mul_le_mul_right X, add_mul, mul_assoc (c ^ 2 * q), inv_mul_cancel (ne_of_gt X),
+      mul_one, add_mul, ← sq, mul_add (c ^ 2), ← add_assoc, add_le_add_iff_right],
+  obtain ⟨y, rfl⟩ : ∃ y : ℝ≥0, y ^ 2 = x := ⟨sqrt x, sq_sqrt x⟩,
+  rw [sqrt_sq, ← mul_pow, mul_assoc 2 c],
+  generalizes [y ^ 2 + q = r, c * y = s],
+  rw [← nnreal.coe_le_coe, nnreal.coe_mul, nnreal.coe_mul, nnreal.coe_add, nnreal.coe_pow,
+      nnreal.coe_pow, nnreal.coe_bit0, nnreal.coe_one, mul_right_comm],
+  exact two_mul_le_add_sq ↑r ↑s
 end
 
 end extra_lemmas
