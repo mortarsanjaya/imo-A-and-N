@@ -70,7 +70,7 @@ end prime_results
 
 
 /-- Final solution, part 2, original version -/
-theorem final_solution_part2_original : {p | odd p ∧ p.prime ∧ ¬balanced p} :=
+theorem final_solution_part2_original : {p | odd p ∧ p.prime ∧ ¬balanced p}.infinite :=
 begin
   sorry
 end
