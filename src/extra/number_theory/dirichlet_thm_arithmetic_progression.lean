@@ -18,17 +18,17 @@ namespace extra
 variables {d a : ℕ} (h : a < d) (h0 : a.coprime d)
 include h h0
 
-theorem exists_infinite_primes_mod_eq (n : ℕ) : ∃ p : ℕ, n < p ∧ p.prime ∧ p % a = d :=
+theorem exists_infinite_primes_mod_eq (n : ℕ) : ∃ p : ℕ, n < p ∧ p.prime ∧ p % d = a :=
   sorry
 
-theorem not_bdd_above_set_of_primes_mod_eq : ¬bdd_above {p : ℕ | p.prime ∧ p % a = d} :=
+theorem not_bdd_above_set_of_primes_mod_eq : ¬bdd_above {p : ℕ | p.prime ∧ p % d = a} :=
 begin
   rw not_bdd_above_iff; intros n,
   rcases exists_infinite_primes_mod_eq h h0 n with ⟨p, h1, h2⟩,
   exact ⟨p, h2, h1⟩
 end
 
-theorem infinite_set_of_primes_mod_eq : {p : ℕ | p.prime ∧ p % a = d}.infinite :=
+theorem infinite_set_of_primes_mod_eq : {p : ℕ | p.prime ∧ p % d = a}.infinite :=
   set.infinite_of_not_bdd_above (not_bdd_above_set_of_primes_mod_eq h h0)
 
 end extra
