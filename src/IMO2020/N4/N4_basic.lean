@@ -44,6 +44,13 @@ begin
   contrapose! h0; exact nat.find_min' _ ⟨zero_lt_iff.mpr h0, h2⟩
 end
 
+lemma p_dvd_two_pow_sub_one_iff (k : ℕ) : p ∣ 2 ^ k - 1 ↔ order_two_mod_p h ∣ k :=
+  by rw [← two_pow_mod_p_eq_one_iff, nat.modeq.comm,
+         nat.modeq_iff_dvd' (nat.one_le_pow k 2 two_pos)]
+
+lemma order_two_mod_p_dvd_totient : order_two_mod_p h ∣ p.totient :=
+  (two_pow_mod_p_eq_one_iff h _).mp (nat.modeq.pow_totient (two_coprime_p h))
+
 end order_two
 
 
@@ -192,6 +199,24 @@ lemma S_mul_order_add (k n r : ℕ) :
 
 lemma S0_F_iterate (k n : ℕ) : S0 h (F p^[k] n) = S0 h n :=
   by rw [S0_mod_p h, F_iterate_mod_p, ← S0_mod_p h, S0_two_pow_mul]
+
+lemma S_p_dvd_add {m n : ℕ} (h0 : ¬p ∣ m) (h1 : p ∣ m + n) (k : ℕ) :
+  S p k m + S p k n = k * p :=
+begin
+  revert h0 h1 m n,
+  induction k with k k_ih; intros m n h0 h1,
+  rw [S_zero, S_zero, add_zero, zero_mul],
+  rw [S_succ', S_succ', add_add_add_comm, k_ih, nat.succ_mul, add_right_inj],
+  have X := nat.le_mod_add_mod_of_dvd_add_of_not_dvd h1 h0,
+  replace X := nat.add_mod_add_of_le_add_mod X,
+  rwa [nat.mod_eq_zero_of_dvd h1, zero_add, eq_comm] at X,
+  rwa (two_coprime_p h).symm.dvd_mul_left,
+  rw ← mul_add; exact dvd_mul_of_dvd_right h1 2
+end
+
+lemma S0_p_dvd_add {m n : ℕ} (h0 : ¬p ∣ m) (h1 : p ∣ m + n) :
+  S0 h m + S0 h n = order_two_mod_p h * p :=
+  S_p_dvd_add h h0 h1 (order_two_mod_p h)
 
 end properties
 
