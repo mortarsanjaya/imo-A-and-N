@@ -1,4 +1,7 @@
-import IMO2020.N4.N4_basic number_theory.legendre_symbol.quadratic_reciprocity
+import
+  IMO2020.N4.N4_basic
+  number_theory.legendre_symbol.quadratic_reciprocity
+  extra.number_theory.dirichlet_thm_arithmetic_progression
 
 /-! # IMO 2020 N4, Generalized Version (Part 2) -/
 
@@ -198,11 +201,19 @@ end prime_results
 
 
 
+
+
 /-- Final solution, part 2, original version -/
 theorem final_solution_part2_original :
   {p : ℕ | odd p ∧ p.prime ∧ ¬balanced p}.infinite :=
 begin
-  sorry
+  have h : 7 < 8 := by norm_num,
+  have h0 : nat.coprime 7 8 := by norm_num,
+  refine set.infinite.mono _ (extra.infinite_set_of_primes_mod_eq h h0),
+  rintros p ⟨hp, h1⟩,
+  refine ⟨_, hp, not_balanced_7_mod_8 hp h1⟩,
+  refine (or_iff_right _).mp hp.eq_two_or_odd',
+  contrapose! h1; subst h1; norm_num
 end
 
 end IMO2020N4
