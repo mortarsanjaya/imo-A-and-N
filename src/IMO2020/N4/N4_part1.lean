@@ -174,7 +174,7 @@ begin
   sorry
 end
 
-private lemma lem7 {k : ℕ} (h0 : p + 1 = 2 ^ k) (h1 : k ≤ 4) : ¬good p :=
+private lemma lem7 {k : ℕ} (h0 : k ∈ ({1, 3, 7, 15} : finset ℕ)) : ¬good p :=
 begin
   rw lem4 h,
   sorry
@@ -187,43 +187,26 @@ end results
 
 
 /-- Final solution -/
-theorem final_solution_part1 {p : ℕ} (h : odd p) :
-  good p ↔ ¬(∃ k : ℕ, k ≤ 4 ∧ p + 1 = 2 ^ k) :=
+theorem final_solution_part1' {p : ℕ} (h : odd p) :
+  good p ↔ p ∉ ({1, 3, 7, 15} : finset ℕ) :=
 begin
-  refine ⟨λ h0 h1, _, λ h0, _⟩,
-  rcases h1 with ⟨k, h1, h2⟩,
-  exact lem7 h h2 h1 h0,
+  refine ⟨λ h0, _, λ h0, _⟩,
+  contrapose! h0; exact lem7 h h0,
   by_cases h1 : ∀ k : ℕ, p + 1 ≠ 2 ^ k,
   exact lem5 h h1,
   simp only [not_forall, not_not] at h1,
   cases h1 with k h1,
-  refine lem6 h h1 (le_of_not_lt (λ h2, _)),
-  rw nat.lt_succ_iff at h2,
-  exact h0 ⟨k, h2, h1⟩
-end
-
-/-- Final solution, version 2 -/
-theorem final_solution_part1' {p : ℕ} (h : odd p) :
-  good p ↔ p ∉ ({1, 3, 7, 15} : finset ℕ) :=
-begin
-  rw [final_solution_part1 h, not_iff_not],
-  simp only [finset.mem_insert, finset.mem_singleton],
-  refine ⟨λ h0, _, λ h0, _⟩,
-  { rcases h0 with ⟨k, h0, h1⟩,
-    rw [eq_comm, ← nat.sub_eq_iff_eq_add (nat.one_le_pow k 2 two_pos)] at h1,
-    subst h1,
-    repeat { rw [le_iff_lt_or_eq, nat.lt_succ_iff] at h0 },
-    repeat { rw [or_assoc] at h0 },
-    cases h0 with h0 h0,
-    rw le_zero_iff at h0,
-    rw [h0, pow_zero, nat.sub_self, nat.odd_iff_not_even] at h,
-    exfalso; exact h even_zero,
-    rcases h0 with rfl | rfl | rfl | rfl; norm_num },
-  { rcases h0 with rfl | rfl | rfl | rfl,
-    use 1; norm_num,
-    use 2; norm_num,
-    use 3; norm_num,
-    use 4; norm_num }
+  refine lem6 h h1 (le_of_not_lt _),
+  contrapose! h0; simp only [finset.mem_insert, finset.mem_singleton],
+  repeat { rw [nat.lt_succ_iff, le_iff_lt_or_eq] at h0 },
+  repeat { rw [or_assoc] at h0 },
+  rcases h0 with h0 | rfl | h0,
+  exfalso; exact not_le_of_lt h0 k.zero_le,
+  rw [pow_zero, add_left_eq_self] at h1,
+  rw [h1, nat.odd_iff_not_even] at h,
+  exfalso; exact h even_zero,
+  rw [eq_comm, ← nat.sub_eq_iff_eq_add (nat.one_le_pow k 2 two_pos)] at h1; subst h1,
+  rcases h0 with rfl | rfl | rfl | rfl; norm_num
 end
 
 end IMO2020N4
