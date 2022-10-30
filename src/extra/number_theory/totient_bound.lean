@@ -64,7 +64,14 @@ begin
     exfalso; refine ne_of_gt (pow_pos _ b) h; exact three_pos }
 end
 
-
+lemma big_two_lt_totient' {n : ℕ} (h : 5 ≤ n) (h0 : n ≠ 6) : 2 < n.totient :=
+begin
+  rw [le_iff_eq_or_lt, ← nat.succ_le_iff, le_iff_eq_or_lt] at h,
+  rcases h with rfl | rfl | h,
+  rw nat.totient_prime; norm_num,
+  exfalso; exact h0 rfl,
+  exact big_two_lt_totient h
+end
 
 end extra
 end IMOSL
