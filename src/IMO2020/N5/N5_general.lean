@@ -38,9 +38,6 @@ begin
   exact hb h0
 end
 
-/-- There exists a Legendre stack `p` with `p.χ₄ = 1`. -/
-theorem exists_legendre_stack_χ₄_eq_one : ∃ p : legendre_stack, p.χ₄ = 1 := sorry
-
 end extra_lemmas
 
 
