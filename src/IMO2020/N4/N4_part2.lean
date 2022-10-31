@@ -203,8 +203,9 @@ end prime_results
 
 
 
-/-- Final solution, part 2, original version -/
-theorem final_solution_part2_original :
+/-- There are infinitely many odd primes that are not balanced.
+  This is the original version of Part 2. -/
+theorem infinite_set_of_odd_primes_not_balanced :
   {p : ℕ | odd p ∧ p.prime ∧ ¬balanced p}.infinite :=
 begin
   have h : 7 < 8 := by norm_num,
@@ -212,6 +213,19 @@ begin
   refine set.infinite.mono _ (extra.infinite_set_of_primes_mod_eq h h0),
   rintros p ⟨hp, h1⟩,
   refine ⟨_, hp, not_balanced_7_mod_8 hp h1⟩,
+  refine (or_iff_right _).mp hp.eq_two_or_odd',
+  contrapose! h1; subst h1; norm_num
+end
+
+/-- There are also infinitely many odd primes that are balanced. -/
+theorem infinite_set_of_odd_primes_balanced :
+  {p : ℕ | odd p ∧ p.prime ∧ balanced p}.infinite :=
+begin
+  have h : 5 < 8 := by norm_num,
+  have h0 : nat.coprime 5 8 := by norm_num,
+  refine set.infinite.mono _ (extra.infinite_set_of_primes_mod_eq h h0),
+  rintros p ⟨hp, h1⟩,
+  refine ⟨_, hp, balanced_3_or_5_mod_8 hp (or.inr h1)⟩,
   refine (or_iff_right _).mp hp.eq_two_or_odd',
   contrapose! h1; subst h1; norm_num
 end
