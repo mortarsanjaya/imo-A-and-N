@@ -14,12 +14,41 @@ def good (p : ℕ) := ∃ a b : ℕ, a.coprime p ∧ b.coprime p ∧ alternating
 
 
 
-section results
+section extra_lemmas
+
+private lemma pow_sub_one_gcd {n : ℕ} (h : 0 < n) (k m : ℕ) :
+  nat.gcd (n ^ k - 1) (n ^ m - 1) = n ^ (nat.gcd k m) - 1 :=
+begin
+  refine nat.gcd.induction k m (λ i, _) (λ i j hi h, _); clear k m,
+  rw [pow_zero, nat.sub_self, nat.gcd_zero_left, nat.gcd_zero_left],
+  rw [nat.gcd_rec i j, ← h, nat.gcd_comm],
+  clear h; refine nat.modeq.gcd_eq_of_modeq (nat.modeq.add_right_cancel' 1 _),
+  obtain ⟨q, r, h0, rfl⟩ : ∃ q r : ℕ, r < i ∧ q * i + r = j :=
+    ⟨j / i, j % i, j.mod_lt hi, nat.div_add_mod' j i⟩,
+  replace h : ∀ k : ℕ, 1 ≤ n ^ k := λ k, nat.one_le_pow k n h,
+  rw [nat.mul_add_mod, nat.mod_eq_of_lt h0, nat.sub_add_cancel (h _),
+      nat.sub_add_cancel (h _), ← one_mul (n ^ r), pow_add, mul_comm q, pow_mul],
+  nth_rewrite 1 ← one_pow q,
+  exact nat.modeq.mul_right _ (nat.modeq.pow _ (nat.modeq_sub (h i)))
+end
+
+private lemma exists_nontrivial_coprime {n : ℕ} (h : 5 ≤ n) (h0 : n ≠ 6) :
+  ∃ k m : ℕ, 1 < k ∧ 1 < m ∧ k.coprime m ∧ k + m = n :=
+begin
+  replace h0 := extra.big_two_lt_totient' h h0,
+  sorry
+end
+
+end extra_lemmas
+
+
+
+section good_iff
 
 variables {p : ℕ} (h : odd p)
 include h
 
-private lemma lem1 : ∀ {a b : ℕ}, alternating p a b → S0 h a = S0 h b :=
+private lemma lem1_1 : ∀ {a b : ℕ}, alternating p a b → S0 h a = S0 h b :=
 begin
   suffices : ∀ {a b : ℕ}, S0 h a < S0 h b → ¬alternating p a b,
   { intros a b h0,
@@ -37,7 +66,7 @@ begin
   exact lt_asymm (set.mem_set_of_eq.mp h3) (h2 n (le_of_lt h4))
 end
 
-private lemma lem2 {a b : ℕ} (h0 : alternating p a b) :
+private lemma lem1_2 {a b : ℕ} (h0 : alternating p a b) :
   ∃ N : ℕ, (F p)^[N] b < (F p^[N]) a ∧ (F p^[N + 1]) a < (F p^[N + 1]) b :=
 begin
   cases h0 with h0 h1,
@@ -63,7 +92,7 @@ begin
   exfalso; exact ne_of_gt h1 (by rw h4)
 end
 
-private lemma lem3 {a b : ℕ} (h0 : b < a) (h1 : F p a < F p b) :
+private lemma lem1_3 {a b : ℕ} (h0 : b < a) (h1 : F p a < F p b) :
   ∃ k x y : ℕ, p / 2 + x < y ∧ y < p ∧ a = x + (k + 1) * p ∧ b = y + k * p :=
 begin
   unfold F at h1,
@@ -95,20 +124,20 @@ begin
   rw le_antisymm h1 h0
 end
 
-private lemma lem4 : good p ↔
+private lemma lem1_4 : good p ↔
   (∃ x y : ℕ, x.coprime p ∧ y.coprime p ∧ p / 2 + x < y ∧ y < p ∧ S0 h x = S0 h y) :=
 begin
   refine ⟨λ h0, _, λ h0, _⟩,
   { rcases h0 with ⟨a, b, ha, hb, h0⟩,
-    have h1 := lem1 h h0,
-    obtain ⟨N, h2, h3⟩ := lem2 h h0,
+    have h1 := lem1_1 h h0,
+    obtain ⟨N, h2, h3⟩ := lem1_2 h h0,
     rw [iterate_succ', comp_app, comp_app] at h3,
     replace ha := F_iterate_coprime h ha N,
     replace hb := F_iterate_coprime h hb N,
     rw [← S0_F_iterate h N, ← S0_F_iterate h N b] at h1,
     generalize_hyp : (F p^[N]) a = c at ha h1 h2 h3,
     generalize_hyp : (F p^[N]) b = d at hb h1 h2 h3,
-    obtain ⟨k, x, y, h4, h5, rfl, rfl⟩ := lem3 h h2 h3,
+    obtain ⟨k, x, y, h4, h5, rfl, rfl⟩ := lem1_3 h h2 h3,
     clear h0 N a b,
     rw nat.coprime_add_mul_right_left at ha hb,
     refine ⟨x, y, ha, hb, h4, h5, _⟩,
@@ -134,11 +163,15 @@ begin
     exact lt_of_lt_of_le h1 le_add_self }
 end
 
+end good_iff
 
 
-private lemma lem5 (h0 : ∀ k : ℕ, p + 1 ≠ 2 ^ k) : good p :=
+
+section computation
+
+private lemma lem2_1 {p : ℕ} (h : odd p) (h0 : ∀ k : ℕ, p ≠ 2 ^ k - 1) : good p :=
 begin
-  rw lem4 h,
+  rw lem1_4 h,
   obtain ⟨c, h1, h2⟩ : ∃ c : ℕ, p ≤ 2 ^ c ∧ ∀ b : ℕ, b < c → 2 ^ b < p :=
   begin
     have X : ∃ a : ℕ, p ≤ 2 ^ a := ⟨p, le_of_lt p.lt_two_pow⟩,
@@ -153,34 +186,112 @@ begin
     exfalso; exact h0 0 (by rw pow_zero),
     exfalso; exact h0 1 (by rw pow_one) },
   replace h2 := h2 c c.lt_succ_self,
-  refine ⟨1, 2 ^ c, p.coprime_one_left, (two_coprime_p h).pow_left c, _, h2, _⟩,
-  work_on_goal 2 { rw [← mul_one (2 ^ c), S0_two_pow_mul] },
+  refine ⟨1, 2 ^ c, p.coprime_one_left, (two_coprime_p h).pow_left c,
+    _, h2, by rw [← mul_one (2 ^ c), S0_two_pow_mul]⟩,
   rw [← nat.add_mul_div_right _ _ two_pos, nat.div_lt_iff_lt_mul two_pos, ← pow_succ', one_mul],
   replace h2 : even (2 ^ c.succ) := nat.even_pow.mpr ⟨even_two, c.succ_ne_zero⟩,
   rw nat.odd_iff_not_even at h,
   rw [le_iff_eq_or_lt, ← nat.add_one_le_iff, le_iff_eq_or_lt, ← nat.add_one_le_iff] at h1,
   rcases h1 with rfl | h1 | h1,
   exfalso; exact h h2,
-  exfalso; exact h0 c.succ h1,
+  exfalso; refine h0 c.succ _,
+  rw [← h1, nat.add_sub_cancel],
   rw le_iff_lt_or_eq at h1; cases h1 with h1 h1,
   exact h1,
   rw [← h1, add_assoc, nat.even_add, iff_true_intro even_two, iff_true] at h2,
   exfalso; exact h h2
 end
 
-private lemma lem6 {k : ℕ} (h0 : p + 1 = 2 ^ k) (h1 : 5 ≤ k) : good p :=
+private lemma lem2_2 {k : ℕ} (h : 5 ≤ k) : good (2 ^ k - 1) :=
 begin
-  rw lem4 h,
+  have X : odd (2 ^ k - 1) :=
+  begin
+    rw [nat.odd_iff_not_even, ← nat.even_add_one, nat.sub_add_cancel, nat.even_pow'],
+    exact even_two,
+    rintros rfl; revert h; norm_num,
+    exact nat.one_le_pow k 2 two_pos
+  end,
+  rw lem1_4 X; rcases eq_or_ne k 6 with rfl | h0,
+  refine ⟨5, 2 ^ 3 * 5, _, _, _, _, by rw S0_two_pow_mul⟩; norm_num,
+  replace h0 := exists_nontrivial_coprime h h0,
+  rcases h0 with ⟨c, d, h0, h1, h2, rfl⟩,
+  replace h : nat.coprime (2 ^ c - 1) (2 ^ (c + d) - 1) :=
+    by unfold nat.coprime at h2 ⊢;
+      rw [pow_sub_one_gcd two_pos, nat.gcd_self_add_right, h2, pow_one],
+  refine ⟨2 ^ c - 1, 2 ^ d * (2 ^ c - 1), h, _, _, _, by rw S0_two_pow_mul⟩,
+  exact nat.coprime.mul (nat.coprime.pow_left _ (two_coprime_p X)) h,
+  { clear h2 X h; have X : 1 ≤ 2 := one_le_two,
+    rw ← nat.succ_le_iff at h0 h1,
+    replace h0 := pow_le_pow X h0,
+    replace h1 := pow_le_pow X h1,
+    rw pow_add; clear X,
+    generalize_hyp : 2 ^ c = M at h0 ⊢,
+    generalize_hyp : 2 ^ d = N at h1 ⊢,
+    cases M with _ M,
+    exfalso; revert h0; norm_num,
+    cases N with _ N,
+    exfalso; revert h1; norm_num,
+    norm_num at h0 h1; rw nat.succ_le_succ_iff at h0 h1,
+    rw [nat.succ_sub_one, nat.succ_mul, nat.mul_succ, nat.succ_mul, add_lt_add_iff_right,
+        nat.add_sub_assoc (nat.succ_le_succ (zero_le N)), nat.succ_sub_one,
+        nat.div_lt_iff_lt_mul two_pos, mul_comm, mul_two, add_assoc, add_lt_add_iff_left],
+    
+    -- This could be made better, I do not have the time to think how
+    cases M with _ M,
+    exfalso; revert h0; norm_num,
+    cases N with _ N,
+    exfalso; revert h1; norm_num,
+    rw [nat.mul_succ, nat.succ_mul, nat.succ_eq_one_add,
+        add_lt_add_iff_right, add_lt_add_iff_right],
+    rw nat.succ_le_succ_iff at h0 h1,
+    exact lt_of_lt_of_le (by norm_num : 1 < 2 * 2) (nat.mul_le_mul h1 h0) },
+  { rw [nat.mul_sub_left_distrib, mul_one, ← pow_add, add_comm, tsub_lt_tsub_iff_left_of_le_of_le],
+    exact nat.one_lt_two_pow d (lt_trans one_pos h1),
+    rw pow_add; exact le_mul_of_one_le_left' (nat.one_le_pow c 2 two_pos),
+    exact nat.one_le_pow (c + d) 2 two_pos }
+end
+
+private lemma lem2_3 : ¬good 1 :=
+begin
+  rw lem1_4 odd_one; simp only [not_exists],
+  rintros x y ⟨-, -, h, h0, -⟩,
+  rw nat.lt_one_iff at h0,
+  exact ne_of_gt (pos_of_gt h) h0
+end
+
+private lemma lem2_4 : ¬good 3 :=
+begin
+  have h : odd 3 := ⟨1, by rw [bit1, mul_one]⟩,
+  rw lem1_4 h; simp only [not_exists],
+  rintros x y ⟨h0, -, h1, h2, -⟩,
+  rw [nat.bit1_div_two, add_comm, ← nat.add_one_le_iff, add_assoc, le_iff_exists_add] at h1,
+  rcases h1 with ⟨c, rfl⟩,
+  rw [nat.lt_succ_iff, add_right_comm, add_le_iff_nonpos_left, le_zero_iff, add_eq_zero_iff] at h2,
+  rcases h2 with ⟨rfl, rfl⟩,
+  rw [nat.coprime_zero_left, nat.bit1_eq_one] at h0,
+  exact one_ne_zero h0
+end
+
+private lemma lem2_220 : ¬good 7 :=
+begin
   sorry
 end
 
-private lemma lem7 {k : ℕ} (h0 : k ∈ ({1, 3, 7, 15} : finset ℕ)) : ¬good p :=
+private lemma lem2_250 : ¬good 15 :=
 begin
-  rw lem4 h,
   sorry
 end
 
-end results
+private lemma lem2_300 {p : ℕ} (h : p ∈ ({1, 3, 7, 15} : finset ℕ)) : ¬good p :=
+begin
+  simp only [finset.mem_insert, finset.mem_singleton] at h,
+  rcases h with rfl | rfl | rfl | rfl,
+  exacts [lem2_3, lem2_4, lem2_220, lem2_250]
+end
+
+end computation
+
+
 
 
 
@@ -191,21 +302,19 @@ theorem final_solution_part1' {p : ℕ} (h : odd p) :
   good p ↔ p ∉ ({1, 3, 7, 15} : finset ℕ) :=
 begin
   refine ⟨λ h0, _, λ h0, _⟩,
-  contrapose! h0; exact lem7 h h0,
-  by_cases h1 : ∀ k : ℕ, p + 1 ≠ 2 ^ k,
-  exact lem5 h h1,
+  contrapose! h0; exact lem2_300 h0,
+  by_cases h1 : ∀ k : ℕ, p ≠ 2 ^ k - 1,
+  exact lem2_1 h h1,
   simp only [not_forall, not_not] at h1,
-  cases h1 with k h1,
-  refine lem6 h h1 (le_of_not_lt _),
+  rcases h1 with ⟨k, rfl⟩,
+  refine lem2_2 (le_of_not_lt _),
   contrapose! h0; simp only [finset.mem_insert, finset.mem_singleton],
   repeat { rw [nat.lt_succ_iff, le_iff_lt_or_eq] at h0 },
   repeat { rw [or_assoc] at h0 },
   rcases h0 with h0 | rfl | h0,
   exfalso; exact not_le_of_lt h0 k.zero_le,
-  rw [pow_zero, add_left_eq_self] at h1,
-  rw [h1, nat.odd_iff_not_even] at h,
+  rw [pow_zero, nat.sub_self, nat.odd_iff_not_even] at h,
   exfalso; exact h even_zero,
-  rw [eq_comm, ← nat.sub_eq_iff_eq_add (nat.one_le_pow k 2 two_pos)] at h1; subst h1,
   rcases h0 with rfl | rfl | rfl | rfl; norm_num
 end
 
