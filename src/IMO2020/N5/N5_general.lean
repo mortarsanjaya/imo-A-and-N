@@ -418,15 +418,28 @@ end wide_map_construction
 section wide_regular_distinction
 
 /-- Wide regular maps must be zero -/
-theorem wide_regular_map_is_zero {M : Type*} [add_comm_monoid M] {p : ℕ} [fact p.prime]
+theorem wide_regular_map_is_zero {M : Type*} [add_cancel_comm_monoid M] {p : ℕ} [fact p.prime]
   {f : additive_map M} (h : is_regular_map M p f) (h0 : wide (good f)) : f = 0 :=
 begin
   rw is_regular_map.zero_iff_at_le_p h,
   intros k h1 h2,
   rw is_regular_map.iff at h,
-  replace h0 := set.infinite.exists_nat_lt h0 (p ^ 2),
+  replace h0 := set.infinite.exists_nat_lt h0 (p * p),
   rcases h0 with ⟨q, ⟨h0, h3⟩, h4⟩,
-  sorry
+  have X := (fact.out p.prime).ne_zero,
+  have X0 : k * p < q := lt_of_le_of_lt (mul_le_mul_right' h2 p) h4,
+  have X1 : p < q := lt_of_le_of_lt p.le_mul_self h4,
+  have X2 : q.coprime p := (nat.coprime_primes h0 (fact.out p.prime)).mpr (ne_of_gt X1),
+  rw [← add_left_inj (f p), zero_add, ← additive_map.map_mul f h1 X,
+      h3 (k * p) (q - k * p) (mul_ne_zero h1 X) (ne_of_gt (by rwa tsub_pos_iff_lt)),
+      h3 p (q - p) X (ne_of_gt (by rwa tsub_pos_iff_lt)), h, h (q - p)],
+  congr' 1,
+  rw [← nat.add_mul_mod_self_right _ k, nat.sub_add_cancel (le_of_lt X0),
+      ← nat.add_mod_right (q - p) p, nat.sub_add_cancel (le_of_lt X1)],
+  rwa [← nat.coprime_add_self_left, nat.sub_add_cancel (le_of_lt X1)],
+  rwa [← nat.coprime_add_mul_right_left _ _ k, nat.sub_add_cancel (le_of_lt X0)],
+  rw [add_comm, nat.sub_add_cancel (le_of_lt X1)],
+  rw [add_comm, nat.sub_add_cancel (le_of_lt X0)]
 end
 
 end wide_regular_distinction
