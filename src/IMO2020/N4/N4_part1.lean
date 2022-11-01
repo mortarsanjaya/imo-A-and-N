@@ -5,7 +5,7 @@ import IMO2020.N4.N4_basic extra.number_theory.totient_bound
 namespace IMOSL
 namespace IMO2020N4
 
-open function
+open finset function
 
 def alternating (p a b : ℕ) :=
   {i : ℕ | (F p)^[i] a < (F p^[i]) b}.infinite ∧ {i : ℕ | (F p)^[i] b < (F p^[i]) a}.infinite
@@ -40,6 +40,10 @@ begin
 end
 
 end extra_lemmas
+
+
+
+
 
 
 
@@ -167,6 +171,8 @@ end good_iff
 
 
 
+
+
 section computation
 
 private lemma lem2_1 {p : ℕ} (h : odd p) (h0 : ∀ k : ℕ, p ≠ 2 ^ k - 1) : good p :=
@@ -201,6 +207,8 @@ begin
   rw [← h1, add_assoc, nat.even_add, iff_true_intro even_two, iff_true] at h2,
   exfalso; exact h h2
 end
+
+
 
 private lemma lem2_2 {k : ℕ} (h : 5 ≤ k) : good (2 ^ k - 1) :=
 begin
@@ -251,6 +259,8 @@ begin
     exact nat.one_le_pow (c + d) 2 two_pos }
 end
 
+
+
 private lemma lem2_3 : ¬good 1 :=
 begin
   rw lem1_4 odd_one; simp only [not_exists],
@@ -272,13 +282,127 @@ begin
   exact one_ne_zero h0
 end
 
-private lemma lem2_220 : ¬good 7 :=
+
+
+private lemma lem2_5 : ¬good 7 :=
 begin
+  have h : odd 7 := ⟨3, by rw [bit1, bit0, two_mul]⟩,
+  rw lem1_4 h; simp only [not_exists],
+  rintros x y ⟨h0, h1, h2, h3, h4⟩,
+
+  -- We first claim that the order of 2 mod 7 is 3
+  have X : order_two_mod_p h = 3 :=
+  begin
+    rw [order_two_mod_p, nat.find_eq_iff],
+    unfold nat.modeq; norm_num,
+    intros n hn hn0; rw nat.lt_succ_iff at hn,
+    rw [nat.mod_eq_of_lt, pow_eq_one_iff],
+    norm_num,
+    exact ne_of_gt hn0,
+    exact lt_of_le_of_lt (pow_le_pow one_le_two hn) (by norm_num)
+  end,
+
+  -- Unfold the sum in h4
+  rw [S0, S0, X, S, S] at h4,
+  repeat { rw sum_range_succ at h4 },
+  rw [sum_range_zero, zero_add, sum_range_zero, zero_add] at h4,
+
+  -- Next we set up the inequalities: 1 ≤ x and x + 4 ≤ y ≤ 6
+  rw nat.lt_succ_iff at h3,
+  rw [add_comm, ← nat.add_one_le_iff, add_assoc] at h2; norm_num at h2,
+  replace h0 : 1 ≤ x := begin
+    rw [nat.succ_le_iff, zero_lt_iff]; rintros rfl,
+    rw [nat.coprime_zero_left, nat.bit1_eq_one] at h0,
+    exfalso; exact nat.bit1_ne_zero _ h0
+  end,
+
+  -- 1 ≤ x and x + 4 ≤ y ≤ 6 implies (x, y) = (1, 5), (1, 6), (2, 6).
+  -- Unfold each of these cases
+  rw [le_iff_eq_or_lt, ← nat.succ_le_iff] at h0,
+  rcases h0 with rfl | h0,
+  norm_num at h4,
+  rw [le_iff_eq_or_lt, ← nat.succ_le_iff] at h2,
+  norm_num at h2; rcases h2 with rfl | h2,
+  norm_num at h4,
+  rw le_antisymm h3 h2 at h4; norm_num at h4,
+  have h5 := le_trans (add_le_add_right h0 _) h2,
+  norm_num at h5; replace h5 := le_antisymm h3 h5,
+  rw h5 at h2 h4,
+  change (x + 4 ≤ 2 + 4) at h2,
+  rw add_le_add_iff_right at h2,
+  rw le_antisymm h2 h0 at h4,
+  norm_num at h4
+end
+
+
+
+private lemma lem2_6_1 : odd 15 :=
+  ⟨7, by rw [bit1, bit0, two_mul]⟩
+
+private lemma lem2_6_2 : order_two_mod_p lem2_6_1 = 4 :=
+begin
+  rw [order_two_mod_p, nat.find_eq_iff],
+  unfold nat.modeq; norm_num,
+  intros n hn hn0; rw nat.lt_succ_iff at hn,
+  rw [nat.mod_eq_of_lt, pow_eq_one_iff],
+  norm_num,
+  exact ne_of_gt hn0,
+  exact lt_of_le_of_lt (pow_le_pow one_le_two hn) (by norm_num)
+end
+
+private lemma lem2_6_3 {x : ℕ} (h : x.coprime 15) (h0 : x < 15) :
+  (x ∈ ({1, 2, 4, 8} : finset ℕ) ∧ S0 lem2_6_1 x = 15) ∨
+  (x ∈ ({7, 11, 13, 14} : finset ℕ) ∧ S0 lem2_6_1 x = 45) :=
+begin
+ unfold S0 S; rw lem2_6_2,
+ rw ← mem_range at h0; revert h,
+ repeat { rw sum_range_succ },
+ rw [sum_range_zero, zero_add],
+ -- There are better ways, certainly...
+ -- To be replaced, it works now but...
+ sorry
+ -- fin_cases h0; norm_num
+end
+
+private lemma lem2_6_4 {x y : ℕ} (h : x.coprime 15) (h0 : y.coprime 15)
+  (h1 : x < 15) (h2 : y < 15) (h3 : S0 lem2_6_1 x = S0 lem2_6_1 y) :
+  y ≤ x + 7 :=
+begin
+  /-
+  replace h1 := lem2_6_3 h h1,
+  replace h2 := lem2_6_3 h0 h2,
+  rcases h1 with ⟨h11, h12⟩ | ⟨h11, h12⟩,
+  -/
   sorry
 end
+  
 
 private lemma lem2_250 : ¬good 15 :=
 begin
+  /-
+  have h : odd 15 := ⟨7, by rw [bit1, bit0, two_mul]⟩,
+  rw lem1_4 h; simp only [not_exists],
+  rintros x y ⟨h0, h1, h2, h3, h4⟩,
+
+  -- We first claim that the order of 2 mod 15 is 4
+  have X : order_two_mod_p h = 4 :=
+  begin
+    rw [order_two_mod_p, nat.find_eq_iff],
+    unfold nat.modeq; norm_num,
+    intros n hn hn0; rw nat.lt_succ_iff at hn,
+    rw [nat.mod_eq_of_lt, pow_eq_one_iff],
+    norm_num,
+    exact ne_of_gt hn0,
+    exact lt_of_le_of_lt (pow_le_pow one_le_two hn) (by norm_num)
+  end,
+
+  -- Unfold the sum in h4
+  rw [S0, S0, X, S, S] at h4,
+  repeat { rw sum_range_succ at h4 },
+  rw [sum_range_zero, zero_add, sum_range_zero, zero_add] at h4,
+
+  -- ...
+  -/
   sorry
 end
 
@@ -286,7 +410,7 @@ private lemma lem2_300 {p : ℕ} (h : p ∈ ({1, 3, 7, 15} : finset ℕ)) : ¬go
 begin
   simp only [finset.mem_insert, finset.mem_singleton] at h,
   rcases h with rfl | rfl | rfl | rfl,
-  exacts [lem2_3, lem2_4, lem2_220, lem2_250]
+  exacts [lem2_3, lem2_4, lem2_5, lem2_250]
 end
 
 end computation
