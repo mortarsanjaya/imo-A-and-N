@@ -1,0 +1,55 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\title{IMO 2006 A2}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $F$ be a totally ordered field.
+Define the sequence $(a_n)_{n \geq 0}$ in $F$ recursively by $a_0 = -1$ and, for all $n \geq 1$,
+\[ \sum_{k = 0}^n \frac{a_k}{n - k + 1} = 0. \tag{*} \]
+Prove that $a_n > 0$ for each $n \geq 1$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2006SL.pdf}
+
+The following solution is just a rewriting of the official solution.
+The solution goes by strong induction.
+
+\textit{\underline{Base case.}}
+For the case $n = 1$, (*) implies $a_1 = \frac{1}{2} > 0$.
+
+\textit{\underline{Induction step.}}
+Fix some $n > 1$, and suppose that $a_k > 0$ for every $0 < k \leq n$.
+Then, (*) yields
+\begin{align*}
+0
+    &= (n + 2) \sum_{k = 0}^{n + 1} \frac{a_k}{n - k + 2} - (n + 1) \sum_{k = 0}^n \frac{a_k}{n - k + 1} \\
+    &= (n + 2) a_{n + 1} + \sum_{k = 0}^n a_k \left(\frac{n + 2}{n - k + 2} - \frac{n + 1}{n - k + 1}\right) \\
+    &= (n + 2) a_{n + 1} - \sum_{k = 0}^n a_k \frac{k}{(n - k + 2)(n - k + 1)} \\
+(n + 2) a_{n + 1}
+    &= \sum_{k = 0}^n a_k \frac{k}{(n - k + 2)(n - k + 1)}.
+\end{align*}
+The term of the sum at $k = 0$ vanishes.
+The rest of the terms are positive since $a_k > 0$ by induction hypothesis.
+Excluding the term at $k = 0$, the sum is non-empty, so $(n + 2) a_{n + 1}$ is positive.
+Induction step is complete.
+
+
+
+\end{document}
