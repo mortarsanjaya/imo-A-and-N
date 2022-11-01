@@ -28,29 +28,26 @@ begin
     exact div_pos one_pos two_pos },
 
   -- Induction step
-  { -- First obtain the main equality and manipulate it to get `(n + 2) a_{n + 1} = ...`
+  { -- First obtain the main equality and manipulate
     replace h0 := congr_arg2 has_sub.sub
       (congr_arg (has_mul.mul (n + 2 : F)) (h0 n.succ n.succ_pos))
       (congr_arg (has_mul.mul (n + 1 : F)) (h0 n h1)),
     rw sum_range_succ at h0; norm_num at h0,
     rw [sub_eq_zero, add_comm _ (a n.succ), mul_add, ← eq_sub_iff_add_eq] at h0,
   
-    -- Next reduce to showing that the RHS of the above main inequality is positive
+    -- Substitute into the goal inequality
     refine pos_of_mul_pos_right _ (add_nonneg n.cast_nonneg zero_le_two),
-    rw h0; clear h0,
-
-    -- Manipulate the RHS again and get the terms with `a_0` out
-    rw [mul_sum, mul_sum, ← sum_sub_distrib],
+    rw [h0, mul_sum, mul_sum, ← sum_sub_distrib],
     conv_rhs { congr, skip, funext,
       rw [mul_div_left_comm, mul_div_left_comm _ (a x), ← mul_sub] },
-    have X : (n + 1 : F) / (n + 1) - (n + 2) / (n + 1 + 1) = 0 :=
+    replace h0 : (n + 1 : F) / (n + 1) - (n + 2) / (n + 1 + 1) = 0 :=
     begin
       rw [div_self, add_assoc, ← bit0, div_self, sub_self],
       all_goals { refine ne_of_gt (add_pos (nat.cast_pos.mpr h1) _) },
       exacts [two_pos, one_pos]
     end,
-    rw [sum_range_succ', nat.cast_zero, sub_zero, sub_zero, X, mul_zero, add_zero],
-    clear X,
+    rw [sum_range_succ', nat.cast_zero, sub_zero, sub_zero, h0, mul_zero, add_zero],
+    clear h0,
 
     -- It remains to show that each summand is positive
     refine sum_pos (λ i h0, mul_pos (n_ih i (mem_range.mp h0)) _) ⟨0, mem_range.mpr h1⟩,
