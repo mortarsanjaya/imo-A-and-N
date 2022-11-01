@@ -9,6 +9,11 @@ open finset nat.arithmetic_function
 
 private def g (n : ℕ) : ℕ := (range n).sum (λ x, n / (x + 1))
 
+
+
+/- ## Properties of g -/
+section g_prop
+
 private lemma lem1 (n : ℕ) : g n.succ = g n + n.succ.divisors.card :=
 begin
   rw [g, g, sum_range_succ, nat.div_self n.succ_pos],
@@ -16,7 +21,7 @@ begin
   rw [sum_add_distrib, add_assoc, add_right_inj, nat.divisors,
       ← nat.cast_id (filter _ _).card, ← sum_boole, sum_Ico_eq_sum_range,
       nat.add_sub_cancel, sum_range_succ, add_comm 1 n, if_pos (dvd_refl _)],
-  conv_rhs { congr, congr, skip, funext, rw add_comm }
+  congr; funext x; rw add_comm
 end
 
 private lemma lem2 (n : ℕ) : g n = (range n.succ).sum (λ x, x.divisors.card) :=
@@ -34,12 +39,12 @@ begin
     rw mem_singleton; exact ne_of_lt h },
   rw [insert_subset, nat.mem_divisors, singleton_subset_iff, nat.mem_divisors],
   replace h : n ≠ 0 := ne_of_gt (lt_of_lt_of_le two_pos h),
-  refine ⟨⟨one_dvd n, h⟩, dvd_refl n, h⟩
+  exact ⟨⟨one_dvd n, h⟩, dvd_refl n, h⟩
 end
 
-private lemma lem4 {n : ℕ} (h : 6 ≤ n) : 2 * n < g n :=
+private lemma lem4 : ∀ {n : ℕ}, 6 ≤ n → 2 * n < g n :=
 begin
-  revert h n; refine nat.le_induction _ (λ n h h0, _),
+  refine nat.le_induction _ (λ n h h0, _),
   unfold g; repeat { rw sum_range_succ }; norm_num,
   rw [mul_add_one, lem1],
   refine add_lt_add_of_lt_of_le h0 (lem3 _),
@@ -48,10 +53,7 @@ begin
 end
 
 private lemma lem5 {p : ℕ} (hp : p.prime) : p.divisors.card = 2 :=
-begin
-  rw [nat.prime.divisors hp, card_insert_eq_ite, if_neg, card_singleton],
-  rw mem_singleton; exact ne_of_lt hp.one_lt
-end
+  by rw [nat.prime.divisors hp, card_doubleton hp.ne_one.symm]
 
 private lemma lem6 {n : ℕ} (h : 6 ≤ n) (hp : n.succ.prime) : n * g n.succ < n.succ * g n :=
   by rw [lem1, lem5 hp, mul_add, nat.succ_mul, add_lt_add_iff_left, mul_comm]; exact lem4 h
@@ -68,6 +70,8 @@ begin
   exact lem3 (nat.succ_le_succ h)
 end
 
+end g_prop
+
 
 
 def f (n : ℕ) : ℚ := ((g n : ℤ) : ℚ) / ((n : ℤ) : ℚ)
@@ -80,15 +84,12 @@ begin
     rintros n ⟨h, h0⟩,
     rw [set.mem_set_of_eq, f, f, rat.div_lt_div_iff_mul_lt_mul, ← nat.cast_mul,
         ← nat.cast_mul, nat.cast_lt, mul_comm, mul_comm (g n.succ)],
-    exact lem7 h h0,
-    all_goals { rw int.coe_nat_pos },
-    refine lt_of_lt_of_le _ h; norm_num,
-    exact n.succ_pos },
+    exacts [lem7 h h0, int.coe_nat_pos.mpr h, int.coe_nat_pos.mpr n.succ_pos] },
   refine set.infinite_of_not_bdd_above _,
   simp [bdd_above, upper_bounds, set.nonempty],
   intros b,
 
-  -- We take x to be the minimal natural with |d(x + 1)| > b.
+  -- We take `x` to be the minimal `nat` with `d(x + 1) > b + 1`.
   have h : ∃ y : ℕ, b + 1 < y.succ.divisors.card :=
     ⟨2 ^ (b + 1) - 1, by rw [nat.succ_eq_add_one, nat.sub_add_cancel (nat.one_le_pow' _ 1),
       nat.divisors_prime_pow nat.prime_two, card_map, card_range, nat.lt_succ_iff] ⟩,
@@ -115,10 +116,9 @@ begin
     rintros n ⟨h, hp⟩,
     rw [set.mem_set_of_eq, f, f, rat.div_lt_div_iff_mul_lt_mul, ← nat.cast_mul,
         ← nat.cast_mul, nat.cast_lt, mul_comm, mul_comm (g n)],
-    exact lem6 h hp,
-    all_goals { rw int.coe_nat_pos },
-    exact n.succ_pos,
-    refine lt_of_lt_of_le _ h; norm_num },
+    work_on_goal 3 { rw int.coe_nat_pos },
+    exacts [lem6 h hp, int.coe_nat_pos.mpr n.succ_pos, lt_of_lt_of_le (by norm_num) h] },
+  
   refine set.infinite_of_not_bdd_above _,
   rintros ⟨N, h⟩; simp [mem_upper_bounds] at h,
   rcases (max 7 (N + 2)).exists_infinite_primes with ⟨⟨_, _⟩, h0, hp⟩,
