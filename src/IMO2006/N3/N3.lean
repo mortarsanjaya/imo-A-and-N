@@ -55,21 +55,6 @@ end
 private lemma lem5 {p : ℕ} (hp : p.prime) : p.divisors.card = 2 :=
   by rw [nat.prime.divisors hp, card_doubleton hp.ne_one.symm]
 
-private lemma lem6 {n : ℕ} (h : 6 ≤ n) (hp : n.succ.prime) : n * g n.succ < n.succ * g n :=
-  by rw [lem1, lem5 hp, mul_add, nat.succ_mul, add_lt_add_iff_left, mul_comm]; exact lem4 h
-
-private lemma lem7 {n : ℕ} (h : 0 < n)
-  (h0 : ∀ m : ℕ, m ≤ n → m.divisors.card < n.succ.divisors.card) :
-  n.succ * g n < n * g n.succ :=
-begin
-  rw [lem1, nat.succ_mul, mul_add, add_lt_add_iff_left, lem2, sum_range_succ',
-      nat.divisors_zero, card_empty, add_zero, ← smul_eq_mul, nsmul_eq_sum_const],
-  refine sum_lt_sum (λ m h1, le_of_lt (h0 _ _)) ⟨0, mem_range.mpr h, _⟩,
-  rwa [nat.succ_le_iff, ← mem_range],
-  rw [zero_add, nat.divisors_one, card_singleton, ← nat.succ_le_iff],
-  exact lem3 (nat.succ_le_succ h)
-end
-
 end g_prop
 
 
@@ -80,11 +65,20 @@ def f (n : ℕ) : ℚ := ((g n : ℤ) : ℚ) / ((n : ℤ) : ℚ)
 theorem final_solution_part1 : {n : ℕ | f n < f n.succ}.infinite :=
 begin
   suffices : {n : ℕ | 0 < n ∧ ∀ m : ℕ, m ≤ n → m.divisors.card < n.succ.divisors.card}.infinite,
-  { refine set.infinite.mono _ this,
+  { refine set.infinite.mono _ this; clear this,
     rintros n ⟨h, h0⟩,
-    rw [set.mem_set_of_eq, f, f, rat.div_lt_div_iff_mul_lt_mul, ← nat.cast_mul,
-        ← nat.cast_mul, nat.cast_lt, mul_comm, mul_comm (g n.succ)],
-    exacts [lem7 h h0, int.coe_nat_pos.mpr h, int.coe_nat_pos.mpr n.succ_pos] },
+    rw [set.mem_set_of_eq, f, f, rat.div_lt_div_iff_mul_lt_mul],
+    rotate 1,
+    rwa int.coe_nat_pos,
+    rw int.coe_nat_pos; exact n.succ_pos,
+    rw [← nat.cast_mul, ← nat.cast_mul, nat.cast_lt, mul_comm, mul_comm (g n.succ),
+        lem1, nat.succ_mul, mul_add, add_lt_add_iff_left, lem2, sum_range_succ',
+        nat.divisors_zero, card_empty, add_zero, ← smul_eq_mul, nsmul_eq_sum_const],
+    refine sum_lt_sum (λ m h1, le_of_lt (h0 _ _)) ⟨0, mem_range.mpr h, _⟩,
+    rwa [nat.succ_le_iff, ← mem_range],
+    rw [zero_add, nat.divisors_one, card_singleton, ← nat.succ_le_iff],
+    exact lem3 (nat.succ_le_succ h) },
+
   refine set.infinite_of_not_bdd_above _,
   simp [bdd_above, upper_bounds, set.nonempty],
   intros b,
@@ -93,14 +87,13 @@ begin
   have h : ∃ y : ℕ, b + 1 < y.succ.divisors.card :=
     ⟨2 ^ (b + 1) - 1, by rw [nat.succ_eq_add_one, nat.sub_add_cancel (nat.one_le_pow' _ 1),
       nat.divisors_prime_pow nat.prime_two, card_map, card_range, nat.lt_succ_iff] ⟩,
-  use nat.find h; rw [and_comm, and_iff_left_of_imp],
-  work_on_goal 2 { rintros ⟨-, h0⟩; exact pos_of_gt h0 },
+  use nat.find h; rw [and_comm, and_assoc],
   refine ⟨λ m h0, lt_of_le_of_lt _ (nat.find_spec h), _⟩,
   { cases m with m m,
     rw [nat.divisors_zero, card_empty]; exact nat.zero_le _,
     have h1 := nat.find_min h h0,
     exact le_of_not_lt h1 },
-  { rw ← not_le; intros h0,
+  { rw [and_iff_left_of_imp pos_of_gt, ← not_le]; intros h0,
     replace h0 : ∃ y, y ≤ b ∧ b + 1 < y.succ.divisors.card := ⟨nat.find h, h0, nat.find_spec h⟩,
     clear h; rcases h0 with ⟨y, h, h0⟩,
     revert h; refine not_le_of_lt (nat.succ_lt_succ_iff.mp (lt_of_lt_of_le h0 _)),
@@ -114,10 +107,13 @@ begin
   suffices : {n : ℕ | 6 ≤ n ∧ n.succ.prime}.infinite,
   { refine set.infinite.mono _ this,
     rintros n ⟨h, hp⟩,
-    rw [set.mem_set_of_eq, f, f, rat.div_lt_div_iff_mul_lt_mul, ← nat.cast_mul,
-        ← nat.cast_mul, nat.cast_lt, mul_comm, mul_comm (g n)],
-    work_on_goal 3 { rw int.coe_nat_pos },
-    exacts [lem6 h hp, int.coe_nat_pos.mpr n.succ_pos, lt_of_lt_of_le (by norm_num) h] },
+    rw [set.mem_set_of_eq, f, f, rat.div_lt_div_iff_mul_lt_mul],
+    rotate 1,
+    rw int.coe_nat_pos; exact n.succ_pos,
+    rw int.coe_nat_pos; exact lt_of_lt_of_le (by norm_num : 0 < 6) h,
+    rw [← nat.cast_mul, ← nat.cast_mul, nat.cast_lt, mul_comm, mul_comm (g n),
+        lem1, lem5 hp, mul_add, nat.succ_mul, add_lt_add_iff_left, mul_comm],
+    exact lem4 h },
   
   refine set.infinite_of_not_bdd_above _,
   rintros ⟨N, h⟩; simp [mem_upper_bounds] at h,
