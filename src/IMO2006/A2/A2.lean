@@ -1,8 +1,4 @@
-import
-  algebra.big_operators.order
-  algebra.big_operators.ring
-  tactic.field_simp
-  tactic.ring
+import algebra.big_operators.order algebra.big_operators.ring
 
 /-! # IMO 2006 A2 -/
 
