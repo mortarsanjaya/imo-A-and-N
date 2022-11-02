@@ -1,0 +1,117 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+
+\newtheorem{lemma}{Lemma}
+
+\title{IMO 2007 A2}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+A function $f : \N \to \N$ is called \textit{good} if, for any $m, n \in \N$,
+\[ f(m + n + 1) \geq f(m) + f(f(n)). \tag{*} \]
+Fix some $N \in \N$.
+Determine all $k \in \N$ for which there exists a good function $f$ such that $f(N) = k$.
+
+
+
+\subsection*{Answer}
+
+If $N = 0$, then only $k = 0$ works.
+If $N > 0$, then any $k \leq N + 1$ works.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2007SL.pdf}
+
+While the original problem uses $\N^+$ instead of $\N$, the same solution works here except for the case $N = 0$.
+The usage of $\N$ will be explained later in the "Implementation details" subsection.
+We translate the official solution into a solution for our version of the problem.
+One exception is the final step of obtaining $f(n) \leq n + 1$, where we will not follow the official solution.
+
+We start with the following lemma on good functions.
+
+\begin{lemma}\label{lem1}
+Any good function is non-decreasing.
+\end{lemma}
+\begin{proof}
+Fix a good function $f : \N \to \N$ and some $m, n \in \N$ with $m < n$.
+We can then write $n = m + k + 1$ for some $k \in \N$.
+Then (*) yields $f(n) \geq f(m) + f(f(k)) \geq f(m)$, as desired.
+\end{proof}
+
+Now, we divide into two cases.
+
+\begin{itemize}
+
+    \item
+    \textit{\underline{Case 1.}}
+    $N = 0$.
+
+    Clearly, the zero map $n \mapsto 0$ is good, so it remains to show that $f(0) = 0$ for any $f : \N \to \N$ good.
+    Fix $f$, and suppose for the sake of contradiction that $f(0) > 0$.
+    This also means $f(0) \geq 1$, so (*) yields $f(1) \geq f(0) + f(f(0)) > f(f(0)) \geq f(1)$, a contradiction.
+
+    \item
+    \textit{\underline{Case 2.}}
+    $N > 0$.
+
+    We first show that $f(N) \leq N + 1$ for any good function $f : \N \to \N$.
+    Then, we construct a good function for $k \leq N$ and $k = N + 1$ separately.
+
+    Set $K = N + 1$, and suppose for the sake of contradiction that $f(N) > K$.
+    In particular, $f(f(N)) \geq f(K)$, so (*) yields $f(m + K) = f(m + N + 1) \geq f(m) + f(K)$ for all $m \in \N$.
+    By small induction, we get $f(mK) \geq m f(K)$ for all $m \in \N$.
+    Since $f(K) \geq f(N) > K$, we have $f(K^2) \geq K f(K) \geq K (K + 1)$.
+    Thus we can write $f(K^2) = K^2 + d + 1$ with $d \geq K - 1 = N$.
+    Plugging $m = d$ and $n = K^2$ into (*) yields
+    \[ f(K^2 + d + 1) \geq f(d) + f(f(K^2)) = f(d) + f(K^2 + d + 1) \implies f(d) \leq 0. \]
+    A contradiction, since $f(d) \geq f(N) > K \geq 0$.
+    Thus, $f(N) \leq K = N + 1$, as desired.
+
+    Now, for $k \leq N$, consider the function $f(n) = \max\{0, n - c\}$, where $c = N - k \geq 0$.
+    Clearly, $f(N) = k$, so it remains to show that $f$ is good.
+    First note that $f$ is non-decreasing and $f(n) \leq n$ for all $n \in \N$.
+    Thus, (*) is satisfied for $n \leq c$ as then $f(f(n)) = 0$.
+    For $n > c$,
+    \[ f(m + n + 1) = m + (n - c) + 1 \geq f(m) + f(n) + 1 > f(m) + f(f(n)). \]
+
+    Finally, consider the case $k = N + 1$.
+    We set $f(n) = n$ if $n \not\equiv -1 \bmod{N + 1}$ and $f(n) = n + 1$ if $n \equiv -1 \bmod{N + 1}$.
+    Clearly $f(N) = N + 1$, so it remains to show that $f$ is good.
+    
+    We have $f(f(n)) = f(n) \leq n + 1$ for all $n \in \N$.
+    So, $f(m + n + 1) \geq m + n + 1 \geq f(m) + f(n)$ holds as long as $N + 1$ does not divide $m + 1$ and $n + 1$.
+    But if $N + 1$ divides both $m + 1$ and $n + 1$, then $N + 1$ divides $(m + n + 1) + 1$.
+    So one can verify that the inequality still holds.
+
+\end{itemize}
+
+
+
+\subsection*{Implementation details}
+
+We use $\N$/\texttt{nat} as opposed to $\N^+$/\texttt{pnat} for the main formulation.
+The main reason is a better Lean API for \texttt{nat} to implement the above solution.
+However, we will still implement the \texttt{pnat} version of the problem.
+This is done through the bijection $f \mapsto \lambda n, f(n + 1) - 1$ between $\N \to \N$ and $\N^+ \to \N^+$.
+
+
+
+\end{document}
