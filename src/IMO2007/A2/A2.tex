@@ -47,7 +47,7 @@ One exception is the final step of obtaining $f(n) \leq n + 1$, where we will no
 
 We start with the following lemma on good functions.
 
-\begin{lemma}\label{lem1}
+\begin{lemma}\label{2007a2-1}
 Any good function is non-decreasing.
 \end{lemma}
 \begin{proof}
@@ -66,7 +66,8 @@ Now, we divide into two cases.
 
     Clearly, the zero map $n \mapsto 0$ is good, so it remains to show that $f(0) = 0$ for any $f : \N \to \N$ good.
     Fix $f$, and suppose for the sake of contradiction that $f(0) > 0$.
-    This also means $f(0) \geq 1$, so (*) yields $f(1) \geq f(0) + f(f(0)) > f(f(0)) \geq f(1)$, a contradiction.
+    This also means $f(0) \geq 1$, so (*) yields $f(1) \geq f(0) + f(f(0)) > f(f(0))$.
+    But Lemma~\ref{2007a2-1} yields $f(f(0)) \geq f(1)$; a contradiction.
 
     \item
     \textit{\underline{Case 2.}}
@@ -76,13 +77,15 @@ Now, we divide into two cases.
     Then, we construct a good function for $k \leq N$ and $k = N + 1$ separately.
 
     Set $K = N + 1$, and suppose for the sake of contradiction that $f(N) > K$.
-    In particular, $f(f(N)) \geq f(K)$, so (*) yields $f(m + K) = f(m + N + 1) \geq f(m) + f(K)$ for all $m \in \N$.
+    In particular, Lemma~\ref{2007a2-1} yields $f(f(N)) \geq f(K)$.
+    Then (*) yields $f(m + K) = f(m + N + 1) \geq f(m) + f(K)$ for all $m \in \N$.
     By small induction, we get $f(mK) \geq m f(K)$ for all $m \in \N$.
-    Since $f(K) \geq f(N) > K$, we have $f(K^2) \geq K f(K) \geq K (K + 1)$.
+
+    By Lemma~\ref{2007a2-1} again, we have $f(K) \geq f(N) > K$, so $f(K^2) \geq K f(K) \geq K (K + 1)$.
     Thus we can write $f(K^2) = K^2 + d + 1$ with $d \geq K - 1 = N$.
     Plugging $m = d$ and $n = K^2$ into (*) yields
     \[ f(K^2 + d + 1) \geq f(d) + f(f(K^2)) = f(d) + f(K^2 + d + 1) \implies f(d) \leq 0. \]
-    A contradiction, since $f(d) \geq f(N) > K \geq 0$.
+    A contradiction, since Lemma~\ref{2007a2-1} gives us $f(d) \geq f(N) > K \geq 0$.
     Thus, $f(N) \leq K = N + 1$, as desired.
 
     Now, for $k \leq N$, consider the function $f(n) = \max\{0, n - c\}$, where $c = N - k \geq 0$.
