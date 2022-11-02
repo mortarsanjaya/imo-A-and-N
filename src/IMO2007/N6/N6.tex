@@ -1,0 +1,72 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+
+\newtheorem{lemma}{Lemma}
+
+\title{IMO 2007 N6 (P5)}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $n > 1$, $a$, and $b$ be positive integers.
+Prove that $nab - 1 \mid (na^2 - 1)^2$ if and only if $a = b$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2007SL.pdf}
+
+The official solution considers the case $n = 4$, but as in its comment section, any $n > 1$ works.
+The following solution is essentially the official solution, presented in a slightly different way.
+
+Fix $n > 1$, and call a pair $(a, b)$ of positive integers \emph{bad} if $0 < a < b$ and $nab - 1 \mid (na^2 - 1)^2$.
+The main results that we need for the descent argument are as follows.
+
+\begin{lemma}\label{2007n6-1}
+For any positive integers $a$ and $b$, $nab - 1 \mid (na^2 - 1)^2$ if and only if $nab - 1 \mid (a - b)^2$.
+\end{lemma}
+\begin{proof}
+Since $\gcd(b, nab - 1) = 1$,
+\[ nab - 1 \mid (na^2 - 1)^2 \iff nab - 1 \mid (na^2 b - b)^2 \iff nab - 1 \mid (a - b)^2. \]
+\end{proof}
+
+\begin{lemma}\label{2007n6-2}
+Fix some $a > 0$, and suppose that there exists $b > 0$ such that $(a, b)$ is a bad pair.
+Then there exists an integer $c > 0$ such that $(c, a)$ is a bad pair.
+\end{lemma}
+\begin{proof}
+Write $(na^2 - 1)^2 = (nab - 1) r$ for some integer $r$.
+Working modulo $na$ gives $r \equiv -1 \pmod{na}$, so we can write $r = nac - 1$ for some integer $c$.
+The bound $0 < a < b$ implies that $0 < c < a$, so it remains to show that $nac - 1 \mid (nc^2 - 1)^2$.
+Indeed, we have $(na^2 - 1)^2 = (nab - 1)(nac - 1)$, so $nac - 1 \mid (na^2 - 1)^2$.
+Then, we are done using: Lemma~\ref{2007n6-1},
+\[ nac - 1 \mid (na^2 - 1)^2 \iff nac - 1 \mid (a - c)^2 = (c - a)^2 \iff nac - 1 \mid (nc^2 - 1)^2. \]
+\end{proof}
+
+If $nab - 1 \mid (na^2 - 1)^2$ holds for some positive integers $0 < b < a$, then Lemma~\ref{2007n6-1} yields that $(b, a)$ is a bad pair.
+Thus, to show that $nab - 1 \mid (na^2 - 1)^2$ implies $a = b$, it suffices to show that there exists no bad pairs.
+
+Suppose for the sake of contradiction that bad pairs exist.
+Let $a$ be the minimal positive integer such that $(a, b)$ is bad for some $b > a$.
+By Lemma~\ref{2007n6-2}, there exists $0 < c < a$ such that $(c, a)$ is a bad pair.
+The properties of such $c$ contradicts the minimality of $a$.
+Thus, no bad pairs exist.
+
+
+
+\end{document}
