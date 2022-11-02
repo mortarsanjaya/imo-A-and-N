@@ -66,7 +66,5 @@ begin
     apply ring.two_ne_zero; rwa ring_char.eq (zmod p) p }
 end
 
-
-
 end IMO2007N2
 end IMOSL
