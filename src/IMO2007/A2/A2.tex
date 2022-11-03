@@ -23,7 +23,7 @@
 \subsection*{Problem}
 
 A function $f : \N \to \N$ is called \textit{good} if, for any $m, n \in \N$,
-\[ f(m + n + 1) \geq f(m) + f(f(n)). \tag{*} \]
+\[ f(m + n + 1) \geq f(m) + f(f(n)). \tag{*}\label{eq0} \]
 Fix some $N \in \N$.
 Determine all $k \in \N$ for which there exists a good function $f$ such that $f(N) = k$.
 
@@ -53,7 +53,7 @@ Any good function is non-decreasing.
 \begin{proof}
 Fix a good function $f : \N \to \N$ and some $m, n \in \N$ with $m < n$.
 We can then write $n = m + k + 1$ for some $k \in \N$.
-Then (*) yields $f(n) \geq f(m) + f(f(k)) \geq f(m)$, as desired.
+Then~\eqref{eq0} yields $f(n) \geq f(m) + f(f(k)) \geq f(m)$, as desired.
 \end{proof}
 
 Now, we divide into two cases.
@@ -66,7 +66,7 @@ Now, we divide into two cases.
 
     Clearly, the zero map $n \mapsto 0$ is good, so it remains to show that $f(0) = 0$ for any $f : \N \to \N$ good.
     Fix $f$, and suppose for the sake of contradiction that $f(0) > 0$.
-    This also means $f(0) \geq 1$, so (*) yields $f(1) \geq f(0) + f(f(0)) > f(f(0))$.
+    This also means $f(0) \geq 1$, so~\eqref{eq0} yields $f(1) \geq f(0) + f(f(0)) > f(f(0))$.
     But Lemma~\ref{2007a2-1} yields $f(f(0)) \geq f(1)$; a contradiction.
 
     \item
@@ -78,12 +78,12 @@ Now, we divide into two cases.
 
     Set $K = N + 1$, and suppose for the sake of contradiction that $f(N) > K$.
     In particular, Lemma~\ref{2007a2-1} yields $f(f(N)) \geq f(K)$.
-    Then (*) yields $f(m + K) = f(m + N + 1) \geq f(m) + f(K)$ for all $m \in \N$.
+    Then~\eqref{eq0} yields $f(m + K) = f(m + N + 1) \geq f(m) + f(K)$ for all $m \in \N$.
     By small induction, we get $f(mK) \geq m f(K)$ for all $m \in \N$.
 
     By Lemma~\ref{2007a2-1} again, we have $f(K) \geq f(N) > K$, so $f(K^2) \geq K f(K) \geq K (K + 1)$.
     Thus we can write $f(K^2) = K^2 + d + 1$ with $d \geq K - 1 = N$.
-    Plugging $m = d$ and $n = K^2$ into (*) yields
+    Plugging $m = d$ and $n = K^2$ into~\eqref{eq0} yields
     \[ f(K^2 + d + 1) \geq f(d) + f(f(K^2)) = f(d) + f(K^2 + d + 1) \implies f(d) \leq 0. \]
     A contradiction, since Lemma~\ref{2007a2-1} gives us $f(d) \geq f(N) > K \geq 0$.
     Thus, $f(N) \leq K = N + 1$, as desired.
@@ -91,7 +91,7 @@ Now, we divide into two cases.
     Now, for $k \leq N$, consider the function $f(n) = \max\{0, n - c\}$, where $c = N - k \geq 0$.
     Clearly, $f(N) = k$, so it remains to show that $f$ is good.
     First note that $f$ is non-decreasing and $f(n) \leq n$ for all $n \in \N$.
-    Thus, (*) is satisfied for $n \leq c$ as then $f(f(n)) = 0$.
+    Thus,~\eqref{eq0} is satisfied for $n \leq c$ as then $f(f(n)) = 0$.
     For $n > c$,
     \[ f(m + n + 1) = m + (n - c) + 1 \geq f(m) + f(n) + 1 > f(m) + f(f(n)). \]
 
