@@ -49,5 +49,11 @@ Then plugging $x = 2$ and $y = 1/2$ into~\eqref{eq0} yields $f(1) = 0$, as desir
 
 
 
+\subsection*{Implementation details}
+
+We put an extra lemma called \texttt{inv\_floor\_eq\_zero}, which proves that given $r \in F$ such that $r > 1$, we have $\lfloor r^{-1} \rfloor = 0$.
+The main use is just to justify that $\lfloor 1/2 \rfloor = 0$, needed in the step of plugging $x = y = 1/2$ into~\eqref{eq0}.
+
+
 
 \end{document}
