@@ -5,79 +5,101 @@ import data.int.modeq ring_theory.coprime.lemmas
 namespace IMOSL
 namespace IMO2007N6
 
-def bad (n a b : ℤ) := n * a * b - 1 ∣ (n * a ^ 2 - 1) ^ 2
-
-variables {n : ℤ} (hn : 1 < n)
-include hn
-
-private lemma lem1 (a b : ℤ) : bad n a b ↔ n * a * b - 1 ∣ (a - b) ^ 2 :=
+private lemma bad_symm {n : ℤ} (hn : 1 < n)
+    {a b : ℕ} (h : n * a * b - 1 ∣ (n * a ^ 2 - 1) ^ 2) :
+  n * b * a - 1 ∣ (n * b ^ 2 - 1) ^ 2 :=
 begin
-  have h : n * a ^ 2 - n * a * b ≡ n * a ^ 2 - 1 [ZMOD n * a * b - 1] :=
-    by rw [int.modeq_iff_dvd, sub_sub_sub_cancel_left],
-  replace h := int.modeq.pow 2 h,
-  rw int.modeq at h,
-  rw [bad, int.dvd_iff_mod_eq_zero, ← h, ← int.dvd_iff_mod_eq_zero,
-      sq a, ← mul_assoc, ← mul_sub, mul_pow],
-  refine ⟨is_coprime.dvd_of_dvd_mul_left (is_coprime.pow_right ⟨-1, b, _⟩),
-          λ h0, dvd_mul_of_dvd_right h0 _⟩,
-  rw [neg_one_mul, neg_sub, mul_comm, sub_add_cancel]
+  sorry
 end
 
-private lemma lem2 {a b : ℤ} (h : bad n a b) : bad n b a :=
+private lemma nat_pred_descent {P : ℕ → Prop} [decidable_pred P]
+    (h : ∀ k : ℕ, P k → ∃ m : ℕ, m < k ∧ P m) :
+  ∀ k : ℕ, ¬P k :=
 begin
-  rw lem1 hn at h ⊢,
-  convert h using 1,
-  rw mul_right_comm,
-  rw [sub_sq, sub_sq, sub_add_comm, mul_right_comm]
-end
-
-private lemma lem3 {a b : ℤ} (h : bad n a b) (h0 : 0 < a) (h1 : a < b) :
-  ∃ c : ℤ, bad n c a ∧ 0 < c ∧ c < a :=
-begin
-  cases h with k h,
-  obtain ⟨c, rfl⟩ : ∃ c : ℤ, k = n * a * c - 1 :=
-  begin
-    replace h := congr_arg (λ x, x % (n * a)) h; simp only [] at h,
-    rw [sub_one_mul, mul_assoc, sq a, sub_sq, ← mul_assoc, one_pow, mul_one] at h,
-    generalize hx : n * a = x,
-    rw [hx, sq, ← sub_mul, mul_comm x, ← mul_assoc, add_comm, int.add_mul_mod_self,
-        sub_eq_add_neg, add_comm, int.add_mul_mod_self_left, eq_comm, ← int.modeq,
-        int.modeq_iff_dvd, sub_neg_eq_add, add_comm] at h,
-    cases h with c h,
-    use c; rw [eq_sub_iff_add_eq, h]
-  end,
-  refine ⟨c, lem2 hn ⟨n * a * b - 1, by rw [h, mul_comm]⟩, _⟩,
-  have h2 : ∀ x y : ℤ, x < y ↔ n * a * x - 1 < n * a * y - 1 :=
-    λ x y, by rw [sub_lt_sub_iff_right, ← mul_lt_mul_left (mul_pos (lt_trans one_pos hn) h0)],
-  rw [h2, mul_zero, int.sub_one_lt_iff] at h0 ⊢,
-  rw h2 at h1 ⊢; split,
-  exact (zero_le_mul_left (lt_of_le_of_lt h0 h1)).mp (le_of_le_of_eq (sq_nonneg _) h),
-  rw ← not_le; intros h3,
-  revert h; rw [sq a, ← mul_assoc, sq],
-  rw le_iff_lt_or_eq at h0,
-  cases h0 with h0 h0,
-  refine ne_of_lt (int.mul_lt_mul h1 h3 h0 (le_of_lt (lt_trans h0 h1))),
-  exfalso; revert hn,
-  refine not_lt_of_le (int.le_of_dvd one_pos _),
-  use (a * a); rwa [← mul_assoc, eq_comm, ← sub_eq_zero, eq_comm]
+  by_contra' h0,
+  replace h := h (nat.find h0) (nat.find_spec h0),
+  rcases h with ⟨m, h, h1⟩,
+  exact nat.find_min h0 h h1
 end
 
 
+
+open_locale classical
 
 /-- Final solution -/
-theorem final_solution {a b : ℤ} (h : bad n a b) (h0 : 0 < a) (h1 : 0 < b) : a = b :=
+theorem final_solution {n : ℤ} (hn : 1 < n) :
+  ∀ a b : ℕ, 0 < a → 0 < b → n * a * b - 1 ∣ (n * a ^ 2 - 1) ^ 2 → a = b :=
 begin
-  wlog h2 : a ≤ b,
-  work_on_goal 2 { exact (this (lem2 hn h) h1 h0).symm },
-  rw le_iff_eq_or_lt at h2,
-  cases h2 with h2 h2,
-  exact h2,
-  exfalso; clear h1,
-  lift b to ℕ using le_of_lt (lt_trans h0 h2),
-  induction b using nat.strong_induction_on with b b_ih generalizing h h0 h2 a,
-  lift a to ℕ using le_of_lt h0,
-  rcases lem3 hn h h0 h2 with ⟨c, h1, h3, h4⟩,
-  exact b_ih a (nat.cast_lt.mp h2) h3 h1 h4
+
+  ---- First use descent argument to reduce the proof
+  let P : ℕ → Prop := λ k, (0 < k ∧ ∃ m : ℕ, k < m ∧ n * k * m - 1 ∣ (n * k ^ 2 - 1) ^ 2),
+  suffices : ∀ k : ℕ, P k → ∃ m : ℕ, m < k ∧ P m,
+  { replace this := nat_pred_descent this,
+    dsimp only [P] at this,
+    intros a b ha hb h; by_contra' h0,
+    rw [← ne.def, ne_iff_lt_or_gt, gt_iff_lt] at h0,
+    have h1 := bad_symm hn h,
+    wlog h0 : a < b := h0 using [a b, b a],
+    exact this a ⟨ha, b, h0, h⟩ },
+  
+  ---- Now prove that the condition for the descent argument holds
+  dsimp only [P]; clear P,
+  rintros a ⟨h, b, h0, k, h1⟩,
+  rw [sq (a : ℤ), ← mul_assoc] at h1,
+  generalize_hyp ht : n * a = t at h1,
+  obtain ⟨c, rfl⟩ : ∃ c : ℤ, k = t * c - 1 :=
+  begin
+    replace h1 : (t * a - 1) ^ 2 ≡ (t * b - 1) * k [ZMOD t] := by rw h1,
+    have X : ∀ m : ℤ, t * m - 1 ≡ -1 [ZMOD t] :=
+      λ m, by symmetry; rw [int.modeq_iff_dvd, sub_neg_eq_add, sub_add_cancel]; exact ⟨m, rfl⟩,
+    replace h1 := ((X a).pow 2).symm.trans (h1.trans ((X b).mul_right _)),
+    rw [int.modeq_iff_dvd, sq, ← mul_sub, sub_neg_eq_add, neg_one_mul, dvd_neg] at h1,
+    cases h1 with c h1,
+    use c; rw [eq_sub_iff_add_eq, h1]
+  end,
+
+  ---- It suffices to show that 0 < c and c < (a : ℤ)
+  suffices h2 : c < a ∧ 0 < c,
+  { lift c to ℕ using le_of_lt h2.2,
+    rw [int.coe_nat_pos, int.coe_nat_lt] at h2,
+    refine ⟨c, h2.1, h2.2, a, h2.1, bad_symm hn _⟩,
+    use t * b - 1; rw [sq (a : ℤ), ← mul_assoc, ht, h1, mul_comm] },
+  
+  ---- We do not need n; we just use t instead.
+  replace ht : 1 < t :=
+  begin
+    rw ← int.coe_nat_pos at h,
+    have h2 := le_trans int.one_nonneg (le_of_lt hn),
+    rw int.lt_iff_add_one_le at hn h ⊢,
+    rw ← ht; refine le_of_eq_of_le _ (mul_le_mul hn h zero_le_one h2),
+    rw [zero_add, mul_one]
+  end,
+  clear hn n,
+
+  ---- Some ordering results
+  have h2 := lt_trans one_pos ht,
+  have h3 : ∀ x y : ℤ, x < y ↔ t * x - 1 < t * y - 1 :=
+    λ x y, by rw [sub_lt_sub_iff_right, ← mul_lt_mul_left h2],
+  replace h2 : ∀ x : ℤ, 0 < x ↔ 0 < t * x - 1 :=
+  begin
+    intros x,
+    rw [h3, mul_zero, int.lt_iff_add_one_le, sub_add_cancel, le_iff_eq_or_lt],
+    refine or_iff_right (λ h4, _),
+    rw [eq_comm, sub_eq_zero] at h4,
+    exact ne_of_gt ht (int.eq_one_of_mul_eq_one_right (le_of_lt h2) h4)
+  end,
+
+  ---- Rearranging and final step
+  rw [← int.coe_nat_pos, h2] at h,
+  rw [← int.coe_nat_lt, h3] at h0,
+  rw [h2, h3 c],
+  generalize_hyp : t * a - 1 = x at h h0 h1 ⊢,
+  generalize_hyp : t * b - 1 = y at h0 h1 ⊢,
+  generalize_hyp : t * c - 1 = z at h1 ⊢,
+  clear ht h2 h3 a b c t; split,
+  rwa [← mul_lt_mul_left (lt_trans h h0), ← h1, sq, mul_lt_mul_right h],
+  rw [← mul_lt_mul_left (lt_trans h h0), mul_zero, ← h1],
+  exact pow_pos h 2
 end
 
 end IMO2007N6
