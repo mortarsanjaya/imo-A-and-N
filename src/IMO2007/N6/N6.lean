@@ -5,11 +5,16 @@ import data.int.modeq ring_theory.coprime.lemmas
 namespace IMOSL
 namespace IMO2007N6
 
-private lemma bad_symm {n : ℤ} (hn : 1 < n)
-    {a b : ℕ} (h : n * a * b - 1 ∣ (n * a ^ 2 - 1) ^ 2) :
+private lemma bad_symm {n : ℤ} {a b : ℕ} (h : n * a * b - 1 ∣ (n * a ^ 2 - 1) ^ 2) :
   n * b * a - 1 ∣ (n * b ^ 2 - 1) ^ 2 :=
 begin
-  sorry
+  rw [mul_right_comm, sub_sq', add_comm, mul_right_comm _ _ (1 : ℤ), ← sub_sq'],
+  replace h := dvd_mul_of_dvd_left h ((n * b ^ 2) ^ 2),
+  rw [← mul_pow, sub_one_mul, mul_mul_mul_comm, ← sq, ← mul_pow, ← mul_pow, ← mul_assoc] at h,
+  rw ← int.modeq_zero_iff_dvd at h ⊢,
+  revert h; refine ((int.modeq.sub_right _ _).pow _).trans,
+  nth_rewrite 1 ← one_pow 2,
+  exact ((n * a * b).modeq_sub 1).symm.pow 2
 end
 
 private lemma nat_pred_descent {P : ℕ → Prop} [decidable_pred P]
@@ -38,7 +43,7 @@ begin
     dsimp only [P] at this,
     intros a b ha hb h; by_contra' h0,
     rw [← ne.def, ne_iff_lt_or_gt, gt_iff_lt] at h0,
-    have h1 := bad_symm hn h,
+    have h1 := bad_symm h,
     wlog h0 : a < b := h0 using [a b, b a],
     exact this a ⟨ha, b, h0, h⟩ },
   
@@ -62,7 +67,7 @@ begin
   suffices h2 : c < a ∧ 0 < c,
   { lift c to ℕ using le_of_lt h2.2,
     rw [int.coe_nat_pos, int.coe_nat_lt] at h2,
-    refine ⟨c, h2.1, h2.2, a, h2.1, bad_symm hn _⟩,
+    refine ⟨c, h2.1, h2.2, a, h2.1, bad_symm _⟩,
     use t * b - 1; rw [sq (a : ℤ), ← mul_assoc, ht, h1, mul_comm] },
   
   ---- We do not need n; we just use t instead.
