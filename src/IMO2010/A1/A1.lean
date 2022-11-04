@@ -5,58 +5,61 @@ import algebra.order.field algebra.order.floor
 namespace IMOSL
 namespace IMO2010A1
 
-open function int
-open_locale classical
-
 variables {F : Type*} [linear_ordered_field F] [floor_ring F]
   {R : Type*} [linear_ordered_ring R] [floor_ring R]
 
-def fn_eq (f : F → R) := ∀ x y : F, f (⌊x⌋ * y) = f x * ⌊f y⌋
-
-
-
-namespace extra
-
-/-- For any r : F with 1 < r, we have ⌊r⁻¹⌋ = 0. -/
+/-- For any `r : F` with `1 < r`, we have `⌊r⁻¹⌋ = 0`. -/
 lemma inv_floor_eq_zero {r : F} (h : 1 < r) : ⌊r⁻¹⌋ = 0 :=
 begin
-  rw [floor_eq_iff, cast_zero, zero_add, inv_nonneg],
+  rw [int.floor_eq_iff, int.cast_zero, zero_add, inv_nonneg],
   exact ⟨le_of_lt (lt_trans zero_lt_one h), inv_lt_one h⟩
 end
-
-end extra
 
 
 
 /-- Final solution -/
-theorem final_solution (f : F → R) : fn_eq f ↔ f = 0 ∨ ∃ C : R, ⌊C⌋ = 1 ∧ f = const F C :=
+theorem final_solution (f : F → R) : (∀ x y : F, f (⌊x⌋ * y) = f x * ⌊f y⌋) ↔
+  ∃ C : R, (C = 0 ∨ ⌊C⌋ = 1) ∧ f = λ _, C :=
 begin
-  split,
-  { intros feq,
-    have h := feq 0 0,
-    rw [mul_zero, eq_comm, mul_right_eq_self₀] at h,
-    cases h with h h,
-    { rw [← cast_one, int.cast_inj] at h,
-      right; refine ⟨f 0, h, funext (λ x, _)⟩,
-      replace feq := feq x 0,
-      rwa [mul_zero, h, cast_one, mul_one, eq_comm] at feq },
-    { left; suffices : f 1 = 0,
-      { funext x,
-        have h0 := feq 1 x,
-        rwa [this, zero_mul, floor_one, cast_one, one_mul] at h0 },
-      have h0 : ⌊f 2⁻¹⌋ = 0 :=
+  symmetry; refine ⟨λ h x y, _, λ h, ⟨f 0, _⟩⟩,
+
+  ---- `→` direction
+  { rcases h with ⟨C, rfl | h, rfl⟩,
+    rw zero_mul,
+    rw [h, int.cast_one, mul_one] },
+
+  ---- `←` direction
+  { have h0 := h 0 0,
+    rw [mul_zero, eq_comm, mul_right_eq_self₀] at h0,
+    cases h0 with h0 h0,
+    
+    -- If `⌊f(0)⌋ = 1`, then...
+    { rw [← int.cast_one, int.cast_inj] at h0,
+      refine ⟨or.inr h0, funext (λ x, _)⟩,
+      replace h := h x 0,
+      rwa [mul_zero, h0, int.cast_one, mul_one, eq_comm] at h },
+  
+    -- If `f(0) = 0`, then...
+    { refine ⟨or.inl h0, _⟩,
+
+      -- First reduce to showing `f(1) = 0`.
+      suffices : f 1 = 0,
+      { funext x; replace h := h 1 x,
+        rw [this, zero_mul, int.floor_one, int.cast_one, one_mul] at h,
+        rw [h, h0] },
+
+      -- Now show that `f(1/2) = 0` and use it to prove `f(1) = 0`.
+      replace h0 : ⌊f 2⁻¹⌋ = 0 :=
       begin
-        have h0 := feq 2⁻¹ 2⁻¹,
-        rwa [extra.inv_floor_eq_zero (one_lt_two : (1 : F) < 2), cast_zero,
-             zero_mul, h, zero_eq_mul, cast_eq_zero, or_iff_right_of_imp] at h0,
-        intros h1; rw [h1, floor_zero]
+        have h1 := h 2⁻¹ 2⁻¹,
+        rw [inv_floor_eq_zero (one_lt_two : (1 : F) < 2), int.cast_zero,
+            zero_mul, h0, zero_eq_mul, int.cast_eq_zero] at h1,
+        revert h1; refine (or_iff_right_of_imp (λ h1, _)).mp,
+        rw [h1, int.floor_zero]
       end,
-      have h1 := feq ↑(2 : ℤ) 2⁻¹,
-      rwa [int.floor_int_cast, cast_bit0, cast_one, h0, cast_zero, mul_zero, mul_inv_cancel] at h1,
-      exact two_ne_zero } },
-  { rintros (rfl | ⟨C, h, rfl⟩) x y,
-    rw [pi.zero_apply, pi.zero_apply, zero_mul],
-    rw [h, cast_one, mul_one] }
+      have h1 := h ↑(2 : ℤ) 2⁻¹,
+      rwa [int.floor_int_cast, int.cast_bit0, int.cast_one, h0, int.cast_zero,
+           mul_zero, mul_inv_cancel (two_ne_zero : (2 : F) ≠ 0)] at h1 } }
 end
 
 end IMO2010A1
