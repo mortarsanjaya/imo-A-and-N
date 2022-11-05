@@ -59,6 +59,8 @@ end g_prop
 
 
 
+/-! ## Main results -/
+
 def f (n : ℕ) : ℚ := ((g n : ℤ) : ℚ) / ((n : ℤ) : ℚ)
 
 /-- Final solution, part 1 -/
