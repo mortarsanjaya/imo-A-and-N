@@ -41,14 +41,11 @@ begin
   
     -- If `f(0) = 0`, then...
     { refine ⟨or.inl h0, _⟩,
-
-      -- First reduce to showing `f(1) = 0`.
       suffices : f 1 = 0,
       { funext x; replace h := h 1 x,
         rw [this, zero_mul, int.floor_one, int.cast_one, one_mul] at h,
         rw [h, h0] },
 
-      -- Now show that `f(1/2) = 0` and use it to prove `f(1) = 0`.
       replace h0 : ⌊f 2⁻¹⌋ = 0 :=
       begin
         have h1 := h 2⁻¹ 2⁻¹,
