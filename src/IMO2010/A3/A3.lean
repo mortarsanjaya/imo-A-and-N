@@ -16,6 +16,7 @@ def target_sum (x : ℕ → ℝ≥0) (n : ℕ) := (range (2 * n)).sum (λ i, x i
 private lemma lem1 {a b c d : ℝ≥0} (h : a + b + c ≤ 1) (h0 : b + c + d ≤ 1) :
   a * c + b * d ≤ 1 / 4 :=
 begin
+  ---- Letting `x = b + c`, reduce to `x ≤ x^2 + 1/4`
   rw add_assoc at h,
   generalize_hyp hx : b + c = x at h h0,
   rw [← add_le_add_iff_left (x * c), ← add_assoc, ← add_mul, add_comm x],
@@ -25,6 +26,7 @@ begin
   rw [mul_one, add_right_comm, mul_comm, ← add_mul, add_comm, hx, ← sq],
   clear h h0 hx a b c d,
 
+  ---- Prove that `x ≤ x^2 + 1/4`
   rcases x with ⟨x, h⟩,
   rw [← nnreal.coe_le_coe, nonneg.coe_add, nonneg.mk_pow, subtype.coe_mk, subtype.coe_mk],
   convert two_mul_le_add_sq x (1 / 2),
