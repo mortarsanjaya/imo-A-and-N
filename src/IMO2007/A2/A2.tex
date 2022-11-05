@@ -96,7 +96,7 @@ Now, we divide into two cases.
     \[ f(m + n + 1) = m + (n - c) + 1 \geq f(m) + f(n) + 1 > f(m) + f(f(n)). \]
 
     Finally, consider the case $k = N + 1$.
-    We set $f(n) = n$ if $n \not\equiv -1 \bmod{N + 1}$ and $f(n) = n + 1$ if $n \equiv -1 \bmod{N + 1}$.
+    We set $f(n) = n$ if $N + 1 \nmid n + 1$ and $f(n) = n + 1$ if $N + 1 \mid n + 1$.
     Clearly $f(N) = N + 1$, so it remains to show that $f$ is good.
     
     We have $f(f(n)) = f(n) \leq n + 1$ for all $n \in \N$.
@@ -114,6 +114,11 @@ We use $\N$/\texttt{nat} as opposed to $\N^+$/\texttt{pnat} for the main formula
 The main reason is a better Lean API for \texttt{nat} to implement the above solution.
 However, we will still implement the \texttt{pnat} version of the problem.
 This is done through the bijection $f \mapsto \lambda n, f(n + 1) - 1$ between $\N \to \N$ and $\N^+ \to \N^+$.
+
+We factor the arguments in Case 2 using three lemmas.
+The first one, \texttt{good'\_val\_bound}, shows that, if $f$ is a good function, then $f(N) \leq N + 1$ for all $N \in \N$.
+The second one, \texttt{sub_right\_good'}, shows that the function $n \mapsto \max\{0, n - c\}$ is good for all $c \in \N$.
+The third one, \texttt{add\_bin\_div\_good'}, shows that the function $f : \N \to \N$ defined by $f(n) = n$ if $K \nmid n + 1$ and $f(n) = n + 1$ if $K \mid n + 1$ is good for all $K > 1$.
 
 
 
