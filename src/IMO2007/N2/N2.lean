@@ -48,7 +48,8 @@ begin
   by_cases h0 : is_square (2 : zmod p),
 
   ---- Case 2: `2` is a square mod `p`.
-  { cases h0 with a h0; use a; rw [sq, ← h0] },
+  { cases h0 with a h0,
+    use a; rw [sq, ← h0] },
 
   ---- Case 3: `2` is not a square mod `p`. We first establish `p ≠ 2`.
   { unfreezingI { rcases eq_or_ne p 2 with rfl | X },
