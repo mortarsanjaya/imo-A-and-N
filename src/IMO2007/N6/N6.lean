@@ -17,39 +17,11 @@ begin
   exact ((n * a * b).modeq_sub 1).symm.pow 2
 end
 
-private lemma nat_pred_descent {P : ℕ → Prop} [decidable_pred P]
-    (h : ∀ k : ℕ, P k → ∃ m : ℕ, m < k ∧ P m) :
-  ∀ k : ℕ, ¬P k :=
+private lemma bad_exists_descent {n : ℤ} (hn : 1 < n) {a : ℕ}
+  (h : 0 < a ∧ ∃ b : ℕ, a < b ∧ n * a * b - 1 ∣ (n * a ^ 2 - 1) ^ 2) :
+  ∃ c : ℕ, 0 < c ∧ c < a ∧ n * c * a - 1 ∣ (n * c ^ 2 - 1) ^ 2 :=
 begin
-  by_contra' h0,
-  replace h := h (nat.find h0) (nat.find_spec h0),
-  rcases h with ⟨m, h, h1⟩,
-  exact nat.find_min h0 h h1
-end
-
-
-
-open_locale classical
-
-/-- Final solution -/
-theorem final_solution {n : ℤ} (hn : 1 < n) :
-  ∀ a b : ℕ, 0 < a → 0 < b → n * a * b - 1 ∣ (n * a ^ 2 - 1) ^ 2 → a = b :=
-begin
-
-  ---- First use descent argument to reduce the proof
-  let P : ℕ → Prop := λ k, (0 < k ∧ ∃ m : ℕ, k < m ∧ n * k * m - 1 ∣ (n * k ^ 2 - 1) ^ 2),
-  suffices : ∀ k : ℕ, P k → ∃ m : ℕ, m < k ∧ P m,
-  { replace this := nat_pred_descent this,
-    dsimp only [P] at this,
-    intros a b ha hb h; by_contra' h0,
-    rw [← ne.def, ne_iff_lt_or_gt, gt_iff_lt] at h0,
-    have h1 := bad_symm h,
-    wlog h0 : a < b := h0 using [a b, b a],
-    exact this a ⟨ha, b, h0, h⟩ },
-  
-  ---- Now prove that the condition for the descent argument holds
-  dsimp only [P]; clear P,
-  rintros a ⟨h, b, h0, k, h1⟩,
+  rcases h with ⟨h, b, h0, k, h1⟩,
   rw [sq (a : ℤ), ← mul_assoc] at h1,
   generalize_hyp ht : n * a = t at h1,
   obtain ⟨c, rfl⟩ : ∃ c : ℤ, k = t * c - 1 :=
@@ -63,14 +35,14 @@ begin
     use c; rw [eq_sub_iff_add_eq, h1]
   end,
 
-  ---- It suffices to show that 0 < c and c < (a : ℤ)
+  ---- It suffices to show that `0 < c` and `c < (a : ℤ)`
   suffices h2 : c < a ∧ 0 < c,
   { lift c to ℕ using le_of_lt h2.2,
     rw [int.coe_nat_pos, int.coe_nat_lt] at h2,
-    refine ⟨c, h2.1, h2.2, a, h2.1, bad_symm _⟩,
+    refine ⟨c, h2.2, h2.1, bad_symm _⟩,
     use t * b - 1; rw [sq (a : ℤ), ← mul_assoc, ht, h1, mul_comm] },
   
-  ---- We do not need n; we just use t instead.
+  ---- We do not need `n`; we just use `t` instead.
   replace ht : 1 < t :=
   begin
     rw ← int.coe_nat_pos at h,
@@ -105,6 +77,46 @@ begin
   rwa [← mul_lt_mul_left (lt_trans h h0), ← h1, sq, mul_lt_mul_right h],
   rw [← mul_lt_mul_left (lt_trans h h0), mul_zero, ← h1],
   exact pow_pos h 2
+end
+
+private lemma nat_pred_descent {P : ℕ → Prop} [decidable_pred P]
+    (h : ∀ k : ℕ, P k → ∃ m : ℕ, m < k ∧ P m) :
+  ∀ k : ℕ, ¬P k :=
+begin
+  by_contra' h0,
+  replace h := h (nat.find h0) (nat.find_spec h0),
+  rcases h with ⟨m, h, h1⟩,
+  exact nat.find_min h0 h h1
+end
+
+
+
+
+
+
+
+open_locale classical
+
+/-- Final solution -/
+theorem final_solution {n : ℤ} (hn : 1 < n) :
+  ∀ a b : ℕ, 0 < a → 0 < b → n * a * b - 1 ∣ (n * a ^ 2 - 1) ^ 2 → a = b :=
+begin
+  let P : ℕ → Prop := λ k, (0 < k ∧ ∃ m : ℕ, k < m ∧ n * k * m - 1 ∣ (n * k ^ 2 - 1) ^ 2),
+  have h : ∀ k : ℕ, P k → ∃ m : ℕ, m < k ∧ P m :=
+  begin
+    intros k h,
+    replace h := bad_exists_descent hn h,
+    rcases h with ⟨c, h, h0, h1⟩,
+    exact ⟨c, h0, h, k, h0, h1⟩
+  end,
+
+  replace h := nat_pred_descent h,
+  dsimp only [P] at h,
+  intros a b ha hb h0; by_contra' h1,
+  rw [← ne.def, ne_iff_lt_or_gt, gt_iff_lt] at h1,
+  have h2 := bad_symm h0,
+  wlog h1 : a < b := h1 using [a b, b a],
+  exact h a ⟨ha, b, h1, h0⟩
 end
 
 end IMO2007N6
