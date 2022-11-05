@@ -1,0 +1,59 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\Z}{\mathbb{Z}}
+
+\title{IMO 2010 A1 (P1)}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+A \emph{floor function} $\lfloor \cdot \rfloor : R \to \Z$ on a totally ordered ring $R$ is a function such that, for any $r \in R$ and $n \in \Z$, $n \leq \lfloor r \rfloor$ if and only if $n \leq r$ in $R$.
+
+Let $F$ and $R$ be a totally ordered field and a totally ordered ring, respectively, both equipped with a floor function.
+Find all functions $f : F \to R$ such that, for all $x, y \in F$,
+\[ f(\lfloor x \rfloor y) = f(x) \lfloor f(y) \rfloor. \tag{*}\label{eq0} \]
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2010SL.pdf}
+
+Although we start with the same substitution as Solution 1, we make a shortcut in the case $f(0) = 0$.
+
+First, plugging $x = y = 0$ into~\eqref{eq0} yields $f(0) = f(0) \lfloor f(0) \rfloor$.
+Thus either $\lfloor f(0) \rfloor = 1$ or $f(0) = 0$.
+
+In the former case, plugging $y = 0$ into~\eqref{eq0} yields $f(x) = f(0)$ for all $x \in F$.
+That is, $f \equiv C$ for some constant $C$.
+Furthermore, $\lfloor f(0) \rfloor = 1$ forces $C \in [1, 2)$.
+
+In the latter case, we claim that $f \equiv 0$.
+Indeed, plugging $x = 1$ into~\eqref{eq0} yields $f(y) = f(1) \lfloor f(y) \rfloor$ for all $y \in F$.
+In the view of this equality, it suffices to show that $f(1) = 0$.
+Plugging $x = y = 1/2$ into~\eqref{eq0} yields $f(1/2) \lfloor f(1/2) \rfloor = f(0) = 0$, so $\lfloor f(1/2) \rfloor = 0$.
+Then plugging $x = 2$ and $y = 1/2$ into~\eqref{eq0} yields $f(1) = 0$, as desired.
+
+
+
+\subsection*{Implementation details}
+
+We put an extra lemma called \texttt{inv\_floor\_eq\_zero}, which proves that given $r \in F$ such that $r > 1$, we have $\lfloor r^{-1} \rfloor = 0$.
+The main use is just to justify that $\lfloor 1/2 \rfloor = 0$, needed in the step of plugging $x = y = 1/2$ into~\eqref{eq0}.
+
+
+
+\end{document}

@@ -1,0 +1,63 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+
+\newtheorem{lemma}{Lemma}
+
+\title{IMO 2010 A3}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Fix a positive integer $n$.
+Determine the maximal possible value of
+\[ \sum_{i = 1}^{2n} x_i x_{i + 2} \tag{*}\label{eq0} \]
+    over all non-negative real numbers $x_1, x_2, \ldots, x_{2n}$ such that $x_i + x_{i + 1} + x_{i + 2} \leq 1$ for all $i = 1, 2, \ldots, 2n$.
+Here, we denote $x_{2n + 1} = x_1$ and $x_{2n + 2} = x_2$.
+
+
+
+\subsection*{Solution}
+
+\textbf{Answer.} $n/4$.
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2010SL.pdf}
+
+To show that $n/4$ is attainable, we take $x_i = 1/2$ if $i$ is odd and $x_i = 0$ if $i$ is even.
+Clearly, $x_i + x_{i + 1} + x_{i + 2} \leq 1$ for each $i$, and~\eqref{eq0} becomes $n/4$.
+For the converse, we use the following lemma.
+
+\begin{lemma}\label{lem1}
+Let $a, b, c, d$ be non-negative real numbers such that $a + b + c \leq 1$ and $b + c + d \leq 1$.
+Then $ac + bd \leq 1/4$.
+\end{lemma}
+\begin{proof}
+\[ ac + bd \leq (1 - b - c)b + (1 - b - c)c = (1 - (b + c))(b + c) \leq \frac{1}{4}. \]
+\end{proof}
+
+The lemma implies
+\[ \sum_{i = 1}^{2n} x_i x_{i + 2} = \sum_{i = 1}^n (x_{2i} x_{2i + 2} + x_{2i + 1} x_{2i + 3}) \leq \sum_{i = 1}^n \frac{1}{4} = \frac{n}{4}. \]
+
+
+
+\subsection*{Implementation details}
+
+We represent the $2n$ non-negative real numbers using a $2n$-periodic sequence from $\N$ to $\R_{\geq 0}$.
+
+
+
+\end{document}

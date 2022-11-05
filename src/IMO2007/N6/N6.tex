@@ -1,0 +1,90 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+
+\newtheorem{lemma}{Lemma}
+
+\title{IMO 2007 N6 (P5)}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Fix $n > 1$, and let $a$ and $b$ be positive integers such that $nab - 1 \mid (na^2 - 1)^2$.
+Prove that $a = b$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2007SL.pdf}
+
+The official solution considers the case $n = 4$, but as in its comment section, any $n > 1$ works.
+The following solution is essentially the official solution, presented in a slightly different way.
+
+Fix $n > 1$, and call a pair $(a, b)$ of positive integers \emph{bad} if $a < b$ and $nab - 1 \mid (na^2 - 1)^2$.
+The main results that we need for the descent argument are as follows.
+
+\begin{lemma}\label{2007n6-1}
+Let $a$ and be be positive integers such that $nab - 1 \mid (na^2 - 1)^2$.
+Then $nab - 1 \mid (nb^2 - 1)^2$.
+\end{lemma}
+\begin{proof}
+Indeed, $nab - 1$ divides $(na^2 - 1)^2 (nb^2)^2 = ((nab)^2 - nb^2)^2 = (nb^2 - (nab)^2)^2$, and $(nab)^2 \equiv 1 \pmod{nab - 1}$.
+\end{proof}
+
+\begin{lemma}\label{2007n6-2}
+Fix some $a > 0$, and suppose that there exists $b > 0$ such that $(a, b)$ is a bad pair.
+Then there exists an integer $c > 0$ such that $(c, a)$ is a bad pair.
+\end{lemma}
+\begin{proof}
+Write $(na^2 - 1)^2 = (nab - 1) r$ for some integer $r$.
+Working modulo $na$ gives $r \equiv -1 \pmod{na}$, so we can write $r = nac - 1$ for some integer $c$.
+The bound $0 < a < b$ implies that $0 < c < a$, so it remains to show that $nac - 1 \mid (nc^2 - 1)^2$.
+Indeed, we have $(na^2 - 1)^2 = (nab - 1)(nac - 1)$, so $nac - 1 \mid (na^2 - 1)^2$.
+Then we are done using Lemma~\ref{2007n6-1}.
+\end{proof}
+
+If $nab - 1 \mid (na^2 - 1)^2$ holds for some positive integers $b < a$, then Lemma~\ref{2007n6-1} yields that $(b, a)$ is a bad pair.
+Thus, to show that $nab - 1 \mid (na^2 - 1)^2$ implies $a = b$, it suffices to show that there exists no bad pairs.
+
+Suppose for the sake of contradiction that bad pairs exist.
+Let $a$ be the minimal positive integer such that $(a, b)$ is bad for some $b > a$.
+By Lemma~\ref{2007n6-2}, there exists $0 < c < a$ such that $(c, a)$ is a bad pair.
+The properties of such $c$ contradicts the minimality of $a$.
+Thus, no bad pairs exist.
+
+
+
+\subsection*{Implementation details}
+
+We will use the \texttt{nat} datatype instead of an \texttt{int} datatype.
+We implement the descent argument as another lemma.
+The lemma can be stated formally as follows.
+
+\begin{lemma}\label{2007n6-3}
+Let $P_0, P_1, P_2, \ldots$ be propositions.
+Suppose that, for every $k \in \N$, $P_k$ implies $P_m$ for some $m \in \N$ such that $m < k$.
+Then $P_k$ does not holds for any $k \in \N$.
+\end{lemma}
+\begin{proof}
+Suppose not, and pick the minimal $k_0 \in \N$ such that $P_{k_0}$ holds.
+Then $P_m$ holds for some $m \in \N$ with $m < k_0$.
+This contradicts the minimality of $k_0$.
+\end{proof}
+
+
+
+\end{document}

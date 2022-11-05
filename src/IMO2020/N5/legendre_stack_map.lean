@@ -1,4 +1,7 @@
-import IMO2020.N5.additive_map number_theory.legendre_symbol.jacobi_symbol
+import
+  IMO2020.N5.additive_map
+  number_theory.legendre_symbol.jacobi_symbol
+  extra.number_theory.dirichlet_thm_arithmetic_progression
 
 /-!
 # "Legendre stack" maps
@@ -232,7 +235,7 @@ begin
   rw [← two_nsmul, ← hc]
 end
 
-theorem map_p_sub_χ₄_eq_one (h : p.χ₄ = 1) {n k : ℕ} (h0 : n ≠ 0) (h1 : n < p k)  :
+theorem map_p_sub_χ₄_eq_one (h : p.χ₄ = 1) {n k : ℕ} (h0 : n ≠ 0) (h1 : n < p k) :
   p.map c hc (p k - n) = p.map c hc n :=
   by rw [p.map_p_sub hc h0 h1, h, if_neg (by norm_num : (1 : ℤ) ≠ -1), zero_add]
 
@@ -243,6 +246,101 @@ theorem map_p_sub_χ₄_eq_neg_one (h : p.χ₄ = -1) {n k : ℕ} (h0 : n ≠ 0)
 end monoid_map
 
 end legendre_stack
+
+
+
+
+
+section construction
+
+private lemma lt_four_times_pred_factorial (p : ℕ) : p < 4 * p.pred.factorial :=
+begin
+  cases p with p p_ih,
+  rw [nat.pred_zero, nat.factorial_zero, mul_one]; norm_num,
+  rw nat.pred_succ; induction p with p h,
+  rw [nat.factorial_zero, mul_one]; norm_num,
+  rcases p.eq_zero_or_pos with rfl | h0,
+  rw [nat.factorial_one, mul_one]; norm_num,
+  rw [nat.factorial_succ, mul_comm (p + 1), ← mul_assoc],
+  rw ← nat.succ_le_iff at h; refine lt_of_lt_of_le _ (nat.mul_le_mul_right _ h),
+  rwa [lt_mul_iff_one_lt_right p.succ.succ_pos, lt_add_iff_pos_left]
+end
+
+private lemma coprime_four_times_pred_factorial {p : ℕ} (hp : p.prime) (h : 2 < p) :
+  p.coprime (4 * p.pred.factorial) :=
+begin
+  rw [nat.coprime_mul_iff_right, bit0, ← two_mul, ← sq]; split,
+  exact nat.coprime.pow_right _ ((nat.coprime_primes hp nat.prime_two).mpr (ne_of_gt h)),
+  replace h := nat.pred_lt (ne_of_gt (pos_of_gt h)),
+  generalize_hyp : p.pred = k at h ⊢,
+  induction k with k k_ih,
+  rw nat.factorial_zero; exact p.coprime_one_right,
+  rw [nat.factorial_succ, nat.coprime_mul_iff_right, and_comm]; split,
+  exact k_ih (nat.lt_of_succ_lt h),
+  rw hp.coprime_iff_not_dvd; exact nat.not_dvd_of_pos_of_lt k.succ_pos h
+end
+
+private lemma exists_next_stack {p : ℕ} (hp : p.prime) (h : 2 < p) :
+  ∃ q : ℕ, p < q ∧ q.prime ∧ q ≡ p [MOD 4 * p.pred.factorial] :=
+begin
+  have X := lt_four_times_pred_factorial p,
+  obtain ⟨q, h0, h1, h2⟩ :=
+    extra.exists_infinite_primes_mod_eq X (coprime_four_times_pred_factorial hp h) p,
+  refine ⟨q, h0, h1, _⟩,
+  rw [nat.modeq, nat.mod_eq_of_lt X, h2]
+end
+
+private def next_stack_term {p : ℕ} (hp : p.prime) (h : 2 < p) :=
+  nat.find (exists_next_stack hp h)
+
+private lemma next_stack_term_prime {p : ℕ} (hp : p.prime) (h : 2 < p) :
+  nat.prime (next_stack_term hp h) :=
+  (nat.find_spec (exists_next_stack hp h)).2.1
+
+private lemma next_stack_term_self_lt {p : ℕ} (hp : p.prime) (h : 2 < p) :
+  p < next_stack_term hp h :=
+  (nat.find_spec (exists_next_stack hp h)).1
+
+private lemma next_stack_term_two_lt {p : ℕ} (hp : p.prime) (h : 2 < p) :
+  2 < next_stack_term hp h :=
+  lt_trans h (next_stack_term_self_lt hp h)
+
+private lemma next_stack_term_mod_pred_factorial {p : ℕ} (hp : p.prime) (h : 2 < p) :
+  next_stack_term hp h ≡ p [MOD 4 * p.pred.factorial] :=
+  (nat.find_spec (exists_next_stack hp h)).2.2
+
+private def bundled_next_stack_term (p' : {p : ℕ | p.prime ∧ 2 < p}) : {p : ℕ | p.prime ∧ 2 < p} :=
+  ⟨next_stack_term p'.2.1 p'.2.2, next_stack_term_prime p'.2.1 p'.2.2,
+   next_stack_term_two_lt p'.2.1 p'.2.2⟩
+
+private def bundled_stack_map (p' : {p : ℕ | p.prime ∧ 2 < p}) : legendre_stack :=
+{ prime_chain := λ n, (bundled_next_stack_term^[n] p').1,
+  is_prime' := λ n, (bundled_next_stack_term^[n] p').2.1,
+  ascending' := strict_mono_nat_of_lt_succ (λ n, by
+    rw [function.iterate_succ', function.comp_app]; exact next_stack_term_self_lt _ _),
+  stacking' := λ n, by rw [function.iterate_succ', function.comp_app];
+    exact next_stack_term_mod_pred_factorial _ _ }
+
+/-- Concrete legendre stack map, starting at given odd prime. -/
+def concrete_stack_map {p : ℕ} (hp : p.prime) (h : 2 < p) : legendre_stack :=
+  bundled_stack_map ⟨p, hp, h⟩
+
+/-- The `χ₄` value of a concrete legendre stack map. -/
+theorem concrete_stack_χ₄ {p : ℕ} (hp : p.prime) (h : 2 < p) :
+  (concrete_stack_map hp h).χ₄ = χ₄ p := rfl
+
+/-- The "standard" legendre stack map starting with `p = 5`. -/
+def standard_stack_map :=
+  concrete_stack_map (by norm_num : nat.prime 5) (by norm_num : 2 < 5)
+
+/-- The `χ₄` value of the standard legendre stack map is `1`. -/
+theorem standard_stack_χ₄ : standard_stack_map.χ₄ = 1 := rfl
+
+/-- An abstraction of the existence of the standard stack. -/
+theorem exists_legendre_stack_χ₄_eq_one : ∃ p : legendre_stack, p.χ₄ = 1 :=
+  ⟨standard_stack_map, standard_stack_χ₄⟩
+
+end construction
 
 end IMO2020N5
 end IMOSL

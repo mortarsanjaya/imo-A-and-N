@@ -1,0 +1,70 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\title{IMO 2009 A5}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $F$ be a totally ordered field.
+Prove that, for any function $f : F \to F$, there exists $x, y \in F$ such that $f(x - f(y)) > y f(x) - x$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2009SL.pdf}
+
+The following solution is a rewrite of Solution 1 of the official solution.
+We modify the ordering and the wording of the solution a bit.
+
+We proceed by contradiction.
+Assume that, for all $x, y \in F$,
+\[ f(x - f(y)) \leq y f(x) - x. \tag{*}\label{eq0} \]
+First, plugging $(x, y) = (t + f(0), 0)$ yields that for all $t \in F$,
+\[ f(t) \leq t + f(0). \tag{1}\label{eq1} \]
+We now split into two cases:
+
+\begin{itemize}
+
+    \item 
+    For all $x \in F$, $f(x) \leq 0$.
+
+    Pick some $t \in F$ such that $t > \max\{0, -f(-1) - 1\}$.
+    We claim that in fact, $f(-1) \leq -t - 1$, contradicting $t > -f(-1) - 1$.
+    The fact that $f(0) \leq 0$ means that~\eqref{eq1} implies $f(x) \leq x$ for all $x \in F$.
+    Then, plugging $(x, y) = (f(t) - 1, t)$ into~\eqref{eq0} now yields
+    \[ f(-1) \leq tf(f(t) - 1) + f(t) - 1 \leq (t + 1)(f(t) - 1). \]
+    But $f(t) \leq 0$ and $t + 1 > t > 0$, so this yields $f(-1) \leq -(t + 1) = -t - 1$.
+
+    \item
+    There exists $c \in F$ such that $f(c) > 0$.
+
+    Pick some $t \in F$ such that $t < \min\left\{c - f(0), \dfrac{-f(0) - c - 1}{f(c)}\right\}$.
+    We claim that in fact, $-f(0) - 1 \leq tf(c) + c$, contradicting $t < \dfrac{-f(0) - c - 1}{f(c)}$.
+    Indeed, by~\eqref{eq0} and~\eqref{eq1}, letting $y = c - f(t)$,
+    \[ tf(c) + c \geq f(y) \geq f(f(y)) - f(0). \]
+    On the other hand, plugging $x = f(y)$ into~\eqref{eq0} yields
+    \[ f(0) \leq y f(f(y)) + f(y) \leq y f(f(y)) + y + f(0) \implies y (f(f(y)) + 1) \geq 0. \]
+    Finally, note that $y > 0$ by~\eqref{eq1}.
+    Indeed, $y = c - f(t) \geq c - (t + f(0)) > 0$.
+    This yields $f(f(y)) \geq -1$; a contradiction.
+
+\end{itemize}
+
+
+
+
+\end{document}
