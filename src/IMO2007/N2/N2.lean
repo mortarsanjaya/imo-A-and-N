@@ -51,7 +51,7 @@ begin
   { cases h0 with a h0,
     use a; rw [sq, ← h0] },
 
-  ---- Case 3: `2` is not a square mod `p`. We first establish `p ≠ 2`.
+  ---- Case 3: `-1` and `2` are not squares mod `p`. We first establish `p ≠ 2`.
   { unfreezingI { rcases eq_or_ne p 2 with rfl | X },
     rw (char_two.two_eq_zero : (2 : zmod 2) = 0) at h0,
     exfalso; exact h0 (is_square_zero (zmod 2)),
