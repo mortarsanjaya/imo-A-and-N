@@ -1,0 +1,287 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+
+\DeclareMathOperator*{\rad}{rad}
+
+\newcommand{\N}{\mathbb{N}}
+
+\title{IMO 2020 N4 \\ Generalized Version}
+\date{}
+\author{}
+
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Fix an odd positive integer $p > 1$.
+For any $n \in \N$, let $d_p(n) \in \{0, 1, \ldots, p - 1\}$ be the remainder when $n$ is divided by $p$, and denote $F_p(n) = n + d_p(n)$.
+
+\begin{enumerate}
+
+\item
+A pair $(a_1, a_2)$ of non-negative integers is called \emph{$p$-alternating} if $F_p^n(a_1) > F_p^n(a_2)$ for infinitely many $n$ and $F_p^n(a_1) < F_p^n(a_2)$ for infinitely many $n$.
+We call $p$ \emph{good} if there exists a $p$-alternating pair $(a_1, a_2)$ with $a_1$ and $a_2$ coprime with $p$.
+Prove that $p$ is good if and only if $p \notin \{1, 3, 7, 15\}$.
+
+\item
+We say that $p$ is \emph{balanced} if there exists no positive integers $a_1 > a_2$ coprime with $p$ such that $F_p^n(a_1) < F_p^n(a_2)$ for all $n \geq 1$.
+Given that $p$ is a prime, prove that $p$ is balanced if and only if the order of $2$ modulo $p$ is even.
+
+\end{enumerate}
+
+
+
+\subsection*{Solution}
+
+We need to set up some common notation for both parts.
+Let $T$ denote the order of $2$ modulo $p$.
+Next, for any $n \in \N$, let $S_p(n) = \displaystyle \sum_{i = 0}^{T - 1} d_p(2^i n)$.
+The following properties of $F_p$ and $S_p$ are easy to prove.
+\begin{itemize}
+
+\item
+For any $n \in \N$, $d_p(F_p(n)) = d_p(2n)$.
+In particular, for all $n, k \in \N$, $d_p(F_p^k(n)) = d_p(2^k n)$.
+
+\item
+$F_p$ is injective.
+Indeed, taking modulo $p$, $F_p(m) = F_p(n)$ yields $d_p(2m) = d_p(2n)$ and thus $d_p(m) = d_p(n)$.
+So we can write $m = q_1 p + r$ and $n = q_2 p + r$, where $q_1, q_2, r \in \N$ with $r < p$.
+Then $F_p(m) = F_p(n)$ yields $q_1 = q_2$ and thus $m = n$.
+
+\item
+For any $k, m, n \in \N$ such that $k \leq m$, $F_p^k(n) \leq F_p^m(n)$.
+This follows from $F_p(n) \geq n$ for any $n \in \N$.
+
+\item
+For any $n \in \N$, $S_p(2n) = S_p(n) = S_p(d_p(n))$.
+In particular, we also have $S_p(F_p(n)) = S_p(n)$.
+
+\item
+For any $n \in \N$, $F_p^T(n) = n + S_p(n)$.
+More generally, $F_p^{kT + r}(n) = F_p^r(n) + k S_p(n)$ for any $k, r, n \in \N$.
+
+\item
+For any $m, n \in \N$ not divisible by $p$ such that $p \mid m + n$, $S_p(m) + S_p(n) = pT$.
+Indeed, since $p$ is odd, this follows from the fact that $d_p(m) + d_p(n) = p$ if $p \mid m + n$ and $p \nmid m$.
+This will only be used in Part 2.
+
+\end{itemize}
+
+The following lemma is the main ingredient in finding balanced odd numbers.
+However, it turns out to be useful in formalizing the solution for Part 1 as well.
+
+\begin{lemma}\label{2020n4-1}
+For any positive integers $a$ and $b$ such that $S_p(a) < S_p(b)$, there exists $N \geq 0$ such that $F_p^n(a) < F_p^n(b)$ for all $n \geq N$.
+\end{lemma}
+\begin{proof}
+Since $S_p(a) < S_p(b)$, there exists $K$ large enough such that $a + (K + 1) S_p(a) < b + K S_p(b)$.
+This is just saying that $F_p^{(K + 1)T}(a) < F_p^{KT}(b)$.
+We claim that $N = KT$ works.
+
+Fix some $n \geq KT$.
+We can write $n$ as $kT + r$, where $k \geq K$ and $0 \leq r < T$.
+One can easily compute and get $F_p^{(k + 1)T}(a) < F_p^{kT}(b)$ since $k \geq K$.
+Then, since $F_p(x) \geq x$ for all $x$ and $kT \leq n < (k + 1)T$, we get $F_p^n(a) < F_p^{(k + 1)T}(a) < F_p^{kT}(b) \leq F_p^n(b)$.
+The claim is proved.
+\end{proof}
+
+
+\subsubsection*{Part 1}
+
+We first reduce goodness to an alternative criterion which is easier to compute.
+
+\begin{theorem}\label{2020n4-2}
+For any $p$ odd, $p$ is good if and only if there exists positive integers $x$ and $y$ coprime with $p$ such that $p > y > p/2 + x$ and $S_p(x) = S_p(y)$.
+\end{theorem}
+\begin{proof}
+First, suppose that such $x$ and $y$ exists.
+We claim that $(p + x, y)$ is a $p$-alternating pair with $p + x$ and $y$ coprime with $p$.
+The latter is clear, so we just prove that $(p + x, y)$ is $p$-alternating.
+Indeed, for any $k \geq 0$,
+\[ F_p^{kT}(p + x) = p + x + k S_p(x) > y + k S_p(y) = F_p^{kT}(y), \]
+\[ F_p^{kT + 1}(p + x) = F_p(p + x) + k S_p(x) = p + 2x + k S_p(y) < 2y + k S_p(y) = F_p^{kT + 1}(y). \]
+
+For the converse, suppose that there exists a $p$-alternating pair $(a_1, a_2)$, with $a_1$ and $a_2$ coprime with $p$.
+Without loss of generality, suppose that $a_1 > a_2$.
+Lemma~\ref{2020n4-1} then yields that $S_p(a_1) = S_p(a_2)$.
+Going back to the property of $p$-alternating pairs, there must exist $N \in \N$ such that $F_p^N(a_1) < F_p^N(a_2)$.
+Take $N$ to be minimal with respect to this property, so $F_p^n(a_1) \geq F_p^n(a_2)$ for any $n < N$.
+Due to $F_p$ being injective, this inequality is actually strict.
+Since $a_1 > a_2$, we have $N > 0$.
+
+Now, write $F_p^{N - 1}(a_i) = q_i p + r_i$ for $i = 1, 2$, where $0 \leq r_1, r_2 < p$.
+Then we have $q_1 p + r_1 > q_2 p + r_2$ and $q_1 p + 2 r_1 = F_p^N(a_1) < F_p^N(a_2) = q_2 p + 2 r_2$.
+Clearly, this means $r_1 < r_2$, and the both inequalities yield $q_1 > q_2$ and $q_1 \leq q_2 + 2$, respectively.
+This forces $q_1 = q_2 + 1$, and the second inequality reduces to $p + 2 r_1 < 2 r_2$, or $r_2 > p/2 + r_1$.
+Thus, we can take $x = r_1$ and $y = r_2$.
+\end{proof}
+
+This means that the rest of the solution is about finding $x$ and $y$ as in Theorem~\ref{2020n4-2}, or proving that they do not exist.
+There are several cases; we present all of them below.
+
+\begin{itemize}
+
+    \item
+    \textit{\underline{Case 1.}}
+    $p + 1$ is not a power of $2$.
+    That is, $p \neq 2^k - 1$ for any $k \in \N$.
+
+    Pick $x = 1$ and $y = 2^d$, where $d = \lfloor \log_2 p \rfloor$ is the non-negative integer such that $2^d \leq p < 2^{d + 1}$.
+    Clearly, $S_p(1) = S_p(2^d)$, so it remains to check that $p > 2^d > p/2 + 1$.
+    Note that, since $p$ is odd and $p \neq 2^k - 1$ for any $k \in \N$, we have $2^d < p < 2^{d + 1} - 1$.
+    This implies the desired inequality.
+
+    \item
+    \textit{\underline{Case 2.}}
+    $p = 2^k - 1$ for some $k \geq 5$.
+
+    First, suppose that $k = 6$.
+    Then take $x = 5$, $y = 40 = 2^3 \cdot 5$, and one can verify all the desired properties.
+
+    Now, suppose that $k \neq 6$.
+    We will use the fact that $\phi(k) > 2$ for $k \geq 5$, $k \neq 6$, where $\phi$ is the Euler's totient function.
+    This means that there exists a positive integer $c$ such that $1 < c < k - 1$ and $\gcd(c, k) = 1$.
+    We take $x = 2^c - 1$ and $y = 2^{k - c} (2^c - 1) = 2^k - 2^{k - c}$.
+    It is evident that $p > y$, $S_p(x) = S_p(y)$, and $\gcd(x, p) = \gcd(y, p)$.
+    Furthermore, $\gcd(x, p) = \gcd(2^c - 1, 2^k - 1) = 2^{\gcd(c, k)} - 1$.
+    But $c$ and $k$ are coprime, so $x$ and $p$ must also be coprime.
+    Finally, since $k \geq 5$, we have
+    \[ y - x = 2^k - 2^{k - c} - 2^c + 1 \geq 2^k - 2^{k - 2} - 3 > \frac{2^k - 1}{2}. \]
+
+    \item
+    \textit{\underline{Case 3.}}
+    $p = 2^k - 1$ for some $k \leq 4$.
+
+    The case $k \leq 2$ is easy.
+    There are no positive integers coprime with $p$ such that $p > y > p/2 + x$ in these cases.
+    One can check by hand that this holds.
+
+    The case $k = 3$ and $k = 4$ can also be done by hand.
+    However, the cleanest proof is as follows.
+    In both cases, first check that every $z < p$ coprime with $p$ can be written as either $2^m$ or $p - 2^m$ for some $0 \leq m < k$.
+    In particular, $S_p(z)$ must be equal to either $S_p(1) = p$ or $S_p(p - 1) = p(k - 1) \neq p$.
+    Thus, $S_p(x) = S_p(y)$ forces either $(x, y) = (2^m, 2^n)$ for some $0 \leq m, n < k$ or $(x, y) = (p - 2^m, p - 2^n)$ for some $0 \leq m, n < k$.
+    In both cases, one can check that $y > p/2 + x \iff y \geq 2^{k - 1} + x$ cannot hold.
+
+\end{itemize}
+
+
+\subsubsection*{Part 2}
+
+The balanced criterion can also be reduced to an equivalent, easier to compute criterion.
+The following theorem describes this criterion.
+
+\begin{theorem}\label{2020n4-3}
+Let $p$ be an odd positive integer and $T$ be the order of $2$ modulo $p$.
+Then $p$ is balanced if and only if $S_p(x) = S_p(y)$ for all $x, y \in \N$ coprime with $p$.
+\end{theorem}
+\begin{proof}
+We prove the contrapositive of the statement.
+First suppose that there exists $a, b \in \N$ coprime with $p$ such that $a > b$ and $F_p^n(a) < F_p^n(b)$ for all $n \geq 1$.
+Then $a + S_p(a) = F_p^T(a) < F_p^T(b) = b + S_p(b)$ implies $S_p(a) < S_p(b)$.
+This means we can take $x = a$ and $y = b$.
+
+Conversely, suppose that $S_p(x) \neq S_p(y)$ for some $x, y \in \N$ coprime with $p$.
+Without loss of generality, suppose that $S_p(x) < S_p(y)$.
+First, we can take some positive integers $c > d$ such that $c \equiv x \pmod{p}$ and $d \equiv y \pmod{p}$.
+For example, we can take $c = x + py > y$ and $d = y$.
+By Lemma~\ref{2020n4-1}, there exists $N \geq 0$ such that $F_p^n(c) < F_p^n(d)$ for all $n \geq N$.
+Take a minimal such $N$, and note that $N > 0$ since $c > d$.
+Then we can take $a = F_p^{N - 1}(c)$ and $b = F_p^{N - 1}(d)$.
+They are coprime with $p$ since $c$ and $d$ must be coprime with $p$.
+By minimality of $N$, $a \geq b$, but $F_p^n(a) < F_p^n(b)$ for all $n \geq 1$.
+Finally, the first inequality is in fact strict by injectivity of $F_p$. 
+\end{proof}
+
+\begin{theorem}\label{2020n4-4}
+With the same notation as in Theorem~\ref{2020n4-3}, $p$ is balanced if and only if $2 S_p(x) = pT$ for all $x \in \N$ coprime with $p$.
+\end{theorem}
+\begin{proof}
+We use Theorem~\ref{2020n4-4} as the criterion of $p$ being balanced.
+Clearly, if $2 S_p(x) = pT$ for any $x$ coprime with $p$, then $S_p(x) = S_p(y)$ for all $x, y \in \N$ coprime with $p$.
+For the converse, we get $2 S_p(x) = S_p(x) + S_p(p - d_p(x)) = pT$ for any $x \in \N$ coprime with $p$.
+\end{proof}
+
+We continue with more lemmmas.
+We will still not assume that $p$ is prime; this condition is used only at the very end of the solution.
+
+\begin{lemma}\label{2020n4-5}
+Suppose that $-1$ is a power of $2$ modulo $p$.
+Then $p$ is balanced.
+\end{lemma}
+\begin{proof}
+Indeed, by Theorem~\ref{2020n4-4}, it suffices to show that $2 S_p(x) = pT$ for any $x \in \N$ coprime with $p$.
+Take any $y \in \N$ such that $p \mid x + y$, e.g. $y = p - d_p(x)$.
+Take some $m \in \N$ such that $2^m \equiv -1 \pmod{p}$.
+Then $y \equiv 2^m x \pmod{p}$, which implies $S_p(y) = S_p(2^m x) = S_p(x)$.
+This means $2 S_p(x) = S_p(x) + S_p(y) = pT$ since $p \mid x + y$.
+\end{proof}
+
+\begin{lemma}\label{2020n4-6}
+If $p$ is balanced, then $T$, the order of $2$ modulo $p$, is even.
+\end{lemma}
+\begin{proof}
+Well, by Theorem~\ref{2020n4-4}, $2 S_p(1) = pT$.
+So, $pT$ is even, but $p$ is odd.
+Thus, $T$ must be even.
+\end{proof}
+
+Finally, if $p$ is prime (or a prime power), then $T$ being even does imply that $-1$ is a power of $2$ modulo $p$.
+Indeed, $p$ divides $(2^{T/2} - 1)(2^{T/2} + 1)$, but $p$ does not divide $2^{T/2} - 1$, so $p$ must divide $2^{T/2} + 1$.
+
+
+
+\subsection*{Implementation details}
+
+We have quite a big result here, so we will use multiple \texttt{.lean} files.
+The definition and basic properties of $F_p$ and $S_p$ are provided in \texttt{N4\_basic.lean}.
+Actually, $S_p$ is implemented as \texttt{S0} instead of \texttt{S}.
+We use \texttt{S} for the general sum of form
+\[ \sum_{i = 0}^{k - 1} d_p(2^i n). \]
+
+We solve Part 1 and Part 2 separately.
+Part 1 goes to \texttt{N4\_part1.lean}.
+As Theorem~\ref{2020n4-2} is big enough, we will split it into smaller lemmas.
+Similarly, the case divisions are big enough that we will need lemmas for each case.
+In fact, we will split Case 3 into two lemmas: one for the case $k \leq 2$, two for the case $k = 3, 4$.
+One general result that is used in here is that $\phi(n) \leq 2$ iff $n \leq 6$ and $n \neq 5$.
+We will prove bounds on the totient function in an extra file:
+\[ \texttt{extra/number\_theory/totient\_bound.lean}. \]
+
+Part 2 goes to \texttt{N4\_part2.lean}.
+We solve Part 2 for not only primes, but also odd prime powers.
+We will implement Lemma~\ref{2020n4-5} and Lemma~\ref{2020n4-6} as well; they have meanings when $p$ is not a prime power.
+Furthermore, we also prove that primes congruent to $7 \pmod{8}$ are not balanced, while primes congruent to $3, 5 \pmod{8}$ are balanced.
+In particular, using Dirichlet's theorem on arithmetic progressions, there exists infinitely many odd primes that are not balanced.
+There also exists infinitely many odd primes that are balanced.
+
+
+
+\subsection*{Notes}
+
+In the original version, only the case where $p$ is prime is considered in both parts.
+Furthermore, it only asks whether there are infinitely many good primes for Part 1, and infinitely many primes that are not balanced for Part 2.
+
+The general case seems to be wild for Part 2.
+When $p$ is not prime, $p$ could be balanced even if $-1$ is not a power of $2$ modulo $p$.
+Some examples are $p = 69$ and $p = 141$.
+In particular, being balanced is not divisor-closed.
+Apparently, it is not even true that $p$ is balanced iff $\rad(p)$ is balanced, with one example case being $p = 1827$, $\rad(p) = 609$.
+
+
+
+\end{document}
