@@ -222,7 +222,7 @@ end properties
 
 
 
-lemma main_lemma {p : ℕ} (h : odd p) {a b : ℕ} (h0 : S0 h a < S0 h b) :
+lemma eventually_F_lt_of_S0_lt {p : ℕ} (h : odd p) {a b : ℕ} (h0 : S0 h a < S0 h b) :
   ∃ N : ℕ, ∀ n : ℕ, N ≤ n → (F p^[n]) a < (F p^[n]) b :=
 begin
 
@@ -254,7 +254,7 @@ begin
   rcases hn with ⟨c, rfl⟩,
   rw [add_right_comm, add_mul, add_mul K c, ← add_assoc, ← add_assoc],
   exact add_lt_add_of_lt_of_le h1 (mul_le_mul_left' (le_of_lt h0) c)
-
+  
 end
 
 end IMO2020N4

@@ -65,7 +65,7 @@ begin
   intros a b h0,
   rw [alternating, not_and_distrib],
   right; intros h1,
-  obtain ⟨N, h2⟩ := main_lemma h h0,
+  obtain ⟨N, h2⟩ := eventually_F_lt_of_S0_lt h h0,
   obtain ⟨n, h3, h4⟩ := h1.exists_nat_lt N,
   exact lt_asymm (set.mem_set_of_eq.mp h3) (h2 n (le_of_lt h4))
 end

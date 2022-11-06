@@ -53,7 +53,7 @@ begin
   clear h3 u; rcases h1 with ⟨x, h1, h3, h4⟩,
   replace h4 : ∃ N : ℕ, (∀ n : ℕ, N < n → (F p^[n]) x < (F p^[n]) y) ∧ (F p^[N]) y < (F p^[N]) x :=
   begin
-    replace h4 := main_lemma h h4,
+    replace h4 := eventually_F_lt_of_S0_lt h h4,
     replace h1 := nat.find_spec h4,
     replace h2 : 0 < nat.find h4 :=
       by simp only [nat.find_pos, not_forall]; exact ⟨0, le_refl 0, lt_asymm h3⟩,
