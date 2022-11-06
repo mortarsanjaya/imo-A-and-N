@@ -18,18 +18,18 @@ def balanced (p : ℕ) := ∀ a b : ℕ,
 
 section general_results
 
-variables {p : ℕ} (h : odd p) (h0 : 1 < p)
-include h h0
+variables {p : ℕ} (h : odd p)
+include h
 
-private lemma lem1 :
+theorem balanced_iff_S0_coprime_eq_pairwise :
   balanced p ↔ ∀ x y : ℕ, x.coprime p → y.coprime p → S0 h x = S0 h y :=
 begin
-  -- Right-to-left direction is easy
+  ---- Right-to-left direction is easy
   symmetry; refine ⟨λ h1 a b ha hb h2, ⟨order_two_mod_p h, order_two_mod_p_pos h, _⟩, _⟩,
   rw [F_iterate_S, F_iterate_S, ← S0, ← S0, h1 a b ha hb, add_le_add_iff_right],
   exact le_of_lt h2,
   
-  -- Use contrapositive, and reduce to the case `S_p(x) < S_p(y)`
+  ---- Use contrapositive, and reduce to the case `S_p(x) < S_p(y)`
   suffices : (∃ x y : ℕ, x.coprime p ∧ y.coprime p ∧ S0 h x < S0 h y) → ¬balanced p,
   { intros h1; contrapose! h1,
     rcases h1 with ⟨x, y, h1, h2, h3⟩,
@@ -37,7 +37,7 @@ begin
     cases h3 with h3 h3,
     exacts [this ⟨x, y, h1, h2, h3⟩, this ⟨y, x, h2, h1, h3⟩] },
 
-  -- There exists such `x` and `y` with an extra condition: `y < x`
+  ---- There exists such `x` and `y` with an extra condition: `y < x`
   rintros ⟨u, y, h1, h2, h3⟩,
   simp only [balanced, not_forall, not_exists, not_and, not_le],
   replace h1 : ∃ x : ℕ, x.coprime p ∧ y < x ∧ S0 h x < S0 h y :=
@@ -45,82 +45,81 @@ begin
     refine ⟨u + (y + 1) * p, _, _, _⟩,
     rwa nat.coprime_add_mul_right_left,
     rw ← nat.add_one_le_iff,
-    exact le_trans (nat.le_mul_of_pos_right (lt_trans one_pos h0)) le_add_self,
+    exact le_trans (nat.le_mul_of_pos_right h.pos) le_add_self,
     rwa [S0_mod_p, nat.add_mul_mod_self_right, ← S0_mod_p]
   end,
+  clear h3 u,
+  rcases h1 with ⟨x, h1, h3⟩,
 
-  -- `S_p(x) < S_p(y)` means there exists a maximal `N ≥ 0` respecting `F_p^N(y) < F_p^N(x)`.
-  clear h3 u; rcases h1 with ⟨x, h1, h3, h4⟩,
-  replace h4 : ∃ N : ℕ, (∀ n : ℕ, N < n → (F p^[n]) x < (F p^[n]) y) ∧ (F p^[N]) y < (F p^[N]) x :=
-  begin
-    replace h4 := eventually_F_lt_of_S0_lt h h4,
-    replace h1 := nat.find_spec h4,
-    replace h2 : 0 < nat.find h4 :=
-      by simp only [nat.find_pos, not_forall]; exact ⟨0, le_refl 0, lt_asymm h3⟩,
-    refine ⟨(nat.find h4).pred, λ n h3, h1 n _, _⟩,
-    rwa [← nat.succ_le_iff, nat.succ_pred_eq_of_pos h2] at h3,
-    replace h0 := nat.find_min h4 (nat.pred_lt (ne_of_gt h2)),
-    simp only [not_forall] at h0,
-    rcases h0 with ⟨c, h5, h6⟩,
-    rw [le_iff_lt_or_eq, ← nat.succ_le_iff, nat.succ_pred_eq_of_pos h2] at h5,
-    rcases h5 with h5 | rfl,
-    exfalso; exact h6 (h1 c h5),
-    rw [not_lt, le_iff_lt_or_eq] at h6,
-    cases h6 with h6 h6,
-    exact h6,
-    exfalso; refine ne_of_lt h3 (injective.iterate (F_injective h) _ h6)
-  end,
+  ---- It suffices to find some `N ≥ 0` such that `F_p^N(x) > F_p^N(y)` but
+  ----   `F_p^n(x) > F_p^n(y)` for all `n > N`
+  suffices : ∃ N : ℕ, (∀ n : ℕ, N < n → (F p^[n]) x < (F p^[n]) y) ∧ (F p^[N]) y < (F p^[N]) x,
+  { rcases this with ⟨N, h4, h5⟩,
+    refine ⟨(F p^[N]) y, (F p^[N]) x, F_iterate_coprime h h2 _,
+      F_iterate_coprime h h1 _, h5, λ k hk, _⟩,
+    replace h4 := h4 (k + N) (lt_add_of_pos_left N hk),
+    rwa [iterate_add, comp_app, comp_app] at h4 },
 
-  -- Finishing
-  rcases h4 with ⟨N, h4, h5⟩,
-  refine ⟨(F p^[N]) y, (F p^[N]) x, F_iterate_coprime h h2 _,
-    F_iterate_coprime h h1 _, h5, λ k hk, _⟩,
-  replace h4 := h4 (k + N) (lt_add_of_pos_left N hk),
-  rwa [iterate_add, comp_app, comp_app] at h4
+  ---- Finishing: find such `N`
+  clear h1 h2; cases h3 with h1 h2,
+  replace h2 := eventually_F_lt_of_S0_lt h h2,
+  have h3 := nat.find_spec h2,
+  refine ⟨(nat.find h2).pred, λ n X, h3 n (nat.le_of_pred_lt X), _⟩,
+  generalize_hyp h4 : nat.find h2 = N at h3 ⊢,
+  cases N with _ N,
+  exact h1,
+  refine lt_of_le_of_ne _ (λ X, ne_of_lt h1 (injective.iterate (F_injective h) _ X)),
+  rw [nat.pred_succ, ← not_lt],
+  replace h4 := nat.find_min h2 (by rw h4; exact N.lt_succ_self),
+  clear h2,
+  simp only [not_forall] at h4,
+  rcases h4 with ⟨n, h2, h4⟩,
+  rw [le_iff_eq_or_lt, ← nat.succ_le_iff] at h2,
+  rcases h2 with rfl | h2,
+  exact h4,
+  exfalso; exact h4 (h3 n h2)
 end
 
-private lemma lem2 :
+theorem balanced_iff_S0_coprime_eq_const (h0 : 1 < p) :
   balanced p ↔ ∀ x : ℕ, x.coprime p → 2 * S0 h x = order_two_mod_p h * p :=
 begin
-  rw lem1 h h0; refine ⟨λ h1 x h2, _, λ h1 x y h2 h3, _⟩,
-  { obtain ⟨y, h3, h4⟩ : ∃ y : ℕ, y.coprime p ∧ p ∣ x + y :=
-    begin
-      refine ⟨x * (p - 1), h2.mul _, _⟩,
-      cases p with _ p,
-      exfalso; exact lt_asymm one_pos h0,
-      rw [nat.succ_eq_add_one, nat.add_sub_cancel, nat.coprime_self_add_right],
-      exact nat.coprime_one_right p,
-      rw [← mul_one_add, add_comm, nat.sub_add_cancel (le_of_lt h0)],
-      exact ⟨x, mul_comm x p⟩
-    end,
-    rw [← S0_p_dvd_add h _ h4, ← h1 x y h2 h3, ← two_mul],
-    rintros ⟨d, rfl⟩,
-    replace h2 := h2.coprime_mul_right,
-    rw nat.coprime_self at h2,
-    exact ne_of_gt h0 h2 },
-  { replace h2 := h1 x h2,
-    rw ← h1 y h3 at h2,
-    exact nat.eq_of_mul_eq_mul_left two_pos h2 }
+  ---- Right-to-left direction is again easy
+  rw [balanced_iff_S0_coprime_eq_pairwise h, iff.comm],
+  refine ⟨λ h1 x y h2 h3, _, λ h1 x h2, _⟩,
+  replace h2 := h1 x h2,
+  rw ← h1 y h3 at h2,
+  exact nat.eq_of_mul_eq_mul_left two_pos h2,
+
+  ---- Left-to-right direction is not too hard either
+  suffices : ∃ y : ℕ, y.coprime p ∧ p ∣ x + y,
+  { rcases this with ⟨y, h3, h4⟩,
+    rw [← S0_p_dvd_add h (not_dvd_of_coprime (ne_of_gt h0) h2) h4, ← h1 x y h2 h3, ← two_mul] },
+  clear h1 h0,
+  refine ⟨x * (p - 1), h2.mul _, _⟩,
+  cases p with _ p,
+  exfalso; exact nat.lt_irrefl 0 h.pos,
+  rw [nat.succ_eq_add_one, nat.add_sub_cancel, nat.coprime_self_add_right],
+  exact nat.coprime_one_right p,
+  rw [← mul_one_add, add_comm, nat.sub_add_cancel h.pos],
+  exact ⟨x, mul_comm x p⟩
 end
 
-/-- Generally, if -1 is a power of 2 mod p, then p is balanced -/
-private lemma lem3 (h1 : ∃ c : ℕ, p ∣ 2 ^ c + 1) : balanced p :=
+/-- Generally, if `-1` is a power of `2` mod `p`, then `p` is balanced -/
+lemma balanced_of_neg_one_is_two_pow_mod_p (h0 : 1 < p) (h1 : ∃ c : ℕ, p ∣ 2 ^ c + 1) :
+  balanced p :=
 begin
   cases h1 with c h1,
-  rw lem2 h h0; intros x h2,
-  rw [← @S0_p_dvd_add p h x (2 ^ c * x), S0_two_pow_mul h, ← two_mul],
-  { rintros ⟨d, rfl⟩,
-    replace h2 := h2.coprime_mul_right,
-    rw nat.coprime_self at h2,
-    exact ne_of_gt h0 h2 },
-  { rw [← one_add_mul, add_comm],
-    exact dvd_mul_of_dvd_left h1 x }
+  rw balanced_iff_S0_coprime_eq_const h h0; intros x h2,
+  replace h1 : p ∣ x + 2 ^ c * x :=
+    by rw [← one_add_mul, add_comm]; exact dvd_mul_of_dvd_left h1 x,
+  rw [← S0_p_dvd_add h (not_dvd_of_coprime (ne_of_gt h0) h2) h1, S0_two_pow_mul h, ← two_mul]
 end
 
-/-- Generally, if p is balanced, then the order of 2 mod p is even -/
-private lemma lem4 (h1 : balanced p) : even (order_two_mod_p h) :=
+/-- Generally, if `p` is balanced, then the order of `2` mod `p` is even -/
+lemma even_order_two_mod_p_of_balanced (h0 : 1 < p) (h1 : balanced p) :
+  even (order_two_mod_p h) :=
 begin
-  rw lem2 h h0 at h1,
+  rw balanced_iff_S0_coprime_eq_const h h0 at h1,
   replace h1 : 2 ∣ order_two_mod_p h * p := ⟨S0 h 1, (h1 1 (nat.coprime_one_left p)).symm⟩,
   rwa [(two_coprime_p h).dvd_mul_right, ← even_iff_two_dvd] at h1
 end
@@ -131,36 +130,27 @@ end general_results
 
 section prime_results
 
+/-- Final solution, part 2, prime power version -/
+theorem final_solution_part2' {p : ℕ} (h : odd p) (h0 : is_prime_pow p) :
+  balanced p ↔ even (order_two_mod_p h) :=
+⟨even_order_two_mod_p_of_balanced h h0.one_lt,
+  λ h1, balanced_of_neg_one_is_two_pow_mod_p h h0.one_lt
+    ((order_two_even_iff_prime_pow h h0).mp h1)⟩
+
 variables {p : ℕ} (hp : p.prime)
 include hp
 
 /-- Final solution, part 2 -/
-theorem final_solution_part2 (h : odd p) : balanced p ↔ even (order_two_mod_p h) :=
-begin
-  refine ⟨lem4 h hp.one_lt, λ h0, lem3 h hp.one_lt _⟩,
-  rw even_iff_two_dvd at h0,
-  cases h0 with c h0; use c,
-  have h1 := order_two_mod_p_pos h,
-  rw [h0, zero_lt_mul_left (two_pos : 0 < 2)] at h1,
-  have h2 := p_dvd_two_pow_sub_one_iff h,
-  rw h0 at h2; clear h0,
-  have h0 := (h2 (2 * c)).mpr (dvd_refl (2 * c)),
-  change p ∣ _ - 1 ^ 2 at h0,
-  rw [mul_comm, pow_mul, nat.sq_sub_sq, hp.dvd_mul] at h0,
-  cases h0 with h0 h0,
-  exact h0,
-  rw [← one_mul c, h2, nat.mul_dvd_mul_iff_right h1] at h0,
-  exfalso; revert h0,
-  rw [← even_iff_two_dvd, imp_false, ← nat.odd_iff_not_even],
-  exact odd_one
-end
+theorem final_solution_part2 (h : odd p) :
+  balanced p ↔ even (order_two_mod_p h) :=
+  final_solution_part2' h hp.is_prime_pow
 
 /-- If p is prime, p ≡ 3 or 5 (mod 8), then p is balanced -/
 theorem balanced_3_or_5_mod_8 (h : p % 8 = 3 ∨ p % 8 = 5) : balanced p :=
 begin
   have h0 : p ≠ 2 := by contrapose! h; subst h; split; norm_num,
   have h1 : odd p := (or_iff_right h0).mp hp.eq_two_or_odd',
-  refine lem3 h1 hp.one_lt ⟨p / 2, _⟩,
+  refine balanced_of_neg_one_is_two_pow_mod_p h1 hp.one_lt ⟨p / 2, _⟩,
   haveI : fact p.prime := ⟨hp⟩,
   have h2 := h0,
   rw [← nat.coprime_primes hp nat.prime_two, hp.coprime_iff_not_dvd,

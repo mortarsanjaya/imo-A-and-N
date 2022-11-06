@@ -1,4 +1,4 @@
-import data.nat.parity field_theory.finite.basic
+import data.nat.parity field_theory.finite.basic algebra.is_prime_pow
 
 /-! # IMO 2020 N4, Generalized Version (Properties of `F` and `S_p`) -/
 
@@ -6,6 +6,22 @@ namespace IMOSL
 namespace IMO2020N4
 
 open finset function
+
+
+
+section extra_lemmas
+
+/-- Note: This lemma should really be put into mathlib, if it does not exist.
+  I cannot find a similar version in mathlib. -/
+lemma not_dvd_of_coprime {p : ℕ} (h : p ≠ 1) {x : ℕ} (h0 : x.coprime p) : ¬p ∣ x :=
+begin
+  rintros ⟨d, rfl⟩,
+  replace h0 := h0.coprime_mul_right,
+  rw nat.coprime_self at h0,
+  exact h h0
+end
+
+end extra_lemmas
 
 
 
@@ -48,8 +64,63 @@ lemma p_dvd_two_pow_sub_one_iff (k : ℕ) : p ∣ 2 ^ k - 1 ↔ order_two_mod_p 
   by rw [← two_pow_mod_p_eq_one_iff, nat.modeq.comm,
          nat.modeq_iff_dvd' (nat.one_le_pow k 2 two_pos)]
 
+lemma p_dvd_two_pow_order_two_mod_p : p ∣ 2 ^ order_two_mod_p h - 1 :=
+  (p_dvd_two_pow_sub_one_iff h (order_two_mod_p h)).mpr (dvd_refl _)
+
 lemma order_two_mod_p_dvd_totient : order_two_mod_p h ∣ p.totient :=
   (two_pow_mod_p_eq_one_iff h _).mp (nat.modeq.pow_totient (two_coprime_p h))
+
+lemma order_two_even_of_neg_one_eq_two_pow (h0 : 1 < p) (h1 : ∃ c : ℕ, p ∣ 2 ^ c + 1) :
+  even (order_two_mod_p h) :=
+begin
+  cases h1 with c h1,
+  by_contra h2,
+  replace h2 := (two_coprime_p (nat.odd_iff_not_even.mpr h2)).symm,
+  have h3 : p ∣ (2 ^ c) ^ 2 - 1 ^ 2 :=
+    by rw nat.sq_sub_sq; exact dvd_mul_of_dvd_left h1 (2 ^ c - 1),
+  rw [one_pow, ← pow_mul, p_dvd_two_pow_sub_one_iff h,
+      h2.dvd_mul_right, ← p_dvd_two_pow_sub_one_iff h] at h3,
+  rw [← nat.sub_add_cancel (nat.one_le_pow c 2 two_pos),
+      add_assoc, ← nat.dvd_add_iff_right h3, ← bit0] at h1,
+  exact not_dvd_of_coprime (ne_of_gt h0) (two_coprime_p h) h1
+end
+
+theorem order_two_even_iff_prime_pow (h0 : is_prime_pow p) :
+  even (order_two_mod_p h) ↔ ∃ c : ℕ, p ∣ 2 ^ c + 1 :=
+begin
+  ---- Right-to-left direction has been proved above
+  rw is_prime_pow_nat_iff at h0,
+  rcases h0 with ⟨q, k, hq, hk, rfl⟩,
+  refine ⟨λ h0, _, order_two_even_of_neg_one_eq_two_pow h (nat.one_lt_pow k q hk hq.one_lt)⟩,
+  cases h0 with c h0; rw ← mul_two at h0,
+  have h1 : q ^ k ∣ (2 ^ c + 1) * (2 ^ c - 1) :=
+    by rw [← nat.sq_sub_sq, one_pow, ← pow_mul, ← h0]; exact p_dvd_two_pow_order_two_mod_p h,
+  use c; refine (nat.coprime.dvd_mul_right (nat.coprime.pow_left _ _)).mp h1,
+  rw hq.coprime_iff_not_dvd,
+
+  ---- Reduce to showing `q ∣ 2 ^ c + 1`
+  suffices : q ∣ 2 ^ c + 1,
+  { intros h2,
+    rw [← nat.sub_add_cancel (nat.one_le_pow c 2 two_pos),
+        add_assoc, ← nat.dvd_add_iff_right h2, ← bit0] at this,
+    refine not_dvd_of_coprime hq.ne_one (two_coprime_p _) this,
+    clear h0; contrapose! h,
+    rw [nat.odd_iff_not_even, not_not] at h ⊢,
+    rw nat.even_pow; exact ⟨h, ne_of_gt hk⟩ },
+  
+  ---- Now show that `q ∣ 2 ^ c + 1`
+  contrapose h1,
+  rw ← hq.coprime_iff_not_dvd at h1,
+  rw [(h1.pow_left k).dvd_mul_left, p_dvd_two_pow_sub_one_iff h, ← mul_one c, h0],
+  replace h0 : 0 < c * 2 := by rw ← h0; exact order_two_mod_p_pos h,
+  rw zero_lt_mul_right (nat.zero_lt_succ 1) at h0,
+  rw [nat.mul_dvd_mul_iff_left h0, nat.dvd_one],
+  norm_num
+end
+
+theorem order_two_even_iff_prime (hp : p.prime) :
+  even (order_two_mod_p h) ↔ ∃ c : ℕ, p ∣ 2 ^ c + 1 :=
+  order_two_even_iff_prime_pow h hp.is_prime_pow
 
 end order_two
 
@@ -134,9 +205,6 @@ end
 variables {p : ℕ} (h : odd p)
 include h
 
-/-- Wrapper for `S_p(n)`, only up to length `T = ord_p(2)` -/
-def S0 (n : ℕ) := S p (order_two_mod_p h) n
-
 lemma F_injective : injective (F p) :=
 begin
   intros x y h0,
@@ -160,6 +228,9 @@ begin
   rw [F, ← nat.coprime_add_mul_left_left _ _ (n / p), add_assoc, nat.mod_add_div, ← two_mul],
   exact (two_coprime_p h).mul h0
 end
+
+/-- Wrapper for `S_p(n)`, only up to length `T = ord_p(2)` -/
+def S0 (n : ℕ) := S p (order_two_mod_p h) n
 
 lemma F_iterate_coprime {n : ℕ} (h0 : n.coprime p) (N : ℕ) : (F p^[N] n).coprime p :=
 begin
@@ -193,9 +264,16 @@ begin
   rw [nat.succ_mul, S_add_SS, k_ih, ← S0, S0_two_pow_mul h, nat.succ_mul]
 end
 
+lemma F_iterate_mul_ord (k n : ℕ) : (F p^[k * order_two_mod_p h]) n = n + k * S0 h n :=
+  by rw [F_iterate_S, S_mul_order]
+
 lemma S_mul_order_add (k n r : ℕ) :
   S p (k * order_two_mod_p h + r) n = k * S0 h n + S p r n :=
   by rw [add_comm, S_add_SS, S_mul_order h, S0_two_pow_mul h, add_comm]
+
+lemma F_iterate_mul_ord_add (k n r : ℕ) :
+  (F p^[k * order_two_mod_p h + r]) n = n + k * S0 h n + S p r n :=
+  by rw [F_iterate_S, S_mul_order_add, add_assoc]
 
 lemma S0_F_iterate (k n : ℕ) : S0 h (F p^[k] n) = S0 h n :=
   by rw [S0_mod_p h, F_iterate_mod_p, ← S0_mod_p h, S0_two_pow_mul]
@@ -225,7 +303,6 @@ end properties
 lemma eventually_F_lt_of_S0_lt {p : ℕ} (h : odd p) {a b : ℕ} (h0 : S0 h a < S0 h b) :
   ∃ N : ℕ, ∀ n : ℕ, N ≤ n → (F p^[n]) a < (F p^[n]) b :=
 begin
-
   ---- Find `K` large enough
   obtain ⟨K, h1⟩ : ∃ K : ℕ, a + (K + 1) * S0 h a < b + K * S0 h b :=
   begin
@@ -254,7 +331,6 @@ begin
   rcases hn with ⟨c, rfl⟩,
   rw [add_right_comm, add_mul, add_mul K c, ← add_assoc, ← add_assoc],
   exact add_lt_add_of_lt_of_le h1 (mul_le_mul_left' (le_of_lt h0) c)
-  
 end
 
 end IMO2020N4
