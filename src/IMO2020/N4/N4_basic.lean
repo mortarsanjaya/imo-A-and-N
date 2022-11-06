@@ -1,6 +1,6 @@
 import data.nat.parity field_theory.finite.basic
 
-/-! # IMO 2020 N4, Generalized Version (Properties of F and S) -/
+/-! # IMO 2020 N4, Generalized Version (Properties of `F` and `S_p`) -/
 
 namespace IMOSL
 namespace IMO2020N4
@@ -71,7 +71,7 @@ begin
 end
 
 lemma self_le_F (p n : ℕ) : n ≤ F p n :=
-  le_iff_exists_add.mpr ⟨n % p, rfl⟩
+  le_self_add
 
 lemma F_iterate_monotone (p n : ℕ) : monotone (λ i, (F p)^[i] n) :=
 begin
@@ -134,7 +134,7 @@ end
 variables {p : ℕ} (h : odd p)
 include h
 
-/-- Wrapper for S_p(n), only up to length T = ord_p(2) -/
+/-- Wrapper for `S_p(n)`, only up to length `T = ord_p(2)` -/
 def S0 (n : ℕ) := S p (order_two_mod_p h) n
 
 lemma F_injective : injective (F p) :=
@@ -225,6 +225,8 @@ end properties
 lemma main_lemma {p : ℕ} (h : odd p) {a b : ℕ} (h0 : S0 h a < S0 h b) :
   ∃ N : ℕ, ∀ n : ℕ, N ≤ n → (F p^[n]) a < (F p^[n]) b :=
 begin
+
+  ---- Find `K` large enough
   obtain ⟨K, h1⟩ : ∃ K : ℕ, a + (K + 1) * S0 h a < b + K * S0 h b :=
   begin
     generalize_hyp : S0 h a = c at h0 ⊢,
@@ -235,6 +237,7 @@ begin
     exact le_trans (mul_le_mul_left' h0 (a + c + 1)) le_add_self
   end,
 
+  ---- Pick `N = kT`, and if `n = kT + r`, reduce to `a + (k + 1) S_p(a) < b + k S_p(b)`
   let T := order_two_mod_p h,
   have hT : 0 < T := order_two_mod_p_pos h,
   refine ⟨K * T, λ n hn, _⟩,
@@ -243,12 +246,15 @@ begin
   refine lt_of_lt_of_le _ (F_iterate_monotone p b le_self_add),
   refine lt_of_le_of_lt (F_iterate_monotone p a (add_le_add_left (le_of_lt h2) _)) _,
   simp only []; rw [← add_one_mul, F_iterate_S, S_mul_order h, F_iterate_S, S_mul_order h],
+
+  ---- Prove that `a + (k + 1) S_p(a) < b + k S_p(b)`
   replace hn : (K * T) / T ≤ (k * T + r) / T := nat.div_le_div_right hn,
   rw [nat.mul_div_cancel _ hT, add_comm, nat.add_mul_div_right _ _ hT,
       nat.div_eq_zero h2, zero_add, le_iff_exists_add] at hn,
   rcases hn with ⟨c, rfl⟩,
   rw [add_right_comm, add_mul, add_mul K c, ← add_assoc, ← add_assoc],
   exact add_lt_add_of_lt_of_le h1 (mul_le_mul_left' (le_of_lt h0) c)
+
 end
 
 end IMO2020N4
