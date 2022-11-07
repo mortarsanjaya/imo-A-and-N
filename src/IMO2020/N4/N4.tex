@@ -255,9 +255,8 @@ We use \texttt{S} for the general sum of form
 
 We solve Part 1 and Part 2 separately.
 Part 1 goes to \texttt{N4\_part1.lean}.
-As Theorem~\ref{2020n4-2} is big enough, we will split it into smaller lemmas.
+As Theorem~\ref{2020n4-2} is big enough, we will use smaller lemmas.
 Similarly, the case divisions are big enough that we will need lemmas for each case.
-In fact, we will split Case 3 into two lemmas: one for the case $k \leq 2$, two for the case $k = 3, 4$.
 One general result that is used in here is that $\phi(n) \leq 2$ iff $n \leq 6$ and $n \neq 5$.
 We will prove bounds on the totient function in an extra file:
 \[ \texttt{extra/number\_theory/totient\_bound.lean}. \]
