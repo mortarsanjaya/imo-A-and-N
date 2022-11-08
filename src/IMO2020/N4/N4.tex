@@ -249,6 +249,7 @@ Indeed, $p$ divides $(2^{T/2} - 1)(2^{T/2} + 1)$, but $p$ does not divide $2^{T/
 
 We have quite a big result here, so we will use multiple \texttt{.lean} files.
 The definition and basic properties of $F_p$ and $S_p$ are provided in \texttt{N4\_basic.lean}.
+This includes some properties of $S_p$ when $p$ is a Mersenne number.
 Actually, $S_p$ is implemented as \texttt{S0} instead of \texttt{S}.
 We use \texttt{S} for the general sum of form
 \[ \sum_{i = 0}^{k - 1} d_p(2^i n). \]
