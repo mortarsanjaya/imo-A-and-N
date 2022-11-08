@@ -200,6 +200,47 @@ begin
   funext x; rw [pow_add, mul_assoc, mul_left_comm]
 end
 
+lemma F_switch_sign {p a b : ℕ} (h0 : b < a) (h1 : F p a < F p b) :
+  ∃ k x y : ℕ, p / 2 + x < y ∧ y < p ∧ a = x + (k + 1) * p ∧ b = y + k * p :=
+begin
+  ---- Throw out the case `p = 0`
+  unfold F at h1,
+  rcases p.eq_zero_or_pos with rfl | h,
+  rw [nat.mod_zero, ← two_mul, nat.mod_zero, ← two_mul] at h1,
+  exfalso; exact lt_asymm h1 ((mul_lt_mul_left two_pos).mpr h0),
+
+  ---- Rexpand `a = kp + x` and `b = mp + y`
+  obtain ⟨m, x, h2, rfl⟩ : ∃ m x : ℕ, x < p ∧ x + m * p = a :=
+    ⟨a / p, a % p, a.mod_lt h, a.mod_add_div' p⟩,
+  obtain ⟨k, y, h3, rfl⟩ : ∃ k y : ℕ, y < p ∧ y + k * p = b :=
+    ⟨b / p, b % p, b.mod_lt h, b.mod_add_div' p⟩,
+  rw [nat.add_mul_mod_self_right, nat.mod_eq_of_lt h2, add_right_comm, ← two_mul,
+      nat.add_mul_mod_self_right, nat.mod_eq_of_lt h3, add_right_comm, ← two_mul] at h1,
+  
+  ---- Reduce to showing that `m = k + 1`
+  suffices h5 : m = k + 1,
+  { subst h5; refine ⟨k, x, y, _, h3, rfl, rfl⟩,
+    rw [add_comm k 1, one_add_mul, ← add_assoc, add_lt_add_iff_right] at h1,
+    rwa [← nat.add_mul_div_right _ _ two_pos, add_comm,
+         nat.div_lt_iff_lt_mul two_pos, mul_comm, mul_comm y] },
+
+  ---- Finishing
+  replace h2 : x < y :=
+  begin
+    rw [← add_lt_add_iff_left x, ← add_assoc, ← add_assoc, ← two_mul] at h0,
+    replace h1 := lt_trans h0 h1,
+    rwa [add_lt_add_iff_right, two_mul, add_lt_add_iff_right] at h1
+  end,
+  replace h0 := lt_trans (add_lt_add_right h2 _) h0,
+  rw [add_lt_add_iff_left, mul_lt_mul_right h, lt_iff_exists_add] at h0,
+  rcases h0 with ⟨c, h0, rfl⟩,
+  rw [add_comm k, add_mul, ← add_assoc, add_lt_add_iff_right, two_mul y] at h1,
+  replace h1 := lt_trans (lt_of_le_of_lt le_add_self h1) (add_lt_add h3 h3),
+  rw [← two_mul, mul_lt_mul_right h, nat.lt_succ_iff] at h1,
+  rw [gt_iff_lt, ← nat.succ_le_iff] at h0,
+  rw le_antisymm h1 h0
+end
+
 
 
 variables {p : ℕ} (h : odd p)
@@ -228,6 +269,7 @@ begin
   rw [F, ← nat.coprime_add_mul_left_left _ _ (n / p), add_assoc, nat.mod_add_div, ← two_mul],
   exact (two_coprime_p h).mul h0
 end
+
 
 /-- Wrapper for `S_p(n)`, only up to length `T = ord_p(2)` -/
 def S0 (n : ℕ) := S p (order_two_mod_p h) n
@@ -296,11 +338,7 @@ lemma S0_p_dvd_add {m n : ℕ} (h0 : ¬p ∣ m) (h1 : p ∣ m + n) :
   S0 h m + S0 h n = order_two_mod_p h * p :=
   S_p_dvd_add h h0 h1 (order_two_mod_p h)
 
-end properties
-
-
-
-lemma eventually_F_lt_of_S0_lt {p : ℕ} (h : odd p) {a b : ℕ} (h0 : S0 h a < S0 h b) :
+lemma eventually_F_lt_of_S0_lt {a b : ℕ} (h0 : S0 h a < S0 h b) :
   ∃ N : ℕ, ∀ n : ℕ, N ≤ n → (F p^[n]) a < (F p^[n]) b :=
 begin
   ---- Find `K` large enough
@@ -332,6 +370,64 @@ begin
   rw [add_right_comm, add_mul, add_mul K c, ← add_assoc, ← add_assoc],
   exact add_lt_add_of_lt_of_le h1 (mul_le_mul_left' (le_of_lt h0) c)
 end
+
+end properties
+
+
+
+section Mersenne
+
+/-- This lemma proves that the Mersenne numbers `2^k - 1` are odd for `k > 0`.
+  For the rest of the lemmas, we use the oddness of `2^k - 1` as the hypothesis itself. -/
+lemma Mersenne_odd {k : ℕ} (h : 0 < k) : odd (2 ^ k - 1) :=
+begin
+  rw [nat.odd_iff_not_even, ← nat.even_add_one,
+      nat.sub_add_cancel (nat.one_le_pow k 2 two_pos), nat.even_pow' (ne_of_gt h)],
+  exact even_two
+end
+
+variables {k : ℕ} (h : odd (2 ^ k - 1))
+include h
+
+lemma order_two_mod_Mersenne : order_two_mod_p h = k :=
+begin
+  have X : ∀ m : ℕ, 1 ≤ 2 ^ m := λ m, nat.one_le_pow m 2 two_pos,
+  unfold order_two_mod_p; apply le_antisymm,
+  rw nat.find_le_iff; refine ⟨k, le_refl k, _, nat.modeq_sub (X k)⟩,
+  rw zero_lt_iff; rintros rfl,
+  rw [pow_zero, nat.sub_self, nat.odd_iff_not_even] at h,
+  exact h even_zero,
+  rw nat.le_find_iff; rintros m h0 ⟨h1, h2⟩,
+  rw [nat.modeq.comm, nat.modeq_iff_dvd' (X m)] at h2,
+  revert h2; refine nat.not_dvd_of_pos_of_lt _ _,
+  rw tsub_pos_iff_lt; exact nat.one_lt_pow m 2 h1 one_lt_two,
+  rw tsub_lt_tsub_iff_right (X m); exact pow_lt_pow one_lt_two h0
+end
+
+lemma S0_Mersenne_one (h0 : 1 < k) : S0 h 1 = 2 ^ k - 1 :=
+begin
+  conv_rhs { rw ← geom_sum_mul_add 1 k },
+  rw [S0, order_two_mod_Mersenne, S, nat.add_sub_cancel, mul_one],
+  refine sum_congr rfl (λ i h1, _),
+  rw [mul_one, nat.mod_eq_of_lt],
+  obtain ⟨m, rfl⟩ := nat.exists_eq_succ_of_ne_zero (ne_of_gt (lt_trans one_pos h0)),
+  rw [mem_range, nat.lt_succ_iff] at h1,
+  rw [lt_tsub_iff_right, pow_succ, two_mul],
+  refine add_lt_add_of_le_of_lt (nat.pow_le_pow_of_le_right two_pos h1) _,
+  rw nat.succ_lt_succ_iff at h0; exact nat.one_lt_two_pow m h0
+end
+
+lemma S0_Mersenne_neg_one (h0 : 1 < k) : S0 h (2 ^ k - 1 - 1) = (k - 1) * (2 ^ k - 1) :=
+begin
+  have h1 : 1 + 1 < 2 ^ k := pow_lt_pow one_lt_two h0,
+  rw ← lt_tsub_iff_right at h1,
+  rw [← add_right_inj (S0 h 1), S0_p_dvd_add, order_two_mod_Mersenne, add_comm,
+      S0_Mersenne_one h h0, ← add_one_mul, nat.sub_add_cancel (le_of_lt h0)],
+  rw nat.dvd_one; exact ne_of_gt h1,
+  rw [add_comm, nat.sub_add_cancel (le_of_lt h1)]
+end
+
+end Mersenne
 
 end IMO2020N4
 end IMOSL

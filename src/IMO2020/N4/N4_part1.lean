@@ -14,11 +14,6 @@ def good (p : ℕ) := ∃ a b : ℕ, a.coprime p ∧ b.coprime p ∧ alternating
 
 
 
-
-
-
-
-/-! # Some extra lemmas not-so-related to the problem -/
 section extra_lemmas
 
 private lemma pow_sub_one_gcd (n k m : ℕ) :
@@ -44,54 +39,6 @@ begin
       nat.sub_add_cancel (h _), ← one_mul (n ^ r), pow_add, mul_comm q, pow_mul],
   nth_rewrite 1 ← one_pow q,
   exact nat.modeq.mul_right _ (nat.modeq.pow _ (nat.modeq_sub (h i)))
-end
-
-private lemma exists_nontrivial_coprime {n : ℕ} (h : 5 ≤ n) (h0 : n ≠ 6) :
-  ∃ k m : ℕ, 1 < k ∧ 1 < m ∧ k.coprime m ∧ k + m = n :=
-begin
-  replace h0 := extra.big_two_lt_totient' h h0,
-  unfold nat.totient at h0,
-  sorry
-end
-
-private lemma Mersenne_odd {k : ℕ} (h : 0 < k) : odd (2 ^ k - 1) :=
-begin
-  rw [nat.odd_iff_not_even, ← nat.even_add_one,
-      nat.sub_add_cancel (nat.one_le_pow k 2 two_pos), nat.even_pow' (ne_of_gt h)],
-  exact even_two
-end
-
-private lemma order_two_mod_Mersenne {k : ℕ} (h : odd (2 ^ k - 1)) :
-  order_two_mod_p h = k :=
-begin
-  have X : ∀ m : ℕ, 1 ≤ 2 ^ m := λ m, nat.one_le_pow m 2 two_pos,
-  unfold order_two_mod_p; apply le_antisymm,
-  rw nat.find_le_iff; refine ⟨k, le_refl k, _, nat.modeq_sub (X k)⟩,
-  rw zero_lt_iff; rintros rfl,
-  rw [pow_zero, nat.sub_self, nat.odd_iff_not_even] at h,
-  exact h even_zero,
-  rw nat.le_find_iff; rintros m h0 ⟨h1, h2⟩,
-  rw [nat.modeq.comm, nat.modeq_iff_dvd' (X m)] at h2,
-  revert h2; refine nat.not_dvd_of_pos_of_lt _ _,
-  rw tsub_pos_iff_lt; exact nat.one_lt_pow m 2 h1 one_lt_two,
-  rw tsub_lt_tsub_iff_right (X m); exact pow_lt_pow one_lt_two h0
-end
-
-private lemma sum_two_pow (k : ℕ) : (range k).sum (λ i, 2 ^ i) = 2 ^ k - 1 :=
-  by rw [← geom_sum_mul_add 1 k, nat.add_sub_cancel, mul_one]
-
-private lemma S0_Mersenne_one {k : ℕ} (h : odd (2 ^ k - 1)) (h0 : 1 < k) :
-  S0 h 1 = 2 ^ k - 1 :=
-begin
-  rw [S0, order_two_mod_Mersenne, S],
-  nth_rewrite 0 ← sum_two_pow,
-  refine sum_congr rfl (λ i h1, _),
-  rw [mul_one, nat.mod_eq_of_lt],
-  obtain ⟨m, rfl⟩ := nat.exists_eq_succ_of_ne_zero (ne_of_gt (lt_trans one_pos h0)),
-  rw [mem_range, nat.lt_succ_iff] at h1,
-  rw [lt_tsub_iff_right, pow_succ, two_mul],
-  refine add_lt_add_of_le_of_lt (nat.pow_le_pow_of_le_right two_pos h1) _,
-  rw nat.succ_lt_succ_iff at h0; exact nat.one_lt_two_pow m h0
 end
 
 end extra_lemmas
@@ -154,44 +101,6 @@ begin
     subst h3; exact not_le_of_lt h1 h4 }
 end
 
-private lemma F_switch_sign {a b : ℕ} (h0 : b < a) (h1 : F p a < F p b) :
-  ∃ k x y : ℕ, p / 2 + x < y ∧ y < p ∧ a = x + (k + 1) * p ∧ b = y + k * p :=
-begin
-  ---- First expand `a = kp + x` and `b = mp + y`
-  unfold F at h1,
-  obtain ⟨m, x, h2, rfl⟩ : ∃ m x : ℕ, x < p ∧ x + m * p = a :=
-    ⟨a / p, a % p, a.mod_lt h.pos, a.mod_add_div' p⟩,
-  obtain ⟨k, y, h3, rfl⟩ : ∃ k y : ℕ, y < p ∧ y + k * p = b :=
-    ⟨b / p, b % p, b.mod_lt h.pos, b.mod_add_div' p⟩,
-  rw [nat.add_mul_mod_self_right, nat.mod_eq_of_lt h2, add_right_comm, ← two_mul,
-      nat.add_mul_mod_self_right, nat.mod_eq_of_lt h3, add_right_comm, ← two_mul] at h1,
-  
-  ---- Reduce to showing that `m = k + 1`
-  suffices h5 : m = k + 1,
-  { subst h5; refine ⟨k, x, y, _, h3, rfl, rfl⟩,
-    rw [add_comm k 1, one_add_mul, ← add_assoc, add_lt_add_iff_right] at h1,
-    rwa [← nat.add_mul_div_right _ _ two_pos, add_comm,
-         nat.div_lt_iff_lt_mul two_pos, mul_comm, mul_comm y] },
-
-  ---- Obtain `x < y`
-  replace h2 : x < y :=
-  begin
-    rw [← add_lt_add_iff_left x, ← add_assoc, ← add_assoc, ← two_mul] at h0,
-    replace h1 := lt_trans h0 h1,
-    rwa [add_lt_add_iff_right, two_mul, add_lt_add_iff_right] at h1
-  end,
-
-  ---- Finishing
-  replace h0 := lt_trans (add_lt_add_right h2 _) h0,
-  rw [add_lt_add_iff_left, mul_lt_mul_right h.pos, lt_iff_exists_add] at h0,
-  rcases h0 with ⟨c, h0, rfl⟩,
-  rw [add_comm k, add_mul, ← add_assoc, add_lt_add_iff_right, two_mul y] at h1,
-  replace h1 := lt_trans (lt_of_le_of_lt le_add_self h1) (add_lt_add h3 h3),
-  rw [← two_mul, mul_lt_mul_right h.pos, nat.lt_succ_iff] at h1,
-  rw [gt_iff_lt, ← nat.succ_le_iff] at h0,
-  rw le_antisymm h1 h0
-end
-
 /-- Theorem 2 in the .tex file -/
 private theorem good_iff' : good p ↔
   (∃ x y : ℕ, x.coprime p ∧ y.coprime p ∧ p / 2 + x < y ∧ y < p ∧ S0 h x = S0 h y) :=
@@ -211,8 +120,8 @@ begin
     generalize_hyp : (F p^[N]) a = c at ha h2 h0 h1,
     generalize_hyp : (F p^[N]) b = d at hb h2 h0 h1,
 
-    ---- Finishing using the previous lemma
-    replace h1 := F_switch_sign h h0 h1,
+    -- Finishing using the previous lemma
+    replace h1 := F_switch_sign h0 h1,
     clear h0 a b,
     rcases h1 with ⟨k, x, y, h0, h1, rfl, rfl⟩,
     rw nat.coprime_add_mul_right_left at ha hb,
@@ -225,7 +134,7 @@ begin
     refine ⟨x + p, y, by rwa nat.coprime_add_self_left, hy, _⟩,
     have X : injective (λ k, k * order_two_mod_p h) :=
       nat.mul_left_injective (order_two_mod_p_pos h),
-     clear hx hy; split,
+    clear hx hy; split,
 
     -- `F_p^{kT + 1}(x + p) < F_p^{kT + 1}(y)` for all `k ≥ 0`
     { refine set.infinite_of_injective_forall_mem (injective.comp (add_left_injective 1) X) _,
@@ -297,7 +206,7 @@ begin
   refine ⟨5, 2 ^ 3 * 5, _, _, _, _, by rw S0_two_pow_mul⟩; norm_num,
 
   ---- Now focus on the case `k ≠ 6`. Reduce to the main inequality.
-  replace h0 := exists_nontrivial_coprime h h0,
+  replace h0 := extra.exists_nontrivial_coprime h h0,
   rcases h0 with ⟨c, d, h0, h1, h2, rfl⟩,
   replace h : nat.coprime (2 ^ c - 1) (2 ^ (c + d) - 1) :=
     by unfold nat.coprime at h2 ⊢; rw [pow_sub_one_gcd, nat.gcd_self_add_right, h2, pow_one],
@@ -336,8 +245,6 @@ begin
       add_lt_add_iff_right, add_lt_add_iff_right, ← one_mul 1],
   exact nat.mul_lt_mul h1 (le_of_lt h0) one_pos
 end
-
-
 
 private lemma Mersenne_small_bad {k : ℕ} (h : 0 < k) (h0 : k < 5) : ¬good (2 ^ k - 1) :=
 begin
