@@ -10,6 +10,8 @@ The main interest is to solve 2020 N4 by characterizing all `n : ℕ` such that 
 namespace IMOSL
 namespace extra
 
+open finset
+
 lemma totient_big_prime_div {p : ℕ} (hp : p.prime) (h : 3 < p) {n : ℕ} (h0 : 0 < n) (h1 : p ∣ n) :
   2 < n.totient :=
 begin
@@ -71,6 +73,33 @@ begin
   rw nat.totient_prime; norm_num,
   exfalso; exact h0 rfl,
   exact big_two_lt_totient h
+end
+
+lemma exists_nontrivial_coprime {n : ℕ} (h : 5 ≤ n) (h0 : n ≠ 6) :
+  ∃ k m : ℕ, 1 < k ∧ 1 < m ∧ k.coprime m ∧ k + m = n :=
+begin
+  replace h0 : 0 < (filter n.coprime (range n) \ {1, n - 1}).card :=
+  begin
+    refine lt_of_lt_of_le _ (le_card_sdiff _ _),
+    rw tsub_pos_iff_lt; refine lt_of_le_of_lt (card_insert_le _ _) _,
+    rw card_singleton; exact big_two_lt_totient' h h0
+  end,
+
+  rw card_pos at h0,
+  cases h0 with k h0,
+  rw [mem_sdiff, mem_filter, mem_range, mem_insert, mem_singleton, not_or_distrib] at h0,
+  rcases h0 with ⟨⟨h0, h1⟩, h2, h3⟩,
+  rw lt_iff_exists_add at h0,
+  rcases h0 with ⟨m, h0, rfl⟩,
+  rw nat.coprime_self_add_left at h1,
+  rw [← ne.def, ne_iff_lt_or_gt, gt_iff_lt, nat.lt_one_iff] at h2,
+  replace h : 1 ≤ k + m := le_trans (by norm_num : 1 ≤ 5) h,
+  rw [eq_comm, nat.sub_eq_iff_eq_add h, add_right_inj, ← ne.def, ne_iff_lt_or_gt,
+      gt_iff_lt, nat.lt_one_iff, or_iff_right (ne_of_gt h0)] at h3,
+  rcases h2 with rfl | h2,
+  rw nat.coprime_zero_right at h1,
+  exfalso; exact ne_of_gt h3 h1,
+  exact ⟨k, m, h2, h3, h1.symm, rfl⟩
 end
 
 end extra
