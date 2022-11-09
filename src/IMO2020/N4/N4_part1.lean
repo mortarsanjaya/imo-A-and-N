@@ -53,11 +53,93 @@ begin
   exact nat.mul_lt_mul ha (le_of_lt hb) one_pos
 end
 
-private lemma two_pow_or_sub_two_pow {k : ℕ} (h : k = 3 ∨ k = 4)
-    {x : ℕ} (h : x.coprime (2 ^ k - 1)) (h0 : x < 2 ^ k - 1) :
-  ∃ i : ℕ, i < k ∧ (x = 2 ^ i ∨ x = 2 ^ k - 1 - 2 ^ i) :=
+private lemma two_pow_add_two_pow_ne_Mersenne {k : ℕ} (h : 3 ≤ k) :
+  ∀ i j : ℕ, 2 ^ i + 2 ^ j ≠ 2 ^ k - 1 :=
 begin
-  sorry
+  suffices : ∀ i : ℕ, 2 ^ i + 1 + 1 ≠ 2 ^ k,
+  { intros i j h0,
+    rw eq_tsub_iff_add_eq_of_le (nat.one_le_two_pow k) at h0,
+    rcases i.eq_zero_or_pos with rfl | hi,
+    rw [pow_zero, add_comm 1] at h0; exact this j h0,
+    rcases j.eq_zero_or_pos with rfl | hj,
+    exact this i h0,
+    replace h0 : even (2 ^ i + 2 ^ j + 1) ↔ even (2 ^ k) := by rw h0,
+    revert h0; rw [imp_false, nat.even_add_one, ← not_iff, not_not, nat.even_add],
+    replace this : ∀ c : ℕ, 0 < c → even (2 ^ c) :=
+      λ c hc, (nat.even_pow' (ne_of_gt hc)).mpr even_two,
+    replace h : 0 < k := lt_of_lt_of_le three_pos h,
+    simp only [this, hi, hj, h, iff_self] },
+
+  intros i h0,
+  replace h0 : 2 ^ 3 ∣ 2 ^ i + 1 + 1 := by rw h0; exact pow_dvd_pow 2 h,
+  clear h; revert h0; rw [add_assoc, imp_false],
+  cases le_or_lt 3 i with h h,
+  rw ← nat.dvd_add_iff_right (pow_dvd_pow 2 h),
+  all_goals { apply nat.not_dvd_of_pos_of_lt; norm_num },
+  rw nat.lt_succ_iff at h,
+  refine lt_of_le_of_lt (add_le_add_right (pow_mono one_le_two h) _) _,
+  norm_num
+end
+
+private lemma two_pow_or_sub_two_pow {k : ℕ} (h : k = 3 ∨ k = 4) :
+  ∀ {x : ℕ}, x.coprime (2 ^ k - 1) → x < 2 ^ k - 1 →
+    ∃ i : ℕ, i < k ∧ (x = 2 ^ i ∨ x = 2 ^ k - 1 - 2 ^ i) :=
+begin
+  ---- First reduce to a set equality
+  suffices : (image (λ i, 2 ^ i) (range k) ∪ image (λ i, 2 ^ k - 1 - 2 ^ i) (range k)) =
+    (filter (nat.coprime (2 ^ k - 1)) (range (2 ^ k - 1))),
+  { intros x h0 h1,
+    replace h1 : x ∈ filter (nat.coprime (2 ^ k - 1)) (range (2 ^ k - 1)) :=
+      by rw [mem_filter, mem_range]; exact ⟨h1, h0.symm⟩,
+    clear h0; rw [← this, mem_union, mem_image, mem_image] at h1,
+    rcases h1 with ⟨i, h1, rfl⟩ | ⟨i, h1, rfl⟩; rw mem_range at h1,
+    exacts [⟨i, h1, or.inl rfl⟩, ⟨i, h1, or.inr rfl⟩] },
+
+  have h0 : 1 < k := by rcases h with rfl | rfl; norm_num,
+  refine eq_of_subset_of_card_le (λ x h1, _) (le_of_eq _),
+  
+  ---- RHS contains LHS
+  { rw [mem_filter, mem_range],
+    simp only [mem_union, mem_image, mem_range] at h1,
+    rcases h1 with ⟨i, h1, rfl⟩ | ⟨i, h1, rfl⟩; split,
+    exact two_pow_lt_Mersenne h0 h1,
+    exact (two_coprime_p (Mersenne_odd (pos_of_gt h0))).symm.pow_right i,
+    rw [tsub_lt_self_iff, tsub_pos_iff_lt],
+    exact ⟨nat.one_lt_two_pow k (pos_of_gt h0), pow_pos two_pos i⟩,
+    replace h1 := two_pow_lt_Mersenne h0 h1,
+    rw lt_iff_exists_add at h1,
+    rcases h1 with ⟨c, h1, h2⟩,
+    rw [h2, nat.add_sub_cancel_left, nat.coprime_add_self_left,
+        ← nat.coprime_add_self_right, add_comm, ← h2],
+    exact (two_coprime_p (Mersenne_odd (pos_of_gt h0))).pow_left i },
+
+  ---- LHS and RHS has the same cardinality
+  { have X : ∀ i j, 2 ^ i = 2 ^ j → i = j := nat.pow_right_injective (le_refl 2),
+    rw [← nat.totient, card_union_eq, card_image_of_injective _ X,
+        card_image_of_inj_on (λ i hi j hj h1, X i j _), card_range],
+
+    -- The main equality: `φ(2^k - 1) = 2k` for `k = 3, 4`
+    { rcases h with rfl | rfl; norm_num,
+      rw nat.totient_prime (by norm_num : nat.prime 7),
+      change 15 with 3 * 5,
+      rw [nat.totient_mul, nat.totient_prime, nat.totient_prime],
+      all_goals { norm_num } },
+
+    -- If `2^k - 1 - 2^i = 2^k - 1 - 2^j`, then `i = j`
+    { rw [mem_coe, mem_range] at hi hj,
+      replace X : ∀ i : ℕ, i < k → 2 ^ i ≤ 2 ^ k - 1 :=
+        λ i Y, le_of_lt (two_pow_lt_Mersenne h0 Y),
+      exact (tsub_right_inj (X i hi) (X j hj)).mp h1 },
+
+    -- `2^i ≠ 2^k - 1 - 2^j` for any `i, j < k`
+    { intros c h1,
+      simp only [inf_eq_inter, mem_image, mem_inter] at h1,
+      rcases h1 with ⟨⟨i, -, rfl⟩, ⟨j, h1, h2⟩⟩,
+      simp only [bot_eq_empty, not_mem_empty],
+      rw mem_range at h1,
+      revert h2; rw nat.sub_eq_iff_eq_add (le_of_lt (two_pow_lt_Mersenne h0 h1)),
+      refine (two_pow_add_two_pow_ne_Mersenne _ i j).symm,
+      rcases h with rfl | rfl; norm_num } }
 end
 
 end extra_lemmas
