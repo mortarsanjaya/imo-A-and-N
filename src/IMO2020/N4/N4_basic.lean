@@ -21,6 +21,14 @@ begin
   exact h h0
 end
 
+lemma two_pow_lt_Mersenne {k m : ℕ} (h : 1 < k) (h0 : m < k) : 2 ^ m < 2 ^ k - 1 :=
+begin
+  rw lt_iff_exists_add at h; rcases h with ⟨n, h, rfl⟩,
+  rw [← nat.succ_eq_one_add, nat.lt_succ_iff] at h0,
+  rw [lt_tsub_iff_right, pow_add, pow_one, two_mul],
+  exact add_lt_add_of_le_of_lt (pow_mono one_le_two h0) (nat.one_lt_two_pow n h)
+end
+
 end extra_lemmas
 
 
@@ -299,6 +307,9 @@ begin
   rw [pow_succ, mul_assoc, S0_two_mul h, c_ih]
 end
 
+lemma S0_two_pow (c : ℕ) : S0 h (2 ^ c) = S0 h 1 :=
+  by rw [← mul_one (2 ^ c), S0_two_pow_mul]
+
 lemma S_mul_order (k n : ℕ) : S p (k * order_two_mod_p h) n = k * S0 h n :=
 begin
   induction k with k k_ih,
@@ -417,15 +428,18 @@ begin
   rw nat.succ_lt_succ_iff at h0; exact nat.one_lt_two_pow m h0
 end
 
-lemma S0_Mersenne_neg_one (h0 : 1 < k) : S0 h (2 ^ k - 1 - 1) = (k - 1) * (2 ^ k - 1) :=
+lemma S0_Mersenne_neg_two_pow (h0 : 1 < k) {m : ℕ} (h1 : m < k) :
+  S0 h (2 ^ k - 1 - 2 ^ m) = (k - 1) * (2 ^ k - 1) :=
 begin
-  have h1 : 1 + 1 < 2 ^ k := pow_lt_pow one_lt_two h0,
-  rw ← lt_tsub_iff_right at h1,
-  rw [← add_right_inj (S0 h 1), S0_p_dvd_add, order_two_mod_Mersenne, add_comm,
-      S0_Mersenne_one h h0, ← add_one_mul, nat.sub_add_cancel (le_of_lt h0)],
-  rw nat.dvd_one; exact ne_of_gt h1,
-  rw [add_comm, nat.sub_add_cancel (le_of_lt h1)]
+  have h2 := two_pow_lt_Mersenne h0 h1,
+  rw [← add_right_inj (S0 h (2 ^ m)), S0_p_dvd_add, order_two_mod_Mersenne, add_comm,
+      S0_two_pow h, S0_Mersenne_one h h0, ← add_one_mul, nat.sub_add_cancel (le_of_lt h0)],
+  exact nat.not_dvd_of_pos_of_lt (pow_pos two_pos m) h2,
+  rw [add_comm, nat.sub_add_cancel (le_of_lt h2)]
 end
+
+lemma S0_Mersenne_neg_one (h0 : 1 < k) : S0 h (2 ^ k - 1 - 1) = (k - 1) * (2 ^ k - 1) :=
+  S0_Mersenne_neg_two_pow h h0 (lt_trans one_pos h0)
 
 end Mersenne
 

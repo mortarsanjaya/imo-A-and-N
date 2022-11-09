@@ -41,6 +41,25 @@ begin
   exact nat.modeq.mul_right _ (nat.modeq.pow _ (nat.modeq_sub (h i)))
 end
 
+private lemma add_lt_mul {a b : ℕ} (ha : 3 ≤ a) (hb : 3 ≤ b) : a + b < a * b :=
+begin
+  have h : ∀ n : ℕ, 3 ≤ n → ∃ m : ℕ, n = m.succ :=
+    λ n Y, nat.exists_eq_succ_of_ne_zero (ne_of_gt (lt_of_lt_of_le three_pos Y)),
+  rcases h a ha with ⟨c, rfl⟩,
+  rcases h b hb with ⟨d, rfl⟩,
+  rw [nat.mul_succ, add_comm, nat.succ_mul, nat.succ_eq_one_add,
+      add_lt_add_iff_right, add_lt_add_iff_right],
+  rw [nat.succ_le_succ_iff, nat.succ_le_iff] at ha hb,
+  exact nat.mul_lt_mul ha (le_of_lt hb) one_pos
+end
+
+private lemma two_pow_or_sub_two_pow {k : ℕ} (h : k = 3 ∨ k = 4)
+    {x : ℕ} (h : x.coprime (2 ^ k - 1)) (h0 : x < 2 ^ k - 1) :
+  ∃ i : ℕ, i < k ∧ (x = 2 ^ i ∨ x = 2 ^ k - 1 - 2 ^ i) :=
+begin
+  sorry
+end
+
 end extra_lemmas
 
 
@@ -120,7 +139,7 @@ begin
     generalize_hyp : (F p^[N]) a = c at ha h2 h0 h1,
     generalize_hyp : (F p^[N]) b = d at hb h2 h0 h1,
 
-    -- Finishing using the previous lemma
+    -- Finishing
     replace h1 := F_switch_sign h0 h1,
     clear h0 a b,
     rcases h1 with ⟨k, x, y, h0, h1, rfl, rfl⟩,
@@ -216,7 +235,7 @@ begin
   exact tsub_lt_tsub_left_of_le (nat.pow_le_pow_of_le_right two_pos le_add_self)
     (nat.one_lt_two_pow d (lt_trans one_pos h1)),
   
-  ---- Now focus on the main inequality. Start with some clean-ups and reductions
+  ---- Now focus on the main inequality.
   replace X : 1 ≤ 2 := one_le_two,
   rw ← nat.succ_le_iff at h0 h1,
   replace h0 := pow_le_pow X h0,
@@ -231,66 +250,66 @@ begin
   obtain ⟨n, rfl⟩ := h N h1,
   clear X h h2,
   rw nat.succ_le_succ_iff at h0 h1,
-
-  ---- Finishing
   rw [nat.succ_sub_one, nat.succ_mul, nat.mul_succ, nat.succ_mul, add_lt_add_iff_right,
       nat.succ_eq_add_one, ← add_assoc, nat.add_sub_cancel, nat.div_lt_iff_lt_mul two_pos,
-      mul_comm, mul_two, add_assoc, add_lt_add_iff_left],
-  have h : ∀ n : ℕ, 3 ≤ n → ∃ m : ℕ, n = m.succ :=
-    λ n Y, nat.exists_eq_succ_of_ne_zero (ne_of_gt (lt_of_lt_of_le three_pos Y)),
-  obtain ⟨M, rfl⟩ := h m h0,
-  obtain ⟨N, rfl⟩ := h n h1,
-  rw [nat.succ_le_succ_iff, nat.succ_le_iff] at h0 h1,
-  rw [nat.mul_succ, nat.succ_mul, nat.succ_eq_one_add,
-      add_lt_add_iff_right, add_lt_add_iff_right, ← one_mul 1],
-  exact nat.mul_lt_mul h1 (le_of_lt h0) one_pos
+      mul_comm, mul_two, add_assoc, add_lt_add_iff_left, mul_comm],
+  exact add_lt_mul h0 h1
 end
 
 private lemma Mersenne_small_bad {k : ℕ} (h : 0 < k) (h0 : k < 5) : ¬good (2 ^ k - 1) :=
 begin
-  replace h := nat.exists_eq_succ_of_ne_zero (ne_of_gt h),
-  rcases h with ⟨k, rfl⟩,
-  rw [nat.succ_lt_succ_iff, nat.lt_succ_iff, le_iff_lt_or_eq, nat.lt_succ_iff,
-      le_iff_lt_or_eq, or_assoc, nat.lt_succ_iff, le_iff_lt_or_eq, nat.lt_one_iff] at h0,
-  have X : odd (2 ^ k.succ - 1) := Mersenne_odd k.succ_pos,
+  have X : odd (2 ^ k - 1) := Mersenne_odd h,
+  rw [nat.lt_succ_iff, le_iff_lt_or_eq, nat.lt_succ_iff, le_iff_lt_or_eq, or_assoc] at h0,
   rw good_iff' X; rcases h0 with h0 | h0,
 
-  ---- Easy case: `k = 0` and `k = 1`
-  { rintros ⟨x, y, h, -, h1, h2, -⟩,
-    rcases h0 with rfl | rfl,
-    rw [pow_one, bit0, nat.add_sub_cancel, nat.lt_one_iff] at h2,
-    exact ne_of_gt (pos_of_gt h1) h2,
-    norm_num at h1 h2 h,
-    rw [← nat.add_one_le_iff, le_iff_exists_add] at h1,
-    rcases h1 with ⟨c, rfl⟩,
+  ---- Easy case: `k ≤ 2`
+  { rw [nat.lt_succ_iff, le_iff_lt_or_eq, nat.lt_succ_iff, le_iff_lt_or_eq, nat.lt_one_iff] at h0,
+    rintros ⟨x, y, h1, -, h2, h3, -⟩; clear X,
+    rcases h0 with (rfl | rfl) | rfl,
+    exact lt_irrefl 0 h,
+    rw [pow_one, bit0, nat.add_sub_cancel, nat.lt_one_iff] at h3,
+    exact ne_of_gt (pos_of_gt h2) h3,
+    norm_num at h1 h2 h3,
+    rw [← nat.add_one_le_iff, le_iff_exists_add] at h2,
+    rcases h2 with ⟨c, rfl⟩,
     rw [add_right_comm, nat.succ_lt_succ_iff, add_assoc, add_comm,
-        nat.succ_lt_succ_iff, nat.lt_one_iff, add_eq_zero_iff] at h2,
-    rcases h2 with ⟨rfl, -⟩,
-    rw nat.coprime_zero_left at h,
-    revert h; norm_num },
+        nat.succ_lt_succ_iff, nat.lt_one_iff, add_eq_zero_iff] at h3,
+    rcases h3 with ⟨rfl, -⟩,
+    rw nat.coprime_zero_left at h1,
+    revert h1; norm_num },
 
-  ---- Hard case: `k = 2` and `k = 3`
-  /-
-  { -- Setup
-    have X0 : S0 X 1 = 2 ^ k.succ - 1 :=
-      S0_Mersenne_one X (by rcases h0 with rfl | rfl; norm_num),
-    have X1 : S0 X (2 ^ k.succ - 1 - 1) = k * (2 ^ k.succ - 1) :=
+  ---- Hard case: `k = 3` and `k = 4`
+  {  -- Setup
+    set n := 2 ^ k - 1,
+    have Y : ∀ x : ℕ, x.coprime n → x < n → ∃ i : ℕ, i < k ∧ (x = 2 ^ i ∨ x = n - 2 ^ i) :=
+      λ x, two_pow_or_sub_two_pow h0,
+    rintros ⟨x, y, h1, h2, h3, h4, h5⟩,
+    replace h1 := Y x h1 (lt_trans (lt_of_le_of_lt le_add_self h3) h4),
+    replace h2 := Y y h2 h4,
+    revert h3 h5; rw [imp_false, imp_iff_not_or, not_lt],
+    replace h : 2 < k := by rcases h0 with rfl | rfl; norm_num,
+    replace h4 : n ≠ (k - 1) * n := ne_of_lt (lt_mul_left X.pos (lt_tsub_iff_left.mpr h)),
+    replace h0 : 1 < k := lt_trans one_lt_two h,
+    replace Y : ∀ i j : ℕ, i < k → 2 ^ i ≤ n / 2 + 2 ^ j :=
     begin
-      S0_p_dvd_add X,
+      intros i j hi,
+      refine le_trans _ (add_le_add_left j.one_le_two_pow _),
+      rw [← nat.add_mul_div_right _ _ two_pos, one_mul,
+          nat.le_div_iff_mul_le two_pos, ← pow_succ'],
+      rw ← nat.succ_le_iff at hi; refine le_trans (pow_mono one_le_two hi) _,
+      change 2 ^ k ≤ 2 ^ k - 1 + 1 + 1,
+      rw nat.sub_add_cancel k.one_le_two_pow; exact le_self_add
     end,
-    replace h0 : 2 ^ k.succ - 1 = 7 ∨ 2 ^ k.succ - 1 = 15 :=
-      by rcases h0 with rfl | rfl; norm_num,
-    generalize_hyp hn : 2 ^ k.succ - 1 = n at X X0 h0 ⊢,
 
-    -- Reduction
-    suffices : ∀ a : ℕ, a.coprime n → a < n → ∃ i : ℕ, i < k.succ ∧ a = 2 ^ i ∨ a = n - 2 ^ i,
-    { rintros ⟨x, y, h1, h2, h3, h4, h5⟩,
-      replace h1 := this x h1 (lt_trans (lt_of_le_of_lt le_add_self h3) h4),
-      replace h2 := this y h2 h4,
-    },
-    sorry }
-  -/
-  sorry
+    -- Case divisions
+    rcases h1 with ⟨i, h1, rfl | rfl⟩; rcases h2 with ⟨j, h2, rfl | rfl⟩,
+    left; exact Y j i h2,
+    right; rw [S0_two_pow, S0_Mersenne_one X h0, S0_Mersenne_neg_two_pow X h0 h2]; exact h4,
+    right; rw [S0_two_pow, S0_Mersenne_one X h0, S0_Mersenne_neg_two_pow X h0 h1]; exact h4.symm,
+    left; replace Y := Y i j h1,
+    rw [tsub_le_iff_right, add_right_comm, ← nat.add_sub_assoc,
+        le_tsub_iff_left (le_trans Y le_self_add), add_le_add_iff_right],
+    exacts [Y, le_of_lt (two_pow_lt_Mersenne h0 h1)] }
 end
 
 private theorem final_solution_part1' {p : ℕ} (h : odd p) :

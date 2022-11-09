@@ -26,7 +26,7 @@
 
 \subsection*{Problem}
 
-Fix an odd positive integer $p > 1$.
+Fix an odd positive integer $p$.
 For any $n \in \N$, let $d_p(n) \in \{0, 1, \ldots, p - 1\}$ be the remainder when $n$ is divided by $p$, and denote $F_p(n) = n + d_p(n)$.
 
 \begin{enumerate}
@@ -117,7 +117,7 @@ Indeed, for any $k \geq 0$,
 
 For the converse, suppose that there exists a $p$-alternating pair $(a_1, a_2)$, with $a_1$ and $a_2$ coprime with $p$.
 Without loss of generality, suppose that $a_1 > a_2$.
-Lemma~\ref{2020n4-1} then yields that $S_p(a_1) = S_p(a_2)$.
+Lemma~\ref{2020n4-1} implies that $S_p(a_1) = S_p(a_2)$.
 Going back to the property of $p$-alternating pairs, there must exist $N \in \N$ such that $F_p^N(a_1) < F_p^N(a_2)$.
 Take $N$ to be minimal with respect to this property, so $F_p^n(a_1) \geq F_p^n(a_2)$ for any $n < N$.
 Due to $F_p$ being injective, this inequality is actually strict.
@@ -149,11 +149,8 @@ There are several cases; we present all of them below.
     \textit{\underline{Case 2.}}
     $p = 2^k - 1$ for some $k \geq 5$.
 
-    First, suppose that $k = 6$.
-    Then take $x = 5$, $y = 40 = 2^3 \cdot 5$, and one can verify all the desired properties.
-
-    Now, suppose that $k \neq 6$.
-    We will use the fact that $\phi(k) > 2$ for $k \geq 5$, $k \neq 6$, where $\phi$ is the Euler's totient function.
+    For $k = 6$, then we can take $x = 5$ and $y = 40$.
+    For $k \neq 6$, we will use the fact that $\phi(k) > 2$ for $k \geq 5$, $k \neq 6$, where $\phi$ is the Euler's totient function.
     This means that there exists a positive integer $c$ such that $1 < c < k - 1$ and $\gcd(c, k) = 1$.
     We take $x = 2^c - 1$ and $y = 2^{k - c} (2^c - 1) = 2^k - 2^{k - c}$.
     It is evident that $p > y$, $S_p(x) = S_p(y)$, and $\gcd(x, p) = \gcd(y, p)$.
@@ -172,10 +169,10 @@ There are several cases; we present all of them below.
 
     The case $k = 3$ and $k = 4$ can also be done by hand.
     However, the cleanest proof is as follows.
-    In both cases, first check that every $z < p$ coprime with $p$ can be written as either $2^m$ or $p - 2^m$ for some $0 \leq m < k$.
+    By easy computation, one obtains $\phi(2^k - 1) = 2k$ in both cases.
+    Thus, it can be proved that $z < p$ coprime with $p$ can be written as either $2^m$ or $p - 2^m$ for some $0 \leq m < k$.
     In particular, $S_p(z)$ must be equal to either $S_p(1) = p$ or $S_p(p - 1) = p(k - 1) \neq p$.
-    Thus, $S_p(x) = S_p(y)$ forces either $(x, y) = (2^m, 2^n)$ for some $0 \leq m, n < k$ or $(x, y) = (p - 2^m, p - 2^n)$ for some $0 \leq m, n < k$.
-    In both cases, one can check that $y > p/2 + x \iff y \geq 2^{k - 1} + x$ cannot hold.
+    Thus, in all cases, one of $S_p(x) = S_p(y)$ or $y > p/2 + x \iff y \geq 2^{k - 1} + x$ does not hold.
 
 \end{itemize}
 
@@ -248,19 +245,20 @@ Indeed, $p$ divides $(2^{T/2} - 1)(2^{T/2} + 1)$, but $p$ does not divide $2^{T/
 \subsection*{Implementation details}
 
 We have quite a big result here, so we will use multiple \texttt{.lean} files.
-The definition and basic properties of $F_p$ and $S_p$ are provided in \texttt{N4\_basic.lean}.
+The definition and properties of $F_p$ and $S_p$ are provided in \texttt{N4\_basic.lean}.
 This includes some properties of $S_p$ when $p$ is a Mersenne number.
 Actually, $S_p$ is implemented as \texttt{S0} instead of \texttt{S}.
-We use \texttt{S} for the general sum of form
-\[ \sum_{i = 0}^{k - 1} d_p(2^i n). \]
+We use \texttt{S} for the general sum of form $\displaystyle \sum_{i = 0}^{k - 1} d_p(2^i n)$.
 
 We solve Part 1 and Part 2 separately.
 Part 1 goes to \texttt{N4\_part1.lean}.
 As Theorem~\ref{2020n4-2} is big enough, we will use smaller lemmas.
 Similarly, the case divisions are big enough that we will need lemmas for each case.
 One general result that is used in here is that $\phi(n) \leq 2$ iff $n \leq 6$ and $n \neq 5$.
-We will prove bounds on the totient function in an extra file:
+We will the bound and its implication (as needed for this problem) in an extra file:
 \[ \texttt{extra/number\_theory/totient\_bound.lean}. \]
+Another general result we need is that, if $k = 3, 4$, then any $x < 2^k - 1$ coprime with $2^k - 1$ is of form $2^i$ or $2^k - 1 - 2^i$ for some $i < k$.
+We prove this in \texttt{N4\_part1.lean} as an extra lemma.
 
 Part 2 goes to \texttt{N4\_part2.lean}.
 We solve Part 2 for not only primes, but also odd prime powers.
