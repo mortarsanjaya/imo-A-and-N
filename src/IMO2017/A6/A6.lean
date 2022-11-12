@@ -7,241 +7,206 @@ namespace IMO2017A6
 
 open function
 
-variables {F : Type*} [field F]
-
-def fn_eq (f : F → F) := ∀ x y : F, f (f x * f y) + f (x + y) = f (x * y)
+def good {R : Type*} [ring R] (f : R → R) := ∀ x y : R, f (f x * f y) + f (x + y) = f (x * y)
 
 
 
-section results
+section basic_results
 
-variables {f : F → F} (feq : fn_eq f)
-include feq
+section ring
 
-private lemma feq_neg : fn_eq (-f) :=
+variables {R : Type*} [ring R]
+
+private lemma good_zero : good (0 : R → R) :=
+  λ x y, by simp only [pi.zero_apply, add_zero]
+
+private lemma good_one_sub_self : good (λ x : R, 1 - x) :=
+  λ x y, by dsimp only []; rw [sub_add, sub_right_inj, mul_one_sub,
+    one_sub_mul, ← sub_sub, sub_sub_sub_cancel_left, sub_sub_cancel]
+
+variables {f : R → R} (h : good f)
+include h
+
+private lemma good_neg : good (-f) :=
+  λ x y, by simp only [pi.neg_apply]; rw [neg_mul_neg, ← neg_add, h]
+
+private lemma good_special_equality {x y : R} (h0 : x * y = 1) : f (f (x + 1) * f (y + 1)) = 0 :=
+  by replace h := h (x + 1) (y + 1);
+    rwa [add_one_mul, mul_add_one, h0, add_comm 1 x, add_left_eq_self] at h
+
+private lemma good_map_map_zero_sq : f (f 0 ^ 2) = 0 :=
+  by replace h := h 0 0; rwa [add_zero, mul_zero, add_left_eq_self, ← sq] at h
+
+private lemma good_map_eq_one_sub_self_of_inj (h0 : f 0 = 1) (h1 : injective f) :
+  f = λ x, 1 - x :=
 begin
-  intros x y,
-  simp only [pi.neg_apply],
-  rw [neg_mul_neg, ← neg_add, feq]
+  suffices h2 : ∀ x : R, f (f x) + f x = 1,
+  { funext x; rw [← h2 x, eq_sub_iff_add_eq, add_comm, add_left_inj],
+    apply h1; rw [← add_left_inj (f (f x)), h2, add_comm, h2] },
+  intros x; replace h := h x 0,
+  rwa [mul_zero, h0, mul_one, add_zero] at h
 end
 
-private lemma lem1_1 {x : F} (x_ne_0 : x ≠ 0) : f (f (x + 1) * f (x⁻¹ + 1)) = 0 :=
+end ring
+
+
+section division_ring
+
+variables {R : Type*} [division_ring R] {f : R → R} (h : good f)
+include h
+
+private lemma good_map_eq_zero {c : R} (h0 : f ≠ 0) (h1 : f c = 0) : c = 1 :=
 begin
-  have h := feq (x + 1) (1 + x⁻¹),
-  rwa [mul_one_add, add_one_mul, mul_inv_cancel x_ne_0, add_left_eq_self, add_comm _ x⁻¹] at h
-end
-
-private lemma lem1_2 (f_ne_0 : f ≠ 0) {c : F} (h : f c = 0) : c = 1 :=
-begin
-  contrapose f_ne_0,
-  rw not_not; funext x,
-  rw ← sub_eq_zero at f_ne_0,
-  have h0 := lem1_1 feq f_ne_0,
-  rw [sub_add_cancel, h, zero_mul] at h0,
-  have h1 := feq x 0,
-  rwa [mul_zero, add_zero, h0, mul_zero, h0, zero_add] at h1
-end
-
-private lemma lem1_3 (f_ne_0 : f ≠ 0) : f 0 ^ 2 = 1 :=
-begin
-  have h := feq 0 0,
-  rw [add_zero, mul_zero, add_left_eq_self, ← sq] at h,
-  exact lem1_2 feq f_ne_0 h
-end
-
-private lemma lem1_4 : f 1 = 0 :=
-begin
-  rcases eq_or_ne f 0 with rfl | f_ne_0,
-  rw pi.zero_apply,
-  have h := feq 0 0,
-  rwa [add_zero, mul_zero, add_left_eq_self, ← sq, lem1_3 feq f_ne_0] at h
-end
-
-
-
-/- From now on, assume that f(0) = 1. One can show that f(0)^2 = 1 and thus f(0) = ±1. -/
-variable f0_eq_1 : f 0 = 1
-include f0_eq_1
-
-private lemma lem2_1 : f ≠ 0 :=
-begin
-  contrapose f0_eq_1,
-  rw not_not at f0_eq_1,
-  rw [f0_eq_1, pi.zero_apply],
-  exact zero_ne_one
-end
-
-private lemma lem2_2 (f_inj : injective f) : f = λ x, 1 - x :=
-begin
-  suffices h : ∀ x : F, f (f x) + f x = 1,
-  { funext x,
-    rw [← h x, eq_sub_iff_add_eq, add_comm, add_left_inj],
-    apply f_inj,
-    rw [← add_left_inj (f (f x)), h, add_comm, h] },
-  intros x,
-  have h := feq x 0,
-  rwa [mul_zero, f0_eq_1, mul_one, add_zero] at h
-end
-
-private lemma lem2_3 (x : F) : f (x + 1) + 1 = f x :=
-begin
-  have h := feq x 1,
-  rwa [lem1_4 feq, mul_zero, mul_one, f0_eq_1, add_comm] at h
-end
-
-private lemma lem2_4 (x : F) : f x = 0 ↔ x = 1 :=
-begin
-  have h := lem2_1 feq f0_eq_1,
-  split,
-  exact lem1_2 feq h,
-  rintros rfl; exact lem1_4 feq
-end
-
-
-
-/-- Case 1: char(F) ≠ 2 -/
-private theorem thm3_1 (char_ne_2 : ring_char F ≠ 2) : injective f :=
-begin
-  have h : ∀ x : F, f (f x * 2) + (f x + 1) = f (-x) :=
-    λ x, by rw [bit0, ← mul_neg_one, ← feq x (-1), ← lem2_3 feq f0_eq_1 (-1 : F),
-      neg_add_self, f0_eq_1, ← lem2_3 feq f0_eq_1 (x + -1), neg_add_cancel_right],
-  suffices : ∀ x : F, f x = f (-x) → x = 0,
-  { intros x y h0,
-    have h1 : f (-x) = f (-y) := by rw [← h, h0, h],
-    have h2 := feq x (-y),
-    rw [h0, ← h1, mul_neg, ← neg_mul, mul_comm, ← feq (-x) y, add_right_inj] at h2,
-    rw ← add_neg_eq_zero; apply this,
-    rw [neg_add, neg_neg, h2] },
-  intros x h0,
-  replace h := h x,
-  rwa [← h0, ← add_assoc, add_right_comm, add_left_eq_self, ← sub_add_cancel (_ * _) (1 : F),
-      lem2_3 feq f0_eq_1, lem2_4 feq f0_eq_1, sub_eq_iff_eq_add, ← bit0, mul_left_eq_self₀,
-      ← lem2_3 feq f0_eq_1, add_left_eq_self, lem2_4 feq f0_eq_1, add_left_eq_self] at h,
-  exact (or_iff_left (ring.two_ne_zero char_ne_2)).mp h
-end
-
-
-
-/- Case 2: char(F) = 2. -/
-section case_char_eq_2
-
-variable [char_p F 2]
-
-private lemma lem3_1 (x : F) : f (x + 1) = f x + 1 :=
-  by rw [← sub_eq_iff_eq_add, char_two.sub_eq_add, lem2_3 feq f0_eq_1]
-
-private lemma lem3_2 (x : F) : f (x⁻¹ + 1) = (f (x + 1))⁻¹ :=
-begin
-  rcases eq_or_ne x 0 with rfl | h,
-  rw [inv_zero, zero_add, lem1_4 feq, inv_zero],
-  rw [← mul_eq_one_iff_eq_inv₀, mul_comm],
-  exact lem1_2 feq (lem2_1 feq f0_eq_1) (lem1_1 feq h),
-  contrapose! h,
-  rwa [lem2_4 feq f0_eq_1, add_left_eq_self] at h
-end
-
-private lemma lem3_3 {a b : F} (h : f (a + 1) * f (b + 1) = 1) :
-  f (a + b + 1) = f (a + b + a * b) :=
-begin
-  have h0 := feq (a + 1) (b + 1),
-  rwa [h, lem1_4 feq, zero_add, add_add_add_comm, add_one_mul,
-       mul_add_one, ← add_assoc, ← add_assoc, lem3_1 feq f0_eq_1 (_ + a + b),
-       lem3_1 feq f0_eq_1, add_left_inj, add_assoc (a * b), add_comm (a * b)] at h0
-end
-
-private lemma lem3_4 {a b : F} (h : f (a + 1) * f (b + 1) = 1) : a * b = 1 :=
-begin
-  have h0 : a ≠ 0 := by rintros rfl; rw [zero_add, lem1_4 feq, zero_mul] at h; exact zero_ne_one h,
-  have h1 : b ≠ 0 := by rintros rfl; rw [zero_add, lem1_4 feq, mul_zero] at h; exact zero_ne_one h,
-  let x := a + b⁻¹ + 1,
-  let y := b + a⁻¹ + 1,
-  have h2 : f (x + y) = 1 + f (x * y) :=
-  begin
-    have h2 : f (a + b + 1 + (a⁻¹ + b⁻¹ + 1)) = f (a + b + a * b + (a⁻¹ + b⁻¹ + a⁻¹ * b⁻¹)) :=
-    begin
-      have h2 := feq (a + b + 1) (a⁻¹ + b⁻¹ + 1),
-      have h3 : (a + b + 1) * (a⁻¹ + b⁻¹ + 1) = (a + b + a * b) * (a⁻¹ + b⁻¹ + a⁻¹ * b⁻¹) :=
-        by field_simp [h0, h1]; ring,
-      rwa [h3, lem3_3 feq f0_eq_1 h, lem3_3 feq f0_eq_1, ← feq (_ + _), add_right_inj] at h2,
-      rw [lem3_2 feq f0_eq_1, lem3_2 feq f0_eq_1, ← mul_inv, h, inv_one]
-    end,
-    have h3 : x + y = (a + b + 1) + (a⁻¹ + b⁻¹ + 1) := by dsimp only [x, y]; ring,
-    have h4 : x * y + 1 = (a + b + a * b) + (a⁻¹ + b⁻¹ + a⁻¹ * b⁻¹) :=
-    begin
-      dsimp only [x, y]; rw ← sub_eq_zero; ring_nf,
-      rw [inv_mul_cancel h0, mul_inv_cancel h1, ← add_assoc, ← bit0, char_two.two_eq_zero, add_zero]
-    end,
-    rwa [← h3, ← h4, lem3_1 feq f0_eq_1, add_comm (f _)] at h2
-  end,
-  have h3 := feq x y,
-  rw [h2, ← add_assoc, add_left_eq_self, ← lem3_1 feq f0_eq_1,
-      lem2_4 feq f0_eq_1, add_left_eq_self, mul_eq_zero] at h3,
-  cases h3 with h3 h3,
-  all_goals { rw [lem2_4 feq f0_eq_1, add_left_eq_self, ← char_two.sub_eq_add, sub_eq_zero] at h3 },
-  rwa mul_eq_one_iff_eq_inv₀ h1,
-  rwa [mul_comm, mul_eq_one_iff_eq_inv₀ h0]
-end
-
-private theorem thm3_2 : injective f :=
-begin
-  suffices : ∀ a b : F, f (a + 1) = f(b + 1) → a = b,
-  { intros a b h,
-    apply this,
-    rw [lem3_1 feq f0_eq_1, h, lem3_1 feq f0_eq_1] },
-  intros a b h,
-  rcases eq_or_ne b 0 with rfl | h0,
-  rwa [zero_add, lem1_4 feq, lem2_4 feq f0_eq_1, add_left_eq_self] at h,
-  rw [← mul_inv_eq_one₀, ← lem3_2 feq f0_eq_1] at h,
-  replace h := lem3_4 feq f0_eq_1 h,
-  rwa mul_inv_eq_one₀ h0 at h,
   contrapose! h0,
-  rwa [lem2_4 feq f0_eq_1, add_left_eq_self] at h0
+  suffices : f 0 = 0,
+  { funext x; replace h := h 0 x,
+    rwa [zero_add, zero_mul, this, zero_mul, this, zero_add] at h },
+  obtain ⟨x, rfl⟩ : ∃ x : R, x + 1 = c := ⟨c - 1, sub_add_cancel c 1⟩,
+  rw [ne.def, add_left_eq_self] at h0,
+  replace h := good_special_equality h (mul_inv_cancel h0),
+  rwa [h1, zero_mul] at h
 end
 
-end case_char_eq_2
+private lemma good_map_zero_sq (h0 : f ≠ 0) : f 0 ^ 2 = 1 :=
+  good_map_eq_zero h h0 (good_map_map_zero_sq h)
 
-
-
-private theorem thm3_3 : f = λ x, 1 - x :=
+private lemma good_map_one : f 1 = 0 :=
 begin
-  apply lem2_2 feq f0_eq_1,
-  cases ne_or_eq (ring_char F) 2 with h h,
-  exact thm3_1 feq f0_eq_1 h,
-  rw ring_char.eq_iff at h,
-  exactI thm3_2 feq f0_eq_1
+  rcases eq_or_ne f 0 with rfl | h0,
+  rw pi.zero_apply,
+  rw ← good_map_zero_sq h h0; exact good_map_map_zero_sq h
 end
 
-end results
+private lemma good_shift (h0 : f 0 = 1) (x : R) : f (x + 1) + 1 = f x :=
+ by have h1 := h x 1; rwa [good_map_one h, mul_zero, h1, mul_one, add_comm, h0] at h1
 
-
-
-/-- Final solution -/
-theorem final_solution_general (f : F → F) : fn_eq f ↔ f = 0 ∨ (f = λ x, x - 1) ∨ f = λ x, 1 - x :=
+private lemma good_map_eq_zero_iff (h0 : f 0 = 1) (c : R) : f c = 0 ↔ c = 1 :=
 begin
-  split,
-  { intros feq,
-    cases eq_or_ne f 0 with h h,
-    left; exact h,
-    right,
-    have h0 := lem1_3 feq h,
-    rw sq_eq_one_iff at h0,
-    cases h0 with h0 h0,
-    right; exact thm3_3 feq h0,
-    left,
-    rw [eq_neg_iff_eq_neg, eq_comm, ← pi.neg_apply f 0] at h0,
-    have h1 := feq_neg feq,
-    replace h1 := thm3_3 h1 h0,
-    rw [eq_comm, eq_neg_iff_eq_neg] at h1,
-    rw h1; funext x; simp only [pi.neg_apply, neg_sub, sub_left_inj] },
-  suffices : fn_eq (λ x, x - (1 : F)),
-  { rintros (rfl | rfl | rfl),
-    intros x y; simp only [pi.zero_apply, add_zero],
-    exact this,
-    replace this := feq_neg this,
-    conv at this { congr, rw pi.neg_def, funext, rw neg_sub },
-    exact this },
-  { intros x y; simp only [],
-    rw [sub_one_mul, mul_sub_one, sub_sub, sub_add_cancel, sub_sub, sub_add_sub_cancel] }
+  symmetry; refine ⟨_, good_map_eq_zero h _⟩,
+  rintros rfl; exact good_map_one h,
+  rintros rfl; exfalso; exact zero_ne_one h0
+end
+
+end division_ring
+
+end basic_results
+
+
+
+
+
+
+
+/-- Final solution, case 1: `char(R) ≠ 2` -/
+theorem final_solution_case1 {R : Type*} [division_ring R] (Rchar : ring_char R ≠ 2) :
+  ∀ f : R → R, good f ↔ (f = 0 ∨ (f = λ x, 1 - x) ∨ (f = λ x, x - 1)) :=
+begin
+  ---- Reduce just to proving that if `f` is good and `f(0) = 1`, then `f` is injective.
+  suffices : ∀ f : R → R, good f → f 0 = 1 → f = λ x, 1 - x,
+  { refine λ f, ⟨λ h, _, λ h, _⟩,
+    rw or_iff_not_imp_left; intros h0,
+    replace h0 := good_map_zero_sq h h0,
+    rw sq_eq_one_iff at h0; cases h0 with h0 h0,
+    left; exact this f h h0,
+    right; rw ← neg_inj; convert this (-f) (good_neg h) _,
+    simp only [pi.neg_def, neg_sub],
+    rw [pi.neg_apply, h0, neg_neg],
+    rcases h with rfl | rfl | rfl,
+    exact good_zero,
+    exact good_one_sub_self,
+    convert good_neg good_one_sub_self,
+    simp only [pi.neg_def, neg_sub] },
+  intros f h h0; refine good_map_eq_one_sub_self_of_inj h h0 _,
+
+  ---- Reduce injectivity to: `∀ c, f(c) = f(-c) → c = 0`
+  have X := good_shift h h0,
+  have h1 : ∀ t : R, f (f (-1) * f t) + f t + 1 = f (-t) :=
+    λ t, by rw [← neg_one_mul t, ← h (-1), add_assoc, ← X (-1 + t), neg_add_cancel_comm],
+  suffices h2 : ∀ c : R, f c = f (-c) → c = 0,
+  { intros a b h3,
+    rw ← sub_eq_zero; apply h2,
+    replace h2 : ∀ {x y : R}, f x = f y → f (-x) = f (-y) := λ x y hxy, by rw [← h1, hxy, h1],
+    replace h1 : f (a * b) = f (b * a) := by rw [← h, ← h b a, h3, add_comm a],
+    replace h0 := h a (-b),
+    rwa [h3, ← h2 h3, mul_neg, h2 h1, ← mul_neg, ← h b, add_right_inj,
+         ← sub_eq_add_neg, ← sub_eq_add_neg, ← neg_sub a] at h0 },
+  
+  ---- Prove `∀ c, f(c) = f(-c) → c = 0`
+  intros c h2,
+  rw ← h1 at h2,
+  replace h1 := good_map_eq_zero_iff h h0,
+  rwa [add_right_comm, self_eq_add_left, ← sub_add_cancel (_ * f c) 1, X, h1, sub_eq_iff_eq_add,
+       ← X, neg_add_self, h0, mul_right_eq_self₀, ← bit0, or_iff_left (ring.two_ne_zero Rchar),
+       ← X, add_left_eq_self, h1, add_left_eq_self] at h2
+end
+
+/-- Final solution, case 2: `F` is a field, `char(F) = 2` -/
+theorem final_solution_case2 {F : Type*} [field F] [char_p F 2] :
+  ∀ f : F → F, good f ↔ f = 0 ∨ f = λ x, x + 1 :=
+begin
+  ---- Again, reduce just to proving that if `f` is good and `f(0) = 1`, then `f` is injective.
+  suffices : ∀ f : F → F, good f → f 0 = 1 → f = λ x, 1 - x,
+  { intros f,
+    conv_rhs { congr, skip, congr, skip, funext, rw [add_comm, ← char_two.sub_eq_add] },
+    refine ⟨λ h, _, λ h, _⟩,
+    rw or_iff_not_imp_left; intros h0,
+    replace h0 := good_map_zero_sq h h0,
+    rw [sq_eq_one_iff, char_two.neg_eq, or_self] at h0,
+    exact this f h h0,
+    rcases h with rfl | rfl,
+    exacts [good_zero, good_one_sub_self] },
+  intros f h h0; refine good_map_eq_one_sub_self_of_inj h h0 (λ a b h1, _),
+
+  ---- First, remove the case `a = 0` and `b = 0`
+  have X := good_shift h h0,
+  have X0 := good_map_eq_zero_iff h h0,
+  rw [← X, ← X b, add_left_inj] at h1,
+  rcases eq_or_ne a 0 with rfl | ha,
+  rwa [zero_add, good_map_one h, eq_comm, X0, add_left_eq_self, eq_comm] at h1,
+  rcases eq_or_ne b 0 with rfl | hb,
+  rwa [zero_add, good_map_one h, X0, add_left_eq_self] at h1,
+
+  ---- Reduce to `f(x + y) = f(xy + 1)`, where `x = a + b + 1` and `y = a⁻¹ + b⁻¹ + 1`
+  let x := a + b + 1; let y := a⁻¹ + b⁻¹ + 1,
+  suffices : f (x + y) + 1 = f (x * y),
+  { replace h := h x y,
+    rw [← this, add_comm, add_right_inj, ← X, add_left_eq_self,
+        X0, add_left_eq_self, mul_eq_zero, X0, X0] at h,
+    cases h with h h; rw [add_left_eq_self, add_eq_zero_iff_eq_neg, char_two.neg_eq] at h,
+    exacts [h, inv_inj.mp h] },
+  rw [← X (x * y), add_left_inj],
+  dsimp only [x, y]; clear x y,
+  
+  ---- A general lemma, applied on the pair `(a, b⁻¹)` and `(b, a⁻¹)`
+  replace X : ∀ c d : F, c ≠ 0 → d ≠ 0 → f (c + 1) = f (d + 1) →
+    f (c + d⁻¹ + 1) = f (c * d⁻¹ + c + d⁻¹) :=
+  begin
+    intros c d hc hd hcd,
+    have hcd0 := h (c + 1) (d⁻¹ + 1),
+    rwa [hcd, good_special_equality h (mul_inv_cancel hd), zero_add, ← add_left_inj (1 : F),
+         add_add_add_comm, ← add_assoc, add_one_mul, mul_add_one, ← add_assoc, X, X] at hcd0
+  end,
+  replace X0 := X a b ha hb h1,
+  replace X := X b a hb ha h1.symm,
+  clear h0 h1,
+  
+  ---- Reduce to two identities, then prove them
+  rw [add_add_add_comm, add_comm a⁻¹, add_add_add_comm a, add_add_add_comm,
+      ← add_right_inj (f (f (a + b⁻¹ + 1) * f (b + a⁻¹ + 1))), h, eq_comm, X0, X],
+  clear X0 X; convert h (a * b⁻¹ + a + b⁻¹) (b * a⁻¹ + b + a⁻¹) using 2,
+  { apply congr_arg; clear h f,
+    rw [add_one_mul, add_assoc, add_assoc (b⁻¹ + a⁻¹), char_two.add_self_eq_zero,
+        add_zero, add_add_add_comm, add_left_inj, add_add_add_comm, mul_add_one,
+        add_left_inj, add_mul, mul_add, mul_add, mul_inv_cancel ha, mul_inv_cancel hb,
+        add_comm (1 : F), add_add_add_comm, char_two.add_self_eq_zero, add_zero] },
+  { rw [← mul_left_inj' ha, mul_assoc, mul_assoc, ← mul_right_inj' hb, ← mul_assoc,
+        ← mul_assoc b, mul_comm, mul_comm b, mul_comm (b * _ + _ + _) a],
+    clear h f; revert a b ha hb,
+    suffices : ∀ {a b : F}, a ≠ 0 → b ≠ 0 → (b + a⁻¹ + 1) * a = b * (a * b⁻¹ + a + b⁻¹),
+      intros a b ha hb; rw [this ha hb, this hb ha],
+    intros a b ha hb,
+    rw [add_right_comm, add_mul, inv_mul_cancel ha, mul_add, ← mul_add_one,
+        mul_left_comm, mul_add_one, mul_inv_cancel hb, add_comm b, mul_comm] }
 end
 
 end IMO2017A6
