@@ -20,7 +20,7 @@
 
 Let $F$ be a totally ordered field.
 Define the sequence $(a_n)_{n \geq 0}$ in $F$ recursively by $a_0 = -1$ and, for all $n \geq 1$,
-\[ \sum_{k = 0}^n \frac{a_k}{n - k + 1} = 0. \tag{*}\label{eq0} \]
+\[ \sum_{k = 0}^n \frac{a_k}{n - k + 1} = 0. \tag{*}\label{2006a2-eq0} \]
 Prove that $a_n > 0$ for each $n \geq 1$.
 
 
@@ -33,13 +33,13 @@ The following solution is just a rewriting of the official solution.
 The solution goes by strong induction.
 
 \textit{\underline{Base case.}}
-For the case $n = 1$,~\eqref{eq0} implies $a_1 = \frac{1}{2} > 0$.
+For the case $n = 1$,~\eqref{2006a2-eq0} implies $a_1 = \frac{1}{2} > 0$.
 
 \textit{\underline{Induction step.}}
 Fix some $n > 1$, and suppose that $a_k > 0$ for every $0 < k \leq n$.
-Then,~\eqref{eq0} yields
+Then,~\eqref{2006a2-eq0} yields
 \begin{align*}
-0
+    0
     &= (n + 2) \sum_{k = 0}^{n + 1} \frac{a_k}{n - k + 2} - (n + 1) \sum_{k = 0}^n \frac{a_k}{n - k + 1} \\
     &= (n + 2) a_{n + 1} + \sum_{k = 0}^n a_k \left(\frac{n + 2}{n - k + 2} - \frac{n + 1}{n - k + 1}\right) \\
     &= (n + 2) a_{n + 1} - \sum_{k = 0}^n a_k \frac{k}{(n - k + 2)(n - k + 1)} \\
