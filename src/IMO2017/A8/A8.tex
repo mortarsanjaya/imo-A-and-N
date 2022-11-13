@@ -1,0 +1,106 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\R}{\mathbb{R}}
+
+\newtheorem*{claim}{Claim}
+
+\title{IMO 2017 A8}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $G$ be an abelian group (presented additively) with a total order $<$.
+We say that a function $f : G \to G$ is \emph{good} if for any $x, y \in G$ such that $f(x) < f(y)$, we have $f(x) \leq x + y \leq f(y)$.
+Prove that:
+\begin{enumerate}
+    \item if $<$ is a dense order, then any good function is non-decreasing,
+    \item if $<$ is not a dense order, then there exists a good function that is not non-decreasing.
+\end{enumerate}
+
+
+\subsection*{Solution}
+
+\subsubsection*{Part 1}
+
+Suppose that $<$ is dense, and let $f$ be a good function.
+Suppose that there exists $x, y \in G$ such that $x < y$ such that $f(x) > f(y)$.
+we get some information on $f(z)$ for each $z \in G$, except at $f(y) - y$ and $f(x) - x$.
+However, the most important information is when $f(y) - y < z < f(x) - x$.
+
+\begin{claim}
+Let $x, y \in G$ such that $x < y$ and $f(x) > f(y)$.
+Let $z \in G$, and suppose that $f(y) - y < z < f(x) - x$.
+Then $f(z) \in \{f(x), f(y)\}$.
+\end{claim}
+\begin{proof}
+If $f(z) < f(y)$, then $y + z \leq f(y)$, so $z \leq f(y) - y$.
+If $f(z) > f(x)$, then $x + z \geq f(x)$, so $z \geq f(x) - x$.
+If $f(y) < f(z) < f(x)$, then $y + z \leq f(z) \leq x + z$, so $y \leq x$.
+All the three cases contradict the lemma's assumption.
+\end{proof}
+
+For convenience, set $c = f(x)$ and $d = f(y)$.
+Now, since $<$ is dense, there exists $z \in G$ such that $x < z < y$.
+Since $f$ is good, we have $d \leq x + y \leq c$, which implies $d - y \leq x < z < y \leq c - x$.
+By the above claim, we have either $f(z) = c$ or $f(z) = d$.
+Note that the two cases are similar.
+
+First, suppose that $f(z) = c$.
+Pick some $w \in G$ such that $x < w < z$.
+Then we have $d - y < c - z < c - w < c - x$.
+By the above claim, we have $f(c - w) \in \{c, d\}$.
+If $f(c - w) = c > d = f(y)$, since $f$ is good, we get $c - w + y \leq c \implies y \leq w$, a contradiction.
+If $f(c - w) = d < c = f(z)$, then instead we get $c - w + z \leq c \implies z \leq w$, a contradiction as well.
+
+Now, suppose that $f(z) = d$.
+Pick some $w \in G$ such that $z < w < y$.
+Then we have $d - y < d - w < d - z < c - x$.
+By the above claim, $f(d - w) \in \{c, d\}$.
+If $f(d - w) = d < c = f(x)$, since $f$ is good, we get $d - w + x \geq d \implies x \geq w$, a contradiction.
+If $f(d - w) = c > d = f(z)$, then instead we get $d - w + z \geq d \implies z \geq w$, a contradiction as well.
+All cases yield a contradiction, as desired.
+
+
+\subsubsection*{Part 2}
+
+Since $<$ is not a dense order on the group $G$, there exists $a, b \in G$ such that $a < b$ and there exists no $x \in G$ for which $a < x < b$.
+Set $f(x) = 2x$ if $x \notin \{a, b\}$, $f(a) = 2b$, and $f(b) = 2a$.
+The claimed good function is $f$.
+Since $a < b$ and $2b = f(b) < f(a) = 2a$, it suffices to show that $f$ is indeed good.
+This can be done by direct bashing on 9 cases.
+
+
+
+\subsection*{Extra notes}
+
+The condition on $f : \R \to \R$ in the original version is that $(f(x) + y)(f(y) + x) \geq 0$ implies $f(x) + y = f(y) + x$.
+After substituting $f(x) = x - g(x)$, this is equivalent to $(x + y - g(x))(x + y - g(y)) > 0$ implying $g(x) = g(y)$.
+If $g(x) < g(y)$, then $(x + y - g(x))(x + y - g(y)) \leq 0$, which necessarily implies $g(x) \leq x + y \leq g(y)$.
+The statement to be proved becomes $x < y \implies g(x) \leq g(y)$, which just says that $g$ is non-decreasing.
+Thus, the original version reduces to our version of A8.
+
+
+
+\subsection*{Implementation details}
+
+In addition to part 1 and part 2, we also combine them in an iff theorem.
+That is, we implement a theorem that proves that $<$ is a dense order iff every good function (on $G$) is monotone.
+We also impolement the original version in a more general setting of a ring with dense total order.
+In particular, the same result holds in any totally ordered field.
+
+
+
+\end{document}
