@@ -15,9 +15,9 @@ begin
   have h : ¬injective f := not_injective_infinite_finite f,
   simp only [injective, not_forall] at h,
   rcases h with ⟨a, b, h, h0⟩,
-  refine ⟨a, b, h0, (λ n h1, _)⟩,
+  refine ⟨a, b, h0, λ n h1, _⟩,
   replace h := congr_fun h ⟨n, h1⟩,
-  dsimp only [f] at h,
+  dsimp only [f] at h; clear f,
   rw [fin.coe_mk, zmod.nat_coe_eq_nat_coe_iff'] at h,
   cases eq_or_ne (a + n) 0 with h2 h2,
   rw [h2, zero_mul, nat.arithmetic_function.map_zero]; exact even_zero,
@@ -26,39 +26,46 @@ begin
   rw [card_factors_mul h2 h3, nat.even_add, nat.even_iff, nat.even_iff, h]
 end
 
-private lemma lem1 {u v : ℕ} (hu : 0 < u) (hv : 0 < v) :
-  even (card_factors (u * v)) ↔ (even (card_factors u) ↔ even (card_factors v)) :=
-  by rw [card_factors_mul (ne_of_gt hu) (ne_of_gt hv), nat.even_add]
+
 
 /-- Final solution, part 2 -/
-theorem final_solution_part2 {a b : ℕ} (h : ∀ k : ℕ, even (card_factors ((a + k) * (b + k)))) :
-  a = b :=
+theorem final_solution_part2 :
+  ∀ {a b : ℕ}, (∀ k : ℕ, even (card_factors ((a + k) * (b + k)))) → a = b :=
 begin
-  wlog h0 : a ≤ b := le_total a b using [a b, b a],
-  work_on_goal 2 { rw this (λ k, by rw mul_comm; exact h k) },
+  ---- Use suffices since WLOG seems to be a bit slow
+  suffices : ∀ {a b : ℕ}, (∀ k : ℕ, even (card_factors ((a + k) * (b + k)))) → a ≤ b → a = b,
+  { intros a b h,
+    cases le_total a b with h0 h0,
+    exact this h h0,
+    refine (this (λ k, _) h0).symm,
+    rw mul_comm; exact h k },
+  intros a b h h0,
   rw le_iff_exists_add at h0; rcases h0 with ⟨c, rfl⟩,
-  by_contra h0,
-  rw [self_eq_add_right, ← ne.def, ← zero_lt_iff] at h0,
-  replace h : ∀ k : ℕ, a ≤ k → (even (card_factors k) ↔ even (card_factors a)) :=
-  begin
-    suffices : ∀ k : ℕ, a ≤ k → (even (card_factors k) ↔ even (card_factors (k + 1))),
-    { refine (λ k, nat.le_induction (by refl) _ k),
-      intros n h1 h2; rw [← this n h1, h2] },
-    intros k h1,
-    rcases k.eq_zero_or_pos with rfl | h2,
-    rw [nat.arithmetic_function.map_zero, zero_add, card_factors_one],
-    replace h1 : a ≤ k * c := le_trans h1 ((le_mul_iff_one_le_right h2).mpr h0),
-    rw le_iff_exists_add at h1; cases h1 with m h1,
-    replace h := h m,
-    rw [add_right_comm, ← h1, ← add_one_mul, mul_mul_mul_comm,
-        lem1 (mul_pos h2 k.succ_pos) (mul_pos h0 h0), lem1 h2 k.succ_pos] at h,
-    rw [h, card_factors_mul (ne_of_gt h0) (ne_of_gt h0)]; exact even_add_self _
-  end,
-  rcases a.exists_infinite_primes with ⟨p, h1, h2⟩,
-  replace h0 := h p h1,
-  rw [card_factors_apply_prime h2, ← h (p ^ 2), card_factors_apply_prime_pow h2] at h0,
-  simp only [false_iff, not_true, even_two, nat.not_even_one] at h0; exact h0,
-  rw sq; exact le_trans h1 (nat.le_mul_self p)
+  by_contra h0; rw [self_eq_add_right, ← ne.def, ← zero_lt_iff] at h0,
+
+  ---- Reduce to `Ω(k) ≡ Ω(k + 1) (mod 2)` for all `k ≥ a`
+  suffices : ∀ k : ℕ, a ≤ k → (even (card_factors k) ↔ even (card_factors a)),
+  { rcases a.exists_infinite_primes with ⟨p, h1, h2⟩,
+    replace h0 := this p h1,
+    rw [card_factors_apply_prime h2, ← this (p ^ 2), card_factors_apply_prime_pow h2] at h0,
+    simp only [false_iff, not_true, even_two, nat.not_even_one] at h0; exact h0,
+    rw sq; exact le_trans h1 (nat.le_mul_self p) },
+  suffices : ∀ k : ℕ, a ≤ k → (even (card_factors k) ↔ even (card_factors (k + 1))),
+  { refine (λ k, nat.le_induction (by refl) _ k),
+    intros n h1 h2; rw [← this n h1, h2] },
+
+  ---- Finishing
+  intros k h1,
+  rcases k.eq_zero_or_pos with rfl | h2,
+  rw [nat.arithmetic_function.map_zero, zero_add, card_factors_one],
+  replace h1 : a ≤ k * c := le_trans h1 ((le_mul_iff_one_le_right h2).mpr h0),
+  rw le_iff_exists_add at h1; cases h1 with m h1,
+  replace h := h m,
+  rw zero_lt_iff at h0 h2,
+  rw [add_right_comm, ← h1, ← add_one_mul, mul_mul_mul_comm, card_factors_mul,
+      nat.even_add, card_factors_mul h2 k.succ_ne_zero, nat.even_add] at h,
+  rw [h, card_factors_mul h0 h0, nat.even_add],
+  exacts [mul_ne_zero h2 k.succ_ne_zero, mul_ne_zero h0 h0]
 end
 
 end IMO2008N2
