@@ -1,4 +1,4 @@
-import algebra.char_p.two tactic.field_simp
+import algebra.char_p.two
 
 /-! # IMO 2017 A6 (P2), Generalized Version -/
 
