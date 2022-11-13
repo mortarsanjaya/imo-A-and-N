@@ -1,0 +1,64 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\Z}{\mathbb{Z}}
+
+\title{IMO 2015 N1}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $f : \Z \to \Z$ be the function defined by $f(n) = n \lfloor n/2 \rfloor$ for all integers.
+Find all integers $M$ such that $f^k(M)$ is even for some $k \geq 0$.
+
+
+
+\subsection*{Answer}
+
+Such $k$ exists if and only if $M \neq 3$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{http://www.imo-official.org/problems/IMO2015SL.pdf}
+
+The following solution is a rewrite of Solution 2 of the official solution.
+We prove the contrapositive; $f^k(M)$ is odd for all $k \geq 0$ if and only if $M = 3$.
+
+Since $f(3) = 3$, the right-to-left direction is trivial.
+For the other direction, suppose that $f^k(M)$ is odd for all $k \geq 0$.
+It suffices to show that $f^k(M) \equiv 3 \pmod{2^x}$ for every $x > 0$ and $k \geq 0$.
+Proceed by induction on $x$, with the base case $x = 1$ being trivial.
+Now suppose that, given some $x \geq 1$, we have $f^k(M) \equiv 3 \pmod{2^x}$ for every $k \geq 0$.
+Fixing $k$, we want to prove that $f^k(M) \equiv 3 \pmod{2^{x + 1}}$.
+Consider that $f^k(M) \equiv f^{k + 1}(M) \equiv 3 \pmod{2^x}$.
+Since $x > 0$, we are done by the following claim.
+
+\begin{claim}
+Let $c \neq 0$ and $m$ be an integer.
+Suppose that $m \equiv 3 \pmod{2c}$ and $f(m) \equiv 3 \pmod{2c}$.
+Then $m \equiv 3 \pmod{4c}$.
+\end{claim}
+\begin{proof}
+Write $m = 2cd + 3$ for some integer $d$.
+Then $f(m) = (2cd + 3)(cd + 1) \equiv 3(cd + 1) \pmod{2c}$.
+So $f(m) \equiv 3 \pmod{2c}$ is equivalent to $2c \mid 3cd$.
+This yields that $d$ is even, implying $m = 2cd + 3 \equiv 3 \pmod{4c}$, as desired.
+\end{proof}
+
+
+
+\end{document}
