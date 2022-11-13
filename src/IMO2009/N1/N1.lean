@@ -43,8 +43,7 @@ begin
   conv at h0 { find (_ ∣ _) {
     rw [← zmod.int_coe_zmod_eq_zero_iff_dvd, int.cast_mul, int.cast_sub, int.cast_one] } },
   refine final_solution_general_ring hk _ h0 j i,
-  intros x; simp only [],
-  rw h
+  intros x; simp only []; rw h
 end
 
 /-- Final solution -/

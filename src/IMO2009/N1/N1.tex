@@ -1,0 +1,66 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\Z}{\mathbb{Z}}
+
+\newtheorem*{claim}{Claim}
+
+\title{IMO 2009 N1 (P1)}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $n$ be a positive integer and $k \geq 1$.
+Let $a_1, a_2, \ldots, a_{k + 1}$ be distinct integers in the set $\{1, 2, \ldots, n\}$ such that $n \mid a_i (a_{i + 1} - 1)$ for every $i \leq k$.
+Prove that $n \nmid a_{k + 1} (a_1 - 1)$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2009SL.pdf}
+
+We over-generalize Solution 3 of the official solution by the following claim.
+
+\begin{claim}
+Let $M$ be a commutative monoid, written multiplicatively.
+Let $k \geq 1$ and $a_1, a_2, \ldots, a_k$ be elements of $M$.
+Suppose that $a_i a_{i + 1} = a_i$ for each $i \leq k$, where we denote $a_{k + 1} = a_1$.
+Then $a_i = a_j$ for each $i, j \leq k$.
+\end{claim}
+\begin{proof}
+We extend $a_1, a_2, \ldots, a_k$ by defining $a_{k + i} = a_i$ for all $i \geq 1$.
+It is easy to see by induction on $m$ that $a_i a_{i + 1} a_{i + 2} \ldots a_{i + m} = a_i$ for all $m \geq 0$.
+Taking $m = k - 1$ gives us $a_1 a_2 \ldots a_k = a_i$ for all $i \leq k$.
+This shows that $a_i = a_j$ for each $i, j \leq k$.
+\end{proof}
+
+Now, suppose for the sake of contradiction that $n \mid a_{k + 1} (a_1 - 1)$.
+Using the claim with $M = \Z/n\Z$, we get that the $a_i$s are equal modulo $n$.
+But they belong in $\{1, 2, \ldots, n\}$, so they must be all equal.
+In particular, since $k + 1 \geq 2$, we have $a_1 = a_2$; a contradiction.
+
+
+
+\subsection*{Implementation details}
+
+Clearly, we will implement the above claim.
+We will also implement a version of the statement in general commutative rings and then in $\Z$ with divisibility.
+In commutative rings, we replace $a_i a_{i + 1} = a_i$ with $a_i (a_{i + 1} - 1) = 0$.
+In $\Z$, we replace $a_i (a_{i + 1} - 1) = 0$ with $n \mid a_i (a_{i + 1} - 1)$.
+
+
+
+\end{document}
