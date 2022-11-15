@@ -97,8 +97,8 @@ end basic_results
 
 
 
-/-- Final solution, case 1: `char(R) ≠ 2` -/
-theorem final_solution_case1 {R : Type*} [division_ring R] (Rchar : ring_char R ≠ 2) :
+/-- Final solution, `char(R) ≠ 2` -/
+theorem final_solution_char_ne_two {R : Type*} [division_ring R] (Rchar : ring_char R ≠ 2) :
   ∀ f : R → R, good f ↔ (f = 0 ∨ (f = λ x, 1 - x) ∨ (f = λ x, x - 1)) :=
 begin
   ---- Reduce just to proving that if `f` is good and `f(0) = 1`, then `f` is injective.
@@ -140,8 +140,10 @@ begin
        ← X, add_left_eq_self, h1, add_left_eq_self] at h2
 end
 
-/-- Final solution, case 2: `F` is a field, `char(F) = 2` -/
-theorem final_solution_case2 {F : Type*} [field F] [char_p F 2] :
+
+
+/-- Final solution, `F` is a field, `char(F) = 2` -/
+theorem final_solution_field_char_two {F : Type*} [field F] [char_p F 2] :
   ∀ f : F → F, good f ↔ f = 0 ∨ f = λ x, x + 1 :=
 begin
   ---- Again, reduce just to proving that if `f` is good and `f(0) = 1`, then `f` is injective.
@@ -207,6 +209,21 @@ begin
     intros a b ha hb,
     rw [add_right_comm, add_mul, inv_mul_cancel ha, mul_add, ← mul_add_one,
         mul_left_comm, mul_add_one, mul_inv_cancel hb, add_comm b, mul_comm] }
+end
+
+
+
+/-- Final solution, `F` is a field -/
+theorem final_solution_field {F : Type*} [field F] :
+  ∀ f : F → F, good f ↔ (f = 0 ∨ (f = λ x, 1 - x) ∨ (f = λ x, x - 1)) :=
+begin
+  cases ne_or_eq (ring_char F) 2 with h h,
+  exact final_solution_char_ne_two h,
+  haveI : char_p F 2 := ring_char.of_eq h,
+  intros f; convert final_solution_field_char_two f,
+  simp only [char_two.sub_eq_add],
+  rw [eq_iff_iff, or_iff_right_iff_imp],
+  rintros rfl; funext x; exact add_comm 1 x
 end
 
 end IMO2017A6
