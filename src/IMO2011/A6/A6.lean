@@ -5,47 +5,29 @@ import algebra.order.field tactic.linarith
 namespace IMOSL
 namespace IMO2011A6
 
-variables {R : Type*} [linear_ordered_comm_ring R]
-
-def fn_ineq (f : R → R) := ∀ x y : R, f (x + y) ≤ y * f x + f (f x)
-
-
-
-variables {f : R → R} (fineq : fn_ineq f)
-include fineq
-
-private lemma lem1 (x : R) : x * f x ≤ 0 :=
-begin
-  revert x; suffices : ∀ t x : R, f t ≤ (t - x) * f x + f (f x),
-    intros x; linarith [this (f (2 * f x)) x, this (f x) (2 * f x)],
-  intros t x,
-  replace fineq := fineq x (t - x),
-  rwa add_sub_cancel'_right at fineq
-end
-
-private lemma lem2 (x : R) : f x ≤ 0 :=
-begin
-  have h := fineq x 0,
-  rw [add_zero, zero_mul, zero_add] at h,
-  rw ← not_lt; intros h0,
-  refine lt_irrefl 0 (lt_of_lt_of_le h0 (le_trans h _)),
-  exact nonpos_of_mul_nonpos_right (lem1 fineq (f x)) h0
-end
-
-
-
 /-- Final solution -/
-theorem final_solution (x : R) (h : x ≤ 0) : f x = 0 :=
+theorem final_solution {R : Type*} [linear_ordered_comm_ring R]
+  {f : R → R} (h : ∀ x y : R, f (x + y) ≤ y * f x + f (f x)) :
+  ∀ x : R, x ≤ 0 → f x = 0 :=
 begin
-  have h0 : ∀ y : R, y < 0 → f y = 0 :=
-    λ y h, le_antisymm (lem2 fineq y) (nonneg_of_mul_nonpos_right (lem1 fineq y) h),
-  rw le_iff_lt_or_eq at h,
-  rcases h with h | rfl,
+  ---- A sequence of results
+  have h0 : ∀ t x : R, f (f t) ≤ (f t - x) * f x + f (f x) := λ t x,
+    by replace h := h x (f t - x); rwa add_sub_cancel'_right at h,
+  replace h0 : ∀ x : R, x * f x ≤ 0 := λ x,
+    by linarith [h0 (2 * f x) x, h0 x (2 * f x)],
+  have h1 : ∀ x : R, f x ≤ f (f x) := λ x,
+    by replace h := h x 0; rwa [add_zero, zero_mul, zero_add] at h,
+  have h2 : ∀ x : R, f x ≤ 0 := λ x,
+    by contrapose! h1; exact ⟨x, lt_of_le_of_lt (nonpos_of_mul_nonpos_right (h0 (f x)) h1) h1⟩,
+  replace h0 : ∀ x : R, x < 0 → f x = 0 := λ x hx,
+    le_antisymm (h2 x) (nonneg_of_mul_nonpos_right (h0 x) hx),
+
+  ---- Finishing
+  intros x h,
+  rw le_iff_lt_or_eq at h; rcases h with h | rfl,
   exact h0 x h,
-  cases exists_lt (0 : R) with x h,
-  have h1 := fineq x 0,
-  rw [add_zero, h0 x h, mul_zero, zero_add] at h1,
-  exact le_antisymm (lem2 fineq 0) h1
+  refine le_antisymm (h2 0) _,
+  rw ← h0 (-1) neg_one_lt_zero; exact h1 (-1)
 end
 
 end IMO2011A6
