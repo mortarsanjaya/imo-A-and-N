@@ -1,6 +1,4 @@
-import
-  algebra.big_operators.ring
-  analysis.mean_inequalities_pow
+import algebra.big_operators.ring algebra.big_operators.order tactic.ring
 
 /-! # IMO 2010 A2 -/
 
@@ -9,83 +7,94 @@ namespace IMO2010A2
 
 open finset
 
-def s1 {n : ℕ} (x : fin n → ℝ) := univ.sum x
-def s2 {n : ℕ} (x : fin n → ℝ) := univ.sum (λ i, x i ^ 2)
-def S {n : ℕ} (x : fin n → ℝ) := 4 * univ.sum (λ i, x i ^ 3) - univ.sum (λ i, x i ^ 4)
 
 
+section comm_ring_ineq
 
-namespace extra
+variables {R : Type*} [linear_ordered_comm_ring R]
 
-/-- QM-AM inequality -/
-theorem QM_AM {n : ℕ} (x : fin n → ℝ) : univ.sum x ^ 2 ≤ n * univ.sum (λ i, x i ^ 2) :=
+private theorem special_identity (x : R) :
+  4 * x ^ 3 - x ^ 4 = 6 * x ^ 2 - 4 * x + 1 - ((x - 1) ^ 2) ^ 2 :=
+  by ring
+
+variables {ι : Type*} [decidable_eq ι] 
+
+theorem sq_sum_le_sum_sq {s : finset ι} {x : ι → R} (h : ∀ i : ι, i ∈ s → 0 ≤ x i) :
+  s.sum (λ i, x i ^ 2) ≤ s.sum x ^ 2 :=
 begin
-  rcases nat.eq_zero_or_pos n with rfl | h,
-  rw [fin.sum_univ_zero, fin.sum_univ_zero, zero_pow two_pos, mul_zero],
-  have h1 : 0 < (n : ℝ) := by rwa nat.cast_pos,
-  have h2 : 0 < (n : ℝ)⁻¹ := by rwa inv_pos,
-  have h0 := real.pow_arith_mean_le_arith_mean_pow_of_even
-    univ (λ _, (n : ℝ)⁻¹) x (λ _ _, le_of_lt h2) _ even_two,
-  simp only [] at h0,
-  rwa [← mul_sum, ← mul_sum, mul_pow, sq, mul_assoc, mul_le_mul_left h2, inv_mul_le_iff h1] at h0,
-  simp only []; rw [sum_const, nsmul_eq_mul, card_univ, fintype.card_fin],
-  exact mul_inv_cancel (ne_of_gt (by rwa nat.cast_pos))
+  induction s using finset.induction with j s s_ih1 s_ih2,
+  rw [sum_empty, sum_empty, zero_pow two_pos],
+  rw [sum_insert s_ih1, sum_insert s_ih1],
+  replace h : 0 ≤ x j ∧ ∀ i : ι, i ∈ s → 0 ≤ x i :=
+    ⟨h j (mem_insert_self j s), λ i h0, h i (mem_insert_of_mem h0)⟩,
+  refine le_trans (add_le_add_left (s_ih2 h.2) _) _; clear s_ih1 s_ih2,
+  rw [add_sq', le_add_iff_nonneg_right],
+  exact mul_nonneg (mul_nonneg zero_le_two h.1) (sum_nonneg h.2)
 end
 
-theorem sq_sum_le_sum_sq {n : ℕ} (x : fin n → ℝ) (h : ∀ k : fin n, 0 ≤ x k) :
-  univ.sum (λ i, x i ^ 2) ≤ univ.sum x ^ 2 :=
+theorem QM_AM (s : finset ι) (x : ι → R) : s.sum x ^ 2 ≤ s.card • s.sum (λ i, x i ^ 2) :=
 begin
-  induction n with n n_ih,
-  rw [fin.sum_univ_zero, fin.sum_univ_zero, zero_pow two_pos],
-  rw [fin.sum_univ_cast_succ, fin.sum_univ_cast_succ, add_sq'],
-  refine le_trans (add_le_add_right (n_ih _ (λ k, _)) _) (le_add_of_nonneg_right _),
-  exacts [h _, mul_nonneg (mul_nonneg zero_le_two (sum_nonneg' (λ i, h _))) (h _)]
+  induction s using finset.induction with j s s_ih1 s_ih2,
+  rw [sum_empty, zero_pow two_pos, card_empty, zero_nsmul],
+  rw [sum_insert s_ih1, sum_insert s_ih1, card_insert_of_not_mem s_ih1, succ_nsmul,
+      add_sq, add_assoc, add_assoc, add_le_add_iff_left, nsmul_add, ← add_assoc,
+      ← sum_const, ← sum_add_distrib, mul_sum],
+  refine add_le_add (sum_le_sum (λ i junk, _)) s_ih2; clear s_ih1 s_ih2 junk,
+  rw mul_right_comm; exact two_mul_le_add_sq (x i) (x j)
 end
 
-end extra
+end comm_ring_ineq
 
 
 
-section results
+variables {F : Type*} [linear_ordered_field F]
 
-variables {n : ℕ} (x : fin n → ℝ)
-
-private def A := univ.sum (λ i, ((x i - 1) ^ 2) ^ 2)
-private def B := 6 * s2 x - 4 * s1 x + n
-private def C := s2 x - 2 * s1 x + n
-
-private lemma lem1 : S x = B x - A x :=
+/-- An intermediate result that is more convenient to manipulate around than the main result -/
+theorem final_solution_general' {ι : Type*} [decidable_eq ι] {s : finset ι} {a : ι → F}
+    {σ₁ σ₂ B C S : F} (hσ₁ : s.sum a = σ₁) (hσ₂ : s.sum (λ i, a i ^ 2) = σ₂)
+    (hB : 6 * σ₂ - 4 * σ₁ + s.card = B) (hC : (σ₂ - 2 * σ₁ + s.card) ^ 2 = C)
+    (hS : 4 * s.sum (λ i, a i ^ 3) - s.sum (λ i, a i ^ 4) = S) :
+  B - C ≤ S ∧ S ≤ B - C / s.card :=
 begin
-  dsimp only [S, s1, s2, A, B],
-  rw eq_sub_iff_add_eq,
-  have h : (λ i, 4 * x i ^ 3 - x i ^ 4 + ((x i - 1) ^ 2) ^ 2) = (λ i, 6 * x i ^ 2 - 4 * x i + 1) :=
-    by funext i; ring,
-  rw [mul_sum, ← sum_sub_distrib, ← sum_add_distrib, h, sum_add_distrib, sum_const, card_univ,
-      fintype.card_fin, sum_sub_distrib, ← mul_sum, ← mul_sum, nat.smul_one_eq_coe],
+  ---- Some setups
+  have X := λ (i : ι) (_ : i ∈ s), special_identity (a i),
+  rw [mul_sum, ← sum_sub_distrib, sum_congr rfl X] at hS; clear X,
+  rw [sum_sub_distrib, sum_add_distrib, sum_const, nsmul_one,
+      sum_sub_distrib, ← mul_sum, hσ₂, ← mul_sum, hσ₁, hB] at hS,
+  replace hC : s.sum (λ i, (a i - 1) ^ 2) ^ 2 = C :=
+  begin
+    conv_lhs {congr, congr, skip, funext, rw [sub_sq, one_pow, mul_one] },
+    rw [sum_add_distrib, sum_const, nsmul_one, sum_sub_distrib, hσ₂, ← mul_sum, hσ₁, hC]
+  end,
+  
+  ---- Now we are ready to finish proving both inequalities
+  subst hS; subst hC; split; rw sub_le_sub_iff_left,
+  exact sq_sum_le_sum_sq (λ i _, sq_nonneg (a i - 1)),
+  rcases s.eq_empty_or_nonempty with rfl | h,
+  rw [sum_empty, sum_empty, zero_pow two_pos, zero_div],
+  replace h : 0 < (s.card : F) := by rwa [nat.cast_pos, card_pos],
+  rw [div_le_iff' h, ← nsmul_eq_mul]; exact QM_AM s _
 end
 
-private lemma lem2 : univ.sum (λ i, ((x i - 1) ^ 2)) = C x :=
-begin
-  simp only [sub_sq, one_pow, mul_one, sum_add_distrib, sum_sub_distrib, s2, s1, C],
-  rw [sum_const, card_univ, fintype.card_fin, ← mul_sum, nat.smul_one_eq_coe]
-end
-
-private lemma lem3 (h : 0 < n) : B x - C x ^ 2 ≤ S x ∧ S x ≤ B x - C x ^ 2 / n :=
-begin
-  rw [lem1, sub_le_sub_iff_left, sub_le_sub_iff_left, ← lem2],
-  refine ⟨extra.sq_sum_le_sum_sq _ (λ n, sq_nonneg _), _⟩,
-  replace h : (0 : ℝ) < n := nat.cast_pos.mpr h,
-  rw [← mul_le_mul_left h, mul_div_cancel' _ (ne_of_gt h)],
-  exact extra.QM_AM (λ i, (x i - 1) ^ 2)
-end
-
-end results
-
-
+/-- Final solution, general version -/
+theorem final_solution_general {ι : Type*} [decidable_eq ι] {s : finset ι} {a : ι → F}
+    {σ₁ σ₂ : F} (h : s.sum a = σ₁) (h0 : s.sum (λ i, a i ^ 2) = σ₂) :
+  let B := 6 * σ₂ - 4 * σ₁ + s.card, C := (σ₂ - 2 * σ₁ + s.card) ^ 2,
+    S := 4 * s.sum (λ i, a i ^ 3) - s.sum (λ i, a i ^ 4) in
+  B - C ≤ S ∧ S ≤ B - C / s.card :=
+final_solution_general' h h0 rfl rfl rfl
 
 /-- Final solution -/
-theorem final_solution {x : fin 4 → ℝ} (h : s1 x = 6) (h0 : s2 x = 12) : 36 ≤ S x ∧ S x ≤ 48 :=
-  by convert lem3 x zero_lt_four; rw [B, C, h, h0]; norm_num
+theorem final_solution {a : fin 4 → F} (h : univ.sum a = 6) (h0 : univ.sum (λ i, a i ^ 2) = 12) :
+  let S := 4 * univ.sum (λ i, a i ^ 3) - univ.sum (λ i, a i ^ 4) in 36 ≤ S ∧ S ≤ 48 :=
+begin
+  intros S,
+  have h1 : (36 : F) = 52 - 16 := by norm_num,
+  have h2 : (48 : F) = 52 - 16 / (univ : finset (fin 4)).card := by norm_num,
+  have h3 : (52 : F) = 6 * 12 - 4 * 6 + (univ : finset (fin 4)).card := by norm_num,
+  have h4 : (16 : F) = (12 - 2 * 6 + (univ : finset (fin 4)).card) ^ 2 := by norm_num,
+  rw [h1, h2, h3, h4]; exact final_solution_general h h0
+end
 
 end IMO2010A2
 end IMOSL
