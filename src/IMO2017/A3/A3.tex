@@ -1,0 +1,57 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newtheorem*{claim}{Claim}
+
+\title{IMO 2017 A3}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $S$ be a finite set, and fix some $f : S \to S$.
+Suppose that, for any $g : S \to S$, $f \circ g \circ f = g \circ f \circ g$ implies $g = f$.
+Prove that $f^2(S) = f(S)$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{http://www.imo-official.org/problems/IMO2017SL.pdf}
+
+We will follow the official solution.
+We also generalize the result to any monoids, treating $S^S$ as a monoid under function composition.
+
+First, notice that it suffices to show that $f^m = f$ for some $m > 1$.
+Indeed, this means $f(S) \subseteq f^m(S) \subseteq f^2(S) \subseteq f(S)$.
+The reduced statement can now be solved under a more generalized setting as follows.
+
+\begin{claim}
+Let $M$ be a finite monoid and fix some $x \in M$.
+Suppose that, for any $y \in M$ such that $xyx = yxy$, we have $x = y$.
+Then $x^m = x$ for some $m > 1$.
+\end{claim}
+\begin{proof}
+Since $M$ is finite, there exists $k > n$ such that $x^k = x^n$.
+Write $k = n + t$, where $t > 0$, and take $y = x^{dt + 1}$ where $d > 0$ is large enough so that $dt + 3 \geq n$.
+For example, since $t > 0$, we can take $d = \max\{n, 1\}$.
+Then $xyx = x^{dt + 3}$ and $yxy = x^{2dt + 3}$.
+But since $dt + 3 \geq n$ and $x^{n + t} = x^n$, we have $x^{2dt + 3} = x^{dt + 3}$.
+So, $xyx = yxy$, and thus $x^{dt + 1} = y = x$.
+We can then take $m = dt + 1$, which works since $d > 0$.
+\end{proof}
+
+
+
+\end{document}
