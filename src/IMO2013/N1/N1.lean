@@ -1,4 +1,4 @@
-import data.pnat.basic data.int.basic algebra.group_power.basic
+import data.pnat.basic
 
 /-! # IMO 2013 N1 -/
 
@@ -6,30 +6,29 @@ namespace IMOSL
 namespace IMO2013N1
 
 /-- Final solution -/
-theorem final_solution (f : ℕ+ → ℕ+) : (∀ m n : ℕ+, m ^ 2 + f n ∣ m * f m + n) ↔ f = id :=
+theorem final_solution (f : ℕ+ → ℕ+) : (∀ m n : ℕ+, m ^ 2 + f n ∣ m * f m + n) ↔ f = (λ n, n) :=
 begin
+  simp only [pow_succ, pow_zero, mul_one],
   symmetry; split,
-  rintros rfl m n,
-  rw [id.def, id.def, sq],
-  intros h; funext n,
-  rw id.def; apply le_antisymm,
+  rintros rfl m n; exact dvd_refl _,
+  intros h; funext n; apply le_antisymm,
+
+  ---- `f(n) ≤ n`
   { replace h := h (f n) n,
-    rw [sq, ← mul_add_one] at h,
+    rw ← mul_add_one at h,
     replace h := dvd_trans (dvd_mul_right _ _) h,
     rw [pnat.dvd_iff, pnat.add_coe, pnat.mul_coe, nat.dvd_add_right ⟨_, rfl⟩, ← pnat.dvd_iff] at h,
     exact pnat.le_of_dvd h },
-  { replace h := pnat.le_of_dvd (h n n),
-    have h0 : 1 ≤ n := n.one_le,
-    rw [le_iff_eq_or_lt, eq_comm] at h0,
-    rcases h0 with rfl | h0,
+
+  ---- `f(n) ≥ n`
+  { rcases eq_or_ne n 1 with rfl | h0,
     exact (f 1).one_le,
-    rw [← pnat.coe_le_coe, ← int.coe_nat_le_coe_nat_iff] at h ⊢,
-    simp only [sq, pnat.add_coe, pnat.mul_coe, int.coe_nat_add, int.coe_nat_mul] at h,
-    generalizes [hx : ((f n : ℕ) : ℤ) = x, hy : ((n : ℕ) : ℤ) = y],
-    rw [← pnat.coe_lt_coe, ← int.coe_nat_lt_coe_nat_iff, ← hy, ← sub_pos] at h0,
-    rw [← hx, ← hy, ← sub_nonneg, add_sub_add_comm, ← mul_sub,
-        ← neg_sub x y, ← neg_one_mul, ← add_mul, ← sub_eq_add_neg] at h,
-    rwa [← sub_nonneg, ← mul_nonneg_iff_right_nonneg_of_pos h0] }
+    replace h := pnat.le_of_dvd (h n n),
+    generalize_hyp : f n = m at h ⊢; clear f,
+    replace h0 := pnat.exists_eq_succ_of_ne_one h0,
+    rcases h0 with ⟨k, rfl⟩,
+    rwa [add_one_mul, add_right_comm, add_le_add_iff_right,
+         add_one_mul, add_le_add_iff_right, mul_le_mul_iff_left] at h }
 end
 
 end IMO2013N1
