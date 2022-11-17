@@ -6,7 +6,6 @@ namespace IMOSL
 namespace IMO2009A7
 
 open function
-open_locale non_zero_divisors
 
 def good {R : Type*} [ring R] (f : R → R) :=
   ∀ x y : R, f (x * f (x + y)) = f (f x * y) + x ^ 2
