@@ -1,4 +1,4 @@
-import algebra.order.floor
+import algebra.order.archimedean
 
 /-! # IMO 2006 A1 -/
 
@@ -32,6 +32,8 @@ begin
 end
 
 
+
+section basic_results
 
 variables {R : Type*} [linear_ordered_ring R] [floor_ring R]
 
@@ -107,11 +109,61 @@ begin
   exact one_pos
 end
 
-private lemma f_floor_iterate_const {k : ℕ} (h : 1 < k) {r : R} (h0 : ∀ n : ℕ, ⌊(f^[n]) r⌋ = -k) :
-  (k + 1 : R) * r = -k ^ 2 :=
+private lemma f_floor_iterate_const [archimedean R]
+  {k : ℕ} (h : 1 < k) {r : R} (h0 : ∀ n : ℕ, ⌊(f^[n]) r⌋ = -k) : (k + 1 : R) * r = -k ^ 2 :=
 begin
-  sorry
+  ---- Setup
+  rw eq_neg_iff_add_eq_zero,
+  generalize h1 : (k + 1 : R) * r + k ^ 2 = c,
+
+  ---- For any `n : ℕ`, `(k + 1) (f^n(r) - r) = ((-k)^n - 1) c`
+  replace h1 : ∀ n : ℕ, (k + 1 : R) * ((f^[n]) r - r) = ((-k) ^ n - 1) * c :=
+  begin
+    intros n,
+    rw sub_one_mul; nth_rewrite 1 ← h1,
+    rw [eq_sub_iff_add_eq, mul_sub, ← add_assoc, sub_add_cancel],
+    induction n with n n_ih,
+    rw [iterate_zero, id.def, h1, pow_zero, one_mul],
+    rw [iterate_succ', comp_app, pow_succ _ n, mul_assoc, ← n_ih],
+    replace h0 := h0 n,
+    generalize_hyp : (f^[n]) r = x at h0 n_ih ⊢,
+    rw [f, int.fract, h0, int.cast_neg, int.cast_coe_nat, sub_neg_eq_add,
+        neg_mul, neg_mul, mul_neg, ← sub_eq_neg_add, ← neg_sub, neg_inj, mul_add,
+        ← sq, mul_add, add_sub_assoc, ← sub_one_mul, add_sub_cancel, mul_add,
+        add_left_inj, ← mul_assoc, ← mul_assoc, add_one_mul, mul_add_one]
+  end,
+
+  ---- For any `n : ℕ`, `|f^n(r) - r| < 1`
+  replace h0 : ∀ n : ℕ, |(f^[n]) r - r| < 1 :=
+  begin
+    intros n,
+    have h2 := h0 n,
+    replace h0 := h0 0,
+    rw [iterate_zero, id.def] at h0,
+    rw [int.floor_eq_iff, int.cast_neg, int.cast_coe_nat] at h0 h2,
+    rw [abs_sub_lt_iff, sub_lt_iff_lt_add, sub_lt_iff_lt_add, add_comm, add_comm (1 : R)],
+    exact ⟨lt_of_lt_of_le h2.2 (add_le_add_right h0.1 _),
+           lt_of_lt_of_le h0.2 (add_le_add_right h2.1 _)⟩
+  end,
+
+  ---- Final step
+  by_contra h2; rw [← ne.def, ← abs_pos] at h2,
+  replace h2 := archimedean.arch (k + 1 : R) h2,
+  cases h2 with n h2,
+  replace h1 := congr_arg has_abs.abs (h1 n),
+  revert h1; have h1 : 0 < (k : R) + 1 := add_pos_of_nonneg_of_pos k.cast_nonneg one_pos,
+  rw [abs_mul, abs_mul, abs_of_nonneg (le_of_lt h1)],
+  refine ne_of_lt (lt_of_lt_of_le ((mul_lt_mul_left h1).mpr (h0 n)) _),
+  rw mul_one; refine le_trans h2 _,
+  clear h0 h1 h2,
+  rw nsmul_eq_mul,
+  refine mul_le_mul_of_nonneg_right (le_trans _ (abs_sub_abs_le_abs_sub _ _)) (abs_nonneg c),
+  rw [abs_one, abs_pow, abs_neg, nat.abs_cast, le_sub_iff_add_le,
+      ← nat.cast_succ, ← nat.cast_pow, nat.cast_le, nat.succ_le_iff],
+  exact nat.lt_pow_self h n
 end
+
+end basic_results
 
 
 
@@ -120,7 +172,8 @@ end
 
 
 /-- Final solution, case `x ≥ 0` -/
-theorem final_solution_x_nonneg {x : R} (h : 0 ≤ x) : ∀ n : ℕ, ⌊x⌋ < n → (f^[n]) x = 0 :=
+theorem final_solution_x_nonneg {R : Type*} [linear_ordered_ring R] [floor_ring R]
+  {x : R} (h : 0 ≤ x) : ∀ n : ℕ, ⌊x⌋ < n → (f^[n]) x = 0 :=
 begin
   ---- Start with casting `⌊x⌋` to `K : ℕ`
   lift ⌊x⌋ to ℕ using by rwa [int.le_floor, int.cast_zero] with K h0,
@@ -157,7 +210,8 @@ end
 
 
 /-- Final solution, case `x ≤ 0` -/
-theorem final_solution_x_nonpos {x : R} (h : x ≤ 0) :
+theorem final_solution_x_nonpos {R : Type*} [linear_ordered_ring R] [floor_ring R] [archimedean R]
+  {x : R} (h : x ≤ 0) :
   (∃ N k : ℕ, (k + 1 : R) * (f^[N] x) = -k ^ 2) ∨ (∃ N : ℕ, -1 < (f^[N]) x ∧ (f^[N]) x < 0) :=
 begin
   ---- First obtain some `N` such that `(⌊f^n(x)⌋)_{n ≥ 0}` stabilizes
@@ -201,7 +255,8 @@ end
 
 
 /-- Final solution -/
-theorem final_solution (x : R) : ∃ N : ℕ, ∀ n : ℕ, N ≤ n → (f^[n + 2]) x = (f^[n]) x :=
+theorem final_solution {R : Type*} [linear_ordered_ring R] [floor_ring R] [archimedean R] (x : R) :
+  ∃ N : ℕ, ∀ n : ℕ, N ≤ n → (f^[n + 2]) x = (f^[n]) x :=
 begin
   cases le_total 0 x with h h,
 
