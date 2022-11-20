@@ -212,18 +212,22 @@ begin
     exact ⟨K + 1, λ n h1, by rw [h n h1, h (n + 2) (le_add_right h1)]⟩ },
   
   ---- Case 2: `x ≤ 0`
-  replace h := final_solution_x_nonpos h,
-  rcases h with ⟨N, k, h⟩ | ⟨N, h, h0⟩,
-  { replace h := f_special_value h; clear k,
-    suffices : ∀ {n : ℕ}, N ≤ n → (f^[n]) x = (f^[N]) x,
-      exact ⟨N, λ n h0, by rw [this h0, this (le_add_right h0)]⟩,
-    refine nat.le_induction (by refl) _,
-    rintros n - h0; rw [iterate_succ', comp_app, h0, h] },
-  { replace h := f_between_neg_one_and_zero h h0,
-    rcases h with ⟨-, h⟩; clear h0,
-    refine ⟨N, λ n h0, _⟩,
-    rw le_iff_exists_add at h0; rcases h0 with ⟨c, rfl⟩,
-    simp_rw [add_comm N, add_right_comm c N, iterate_add, comp_app, h] }
+  { replace h := final_solution_x_nonpos h,
+    rcases h with ⟨N, k, h⟩ | ⟨N, h, h0⟩,
+
+    -- Subcase 2.1: `(k + 1) f^N(x) = -k^2` for some `N k : ℕ`
+    { replace h := f_special_value h; clear k,
+      suffices : ∀ {n : ℕ}, N ≤ n → (f^[n]) x = (f^[N]) x,
+        exact ⟨N, λ n h0, by rw [this h0, this (le_add_right h0)]⟩,
+      refine nat.le_induction (by refl) _,
+      rintros n - h0; rw [iterate_succ', comp_app, h0, h] },
+
+    -- Subcase 2.2: `-1 < f^N(x) < 0` for some `N : ℕ`
+    { replace h := f_between_neg_one_and_zero h h0,
+      rcases h with ⟨-, h⟩; clear h0,
+      refine ⟨N, λ n h0, _⟩,
+      rw le_iff_exists_add at h0; rcases h0 with ⟨c, rfl⟩,
+      simp_rw [add_comm N, add_right_comm c N, iterate_add, comp_app, h] } }
 end
 
 end IMO2006A1
