@@ -95,7 +95,7 @@ begin
   -- Finishing
   rcases h1 with ⟨d, h2, h3⟩,
   replace hK := h d (K * K),
-  rw [add_comm d, h3, add_le_iff_nonpos_left, le_zero_iff] at hK,
+  rw [add_comm d, h3, add_le_iff_nonpos_left, nonpos_iff_eq_zero] at hK,
   revert hK; exact ne_of_gt (lt_of_lt_of_le K.succ_pos (le_trans h0 (good'_monotone h h2)))
 end
 
@@ -115,16 +115,11 @@ begin
   intros m n; dsimp only [],
   rw [add_add_add_comm, ← add_assoc m, add_assoc, add_assoc (m + n), add_le_add_iff_left],
   by_cases h0 : K ∣ n + 1,
-  { rw [if_pos h0, add_le_add_iff_left, add_assoc m, add_right_comm m],
-    simp only [nat.dvd_add_left h0, add_le_iff_nonpos_right, le_zero_iff],
-    refine if_neg (λ h1, _),
-    rw [nat.dvd_add_right h0, nat.dvd_one] at h1,
-    exact ne_of_gt h h1 },
+  { simp_rw [if_pos h0, add_assoc m, add_left_comm m, nat.dvd_add_right h0, ← add_assoc,
+             add_le_iff_nonpos_right, nonpos_iff_eq_zero, ite_eq_right_iff],
+    intros h1; exfalso; exact ne_of_gt h (nat.eq_one_of_dvd_one h1) },
   { rw [if_neg h0, zero_add, add_zero, if_neg h0, add_zero],
-    refine le_trans _ le_self_add,
-    by_cases h1 : K ∣ m + 1,
-    rw if_pos h1,
-    rw if_neg h1; exact zero_le_one }
+    exact le_trans (ite_le_sup 1 0 _) le_self_add }
 end
 
 
@@ -139,7 +134,7 @@ begin
   symmetry; refine ⟨λ h, ⟨λ _, 0, λ m n, _, h.symm⟩, λ h, _⟩,
   simp only [add_zero],
   rcases h with ⟨f, h, rfl⟩,
-  by_contra h0; rw [← ne.def, ← zero_lt_iff] at h0,
+  by_contra h0; rw [← ne.def, ← pos_iff_ne_zero] at h0,
   refine not_le_of_lt (lt_of_lt_of_le (lt_add_of_pos_left _ h0) (h 0 0)) _,
   rw ← nat.succ_le_iff at h0,
   exact good'_monotone h h0

@@ -1,4 +1,4 @@
-import algebra.order.ring algebra.order.smul
+import algebra.order.ring.defs algebra.order.smul
 
 /-! # IMO 2017 A8, Generalized Version -/
 

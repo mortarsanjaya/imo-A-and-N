@@ -1,4 +1,4 @@
-import algebra.order.field algebra.big_operators.intervals
+import algebra.order.field.basic algebra.big_operators.intervals
 
 /-! # IMO 2015 A1 -/
 

@@ -1,4 +1,4 @@
-import data.int.basic
+import data.int.basic data.pi.algebra data.int.order.basic algebra.ring.regular
 
 /-! # IMO 2019 A1 (P1) -/
 
@@ -23,7 +23,7 @@ begin
     λ n, by rw [mul_sub, ← mul_zero N, sub_eq_sub_iff_add_eq_add,
       add_comm, h0, zero_add, add_comm, ← h0, mul_one],
   replace h1 : ∀ n : ℤ, f (n + 1) - f n = f 1 - f 0 :=
-    λ n, by rw [← mul_right_inj' h, h1, ← h1 0, zero_add],
+    λ n, int.eq_of_mul_eq_mul_left h (by rw [h1, ← h1 0, zero_add]),
   replace h1 : ∃ q c : ℤ, f = λ n, q * n + c :=
   begin
     refine ⟨f 1 - f 0, f 0, funext (λ n, int.induction_on' n 0 _ _ _)⟩,

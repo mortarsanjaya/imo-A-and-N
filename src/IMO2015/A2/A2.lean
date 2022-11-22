@@ -1,4 +1,4 @@
-import data.int.basic
+import data.int.basic data.pi.algebra
 
 /-! # IMO 2015 A2 -/
 
@@ -78,7 +78,8 @@ begin
       rw [h, ← h (-1), pi.neg_apply, pi.one_apply, ← add_eq_zero_iff_eq_neg, h0] },
     { right; funext x,
       have h1 := fn_lem1 feq x,
-      rwa [h, h (x + 1), add_left_inj, mul_eq_mul_left_iff, or_iff_left h0] at h1 } },
+      rw [h, h (x + 1), add_left_inj] at h1,
+      exact int.eq_of_mul_eq_mul_left h0 h1 } },
   { rintros (rfl | rfl) x y; simp,
     rw [← add_sub_right_comm, sub_sub] }
 end

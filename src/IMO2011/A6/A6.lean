@@ -1,4 +1,4 @@
-import algebra.order.field tactic.linarith
+import algebra.order.field.basic tactic.linarith
 
 /-! # IMO 2011 A6 (P3) -/
 

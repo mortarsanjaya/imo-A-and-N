@@ -1,0 +1,140 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+
+\newtheorem{lemma}{Lemma}
+
+\title{IMO 2006 A1}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $R$ be an archimedean (totally ordered) ring.
+It is naturally equipped with a floor function $\lfloor \cdot \rfloor : R \to \Z$ such that, for any $r \in R$ and $n \in \Z$, $n \leq \lfloor r \rfloor$ if and only if $n \leq r$ in $R$.
+We denote $\{r\} = r - \lfloor r \rfloor$ for any $r \in R$.
+
+Define $f : R \to R$ by $f(r) = \lfloor r \rfloor \{r\}$.
+Prove that, for any $x \in R$, where exists $N \geq 0$ such that $f^{n + 2}(x) = f^n(x)$ for all $n \geq N$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2006SL.pdf}
+
+The solution we present is a rewriting of the official solution in a setting that works on rings, not just fields.
+We will also use several lemmas to represent the solution.
+Some of them are straightforward, and we will omit their proof.
+
+The first three lemmas allow us to solve the case $x \geq 0$.
+In fact, we can say something stronger: $f^{\lfloor x \rfloor + 1}(x) = 0$.
+This suffices, since clearly $f(0) = 0$.
+
+\begin{lemma}\label{2006a1-1}
+For any $r \in R$ with $r \geq 0$, $f(r) \geq 0$.
+\end{lemma}
+
+\begin{lemma}\label{2006a1-2}
+For any $r \in R$ with $0 \leq r < 1$, $f(r) = 0$.
+\end{lemma}
+
+\begin{lemma}\label{2006a1-3}
+For any $r \in R$ with $r \geq 1$, $\lfloor f(r) \rfloor < \lfloor r \rfloor$.
+\end{lemma}
+
+Now, suppose that $x \geq 0$, and let $N = \lfloor x \rfloor$.
+Due to Lemma~\ref{2006a1-2}, it suffices to show that $\lfloor f^N(x) \rfloor = 0$.
+More generally, we have by induction on $n$ that $0 \leq \lfloor f^n(x) \rfloor \leq N - n$ for any $n \in \N$ with $n \leq N$.
+The base case $n = 0$ is clear.
+For the induction step, suppose that this inequality holds for some $0 \leq n < N$.
+If $\lfloor f^n(x) \rfloor = 0$, then Lemma~\ref{2006a1-3} implies $f^{n + 1}(x) = 0$, which implies $0 \leq \lfloor f^{n + 1}(x) \rfloor \leq N - (n + 1)$.
+Otherwise, $\lfloor f^n(x) \rfloor \geq 1$, so Lemma~\ref{2006a1-1} and Lemma~\ref{2006a1-2} implies
+\[ 0 \leq \lfloor f^{n + 1}(x) \rfloor < \leq \lfloor f^{n}(x) \rfloor \leq N - n. \]
+And thus, $\lfloor f^{n + 1}(x) \rfloor \leq N - (n + 1)$.
+Induction step is complete.
+
+We now focus our attention to the case $x < 0$.
+Similar to the previous case, we can analyze the sequence $(\lfloor f^n(r) \rfloor)_{n \geq 0}$.
+However, we will not get a concrete bound on $N$.
+The main result for this case is Lemma~\ref{2006a1-8}.
+
+\begin{lemma}\label{2006a1-4}
+For any $r \in R$ with $r \leq 0$, $f(r) \leq 0$.
+\end{lemma}
+    
+\begin{lemma}\label{2006a1-5}
+For any $r \in R$ with $r \leq 0$, $\lfloor r \rfloor \leq \lfloor f(r) \rfloor$.
+\end{lemma}
+    
+\begin{lemma}\label{2006a1-6}
+For any $r \in R$ with $-1 < r < 0$, $f(r) = -1 - r$ and $f^2(r) = r$.
+\end{lemma}
+
+\begin{lemma}\label{2006a1-7}
+Fix some $k \in \N$, and suppose that there exists $r \in R$ such that $(k + 1)r = -k^2$.\footnote{This is equivalent to $n + 1$ being invertible in $R$.}
+Then $f(r) = r$.
+\end{lemma}
+\begin{proof}
+If $k = 0$ then $r = 0$, and clearly $f(0) = 0$.
+So now, suppose that $k > 0$.
+Since $(k + 1)k > k^2 > (k + 1)(k - 1)$, we have $-k - 1 < r < -k$.
+Thus, $\lfloor r \rfloor = -k$, and so we get
+\[ f(r) = -k (r + k) = r -(k + 1)r - k^2 = r. \]
+\end{proof}
+
+\begin{lemma}\label{2006a1-8}
+Fix some $r \in R$ and $k \in \N$ with $k > 1$.
+Suppose that $\lfloor f^n(r) \rfloor = -k$ for all $n \geq 0$.
+Then $(k + 1)r = -k^2$.
+\end{lemma}
+\begin{proof}
+Let $c = (k + 1)r + k^2$.
+For any $t \in R$ with $\lfloor t \rfloor = -k$, we have $f(t) = -k(t + k)$.
+Some manipulation gives us $(k + 1)f(t) + k^2 = -k((k + 1)t + k^2)$.
+Thus, by small induction, we have $(k + 1) f^n(r) + k^2 = (-k)^n ((k + 1) r + k^2) = (-k)^n c$ for all $n \geq 0$.
+In particular, we have $(k + 1) (f^n(r) - r) = ((-k)^n - 1) c$, and thus $(k + 1) |f^n(r) - r| \geq (k^n - 1) |c|$.
+But we always have $|f^n(r) - r| < 1$ since $\lfloor f^n(r) \rfloor = \lfloor r \rfloor = -k$.
+Thus, for any $n \geq 0$, we have $k + 1 > (k^n - 1) |c|$.
+Since $R$ is an archimedean ring and $k > 1$, this necessarily implies $c = 0$.
+This proves the lemma.
+\end{proof}
+
+Now, suppose that $x < 0$.
+We prove that either $-1 < f^N(x) < 0$ for some $N \geq 0$ or $(k + 1) f^N(x) = -k^2$ for some $k, N \geq 0$.
+The latter implies that $f^{N + n}(x)$ equals $-1 - f^N(x)$ if $n$ is odd and $f^N(x)$ if $n$ is even.
+For the latter, Lemma~\ref{2006a1-7} yields $f^n(x) = f^N(x)$ for all $n \geq N$.
+
+Indeed, by Lemma~\ref{2006a1-4}, Lemma~\ref{2006a1-5}, and induction, we get $\lfloor f^n(r) \rfloor \leq \lfloor f^{n + 1}(r) \rfloor \leq 0$ for all $n \geq 0$.
+Thus the sequence $(\lfloor f^n(r) \rfloor)_{n \geq 0}$, consisting of integers, is non-decreasing but bounded above by $0$.
+As a result, it has to eventually stabilize.
+That is, there exists $N, k \geq 0$ such that $\lfloor f^n(x) \rfloor = -k$ for all $n \geq N$.
+If $k > 1$, then Lemma~\ref{2006a1-8} yields $(k + 1) f^N(x) = -k^2$.
+If $k = 1$, then $-1 \leq f^N(x) < 0$.
+But $f^N(x) = -1$ yields $f^{N + 1}(x) = 0$, so in fact we have $-1 < f^N(x) < 0$.
+If $k = 0$, then $f^{N + 1}(x) = 0$ by Lemma~\ref{2006a1-2}.
+We are done.
+
+
+
+\subsection*{Implementation details}
+
+As one can see, we gain more information than just $(f^n(x))_{n \geq 0}$ being eventually $2$-periodic.
+Thus, we will implement each of the lemmas separately.
+
+
+
+\end{document}

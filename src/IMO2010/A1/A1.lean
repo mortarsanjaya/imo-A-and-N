@@ -1,4 +1,4 @@
-import algebra.order.field algebra.order.floor
+import algebra.order.field.basic algebra.order.floor
 
 /-! # IMO 2010 A1 (P1) -/
 

@@ -123,7 +123,7 @@ begin
   have h0 := congr_arg card (filter_union_filter_neg_eq (λ x, x ∈ X) (range (n + X.card))),
   rw [card_range, card_union_eq, ← nat.count_eq_card_filter_range,
       ← nat.count_eq_card_filter_range, nat.count_eq_card_fintype] at h0,
-  work_on_goal 2 { rw disjoint_iff_inter_eq_empty, exact filter_inter_filter_neg_eq _ _ },
+  work_on_goal 2 { rw disjoint_iff_inter_eq_empty, exact filter_inter_filter_neg_eq _ _ _ },
   rw [← add_left_inj X.card, add_comm]; convert h0 using 2; clear h0,
   suffices : ∀ k : ℕ, k ∈ X ↔ (k < n + X.card ∧ k ∈ X),
     rw eq_comm; convert fintype.subtype_card X this, -- Why doesn't it work with `exact`???

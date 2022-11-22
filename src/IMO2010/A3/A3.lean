@@ -1,6 +1,6 @@
 import data.real.nnreal algebra.big_operators.intervals algebra.periodic
 
-/-! # IMO 2010 A3, Generalized Version -/
+/-! # IMO 2010 A3 -/
 
 namespace IMOSL
 namespace IMO2010A3

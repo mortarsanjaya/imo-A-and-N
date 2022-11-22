@@ -1,4 +1,4 @@
-import data.nat.basic
+import data.nat.order.basic data.set.basic
 
 /-! # IMO 2010 A6 -/
 
@@ -33,8 +33,8 @@ begin
   cases h1 with h1 h1,
   rwa nat.succ_le_iff,
   replace h := h a,
-  rw [← h1, nat.succ_eq_add_one, self_eq_add_right] at h,
-  exfalso; exact one_ne_zero h
+  rw [← h1, nat.succ_eq_add_one] at h,
+  exfalso; exact nat.succ_ne_self (g a) h.symm
 end
 
 private lemma lem5 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a b : ℕ} (h1 : a ≤ b)

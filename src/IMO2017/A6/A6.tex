@@ -83,7 +83,7 @@ Plugging $y = 1$ into~\eqref{2017a6-eq0} yields that, for any $x \in R$,
 \[ f(x + 1) + 1 = f(x). \tag{2}\label{2017a6-eq2} \]
 
 
-\subsubsection*{Case 1: $\rchar(R) \neq 2$.}
+\subsubsection*{Case 1: $R$ is a division ring and $\rchar(R) \neq 2$.}
 
 First,~\eqref{2017a6-eq2} implies that $f(-1) = 2$.
 Thus, plugging $x = -1$ into~\eqref{2017a6-eq0} yields that for all $y \in R$,
@@ -133,6 +133,7 @@ In the above step, we show that if $f(0) = 1$ and $f$ is injective, then $f(x) =
 This holds in any ring $R$, so we implement this result as another lemma as well.
 Another lemma we implement is checking that $x \mapsto 1 - x$ indeed satisfies~\eqref{2017a6-eq0}.
 As we deal with two very distinct cases, we implement the two cases as separate results.
+Lastly, we implement a wrapper for cases where $R$ is a field.
 
 
 

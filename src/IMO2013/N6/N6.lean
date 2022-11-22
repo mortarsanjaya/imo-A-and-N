@@ -1,4 +1,4 @@
-import data.rat.default tactic.fin_cases
+import data.rat.default data.pnat.basic tactic.fin_cases
 
 /-! # IMO 2013 N6 -/
 
@@ -120,6 +120,7 @@ begin
         div_add', div_div, mul_comm ↑(k + 1 + 1), ← div_div] at feq,
     convert feq; rw eq_div_iff,
     simp only [pnat.one_coe, nat.cast_add, pnat.add_coe, nat.cast_one, coe_coe],
+    rw [int.cast_add, int.cast_add, int.cast_one, ← coe_coe],
     generalize : ((k : ℕ) : ℚ) = m,
     rw [mul_add_one, mul_add_one, add_comm (1 : ℚ), add_assoc, mul_comm],
     all_goals { apply ne_of_gt, rw [coe_coe, nat.cast_pos], exact pnat.pos _ } },
@@ -130,6 +131,7 @@ begin
     rwa [b_ih, int.cast_zero, zero_add, ← coe_coe, div_eq_mul_inv (a : ℚ),
          ← mul_add_one, mul_div_assoc, this, ← div_eq_mul_inv, b_ih, eq_comm] at feq,
   simp only [pnat.one_coe, nat.cast_add, pnat.add_coe, nat.cast_one, coe_coe],
+  rw [int.cast_add, int.cast_one, ← coe_coe],
   generalize h : ((b : ℕ) : ℚ) = k,
   replace h : 0 < k := by rw [← h, nat.cast_pos]; exact pnat.pos b,
   rw [inv_eq_one_div, div_add_one, add_comm, div_div, div_mul_left],
