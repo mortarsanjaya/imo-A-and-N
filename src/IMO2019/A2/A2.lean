@@ -1,4 +1,4 @@
-import algebra.order.ring algebra.big_operators.fin algebra.order.nonneg
+import algebra.order.ring.defs algebra.big_operators.fin algebra.order.group.min_max
 
 /-! # IMO 2019 A2 -/
 

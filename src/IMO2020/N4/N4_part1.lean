@@ -132,10 +132,10 @@ begin
       exact (tsub_right_inj (X i hi) (X j hj)).mp h1 },
 
     -- `2^i ≠ 2^k - 1 - 2^j` for any `i, j < k`
-    { intros c h1,
-      simp only [inf_eq_inter, mem_image, mem_inter] at h1,
+    { rw [disjoint_iff, inf_eq_inter, bot_eq_empty, eq_empty_iff_forall_not_mem],
+      intros c h1,
+      simp only [inf_eq_inter, mem_image, mem_inter, le_eq_subset] at h1,
       rcases h1 with ⟨⟨i, -, rfl⟩, ⟨j, h1, h2⟩⟩,
-      simp only [bot_eq_empty, not_mem_empty],
       rw mem_range at h1,
       revert h2; rw nat.sub_eq_iff_eq_add (le_of_lt (two_pow_lt_Mersenne h0 h1)),
       refine (two_pow_add_two_pow_ne_Mersenne _ i j).symm,
@@ -234,7 +234,7 @@ begin
   { rcases h0 with ⟨x, y, hx, hy, h0, h1, h2⟩,
     refine ⟨x + p, y, by rwa nat.coprime_add_self_left, hy, _⟩,
     have X : injective (λ k, k * order_two_mod_p h) :=
-      nat.mul_left_injective (order_two_mod_p_pos h),
+      mul_left_injective₀ (ne_of_gt (order_two_mod_p_pos h)),
     clear hx hy; split,
 
     -- `F_p^{kT + 1}(x + p) < F_p^{kT + 1}(y)` for all `k ≥ 0`

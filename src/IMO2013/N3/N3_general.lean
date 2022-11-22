@@ -1,4 +1,4 @@
-import data.set.finite tactic.ring
+import data.set.finite data.pnat.basic tactic.ring
 
 /-! # IMO 2013 N3, "Generalized" Version -/
 

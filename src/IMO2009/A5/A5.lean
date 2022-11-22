@@ -1,4 +1,4 @@
-import algebra.order.field tactic.by_contra
+import algebra.order.field.basic tactic.by_contra
 
 /-! # IMO 2009 A5 -/
 

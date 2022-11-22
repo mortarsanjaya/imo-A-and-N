@@ -1,4 +1,4 @@
-import data.int.basic algebra.group.defs
+import data.int.dvd.basic data.int.order.lemmas algebra.group.defs
 
 /-! # IMO 2011 N5 (P5) -/
 
