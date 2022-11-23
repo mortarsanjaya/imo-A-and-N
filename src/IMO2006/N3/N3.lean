@@ -1,4 +1,4 @@
-import data.nat.basic data.rat.basic data.finset.basic number_theory.arithmetic_function
+import number_theory.arithmetic_function
 
 /-! # IMO 2006 N3 -/
 
