@@ -1,6 +1,6 @@
 import number_theory.legendre_symbol.quadratic_reciprocity
 
-/-! # IMO 2007 N2, Extra -/
+/-! # IMO 2007 N2, Extra Version -/
 
 namespace IMOSL
 namespace IMO2007N2
