@@ -51,20 +51,24 @@ begin
   { cases h0 with a h0,
     use a; rw [sq, ← h0] },
 
-  ---- Case 3: `-1` and `2` are not squares mod `p`. We first establish `p ≠ 2`.
-  { unfreezingI { rcases eq_or_ne p 2 with rfl | X },
-    rw (char_two.two_eq_zero : (2 : zmod 2) = 0) at h0,
-    exfalso; exact h0 (is_square_zero (zmod 2)),
-    rw [← int.cast_one, ← int.cast_neg, ← legendre_sym.eq_neg_one_iff] at h,
+  ---- Case 3: `-1` and `2` are not squares mod `p`.
+  { rw [← int.cast_one, ← int.cast_neg, ← legendre_sym.eq_neg_one_iff] at h,
     rw [← int.cast_two, ← legendre_sym.eq_neg_one_iff] at h0,
-    replace h : legendre_sym p (-2) = 1 :=
-      by rw [← neg_one_mul, legendre_sym.mul, h, h0, neg_mul_neg, mul_one],
-    replace h0 : ((-2 : ℤ) : zmod p) = -2 := by rw [int.cast_neg, int.cast_two],
-    rw [legendre_sym.eq_one_iff, h0] at h,
-    cases h with a h,
-    use a; rw [sq, ← h, neg_pow_bit0],
-    rw [h0, neg_ne_zero],
-    apply ring.two_ne_zero; rwa ring_char.eq (zmod p) p }
+    suffices : (2 : zmod p) ≠ 0,
+    { replace h : legendre_sym p (-2) = 1 :=
+        by rw [← neg_one_mul, legendre_sym.mul, h, h0, neg_mul_neg, mul_one],
+      rw [← neg_ne_zero, ← int.cast_two, ← int.cast_neg] at this,
+      rw [legendre_sym.eq_one_iff p this, int.cast_neg, int.cast_two] at h,
+      cases h with a h,
+      use a; rw [sq, ← h, neg_pow_bit0] },
+
+    -- Now it remains to show that `-2 ≢ 0 mod p`
+    apply ring.two_ne_zero,
+    contrapose! h0; rw ring_char.eq (zmod p) p at h0,
+    simp_rw [h0]; suffices : legendre_sym 2 2 = 0,
+      rw [this, ne.def, zero_eq_neg]; exact one_ne_zero,
+    rw [legendre_sym.eq_zero_iff, int.cast_two],
+    exact char_two.two_eq_zero }
 end
 
 end IMO2007N2
