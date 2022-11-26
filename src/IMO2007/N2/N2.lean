@@ -1,4 +1,4 @@
-import ring_theory.int.basic data.nat.parity number_theory.legendre_symbol.quadratic_reciprocity
+import ring_theory.int.basic data.nat.parity
 
 /-! # IMO 2007 N2 -/
 
@@ -27,44 +27,6 @@ begin
   rw [← int.coe_gcd, nat.cast_eq_one, int.gcd_eq_one_iff_coprime],
   refine ⟨d, 1, _⟩,
   rw [one_mul, mul_comm, add_sub_cancel'_right]
-end
-
-/-- Final solution, part 2 -/
-theorem final_solution_part2 (p : ℕ) [fact p.prime] :
-  ∃ a : zmod p, a ^ 8 = 16 :=
-begin
-  rw [bit0, ← two_mul]; simp only [pow_mul],
-  have X : (2 : zmod p) ^ 4 = 16 := by norm_num,
-  rw ← X; clear X,
-  by_cases h : is_square (-1 : zmod p),
-
-  ---- Case 1: `-1` is a square mod `p`.
-  { cases h with i h,
-    rw ← sq at h,
-    use 1 + i; rw [add_sq', one_pow, ← h, add_neg_self, zero_add, mul_one, mul_pow],
-    change _ * i ^ (2 + 2) = _,
-    rw [← two_mul, pow_mul, ← h, neg_pow_bit0, one_pow, mul_one] },
-
-  by_cases h0 : is_square (2 : zmod p),
-
-  ---- Case 2: `2` is a square mod `p`.
-  { cases h0 with a h0,
-    use a; rw [sq, ← h0] },
-
-  ---- Case 3: `-1` and `2` are not squares mod `p`. We first establish `p ≠ 2`.
-  { unfreezingI { rcases eq_or_ne p 2 with rfl | X },
-    rw (char_two.two_eq_zero : (2 : zmod 2) = 0) at h0,
-    exfalso; exact h0 (is_square_zero (zmod 2)),
-    rw [← int.cast_one, ← int.cast_neg, ← legendre_sym.eq_neg_one_iff] at h,
-    rw [← int.cast_two, ← legendre_sym.eq_neg_one_iff] at h0,
-    replace h : legendre_sym p (-2) = 1 :=
-      by rw [← neg_one_mul, legendre_sym.mul, h, h0, neg_mul_neg, mul_one],
-    replace h0 : ((-2 : ℤ) : zmod p) = -2 := by rw [int.cast_neg, int.cast_two],
-    rw [legendre_sym.eq_one_iff, h0] at h,
-    cases h with a h,
-    use a; rw [sq, ← h, neg_pow_bit0],
-    rw [h0, neg_ne_zero],
-    apply ring.two_ne_zero; rwa ring_char.eq (zmod p) p }
 end
 
 end IMO2007N2

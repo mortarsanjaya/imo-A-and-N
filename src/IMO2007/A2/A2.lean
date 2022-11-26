@@ -1,4 +1,4 @@
-import data.pnat.basic tactic.nth_rewrite
+import data.pnat.basic
 
 /-! # IMO 2007 A2 -/
 

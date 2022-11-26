@@ -1,4 +1,4 @@
-import data.nat.basic data.rat.basic data.finset.basic number_theory.arithmetic_function
+import number_theory.arithmetic_function
 
 /-! # IMO 2006 N3 -/
 
@@ -82,25 +82,24 @@ begin
     exact lem3 (nat.succ_le_succ h) },
 
   refine set.infinite_of_not_bdd_above _,
-  simp [bdd_above, upper_bounds, set.nonempty],
+  simp_rw [bdd_above, upper_bounds, set.nonempty, not_exists, set.mem_set_of_eq, not_forall],
   intros b,
-
   -- We take `x` to be the minimal `nat` with `d(x + 1) > b + 1`.
   have h : ∃ y : ℕ, b + 1 < y.succ.divisors.card :=
     ⟨2 ^ (b + 1) - 1, by rw [nat.succ_eq_add_one, nat.sub_add_cancel (nat.one_le_pow' _ 1),
       nat.divisors_prime_pow nat.prime_two, card_map, card_range, nat.lt_succ_iff] ⟩,
-  use nat.find h; rw [and_comm, and_assoc],
-  refine ⟨λ m h0, lt_of_le_of_lt _ (nat.find_spec h), _⟩,
-  { cases m with m m,
-    rw [nat.divisors_zero, card_empty]; exact nat.zero_le _,
-    have h1 := nat.find_min h h0,
-    exact le_of_not_lt h1 },
+  use nat.find h; rw [and_comm, ← and_assoc, not_le],
+  refine ⟨_, λ m h0, lt_of_le_of_lt _ (nat.find_spec h)⟩,
   { rw [and_iff_left_of_imp pos_of_gt, ← not_le]; intros h0,
     replace h0 : ∃ y, y ≤ b ∧ b + 1 < y.succ.divisors.card := ⟨nat.find h, h0, nat.find_spec h⟩,
     clear h; rcases h0 with ⟨y, h, h0⟩,
     revert h; refine not_le_of_lt (nat.succ_lt_succ_iff.mp (lt_of_lt_of_le h0 _)),
     rw nat.divisors; convert finset.card_filter_le _ _,
-    rw list.length_range' }
+    rw list.length_range' },
+  { cases m with m m,
+    rw [nat.divisors_zero, card_empty]; exact nat.zero_le _,
+    have h1 := nat.find_min h h0,
+    exact le_of_not_lt h1 }
 end
 
 /-- Final solution, part 2 -/

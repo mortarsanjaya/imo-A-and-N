@@ -1,4 +1,4 @@
-import data.int.modeq ring_theory.coprime.lemmas tactic.wlog
+import data.int.modeq tactic.wlog
 
 /-! # IMO 2007 N6 (P5) -/
 
