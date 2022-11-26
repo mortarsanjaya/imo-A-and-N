@@ -40,16 +40,13 @@ begin
   rcases eq_or_ne S 0 with rfl | h,
   rw [card_zero, pow_zero, prod_zero],
   rw [ne.def, ← card_eq_zero] at h,
-  have h0 : finset.univ.sum (λ _ : ↥S, (S.card : ℝ≥0)⁻¹) = 1 :=
-  begin
-    rw [finset.sum_const, finset.card_univ, card_coe, nsmul_eq_mul],
-    apply mul_inv_cancel; rwa nat.cast_ne_zero
-  end,
-  replace h0 := nnreal.geom_mean_le_arith_mean_weighted (finset.univ : finset ↥S) _ (λ i, ↑i) h0,
-  simp only [] at h0; rw [← finset.mul_sum, ← sum_eq_sum_coe,
-    inv_mul_eq_div, nonneg.coe_inv, nnreal.coe_nat_cast] at h0,
-  refine le_of_eq_of_le _ (pow_le_pow_of_le_left (zero_le _) h0 (card S)); clear h0,
-  simp_rw [← finset.prod_pow, nnreal.rpow_nat_inv_pow_nat _ h, ← prod_eq_prod_coe]
+  rw [sum_eq_sum_coe, ← inv_mul_eq_div, finset.mul_sum],
+  refine le_of_eq_of_le _
+    (pow_le_pow_of_le_left (zero_le _) (nnreal.geom_mean_le_arith_mean_weighted _ _ _ _) _),
+  simp_rw [← finset.prod_pow, nonneg.coe_inv, nnreal.coe_nat_cast,
+           nnreal.rpow_nat_inv_pow_nat _ h, ← prod_eq_prod_coe],
+  rw [finset.sum_const, finset.card_univ, card_coe, nsmul_eq_mul],
+  apply mul_inv_cancel; rwa nat.cast_ne_zero
 end
 
 end extra_lemmas
