@@ -22,7 +22,7 @@
 
 \subsection*{Problem}
 
-Let $G$ be an abelian group (presented additively) with a total order $<$.
+Let $G$ be an abelian group with a total order $<$.
 We say that a function $f : G \to G$ is \emph{good} if for any $x, y \in G$ such that $f(x) < f(y)$, we have $f(x) \leq x + y \leq f(y)$.
 Prove that:
 \begin{enumerate}
@@ -100,6 +100,7 @@ In addition to part 1 and part 2, we also combine them in an iff theorem.
 That is, we implement a theorem that proves that $<$ is a dense order iff every good function (on $G$) is monotone.
 We also impolement the original version in a more general setting of a ring with dense total order.
 In particular, the same result holds in any totally ordered field.
+This will be implemented in a separate file called \texttt{A8\_original.lean}.
 
 
 
