@@ -1,4 +1,4 @@
-import IMO2017.A8.A8
+import IMO2017.A8.A8_general
 
 /-! # IMO 2017 A8, Original Version -/
 
