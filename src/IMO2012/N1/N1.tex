@@ -1,0 +1,54 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\Z}{\mathbb{Z}}
+
+\title{IMO 2010 A4}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+A set $A$ of integers is called admissible if for any $x, y \in A$ and $k \in \Z$, we have $x^2 + kxy + y^2 \in A$.
+Determine all pairs $(m, n)$ of integers such that the only admissible set containing $m$ and $n$ is $\Z$.
+
+
+
+\subsection*{Answer}
+
+They are precisely the pairs $(m, n)$ such that $m$ and $n$ are coprime.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2012SL.pdf}
+
+The following solution is a slight modification from the official solution.
+
+First, suppose that the pair $(m, n)$ satisfies the requirement.
+Let $d = \gcd(m, n)$, and consider $A = \{m \in \Z : d \mid m\}$.
+It is easy to check that this set is admissible.
+So, by the property of $(m, n)$, we have $A = \Z \implies d = 1$.
+
+Conversely, suppose that $\gcd(m, n) = 1$.
+Let $A$ be an admissible set containing $m$ and $n$.
+First, for any $x \in A$ and $a \in \Z$, we have $ax^2 = x^2 + (a - 2) x^2 + x^2 \in A$.
+Now, since $\gcd(m, n) = 1$, we have $\gcd(m^2, n^2) = 1$, so $am^2 + bn^2 = 1$ for some $a, b \in \Z$.
+Since $am^2, bn^2 \in A$ by the previous argument, we get $1 = (am^2)^2 + 2(am^2)(bn^2) + (bn^2)^2 \in A$.
+In particular, this means for any $a \in \Z$, setting $x = 1$ yields $a \in A$, so $A = \Z$.
+
+
+
+\end{document}
