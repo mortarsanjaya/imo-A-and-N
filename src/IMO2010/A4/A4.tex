@@ -33,7 +33,7 @@ Prove that $S_n = 0$ if and only if the base $4$ representation of $n$ only cont
 
 \subsection*{Solution}
 
-Official solution: <https://www.imo-official.org/problems/IMO2010SL.pdf>
+Official solution: \url{https://www.imo-official.org/problems/IMO2010SL.pdf}
 
 The presented solution below is Solution 2, but modified so that the index starts with $0$ instead of $1$.
 This approach also easily proves the extra part.
@@ -88,6 +88,13 @@ The base $4$ digit representation of $n$ consists of the base $4$ digit represen
 By Lemma~\ref{2010a4-1}, $S_n = 0$ if and only if $S_q = 0$ and $r \in \{0, 2\}$.
 By the inductive hypothesis, the former holds if and only if the base $4$ digit representation of $n$ consists only of the digits $0$ and $2$, except possibly the last digit $r$.
 Combining with the condition $r \in \{0, 2\}$ finishes the inductive step.
+
+
+
+\subsection*{Extra notes}
+
+In the original problem, the index for the sequence starts with $1$.
+We shift the indexing to start at $0$ so that we can use the \texttt{nat} API.
 
 
 
