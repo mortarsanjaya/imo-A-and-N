@@ -1,0 +1,71 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\Z}{\mathbb{Z}}
+
+\title{IMO 2012 N3}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Determine all integers $m > 1$ such that, $n \mid \binom{n}{m - 2n}$ for every $n \leq m/2$ non-negative.
+
+
+
+\subsection*{Answer}
+
+Prime numbers.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2012SL.pdf}
+
+The following solution we present is the official solution.
+
+First, suppose that $m$ is prime.
+Clearly, $0$ divides $\binom{0}{m} = 0$ since $m > 0$.
+So, it remains to consider the case where $n$ is positive.
+For $m = 2$, the only remaining case to consider is $n = 1$, for which the divisibility is trivial.
+So now, suppose that $m$ is odd; in particular, $m - 2n > 0$ for any $n \leq m/2$.
+Since $m$ is prime and $0 < n \leq m/2 < m$, we have $\gcd(n, m - 2n) = 1$.
+On the other hand, we have the identity $(m - 2n) \binom{n}{m - 2n} = n \binom{n - 1}{p - 2n - 1}$.
+Then $\gcd(n, m - 2n) = 1$ implies $n \mid \binom{n}{m - 2n}$, as desired.
+
+Conversely, suppose that $n$ divides $\binom{n}{m - 2n}$ whenever $n \leq m/2$.
+Write $m = pr$, where $p$ is the smallest prime divisor of $m$ and $r \geq 1$.
+If $p = 2$, then choosing $n = r$ yields $r \mid \binom{r}{0} = 1$, so $r = 1$ and thus $m = 2$.
+So now, suppose that $p > 2$.
+Then $m$ is odd, and so is $r$, so we can write $r = 2k + 1$ for some $k \geq 0$.
+
+Now, picking $n = pk < m/2$, we have $pk \mid \binom{pk}{p}$.
+Suppose for the sake of contradiction that $k > 0$.
+Consider the equation
+\[ p! \binom{pk}{p} = pk \prod_{j = 1}^{p - 1} (p(k - 1) + j) \implies (p - 1)! \binom{pk}{p} = k \prod_{j = p(k - 1) + 1}^{p(k - 1) + (p - 1)} j. \]
+The right hand side is not divisible by $pk$, so $pk \nmid \binom{pk}{p}$.
+A contradiction, so $k = 0$, and thus $m = pr = p(2k + 1) = p$; $m$ is a prime.
+
+
+
+\subsection*{Extra notes}
+
+The original problem has a more restricted inequality, $m/3 \leq n \leq m/2$.
+We remove the inequality $m/3 \leq n$ since the only thing that this inequality does is making sure that $\binom{n}{m - 2n}$ is a positive integer.
+Note that, by convention, we define $\binom{a}{b} = 0$ if $0 \leq a < b$, and also we define $0 \mid 0$.
+
+
+
+\end{document}
