@@ -6,6 +6,8 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{5pt}
 
+\newtheorem*{lemma*}{Lemma}
+
 \newcommand{\Z}{\mathbb{Z}}
 
 \title{IMO 2012 N3}
@@ -54,7 +56,7 @@ Then $m$ is odd, and so is $r$, so we can write $r = 2k + 1$ for some $k \geq 0$
 Now, picking $n = pk < m/2$, we have $pk \mid \binom{pk}{p}$.
 Suppose for the sake of contradiction that $k > 0$.
 Consider the equation
-\[ p! \binom{pk}{p} = pk \prod_{j = 1}^{p - 1} (p(k - 1) + j) \implies (p - 1)! \binom{pk}{p} = k \prod_{j = p(k - 1) + 1}^{p(k - 1) + (p - 1)} j. \]
+\[ p! \binom{pk}{p} = pk \prod_{j = 1}^{p - 1} (p(k - 1) + j) \implies (p - 1)! \binom{pk}{p} = k \prod_{j = 1}^{p - 1} (p(k - 1) + j). \]
 The right hand side is not divisible by $pk$, so $pk \nmid \binom{pk}{p}$.
 A contradiction, so $k = 0$, and thus $m = pr = p(2k + 1) = p$; $m$ is a prime.
 
@@ -65,6 +67,14 @@ A contradiction, so $k = 0$, and thus $m = pr = p(2k + 1) = p$; $m$ is a prime.
 The original problem has a more restricted inequality, $m/3 \leq n \leq m/2$.
 We remove the inequality $m/3 \leq n$ since the only thing that this inequality does is making sure that $\binom{n}{m - 2n}$ is a positive integer.
 Note that, by convention, we define $\binom{a}{b} = 0$ if $0 \leq a < b$, and also we define $0 \mid 0$.
+
+
+
+\subsection*{Implementation details}
+
+For the above solution, we use the fact that $p \nmid \displaystyle \prod_{j = 1}^{p - 1} (p(k - 1) + j)$.
+More generally, it follows from the following fact, which we prove as a separate lemma: for any $p$ prime, $k \geq 0$, and $r < p$,
+\[ p \nmid \prod_{j = 1}^r (pk + j). \]
 
 
 

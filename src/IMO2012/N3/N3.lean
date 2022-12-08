@@ -5,6 +5,18 @@ import data.nat.choose.basic data.nat.parity
 namespace IMOSL
 namespace IMO2012N3
 
+private lemma lem2 {p : ℕ} (h : p.prime) (k : ℕ) {r : ℕ} (h0 : r < p) :
+   ¬p ∣ (p * k + r).desc_factorial r :=
+ begin
+  induction r with r h1,
+  rw nat.desc_factorial_zero; exact h.not_dvd_one,
+  rw [nat.add_succ, nat.succ_desc_factorial_succ, add_assoc, h.dvd_mul,
+      nat.dvd_add_right ⟨k, rfl⟩, or_iff_right (nat.not_dvd_of_pos_of_lt r.succ_pos h0)],
+  exact h1 (lt_trans r.lt_succ_self h0)
+ end
+
+
+
 /-- Final solution -/
 theorem final_solution {m : ℕ} (h : 1 < m) :
   (∀ n : ℕ, 2 * n ≤ m → n ∣ n.choose (m - 2 * n)) ↔ m.prime :=
@@ -59,7 +71,7 @@ begin
     rcases h1 with ⟨k, rfl⟩,
     rw [add_left_eq_self, nat.mul_eq_zero, or_iff_right (two_ne_zero : 2 ≠ 0)],
     
-    -- Now choose `n = pk` and reduce to showing that `p ∤ ∏_{i ≤ j} (pk + i)` for all `j < p`
+    -- Now choose `n = pk` and do the work
     replace h0 := h0 (p * k),
     rw [mul_left_comm, mul_add_one, nat.add_sub_cancel_left] at h0,
     replace h0 := dvd_mul_of_dvd_right (h0 le_self_add) (p - 1).factorial,
@@ -68,17 +80,9 @@ begin
     rw [← nat.mul_dvd_mul_iff_left (p - 1).succ_pos, nat.mul_succ, ← mul_assoc,
         ← nat.factorial_succ, nat.succ_eq_add_one, nat.sub_add_cancel h.pos,
         ← nat.desc_factorial_eq_factorial_mul_choose],
-    suffices : ∀ j : ℕ, j < p → ¬p ∣ (p * k + j).desc_factorial j,
-      replace this := this (p - 1) (nat.sub_lt h.pos one_pos);
-        rwa [← nat.mul_dvd_mul_iff_left (p * k + (p - 1)).succ_pos, ← nat.succ_desc_factorial_succ,
-             nat.succ_eq_add_one, add_assoc, nat.sub_add_cancel h.pos, mul_comm] at this,
-
-    -- Prove that `p ∤ ∏_{i ≤ j} (pk + i)` for `j < p` by induction on `j`
-    intros j h0; induction j with j h1,
-    rw nat.desc_factorial_zero; exact h.not_dvd_one,
-    rw [nat.add_succ, nat.succ_desc_factorial_succ, add_assoc, h.dvd_mul,
-        nat.dvd_add_right ⟨k, rfl⟩, or_iff_right (nat.not_dvd_of_pos_of_lt j.succ_pos h0)],
-    exact h1 (lt_trans j.lt_succ_self h0) }
+    have h0 := lem2 h k (nat.sub_lt h.pos one_pos),
+    rwa [← nat.mul_dvd_mul_iff_left (p * k + (p - 1)).succ_pos, ← nat.succ_desc_factorial_succ,
+         nat.succ_eq_add_one, add_assoc, nat.sub_add_cancel h.pos, mul_comm] at h0 }
 end
 
 end IMO2012N3
