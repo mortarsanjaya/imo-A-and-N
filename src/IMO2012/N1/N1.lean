@@ -22,7 +22,7 @@ begin
     replace h := h _ (h0 (ideal.span {x, y})) (ideal.subset_span (set.mem_insert x _))
       (ideal.subset_span (set.mem_insert_of_mem _ (set.mem_singleton y))) 1,
     simp_rw [set_like.mem_coe, ideal.mem_span_insert, ideal.mem_span_singleton] at h,
-    rcases h with ⟨a, z, ⟨b, rfl⟩, h⟩,
+    clear h0; rcases h with ⟨a, z, ⟨b, rfl⟩, h⟩,
     rw mul_comm y at h; exact ⟨a, b, h.symm⟩ },
 
   ---- If `x` and `y` are coprime, the only admissible set `x` and `y` is `R`
@@ -37,7 +37,7 @@ begin
     replace h1 := h3 x h1 a,
     replace h2 := h3 y h2 b,
     replace h0 := h0 _ _ h1 h2 2,
-    rwa [← add_sq, h, one_pow] at h0 }
+    clear h1 h2 h3; rwa [← add_sq, h, one_pow] at h0 }
 end 
 
 end IMO2012N1
