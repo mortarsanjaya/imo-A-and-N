@@ -5,94 +5,66 @@ import number_theory.basic
 namespace IMOSL
 namespace IMO2014N4
 
-private theorem case_odd {n : ℕ} (h : 1 < n) (h0 : odd n) (m : ℕ) : odd (n ^ (n ^ m) / (n ^ m)) :=
-  by rw nat.pow_div (le_of_lt (nat.lt_pow_self h m)) (lt_trans one_pos h); exact h0.pow
+open set function
 
-private theorem case_even_ne_two {n : ℕ} (h : 2 < n) (h0 : even n) {i : ℕ} (h1 : 0 < i) :
-  odd (n ^ ((n - 1) ^ i) / (n - 1) ^ i) :=
-begin
-  cases n with _ n,
-  exfalso; exact lt_asymm h two_pos,
-  rw [nat.even_add_one, ← nat.odd_iff_not_even] at h0,
-  rw nat.succ_lt_succ_iff at h,
-  rw [nat.succ_eq_add_one, nat.add_sub_cancel],
-  have h2 : n ^ i ≠ 0 := pow_ne_zero i (ne_of_gt (lt_trans one_pos h)),
-  have h3 := le_of_lt (one_lt_pow (lt_trans h (lt_add_one n)) h2),
-  suffices : n ^ (i + 1) ∣ (n + 1) ^ n ^ i - 1,
-  { replace this := dvd_trans (dvd_mul_left (n ^ i) n) this,
-    cases this with c this,
-    rw nat.sub_eq_iff_eq_add h3 at this,
-    rw [this, add_comm, nat.add_mul_div_left 1 c (pow_pos (lt_trans one_pos h) i),
-        nat.div_eq_zero (one_lt_pow h (ne_of_gt h1)), zero_add, nat.odd_iff_not_even],
-    intros h4,
-    replace h4 : ¬even (n ^ i * c + 1) :=
-      by rw [nat.even_add_one, not_not]; exact h4.mul_left (n ^ i),
-    rw [← this, nat.even_pow, and_iff_left h2, nat.even_add_one, ← nat.odd_iff_not_even] at h4,
-    exact h4 h0 },
-  replace h1 : (n : ℤ) ∣ n + 1 - 1 := by rw add_sub_cancel,
-  replace h1 := dvd_sub_pow_of_dvd_sub h1 i,
-  rwa [one_pow, ← int.coe_nat_pow, ← (nat.cast_one : (1 : ℤ) = 1), ← nat.cast_add,
-       ← int.coe_nat_pow, ← nat.cast_sub h3, int.coe_nat_dvd] at h1
-end
-
-private theorem case_two {i : ℕ} (h : 0 < i) : odd (2 ^ (3 * 2 ^ (2 * i)) / (3 * 2 ^ (2 * i))) :=
-begin
-  have h0 : 2 * i < 2 ^ (2 * i) * 3 := lt_trans (nat.lt_pow_self one_lt_two (2 * i))
-    (lt_mul_of_one_lt_right (pow_pos two_pos _) (by norm_num)),
-  suffices : 3 ∣ 2 ^ (2 ^ (2 * i) * 3 - 2 * i) - 1,
-  { rw [mul_comm, ← nat.div_div_eq_div_mul, nat.pow_div (le_of_lt h0) two_pos],
-    cases this with c h1,
-    rw nat.sub_eq_iff_eq_add (nat.one_le_pow _ _ two_pos) at h1,
-    rw [h1, add_comm, nat.add_mul_div_left 1 c three_pos,
-        nat.div_eq_zero (by norm_num : 1 < 3), zero_add, nat.odd_iff_not_even],
-    intros h2,
-    replace h2 : ¬even (3 * c + 1) := by rw [nat.even_add_one, not_not]; exact h2.mul_left 3,
-    rw ← tsub_pos_iff_lt at h0,
-    rw [← h1, nat.even_pow, and_iff_left (ne_of_gt h0)] at h2,
-    exact h2 even_two },
-  generalize h1 : 2 ^ (2 * i) * 3 - 2 * i = k,
-  replace h1 : 2 ∣ k :=
-  begin
-    rw [← h1, nat.dvd_add_iff_left ⟨i, rfl⟩, nat.sub_add_cancel (le_of_lt h0)],
-    use 2 ^ (2 * i - 1) * 3,
-    rw [← mul_assoc, ← pow_succ, nat.sub_add_cancel (mul_pos two_pos h)]
-  end,
-  rcases h1 with ⟨m, rfl⟩,
-  clear h h0; induction m with m m_ih,
-  rw [mul_zero, pow_zero, nat.sub_self],
-  exact dvd_zero 3,
-  cases m_ih with c h,
-  rw nat.sub_eq_iff_eq_add (nat.one_le_pow _ _ two_pos) at h,
-  rw [mul_add_one, pow_add, h, add_one_mul]; norm_num,
-  use c * 4; rw mul_assoc
-end
+/-- If `k` is even and `k % m = 1`, then `k / m` is odd. -/
+private lemma even_div_odd_one_mod {k m : ℕ} (h : even k) (h0 : k % m = 1) : odd (k / m) :=
+  by rw [← nat.div_add_mod k m, nat.even_add, h0, iff_false_right nat.not_even_one,
+    ← nat.odd_iff_not_even, nat.odd_mul] at h; exact h.2
 
 
 
 /-- Final solution -/
 theorem final_solution {n : ℕ} (h : 1 < n) : {k : ℕ | odd (n ^ k / k)}.infinite :=
 begin
-  suffices : ∃ f : ℕ → ℕ, function.injective f ∧ set.range f ⊆ {k : ℕ | odd (n ^ k / k)},
-  { rcases this with ⟨f, h0, h1⟩,
-    exact set.infinite.mono h1 (set.infinite_range_of_injective h0) },
-  cases n.even_or_odd with h0 h0,
-  rw [nat.lt_iff_add_one_le, ← bit0, le_iff_eq_or_lt, eq_comm] at h,
-  rcases h with rfl | h,
-  { use (λ i, 3 * 2 ^ (2 * i.succ)); split,
-    intros x y h; simp only [] at h,
-    rw mul_right_inj' (by norm_num : 3 ≠ 0) at h,
-    replace h := nat.pow_right_injective (le_refl 2) h,
-    rwa [mul_right_inj' (two_ne_zero : (2 : ℕ) ≠ 0), nat.succ_inj'] at h,
-    rintros k ⟨i, rfl⟩,
-    exact case_two i.succ_pos },
-  { use (λ i, (n - 1) ^ i.succ); split,
-    intros x y h1; simp only [] at h1,
-    rw ← nat.succ_inj'; refine nat.pow_right_injective (nat.le_pred_of_lt h) h1,
-    rintros k ⟨i, rfl⟩,
-    exact case_even_ne_two h h0 i.succ_pos },
-  { use (has_pow.pow n); split,
-    exact nat.pow_right_injective h,
-    rintros k ⟨i, rfl⟩; exact case_odd h h0 i },
+  suffices : ∃ f : ℕ → ℕ, injective f ∧ ∀ k : ℕ, odd (n ^ f k / f k),
+    rcases this with ⟨f, h0, h1⟩; exact infinite_of_injective_forall_mem h0 h1,
+  cases n.even_or_odd with h0 h0, rotate,
+
+  ---- Case 1: `n > 1` is odd. Choose `f(k) = n^k`.
+  { refine ⟨has_pow.pow n, nat.pow_right_injective h, λ k, _⟩,
+    rw nat.pow_div (le_of_lt (nat.lt_pow_self h k)) (lt_trans one_pos h),
+    exact h0.pow },
+
+  rw [nat.lt_iff_add_one_le, ← bit0, le_iff_lt_or_eq] at h,
+  rcases h with h | rfl,
+
+  ---- Case 2: `n > 2` is even. Choose `f(k) = (n - 1) ^ (k + 1)`
+  { -- Injectivity
+    refine ⟨λ k, (n - 1) ^ k.succ, λ x y h1, _, λ k, _⟩,
+    rw ← nat.succ_inj'; exact nat.pow_right_injective (nat.le_pred_of_lt h) h1,
+
+    -- The main work
+    obtain ⟨n, rfl⟩ := nat.exists_eq_succ_of_ne_zero (ne_zero_of_lt h),
+    rw nat.succ_lt_succ_iff at h,
+    rw [nat.succ_eq_add_one, nat.add_sub_cancel],
+    refine even_div_odd_one_mod (nat.even_pow.mpr ⟨h0, pow_ne_zero _ (ne_zero_of_lt h)⟩) _,
+    nth_rewrite 1 ← nat.mod_eq_of_lt (one_lt_pow h k.succ_ne_zero),
+    rw [eq_comm, ← nat.modeq, nat.modeq_iff_dvd, nat.cast_one,
+        int.coe_nat_pow, int.coe_nat_pow, nat.cast_add_one],
+    nth_rewrite 1 ← one_pow (n ^ k.succ),
+    refine dvd_trans (pow_dvd_pow _ k.succ.le_succ) (dvd_sub_pow_of_dvd_sub _ k.succ),
+    rw add_sub_cancel },
+
+  ---- Case 3: `n = 2`. Choose `f(k) = 3 ⬝ 4 ^ (k + 1)`
+  { -- Injectivity
+    clear h0; refine ⟨λ k, 2 ^ (2 * k.succ) * 3, λ x y h, _, λ k, _⟩,
+    rw [mul_eq_mul_right_iff, or_iff_left (three_ne_zero : 3 ≠ 0)] at h,
+    rw [← nat.succ_inj', ← mul_right_inj' (two_ne_zero : 2 ≠ 0)],
+    exact nat.pow_right_injective (le_refl 2) h,
+
+    -- The main work
+    have h : 1 < 3 := by norm_num,
+    have h0 : 2 * k.succ < 2 ^ (2 * k.succ) * 3 :=
+      lt_trans (nat.lt_pow_self one_lt_two _) (lt_mul_of_one_lt_right (pow_pos two_pos _) h),
+    rw lt_iff_exists_add at h0; rcases h0 with ⟨c, h1, h0⟩,
+    rw [← nat.div_div_eq_div_mul, h0, nat.pow_div le_self_add two_pos, nat.add_sub_cancel_left],
+    refine even_div_odd_one_mod (nat.even_pow.mpr ⟨even_two, ne_of_gt h1⟩) _,
+    replace h1 : 2 ∣ 2 ^ (2 * nat.succ k) * 3 :=
+      dvd_mul_of_dvd_left (dvd_pow_self 2 (mul_ne_zero two_ne_zero k.succ_ne_zero)) 3,
+    rw [h0, ← nat.dvd_add_iff_right ⟨k.succ, rfl⟩] at h1,
+    clear h0 k; rcases h1 with ⟨d, rfl⟩,
+    rw [pow_mul, nat.pow_mod]; norm_num }
 end
 
 end IMO2014N4
