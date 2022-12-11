@@ -1,0 +1,75 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\title{IMO 2011 A3}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $R$ be a commutative ring such that $2$ is not a zero divisor in $R$.
+Determine all functions $f, g : R \to R$ such that, for all $x, y \in R$,
+\[ g(f(x + y)) = f(x) + (2x + y) g(y). \tag{*}\label{2011a3-eq0} \]
+
+
+
+\subsection*{Answer}
+
+$(f, g) = x \mapsto (ax^2 + c, ax)$, for some $a, c \in R$ such that $a(a - 1) = c(a - 1) = 0$.
+
+In particular, if $R$ is an integral domain with characteristic not equal to $2$, then $(f, g) = x \mapsto (x^2 + c, x)$ and $(f, g) = (0, 0)$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2011SL.pdf}
+
+The solution presented below is the official solution, except for the step of proving that $g$ has to be linear.
+The official solution requires that $2$ is invertible in $R$.
+Instead, we take the step from the comment section, which only requires that $2$ is not a zero divisor in $R$.
+
+It is easy to verify algebraically that the provided pairs in the answer section satisfies~\eqref{2011a3-eq0}.
+Thus, we now prove that these are all the functions satisfying~\eqref{2011a3-eq0}.
+Start with the following equality:
+\[ f(x) + (2x + y) g(y) = g(f(x + y)) = f(y) + (2y + x) g(x), \]
+\[ (f(x) - x g(x)) - (f(y) - y g(y)) = 2(y g(x) - x g(y)). \tag{1}\label{2011a3-eq1} \]
+Now, adding~\eqref{2011a3-eq1} with $(x, y) = (0, 1), (1, t), (t, 0)$ gives us
+\[ 0 = 2(g(0) + t g(1) - g(t) - t g(0)) \implies 2((g(1) - g(0)) t + g(0) - g(t)) = 0. \]
+Since $2$ is not a zero divisor in $R$, this necessarily implies $g(t) = (g(1) - g(0)) t + g(0)$ for all $t \in R$.
+That is, $g$ is linear.
+
+For convenience, write $a = g(1) - g(0)$ and $b = g(0)$.
+Substituting $g(x) = ax + b$ and $y = 0$ into~\eqref{2011a3-eq1} gives us
+\[ f(x) - (ax^2 + bx) - f(0) = -2bx, \implies f(x) = ax^2 - bx + f(0). \]
+It remains to prove that $b = 0$, $a(a - 1) = 0$, and $f(0) (a - 1) = 0$.
+First, plugging $y = -2x$ into~\eqref{2011a3-eq0} yields $g(f(-x)) = f(x)$.
+Plugging the above formulas for $f$ and $g$ directly now yields
+\[ a(ax^2 + bx + f(0)) + b = ax^2 - bx + f(0). \]
+At $x = 0$, we get $a f(0) + b = f(0)$.
+Then at $x = 1$ and $x = -1$, we get $a^2 + ab = a - b$ and $a^2 - ab = a + b$, respectively.
+Since $2$ is not a zero divisor in $R$, this implies $a^2 = a$ and $ab = -b$.
+The latter implies $b = -ab = a(ab) = a^2 b = ab = -b$, so $b = 0$.
+The remaining equalities are $a^2 = a$ and $a f(0) = f(0)$; we are done.
+
+
+
+\subsection*{Implementation details}
+
+We also implement the same problem with integral domains.
+
+
+
+
+\end{document}
