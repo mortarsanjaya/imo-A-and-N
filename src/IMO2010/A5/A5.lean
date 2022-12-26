@@ -117,8 +117,8 @@ theorem final_solution_multiplicative {G : Type*} [comm_group G]
 
 
 
-/-- Final solution, `ℚ+` version -/
-theorem final_solution_rat :
+/-- Final solution, original (`ℚ+`) version -/
+theorem final_solution_original :
   ∀ f : {q : ℚ // 0 < q} → {q : ℚ // 0 < q}, good f ↔ f = has_inv.inv :=
   final_solution_multiplicative extra.pos_rat_factor_hom.inj
 
