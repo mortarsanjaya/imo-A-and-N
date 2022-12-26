@@ -1,0 +1,69 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+
+\title{IMO 2016 A4}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $F$ be a totally ordered field.
+Denote by $F^+$ the set of positive elements of $F$.
+Find all functions $f : F^+ \to F^+$ such that, for all $x, y \in F^+$,
+\[ x f(x^2) f(f(y)) + f(y f(x)) = f(xy) (f(f(x^2)) + f(f(y^2))). \tag{*}\label{2016a4-eq0} \]
+
+
+
+\subsection*{Answer}
+
+$x \mapsto x^{-1}$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{http://www.imo-official.org/problems/IMO2016SL.pdf}
+
+We present Solution 1 of the official solution.
+First, it is immediate to check that $x \mapsto x^{-1}$ satisfies~\eqref{2016a4-eq0}.
+
+Start by plugging $y = 1$ in~\eqref{2016a4-eq0}.
+We get that, for all $x \in F^+$,
+\[ x f(x^2) f(f(1)) + f(f(x)) = f(x) (f(f(x^2)) + f(f(1))). \]
+Plugging $x = 1$ into this equation gives us $f(1) = 1$.
+So, the equation simplifies to
+\[ x f(x^2) + f(f(x)) = f(x) (f(f(x^2)) + 1). \]
+Plugging $x = 1$ into~\eqref{2016a4-eq0} gives us
+\[ f(f(y)) + f(y) = f(y) (f(f(y^2)) + 1) \implies f(f(y^2)) = \frac{f(y)}{y}. \tag{1}\label{2016a4-eq1} \]
+If we also use the previous equation, we instead get
+\[ f(f(y)) + f(y) = y f(y^2) + f(f(y)) \implies f(y^2) = \frac{f(y)}{y}. \tag{2}\label{2016a4-eq2} \]
+If we combine the two equations, we get that for all $y \in F^+$,
+\[ f(f(y)^2) = \frac{f(f(y))}{f(y)} = f(f(y^2)) = f\left(\frac{f(y)}{y}\right). \]
+If $f$ is injective, the above equation immediately implies $f(y) = y^{-1}$ for all $y \in F^+$.
+Thus, it remains to show that $f$ is indeed injective.
+
+Fix some $a, b \in F^+$, and suppose that $f(a) = f(b)$.
+Write $c = f(a) = f(b)$.
+For any $x, y \in F^+$ such that $f(x) = f(y) = c$,~\eqref{2016a4-eq0},~\eqref{2016a4-eq1}, and~\eqref{2016a4-eq2} gives us
+\[ c f(c) + f(yc) = f(xy) \frac{2 f(c)}{c}. \]
+This implies $f(y^2) = f(xy)$, as
+\[ f(y^2) \frac{2 f(c)}{c} = f(xy) \frac{2 f(c)}{c} = c f(c) + f(yc). \]
+In particular, we get $f(a^2) = f(ab) = f(b^2)$.
+Finally,~\eqref{2016a4-eq2} implies $a = b$, as desired.
+
+
+
+\end{document}
