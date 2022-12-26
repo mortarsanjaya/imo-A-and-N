@@ -1,0 +1,86 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\title{IMO 2010 A5}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $G$ be an abelian group.
+Suppose that $G$ embeds into the group of functions $\Z^S$ for some set $S$.
+Find all functions $f : G \to G$ such that, for any $x, y \in G$,
+\[ f(2 f(x) + y) = 3x + f(x + y). \tag{*}\label{2010a5-eq0} \]
+
+
+
+\subsection*{Answer}
+
+$x \mapsto -x$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2010SL.pdf}
+
+We present the official solution in the setting of additive groups as opposed to multiplicative groups.
+We only need the fact that $G$ is torsion-free up to obtaining the functional equation $2 f(f(x)) - f(x) - 3x = 0$.
+We need the fact that $G$ embeds into a $\Z^S$ for some set $S$ to solve this final functional equation. 
+
+Clearly, $x \mapsto -x$ satisfies~\eqref{2010a5-eq0}.
+So it remains to show that it is the only such function.
+First, plugging $y = 0$ into~\eqref{2010a5-eq0} yields that for all $x \in G$,
+\[ f(2 f(x)) = 3x + f(x). \tag{1}\label{2010a5-eq1} \]
+Since $G$ is torsion-free, this implies that $f$ is injective.
+Now, replacing $y$ with $2 f(y)$ in~\eqref{2010a5-eq0} and using~\eqref{2010a5-eq1} gives us
+\[ f(2 (f(x) + f(y))) = 3x + f(x + 2 f(y)) = 3(x + y) + f(x + y) = f(2 f(x + y)). \]
+By injectivity and again, the fact that $G$ is torsion-free, we get $f(x + y) = f(x) + f(y)$ for all $x, y \in G$.
+Thus, $f$ is an endomorphism of $G$.
+Then~\eqref{2010a5-eq1} becomes $2 f(f(x)) - f(x) - 3x = 0$.
+That is, as an element of the endomorphism ring of $G$, $(f + 1)(2f - 3) = 2 f^2 - f - 3 = 0$.
+Letting $h = f + 1$, we have $h(2h - 5) = 0$.
+We now show that $h = 0$, i.e. $h(x) = 0$ for each $x \in G$.
+
+Let $\phi : G \to \Z^S$ be an embedding.
+We use subscript notation for applications of $\phi$.
+That is, we denote $\phi(x)$ by $\phi_x$ for any $x \in G$.
+Now, fixing $x \in G$, we have $2 h(h(x)) = 5 h(x)$, and thus $2 \phi_{h(h(x))}(s) = 5 \phi_{h(x)}(s)$ for each $s \in S$.
+We have $h(x) = 0 \iff \phi_{h(x)} = 0$.
+Thus, it remains to show that $\phi_{h(x)}(s) = 0$ for each $s \in S$.
+Fixing $s$, we prove by induction that $2^k \mid \phi_{h(x)}(s)$ for each $k \geq 0$ and $x \in G$.
+This gives the desired conclusion.
+
+The base case $k = 0$ is obvious.
+Now suppose that, for some $k \geq 0$, we have $2^k \mid \phi_{h(x)}(s)$ for all $x \in G$.
+Then $5 \phi_{h(x)}(s) = 2 \phi_{h(h(x))}(s)$ is divisible by $2^{k + 1}$.
+Since $5$ is coprime with $2$, this shows that $2^{k + 1} \mid  \phi_{h(x)}(s)$ for any $x \in G$.
+Induction step is complete; we are done.
+
+
+
+\subsection*{Implementation details}
+
+We implement a version with multiplicative group as well.
+However, we just provide a correspondence without the full solution for the multiplicative case.
+Then we state the answer for the case where the multiplicative group is $\Q^+$, which embeds into $\Z^P$, where $P$ is the set of primes.
+
+The fact that $\Q^+$ embeds into $\Z^P$ is implemented in \texttt{extra/number\_theory/pos\_rat\_primes.lean}.
+
+
+
+\end{document}
