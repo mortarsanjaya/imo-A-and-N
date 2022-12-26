@@ -1,4 +1,4 @@
-import algebra.module.basic group_theory.torsion extra.number_theory.pos_rat_primes
+import extra.number_theory.pos_rat_primes
 
 /-! # IMO 2010 A5 -/
 
@@ -12,9 +12,6 @@ def good {G : Type*} [monoid G] (f : G → G) :=
   ∀ x y : G, f (f x ^ 2 * y) = x ^ 3 * f (x * y)
 
 
-
-private theorem correspondence {G : Type*} [monoid G] (f : G → G) :
-  good f ↔ good' (λ x : additive G, f x) := by refl
 
 private lemma neg_is_good' {G : Type*} [add_comm_group G] : good' (has_neg.neg : G → G) :=
   λ x y, by rw [eq_add_neg_iff_add_eq, add_comm, ← sub_eq_add_neg,
@@ -65,6 +62,7 @@ theorem final_solution_additive {G : Type*} [add_comm_group G]
   ∀ f : G → G, good' f ↔ f = has_neg.neg :=
 begin
   ---- A characterization of zeroes in `G` using `ρ`
+  refine λ f, ⟨λ h0, _, λ h0, by subst h0; exact neg_is_good'⟩,
   simp_rw [injective_iff_map_eq_zero', function.funext_iff, pi.zero_apply] at h,
 
   ---- Set up `no_zero_smul_divisors ℕ G` instance
@@ -76,7 +74,6 @@ begin
   end⟩,
 
   ---- Setup for the final step of induction
-  refine λ f, ⟨λ h0, _, λ h0, by subst h0; exact neg_is_good'⟩,
   rw good'_iff at h0; rcases h0 with ⟨φ, rfl, h0⟩,
   obtain ⟨γ, rfl⟩ : ∃ γ : G →+ G, γ - add_monoid_hom.id G = φ :=
     ⟨φ + add_monoid_hom.id G, add_sub_cancel _ _⟩,
@@ -88,15 +85,16 @@ begin
     nsmul_eq_mul, nat.cast_bit1, nat.cast_bit0, nat.cast_one] at h0,
   simp_rw [function.funext_iff, add_monoid_hom.sub_apply,
     add_monoid_hom.id_apply, sub_eq_neg_self, ← h],
-  clear h; intros x s; revert x,
-  suffices : ∀ (k : ℕ) (x : G), 2 ^ k ∣ ρ (γ x) s,
-  { intros x; refine int.eq_zero_of_abs_lt_dvd (this (ρ (γ x) s).nat_abs x) _,
+  clear h,
+
+  suffices : ∀ (s : S) (k : ℕ) (x : G), 2 ^ k ∣ ρ (γ x) s,
+  { intros x s; refine int.eq_zero_of_abs_lt_dvd (this s (ρ (γ x) s).nat_abs x) _,
     change |↑(ρ (γ x) s)| < ((2 : ℕ) : ℤ) ^ (ρ (γ x) s).nat_abs,
     rw [← nat.cast_pow, ← int.cast_nat_abs, nat.cast_lt],
     exact (ρ (γ x) s).nat_abs.lt_two_pow },
 
   ---- Induction
-  intros k; induction k with k h; intros x,
+  intros s k; induction k with k h; intros x,
   rw pow_zero; exact one_dvd _,
   replace h := h (γ x); cases h with c h,
   replace h0 := h0 x s,
