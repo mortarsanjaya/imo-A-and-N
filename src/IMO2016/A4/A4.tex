@@ -45,9 +45,9 @@ Plugging $x = 1$ into this equation gives us $f(1) = 1$.
 So, the equation simplifies to
 \[ x f(x^2) + f(f(x)) = f(x) (f(f(x^2)) + 1). \]
 Plugging $x = 1$ into~\eqref{2016a4-eq0} gives us
-\[ f(f(y)) + f(y) = f(y) (f(f(y^2)) + 1) \implies f(f(y^2)) = \frac{f(y)}{y}. \tag{1}\label{2016a4-eq1} \]
-If we also use the previous equation, we instead get
-\[ f(f(y)) + f(y) = y f(y^2) + f(f(y)) \implies f(y^2) = \frac{f(y)}{y}. \tag{2}\label{2016a4-eq2} \]
+\[ f(f(y)) + f(y) = f(y) (f(f(y^2)) + 1) \implies f(f(y^2)) = \frac{f(f(y))}{f(y)}. \tag{1}\label{2016a4-eq1} \]
+Then the previous equation becomes
+\[ x f(x^2) + f(f(x)) = f(f(x)) + f(x) \implies f(x^2) = \frac{f(x)}{x}. \tag{2}\label{2016a4-eq2} \]
 If we combine the two equations, we get that for all $y \in F^+$,
 \[ f(f(y)^2) = \frac{f(f(y))}{f(y)} = f(f(y^2)) = f\left(\frac{f(y)}{y}\right). \]
 If $f$ is injective, the above equation immediately implies $f(y) = y^{-1}$ for all $y \in F^+$.
