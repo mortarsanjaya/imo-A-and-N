@@ -95,11 +95,9 @@ end results
 
 
 /-- Final solution -/
-theorem final_solution {u : multiset R} (h : u.sum = 0) (h0 : (u.map (λ c, c ^ 2)).sum = 1) :
-  (u.card : R) * (u.fold min 0 * u.fold max 0) ≤ -1 :=
+theorem final_solution {u : multiset R} (h : u.sum = 0) :
+  (u.card : R) * (u.fold min 0 * u.fold max 0) ≤ -(u.map (λ c, c ^ 2)).sum :=
 begin
-  rw ← h0; clear h0,
-  have X : id = λ x : R, x := rfl,
   obtain ⟨a, b, ha, hb, rfl⟩ : ∃ a b : multiset R,
     (∀ x : R, x ∈ a → 0 ≤ x) ∧ (∀ x : R, x ∈ b → 0 ≤ x) ∧ a + b.map has_neg.neg = u :=
   begin
@@ -107,16 +105,15 @@ begin
       λ x h0, (mem_filter.mp h0).2, λ x h0, _, _⟩,
     rw mem_map at h0; rcases h0 with ⟨y, h0, rfl⟩,
     rw [mem_filter, not_le, ← neg_pos] at h0; exact le_of_lt h0.2,
-    convert u.filter_add_not _,
-    rw [map_map, neg_comp_neg, X, map_id']
+    rw [map_map, neg_comp_neg, map_id]; exact u.filter_add_not _
   end,
 
   rw [sum_add, sum_map_neg, map_id', add_neg_eq_zero] at h,
   rw [card_add, card_map, multiset.map_add, map_map, le_neg, ← mul_neg, ← neg_mul, nat.cast_add],
-  simp only [neg_sq, comp_app, map_congr, sum_add],
+  simp_rw [comp_app, neg_sq, sum_add],
   rw [mul_comm (-(fold min (0 : R) _)), lem7 ha hb, lem4],
   convert final_solution' ha hb h using 3,
-  rw [multiset.map_add, map_map, neg_comp_neg, X, map_id', add_comm, lem7 hb ha]
+  rw [multiset.map_add, map_map, neg_comp_neg, map_id, add_comm, lem7 hb ha]
 end
 
 end IMO2019A2
