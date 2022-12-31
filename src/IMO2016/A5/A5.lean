@@ -1,4 +1,4 @@
-import data.nat.sqrt data.nat.parity
+import data.nat.sqrt data.nat.parity data.set.finite
 
 /-! # IMO 2016 A5 -/
 

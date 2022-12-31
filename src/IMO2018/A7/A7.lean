@@ -235,7 +235,7 @@ begin
   { rcases h with ⟨a, ⟨h0, h1⟩, rfl⟩,
     rcases n.eq_zero_or_pos with rfl | hn,
     unfold target_sum; rw [mul_zero, sum_range_zero, zero_smul],
-    replace hn := mul_pos two_pos hn,
+    replace hn : 0 < 2 * n := mul_pos two_pos hn,
     have X : ((2 * n : ℕ) : ℝ≥0) ≠ 0 := nat.cast_ne_zero.mpr (ne_of_gt hn),
     obtain ⟨t, ht⟩ : ∃ t : ℝ≥0, (range (2 * n)).sum (λ i, sqrt (a i)) = (2 * n) • t :=
       ⟨(range (2 * n)).sum (λ i, sqrt (a i)) / ↑(2 * n),
