@@ -1,6 +1,6 @@
 import data.set.finite data.pnat.basic tactic.ring
 
-/-! # IMO 2013 N3, "Generalized" Version -/
+/-! # IMO 2013 N3, Generalized Version -/
 
 namespace IMOSL
 namespace IMO2013N3
@@ -11,89 +11,69 @@ def good (f : ℕ+ → S) (n : ℕ+) := f (n ^ 4 + n ^ 2 + 1) = f ((n + 1) ^ 4 +
 
 
 
-/-- A notation convenience for n² + n + 1. -/
-private def T (n : ℕ+) := n ^ 2 + n + 1
-
-/-- Proof of the identity T((n + 1)²) = T(n) T(n + 1). -/
-private lemma T_sq_factor (n : ℕ+) : T ((n + 1) ^ 2) = T n * T (n + 1) :=
-  by unfold T; apply pnat.eq; simp; ring
-
-
-
-section results
-
-variables {f : ℕ+ → S} (fmax : ∀ a b : ℕ+, f (a * b) = max (f a) (f b))
-include fmax
-
-private lemma lem1 {n : ℕ+} (h : ¬good f (n + 1)) (h0 : f (T n) ≤ f (T (n + 1))) :
-  f (T (n + 1)) < f (T (n + 1 + 1)) :=
-begin
-  apply lt_of_not_le; intros h1,
-  apply h; unfold good,
-  change 4 with 2 * 2,
-  repeat {rw [pow_mul, ← T, T_sq_factor, fmax] },
-  rw [max_eq_right h0, max_eq_left h1]
-end
-
-private lemma lem2 {N : ℕ+} (h : ∀ n : ℕ+, N < n → ¬good f n)
-  {C : ℕ+} (h0 : N < C) (h1 : f (T C) ≤ f (T (C + 1))) :
-  ∀ k : ℕ+, f (T (C + 1)) < f (T (C + 1 + k)) :=
-begin
-  suffices : ∀ k : ℕ+, f (T (C + k)) < f (T (C + k + 1)) ∧ f (T (C + 1)) < f (T (C + 1 + k)),
-    intros k; exact and.right (this k),
-  intros k; induction k using pnat.strong_induction_on with k k_ih,
-  rcases eq_or_ne k 1 with rfl | h2,
-  split; exact lem1 fmax (h _ (lt_trans h0 (pnat.lt_add_right C 1))) h1,
-  rcases pnat.exists_eq_succ_of_ne_one h2 with ⟨k₀, rfl⟩,
-  rcases k_ih k₀ (pnat.lt_add_right k₀ 1) with ⟨h3, h4⟩,
-  replace h3 : f (T (C + k₀ + 1)) < f (T (C + k₀ + 1 + 1)) :=
-    lem1 fmax (h _ (lt_trans h0 (pnat.lt_add_right C (k₀ + 1)))) (le_of_lt h3),
-  rw [← add_assoc, and_iff_right h3],
-  apply lt_trans h4,
-  rwa [add_right_comm, add_add_add_comm]
-end
-
-private lemma lem3 {N : ℕ+} (h : ∀ n : ℕ+, N < n → ¬good f n) {C : ℕ+} (h0 : N < C) :
-  f (T (C + 1)) < f (T C) :=
-begin
-  apply lt_of_not_le; intros h1,
-  have h2 := lem2 fmax h h0 h1 (C * (C + 1)),
-  rw [← one_add_mul, add_comm 1 C, ← sq, T_sq_factor, fmax, max_eq_right h1] at h2,
-  exact lt_irrefl _ h2
-end
-
-private lemma lem4 {N : ℕ+} (h : ∀ n : ℕ+, N < n → ¬good f n) {C : ℕ+} (h0 : N < C) :
-  ∀ k : ℕ+, f (T (C + k)) < f (T C) :=
-begin
-  intros k; apply pnat.rec_on k; clear k,
-  exact lem3 fmax h h0,
-  intros k h1,
-  refine lt_trans _ h1,
-  rw ← add_assoc,
-  exact lem3 fmax h (lt_trans h0 (pnat.lt_add_right C k))
-end
-
-private lemma lem5 (N : ℕ+) (h : ∀ n : ℕ+, N < n → ¬good f n) : false :=
-begin
-  replace h := lem4 fmax h (pnat.lt_add_right N 1) (N * (N + 1)),
-  rw [← one_add_mul, add_comm, ← sq, T_sq_factor, fmax, lt_iff_not_le] at h,
-  exact h (le_max_right (f (T N)) (f (T (N + 1))))
-end
-  
-end results
+/-- Proof of the identity `(n + 1)⁴ + (n + 1)² + 1 = (n² + n + 1)((n + 1)² + (n + 1) + 1)`. -/
+private lemma special_identity (n : ℕ+) :
+  ((n + 1) ^ 2) ^ 2 + (n + 1) ^ 2 + 1 = (n ^ 2 + n + 1) * ((n + 1) ^ 2 + (n + 1) + 1) :=
+  by apply pnat.eq; simp only [positive.coe_one, pnat.mul_coe, pnat.pow_coe, pnat.add_coe]; ring
 
 
 
 /-- Final solution -/
-theorem final_solution_general {f : ℕ+ → S} (fmax : ∀ a b : ℕ+, f (a * b) = max (f a) (f b)) :
+theorem final_solution_general {f : ℕ+ → S} (h : ∀ a b : ℕ+, f (a * b) = max (f a) (f b)) :
   set.infinite (set_of (good f)) :=
 begin
-  apply set.infinite_of_not_bdd_above; rintros ⟨N, h⟩,
-  simp only [upper_bounds, set.mem_set_of] at h,
-  apply lem5 fmax N,
-  intros n h0 h1,
-  rw lt_iff_not_le at h0,
-  exact h0 (h h1)
+  ---- Set `g(n) = f(n^2 + n + 1)` and re-interpret in terms of `g` instead of `f`
+  apply set.infinite_of_not_bdd_above; rintros ⟨N, h0⟩,
+  simp_rw [upper_bounds, set.mem_set_of, good] at h0,
+  let T := λ n : ℕ+, n ^ 2 + n + 1,
+  replace h : ∀ n : ℕ+, (f ∘ T) ((n + 1) ^ 2) = max ((f ∘ T) n) ((f ∘ T) (n + 1)) :=
+    λ n, by simp_rw [function.comp_app, T]; rw [special_identity, h],
+  replace h0 : ∀ n : ℕ+, (f ∘ T) (n ^ 2) = (f ∘ T) ((n + 1) ^ 2) → n ≤ N :=
+    λ n, by simp_rw [function.comp_app, T, ← pow_mul]; rw [two_mul, ← bit0]; exact @h0 n,
+  generalize_hyp : f ∘ T = g at h h0,
+  clear f T,
+
+  ---- For all `n ≥ N`, `g(n) ≤ g(n + 1)` implies `g(n + 1) < g(n + 2)`
+  replace h0 : ∀ n, N ≤ n → g n ≤ g (n + 1) → g (n + 1) < g (n + 1 + 1) :=
+  begin
+    intros n h1 h2; contrapose! h0,
+    refine ⟨n + 1, _, pnat.lt_add_one_iff.mpr h1⟩,
+    rw [h, max_eq_right h2, h, max_eq_left h0],
+  end,
+
+  ---- There exists `C ≥ N` such that `g(C) ≤ g(C + 1)`
+  obtain ⟨C, h1, h2⟩ : ∃ C : ℕ+, N ≤ C ∧ g C ≤ g (C + 1) :=
+  begin
+    replace h : g (N + 1) ≤ g ((N + 1) ^ 2) :=
+      by rw h; exact le_max_right (g N) (g (N + 1)),
+    contrapose! h; rw [sq, mul_add_one, add_comm _ (N + 1)],
+    generalize : (N + 1) * N = k,
+    induction k using pnat.case_strong_induction_on with k h1,
+    exact h (N + 1) (le_of_lt (N.lt_add_right 1)),
+    rw ← add_assoc; refine lt_trans (h _ _) (h1 k (le_refl k)),
+    rw add_assoc; exact le_of_lt (N.lt_add_right (1 + k))
+  end,
+  
+  ---- Reduce to showing `g(C + 1) < g(C + 1 + k)` for all `k > 0`
+  replace h := h C,
+  rw [max_eq_right h2, sq, mul_add_one, add_comm _ (C + 1)] at h,
+  generalize_hyp : (C + 1) * C = k at h,
+  revert h; apply ne_of_gt; revert k,
+
+  ---- Final step via two inductions
+  replace h0 : ∀ k : ℕ+, g (C + k) < g (C + k + 1) :=
+  begin
+    intros k; induction k using pnat.case_strong_induction_on with k h3,
+    exact h0 C h1 h2,
+    rw ← add_assoc,
+    exact h0 _ (le_trans h1 (le_of_lt (C.lt_add_right k))) (le_of_lt (h3 k (le_refl k)))
+  end,
+
+  clear h1 h2 N,
+  intros k; induction k using pnat.case_strong_induction_on with k h,
+  exact h0 1,
+  rw ← add_assoc; refine lt_trans (h k (le_refl k)) _,
+  rw add_assoc; exact h0 (1 + k)
 end
 
 end IMO2013N3

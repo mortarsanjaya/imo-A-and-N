@@ -5,43 +5,39 @@ import IMO2013.N3.N3_general data.pnat.factors
 namespace IMOSL
 namespace IMO2013N3
 
+open pnat
 
-
-namespace extra
+namespace pnat
 
 /-- The maximum prime divisor of a positive integer n, as a `nat`, or 1 if n = 1. -/
-def pnat.max_prime_divisor (n : ℕ+) :=
+def max_prime_divisor (n : ℕ+) :=
   (n.factor_multiset : multiset ℕ).fold linear_order.max 1
 
-lemma pnat.max_prime_divisor_one : pnat.max_prime_divisor 1 = 1 :=
-  by unfold pnat.max_prime_divisor; rw pnat.factor_multiset_one; refl
+lemma max_prime_divisor_one : max_prime_divisor 1 = 1 :=
+  by rw [max_prime_divisor, factor_multiset_one]; refl
 
-lemma pnat.max_prime_divisor_prime (p : ℕ+) (h : p.prime) : pnat.max_prime_divisor p = p :=
+lemma max_prime_divisor_prime (p : ℕ+) (h : p.prime) : max_prime_divisor p = p :=
 begin
-  unfold pnat.prime at h,
-  unfold pnat.max_prime_divisor,
+  unfold pnat.prime at h; unfold max_prime_divisor,
   let q : nat.primes := ⟨(p : ℕ), h⟩,
   have h0 : p = ↑q := by ext1; rw nat.primes.coe_pnat_nat; refl,
-  rw [h0, pnat.factor_multiset_of_prime q, prime_multiset.coe_nat_of_prime,
+  rw [h0, factor_multiset_of_prime q, prime_multiset.coe_nat_of_prime,
       multiset.fold_singleton, nat.primes.coe_pnat_nat, subtype.coe_mk],
   exact max_eq_left (le_of_lt (nat.prime.one_lt h))
 end
 
-lemma pnat.max_prime_divisor_mul (a b : ℕ+) :
-  pnat.max_prime_divisor (a * b) = max (pnat.max_prime_divisor a) (pnat.max_prime_divisor b) :=
-begin
-  unfold pnat.max_prime_divisor,
-  rw [pnat.factor_multiset_mul, ← prime_multiset.coe_coe_nat_monoid_hom,
-      add_monoid_hom.map_add, ← multiset.fold_add max, max_self]
-end
+lemma max_prime_divisor_mul (a b : ℕ+) :
+  max_prime_divisor (a * b) = max (max_prime_divisor a) (max_prime_divisor b) :=
+  by unfold max_prime_divisor; rw [factor_multiset_mul, ← prime_multiset.coe_coe_nat_monoid_hom,
+    add_monoid_hom.map_add, ← multiset.fold_add max, max_self]
 
-end extra
+end pnat
 
 
 
 /-- Final solution -/
-theorem final_solution_original : set.infinite (set_of (good extra.pnat.max_prime_divisor)) :=
-  final_solution_general extra.pnat.max_prime_divisor_mul
+theorem final_solution_original : set.infinite (set_of (good pnat.max_prime_divisor)) :=
+  final_solution_general pnat.max_prime_divisor_mul
 
 end IMO2013N3
 end IMOSL
