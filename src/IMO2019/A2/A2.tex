@@ -1,0 +1,45 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\title{IMO 2019 A2}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $R$ be a totally ordered commutative ring, and let $n$ be a non-negative integer.
+Let $u_1, u_2, \ldots, u_n$ be elements of $R$ such that $\displaystyle \sum_{i = 1}^n u_i = 0$.
+Prove that
+\[ n \min_{i \leq n} u_i \cdot \max_{i \leq n} u_i \leq -\sum_{i = 1}^n u_i^2. \tag{*}\label{2019a2-eq0} \]
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2019SL.pdf}
+
+We present Solution 1 of the official solution.
+
+Let $P = \{i \leq n : u_i \geq 0\}$ and $N = \{i \leq n : u_i < 0\}$.
+For each $i \in P$, set $a_i = u_i$, and for each $j \in N$, set $b_j = -u_j$.
+We have $a_i, b_j \geq 0$ and $\displaystyle \sum_{i \in P} a_i = \sum_{j \in N} b_j$.
+Also, ~\eqref{2019a2-eq0} reduces to
+\[ (|P| + |N|) \max_{i \in P} a_i \max_{j \in N} b_j \geq \sum_{i \in P} a_i^2 + \sum_{j \in N} b_j^2. \]
+This inequality follows from the following two inequalities:
+\[ \sum_{i \in P} a_i^2 \leq \max_{i \in P} a_i \sum_{i \in P} a_i = \max_{i \in P} a_i \sum_{j \in N} b_j \leq |N| \max_{i \in P} a_i \max_{j \in N} b_j, \]
+\[ \sum_{j \in N} b_j^2 \leq \max_{j \in N} b_j \sum_{j \in N} b_j = \max_{j \in N} b_j \sum_{i \in P} a_i \leq |P| \max_{i \in P} a_i \max_{j \in N} b_j. \]
+
+
+
+\end{document}
