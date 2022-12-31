@@ -1,0 +1,67 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+
+\title{IMO 2013 N3 \\ Generalized Version}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $S$ be a totally ordered set.
+Fix a function $f : \N^+ \to S$ such that $f(ab) = \max\{f(a), f(b)\}$ for all $a, b \in \N^+$.
+Prove that there exists infinitely many positive integers $n$ such that
+\[ f(n^4 + n^2 + 1) = f((n + 1)^4 + (n + 1)^2 + 1). \]
+
+
+
+\subsection*{Solution}
+
+We denote $g(n) = f(n^2 + n + 1)$ for every $n \in \N^+$.
+Notice that $(n^2 + n + 1)((n + 1)^2 + (n + 1) + 1) = (n + 1)^4 + (n + 1)^2 + 1$ for any $n \in \N^+$.
+Thus, for all $n \in \N^+$, we have
+\[ g((n + 1)^2) = \max\{g(n), g(n + 1)\}. \tag{1}\label{2013n3-eq1} \]
+The statement to be proved is equivalent to $g(n^2) = g((n + 1)^2)$ for infinitely many $n \in \N^+$.
+
+Suppose that it does not hold; that is, $g(n^2) \neq g((n + 1)^2)$ for all $n$ big enough.
+Replacing $n$ with $n + 1$ and using~\eqref{2013n3-eq1}, there exists $N \in \N^+$ such that, for all $n \geq N$,
+\[ \max\{g(n), g(n + 1)\} \neq \max\{g(n + 1), g(n + 2)\}. \]
+All we need from this inequality is that, for all $n \geq N$,
+\[ g(n) \leq g(n + 1) \implies g(n + 1) < g(n + 2). \tag{2}\label{2013n3-eq2} \]
+We are now ready to obtain a contradiction.
+
+We start by showing that there exists $C \geq N$ for which $g(C) \leq g(C + 1)$.
+Suppose not, that $g(n) > g(n + 1)$ for all $n \geq N$.
+Then by induction, we get $g(N + 1) > g(N + 1 + k)$ for all $k > 0$.
+In particular, taking $k = N(N + 1)$, we get $g(N + 1) > g((N + 1)^2)$.
+But~\eqref{2013n3-eq1} yields $g((N + 1)^2) \geq g(N + 1)$; a contradiction.
+
+Now, since $g(C) \leq g(C + 1)$,~\eqref{2013n3-eq2} and induction implies $g(C + k) < g(C + k + 1)$ for all $k > 0$.
+Induction once again implies $g(C + 1) < g(C + 1 + k)$ for all $k > 0$.
+In particular, $g(C + 1) < g((C + 1)^2)$.
+But~\eqref{2013n3-eq1} tells us that $g((C + 1)^2) = \max\{g(C), g(C + 1)\} = g(C + 1)$ since $g(C) \leq g(C + 1)$.
+A contradiction!
+
+
+
+\subsection*{Implementation details}
+
+We implement the original problem in \texttt{N3\_original.lean}.
+We still need to define the largest divisor function and prove the desired property manually.
+When this function has been implemented in \texttt{mathlib}, the original problem might be moved to \texttt{N3\_general.lean}.
+
+
+
+\end{document}
