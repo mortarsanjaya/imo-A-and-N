@@ -16,23 +16,25 @@ def good (f : ℕ+ → ℕ+) := ∀ m n : ℕ+, f m + f (f n) ≤ f (m + n) + 1
 /-! ## Correspondence between `good` and `good'` -/
 section correspondence
 
+private lemma pnat_to_nat_prop {P : ℕ+ → Prop} : (∀ n : ℕ+, P n) ↔ (∀ n : ℕ, P n.succ_pnat) :=
+  ⟨λ h n, h n.succ_pnat, λ h n, by rw ← pnat.succ_pnat_nat_pred n; exact h _⟩
+
+private lemma pnat_to_nat_prop2 {P : ℕ+ → ℕ+ → Prop} :
+  (∀ m n : ℕ+, P m n) ↔ (∀ m n : ℕ, P m.succ_pnat n.succ_pnat) :=
+  by rw pnat_to_nat_prop; refine forall_congr (λ m, _); rw pnat_to_nat_prop
+
+private lemma succ_pnat_add_succ_pnat (m n : ℕ) :
+  m.succ_pnat + n.succ_pnat = (m + n).succ_pnat + 1 :=
+  by simp_rw [← pnat.coe_inj, pnat.add_coe, nat.succ_pnat_coe,
+              nat.add_succ, nat.succ_add, positive.coe_one]
+
 private lemma good_iff_good' (f : ℕ+ → ℕ+) : good f ↔ good' (λ x, (f x.succ_pnat).nat_pred) :=
 begin
-  unfold good good',
-  conv_rhs { find (_ ≤ _) {
-    rw [pnat.succ_pnat_nat_pred, ← add_le_add_iff_right 1, pnat.nat_pred_add_one, add_assoc,
-        pnat.nat_pred_add_one, ← add_le_add_iff_right 1, add_right_comm, pnat.nat_pred_add_one,
-        ← pnat.add_coe, ← pnat.one_coe, ← pnat.add_coe, pnat.coe_le_coe, pnat.one_coe] } },
-  suffices : ∀ m n : ℕ, (m + n + 1).succ_pnat = m.succ_pnat + n.succ_pnat,
-  { refine ⟨λ h m n, _, λ h m n, _⟩,
-    rw this; exact h m.succ_pnat n.succ_pnat,
-    replace h := h m.nat_pred n.nat_pred,
-    rw this at h; simp only [pnat.succ_pnat_nat_pred] at h,
-    exact h },
-  intros m n,
-  rw [← pnat.coe_inj, pnat.add_coe],
-  simp only [nat.succ_pnat_coe, nat.succ_eq_add_one],
-  rw [add_assoc, add_add_add_comm]
+  obtain ⟨g, rfl⟩ : ∃ g : ℕ → ℕ, f = λ x, (g x.nat_pred).succ_pnat :=
+    ⟨λ x, (f x.succ_pnat).nat_pred, funext (λ x, by simp_rw pnat.succ_pnat_nat_pred)⟩,
+  simp_rw [good, pnat_to_nat_prop2, nat.nat_pred_succ_pnat, succ_pnat_add_succ_pnat,
+           add_le_add_iff_right, nat.succ_pnat_le_succ_pnat, good'],
+  refl
 end
 
 private lemma correspondence (N k : ℕ+) :
@@ -132,7 +134,7 @@ end
 theorem final_solution_nat_zero (k : ℕ) : (∃ f : ℕ → ℕ, good' f ∧ f 0 = k) ↔ k = 0 :=
 begin
   symmetry; refine ⟨λ h, ⟨λ _, 0, λ m n, _, h.symm⟩, λ h, _⟩,
-  simp only [add_zero],
+  simp_rw  add_zero,
   rcases h with ⟨f, h, rfl⟩,
   by_contra h0; rw [← ne.def, ← pos_iff_ne_zero] at h0,
   refine not_le_of_lt (lt_of_lt_of_le (lt_add_of_pos_left _ h0) (h 0 0)) _,

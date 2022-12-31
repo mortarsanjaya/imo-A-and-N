@@ -1,0 +1,85 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\title{IMO 2016 A4}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $R$ be a totally ordered commutative ring.
+Denote by $R^+$ the set of positive elements of $R$.
+Find all functions $f : R^+ \to R^+$ such that, for all $x, y \in R^+$,
+\[ x f(x^2) f(f(y)) + f(y f(x)) = f(xy) (f(f(x^2)) + f(f(y^2))). \tag{*}\label{2016a4-eq0} \]
+
+
+
+\subsection*{Answer}
+
+A function $f : R^+ \to R^+$ satisfies~\eqref{2016a4-eq0} if and only if $x f(x) = 1$ for all $x \in R^+$.
+In particular, such a function does not exist if $R$ is not a field, and $x \mapsto x^{-1}$ is the only such function if $R$ is a field.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{http://www.imo-official.org/problems/IMO2016SL.pdf}
+
+We present Solution 1 of the official solution.
+We prove injectivity in a different way from the solution.
+
+First, we check that $f$ satisfies~\eqref{2016a4-eq0} if $x f(x) = 1$ for all $x \in R^+$.
+Start by verifying that $f(f(x)) = x$ for all $x \in R^+$; this holds due to $x f(x) = f(x) f(f(x)) = 1$ for all $x \in R^+$.
+The equation to be proved reduces to $xy f(x^2) + f(y f(x)) = f(xy) (x^2 + y^2)$.
+Now, multiply both sides by $xy f(x) = y$ and get
+\[ (xy)^2 f(x^2) f(x) + x = f(x) (x^2 + y^2) \iff y^2 f(x) + x = x + f(x) y^2. \]
+
+Now, we go for the converse.
+Start by plugging $y = 1$ in~\eqref{2016a4-eq0}.
+We get that, for all $x \in R^+$,
+\[ x f(x^2) f(f(1)) + f(f(x)) = f(x) (f(f(x^2)) + f(f(1))). \]
+Plugging $x = 1$ into this equation gives us $f(1) = 1$.
+So, the equation simplifies to
+\[ x f(x^2) + f(f(x)) = f(x) (f(f(x^2)) + 1). \]
+Plugging $x = 1$ into~\eqref{2016a4-eq0} gives us
+\[ f(f(y)) + f(y) = f(y) (f(f(y^2)) + 1) \implies f(y) f(f(y^2)) = f(f(y)). \tag{1}\label{2016a4-eq1} \]
+Then the previous equation becomes
+\[ x f(x^2) + f(f(x)) = f(f(x)) + f(x) \implies x f(x^2) = f(x). \tag{2}\label{2016a4-eq2} \]
+
+Next, we show that $f$ is injective.
+Fix some $a, b \in R^+$, and suppose that $f(a) = f(b)$.
+Write $c = f(a) = f(b)$.
+For any $x, y \in R^+$ such that $f(x) = f(y) = c$,~\eqref{2016a4-eq0},~\eqref{2016a4-eq1}, and~\eqref{2016a4-eq2} gives us
+\[ c(c f(c) + f(yc)) = c f(xy) (f(f(x^2)) + f(f(y^2))) = 2 f(c) f(xy). \]
+This implies $f(y^2) = f(xy)$, as
+\[ 2 f(c) f(xy) = 2 f(c) f(y^2) = c(c f(c) + f(yc)). \]
+In particular, we get $f(a^2) = f(ab) = f(b^2)$.
+Then~\eqref{2016a4-eq2} implies $a = b$, as desired.
+
+Finally, we show that $x f(x) = 1$ for all $x \in R^+$.
+Indeed,~\eqref{2016a4-eq1} and~\eqref{2016a4-eq2} gives us $f(x) f(f(x^2)) = f(f(x)) = f(x) f(f(x)^2)$, so $f(f(x^2)) = f(f(x)^2)$.
+But $f$ is injective, so $f(x^2) = f(x)^2$.
+Thus,~\eqref{2016a4-eq2} gives $x f(x)^2 = f(x)$ and thus $x f(x) = 1$.
+
+
+
+\subsection*{Implementation details}
+
+At the time of writing, the Lean API apparently breaks when trying to work over totally ordered commutative rings while also importing the \texttt{algebra.order.positive.field} module.
+The module is necessary to get the inverse function.
+Thus, we will only implement a version with rings without mentioning what happens if $R$ is a field.
+
+
+
+\end{document}

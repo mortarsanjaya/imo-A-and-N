@@ -1,4 +1,4 @@
-import data.nat.totient
+import data.nat.totient data.nat.prime_norm_num
 
 /-!
 # Bounds on the totient function

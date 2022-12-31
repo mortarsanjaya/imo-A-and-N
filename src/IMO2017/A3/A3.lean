@@ -1,4 +1,4 @@
-import data.fintype.card tactic.abel data.set.finite
+import data.fintype.basic data.set.finite
 
 /-! # IMO 2017 A3 -/
 

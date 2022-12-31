@@ -113,7 +113,8 @@ begin
   rw [prod_repeat, one_pow, mul_one, card_repeat, bit0, ← mul_two, ← sq, ← pow_mul,
       mul_left_comm, ← pow_succ, nat.sub_add_cancel h, pow_mul] at h2,
   replace h2 := le_of_pow_le_pow (2 ^ m) (zero_le (x / ↑(2 ^ m))) (pow_pos two_pos _) h2,
-  rw [coe_pow, coe_bit0, coe_one, le_div_iff (pow_pos _ _), ← mul_pow, two_mul, ← bit0] at h2,
+  rw [nat.cast_pow, nat.cast_bit0, nat.cast_one,
+      le_div_iff (pow_pos _ _), ← mul_pow, two_mul, ← bit0] at h2,
   exacts [h2, two_pos]
 end
 

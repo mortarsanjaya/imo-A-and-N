@@ -1,0 +1,79 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newtheorem*{claim}{Claim}
+
+\title{IMO 2018 A5}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $F$ be a totally ordered field.
+Denote by $F^+$ the set of positive elements of $F$.
+Let $V$ be an $F$-vector space.
+Find all functions $f : F^+ \to V$ such that, for all $x, y \in F^+$,
+\[ (x + x^{-1}) f(y) = f(xy) + f(x^{-1} y). \tag{*}\label{2018a5-eq0} \]
+
+
+
+\subsection*{Answer}
+
+$x \mapsto x v_1 + x^{-1} v_2$ for some $v_1, v_2 \in V$.
+
+
+
+\subsection*{Solution}
+
+Reference: \url{https://artofproblemsolving.com/community/c6h1876752p12753740}
+
+We refer to the solution in the AoPS thread of IMO 2018 A5 by the user \texttt{MarkBcc168} (post \#6).
+We will also present the same solution below, with some modifications.
+Note that the solution generalizes well to our setting.
+
+Clearly, the set of functions satisfying~\eqref{2018a5-eq0} form an $F$-vector space.
+Furthermore, it is easy to check that $x \mapsto xv$ and $x \mapsto x^{-1} v$ satisfies~\eqref{2018a5-eq0} for any $v \in V$.
+This verifies the answer, so it remains to prove that no other solutions exist.
+
+Let $f$ be a function satisfying~\eqref{2018a5-eq0}, and fix some $a \neq b \in F^+$.
+Set $c = ab^{-1} - ba^{-1}$, $w_1 = b^{-1} f(a) - a^{-1} f(b)$, and $w_2 = a f(b) - b f(a)$.
+It is easy to check that the function $g(x) = x w_1 + x^{-1} w_2$ satisfies~\eqref{2018a5-eq0} with $g(a) = cf(a)$ and $g(b) = cf(b)$.
+Since $a$ and $b$ are distinct and positive, we have $c \neq 0$.
+Since $f$ satisfies~\eqref{2018a5-eq0}, we get that $h = f - c^{-1} g$ satisfies~\eqref{2018a5-eq0} with $h(a) = h(b) = 0$.
+The following claim shows that $h = 0$ and thus $f = c^{-1} g$ is of the desired form.
+
+\begin{claim}
+Let $f : F^+ \to V$ be a function satisfying~\eqref{2018a5-eq0} with $f(a) = f(b) = 0$.
+Then $f = 0$.
+\end{claim}
+\begin{proof}
+First, for any $u \in F^+$ with $f(u) = 0$, substituting $(x, y) = (uz, u)$ into~\eqref{2018a5-eq0} yields $f(u^2 z) = -f(z)$ for all $z \in F^+$.
+In particular, since $f(a) = f(b) = 0$, we get $f(a^2 z) = -f(z) = f(b^2 z)$ for all $z \in F^+$.
+This implies $f(cz) = f(z)$ for all $z \in F^+$, where $c = (a/b)^2 \neq 1$.
+
+Finally, for any $z \in F^+$, plugging $(x, y) = (c, cz)$ yields $(c + c^{-1}) f(z) = 2 f(z)$.
+Since $c \neq 1$, we have $c + c^{-1} \neq 2$, so $f(z) = 0$.
+\end{proof}
+
+
+
+\subsection*{Implementation details}
+
+To implement the solution, it is most convenient to construct the set of solutions as an $F$-vector space.
+We implement this construction, and we also implement solution checks separately.
+The harder direction also uses the construction and solution checks.
+
+
+
+\end{document}

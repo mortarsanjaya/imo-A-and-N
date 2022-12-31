@@ -1,4 +1,4 @@
-import data.nat.order.basic data.set.basic
+import data.nat.order.basic data.set.image
 
 /-! # IMO 2010 A6 -/
 

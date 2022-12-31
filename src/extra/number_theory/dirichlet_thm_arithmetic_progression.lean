@@ -1,4 +1,4 @@
-import data.nat.prime
+import data.nat.prime data.set.finite
 
 /-!
 # Dirichlet's theorem on arithmetic progressions

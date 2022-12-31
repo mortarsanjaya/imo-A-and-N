@@ -1,4 +1,9 @@
-import data.real.basic extra.periodic.big_operators data.nat.periodic tactic.fin_cases
+import
+  data.real.basic
+  extra.periodic.big_operators
+  data.nat.periodic
+  algebra.big_operators.order
+  tactic.fin_cases
 
 /-! # IMO 2018 A2 (P2) -/
 

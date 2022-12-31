@@ -5,7 +5,7 @@ import data.nat.choose.basic data.nat.parity
 namespace IMOSL
 namespace IMO2012N3
 
-private lemma lem2 {p : ℕ} (h : p.prime) (k : ℕ) {r : ℕ} (h0 : r < p) :
+private lemma prime_not_dvd_desc_factorial {p : ℕ} (h : p.prime) (k : ℕ) {r : ℕ} (h0 : r < p) :
    ¬p ∣ (p * k + r).desc_factorial r :=
  begin
   induction r with r h1,
@@ -80,7 +80,7 @@ begin
     rw [← nat.mul_dvd_mul_iff_left (p - 1).succ_pos, nat.mul_succ, ← mul_assoc,
         ← nat.factorial_succ, nat.succ_eq_add_one, nat.sub_add_cancel h.pos,
         ← nat.desc_factorial_eq_factorial_mul_choose],
-    have h0 := lem2 h k (nat.sub_lt h.pos one_pos),
+    have h0 := prime_not_dvd_desc_factorial h k (nat.sub_lt h.pos one_pos),
     rwa [← nat.mul_dvd_mul_iff_left (p * k + (p - 1)).succ_pos, ← nat.succ_desc_factorial_succ,
          nat.succ_eq_add_one, add_assoc, nat.sub_add_cancel h.pos, mul_comm] at h0 }
 end
