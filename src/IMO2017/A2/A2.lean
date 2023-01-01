@@ -222,7 +222,16 @@ begin
   ---- Get the integer with maximum square in `T`
   replace h0 : ∃ k : ℤ, k ≠ 0 ∧ k ∈ T ∧ ∀ m : ℤ, m ∈ T → m ^ 2 ≤ k ^ 2 :=
   begin
-    sorry
+    rcases h0 with ⟨k, h0, h1⟩,
+    let U := image (λ x, x ^ 2) T,
+    replace h : U.nonempty := by rw nonempty.image_iff; exact ⟨k, h1⟩,
+    obtain ⟨c, h2, h3⟩ : ∃ c : ℤ, c ∈ U ∧ ∀ d : ℤ, d ∈ U → d ≤ c :=
+      ⟨U.max' h, max'_mem U h, le_max' U⟩,
+    simp_rw mem_image at h3,
+    replace h3 : ∀ m : ℤ, m ∈ T → m ^ 2 ≤ c := λ m h4, h3 (m ^ 2) ⟨m, h4, rfl⟩,
+    rw mem_image at h2; rcases h2 with ⟨n, h2, rfl⟩,
+    refine ⟨n, _, h2, h3⟩,
+    rw ← sq_pos_iff at h0 ⊢; exact lt_of_lt_of_le h0 (h3 k h1)
   end,
 
   ---- Bound `a^2 + b^2` for `a, b ∈ T` 
