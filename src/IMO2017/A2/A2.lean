@@ -1,4 +1,4 @@
-import algebra.ring.basic data.finset.pointwise data.int.interval tactic.ring
+import algebra.ring.basic data.finset.pointwise data.int.parity data.int.interval tactic.ring
 
 /-! # IMO 2017 A2 -/
 
@@ -60,6 +60,11 @@ begin
   right; right; rw [neg_mul, ← sq],
   right; left; rw [neg_mul_neg, ← sq]
 end
+
+private lemma odd_four_mul_neg_one (c : ℤ) : odd (4 * c - 1) :=
+  by rw [int.odd_sub', iff_true_left odd_one, int.even_mul]; left; exact even_bit0 2
+
+
 
 
 variables {G : Type*} [add_group G] [decidable_eq G]
@@ -290,14 +295,52 @@ begin
 
   ---- Reduce to finding `T : finset ℤ` such that `1, 4 ∈ T - T` and
   ----   all elements of `T - T` are either odd or divisible by `4`
-  rsuffices ⟨T, h0, h1, h2, h3⟩ : ∃ T : finset ℤ,
-    T.card = k ∧ (1 : ℤ) ∈ T - T ∧ (4 : ℤ) ∈ T - T ∧ ∀ x : ℤ, x ∈ T - T → odd x ∨ 4 ∣ x,
+  rsuffices ⟨T, h0, ⟨h1, h2⟩, h3⟩ : ∃ T : finset ℤ,
+    T.card = k ∧ ((1 : ℤ) ∈ T - T ∧ (4 : ℤ) ∈ T - T) ∧ ∀ x : ℤ, x ∈ T - T → odd x ∨ 4 ∣ x,
   { intros h4; replace h4 := h4 (image coe T) (by rw [card_image_coe, h0]),
     rw [← set_coe_image_sub, ← int.cast_one] at h4,
     exact not_good_one h1 h2 h3 (good_cast_cast_imp_good h4) },
 
   ---- Find the desired `T`
-  sorry
+  obtain ⟨m, rfl⟩ := nat.exists_eq_succ_of_ne_zero (ne_of_gt (lt_trans two_pos h)),
+  rw nat.succ_le_succ_iff at h; simp_rw mem_sub,
+  let T := insert (1 : ℤ) (image (has_mul.mul (4 : ℤ)) (Ico 0 m)),
+  refine ⟨T, _, _, _⟩,
+
+  -- `|T| = m + 1`
+  rw [card_insert_of_not_mem, card_image_of_injective, int.card_Ico, sub_zero, int.to_nat_coe_nat],
+  exact mul_right_injective₀ four_ne_zero,
+  intros h0; rw mem_image at h0,
+  replace h0 : (4 : ℤ) ∣ 1 := by rcases h0 with ⟨a, -, h0⟩; exact ⟨a, h0.symm⟩,
+  replace h0 := int.eq_one_of_dvd_one zero_le_four h0,
+  revert h0; norm_num,
+
+  -- `1, 4 ∈ T - T`
+  rsuffices ⟨h0, h1, h2⟩ : (0 : ℤ) ∈ T ∧ (1 : ℤ) ∈ T ∧ (4 : ℤ) ∈ T,
+    exact ⟨⟨1, 0, h1, h0, sub_zero 1⟩, ⟨4, 0, h2, h0, sub_zero 4⟩⟩,
+  refine ⟨mem_insert_of_mem _, mem_insert_self 1 _, mem_insert_of_mem _⟩; rw mem_image,
+  refine ⟨0, _, mul_zero 4⟩,
+  rw [left_mem_Ico, int.coe_nat_pos]; exact lt_of_lt_of_le two_pos h,
+  refine ⟨1, _, mul_one 4⟩,
+  rw [mem_Ico, nat.one_lt_cast]; exact ⟨int.one_nonneg, lt_of_lt_of_le one_lt_two h⟩,
+
+  -- `x ∈ T - T` implies `x` is odd or `4 ∣ x`
+  replace h0 : ∀ c : ℤ, c ∈ T → c = 1 ∨ 4 ∣ c :=
+  begin
+    intros c h0; rw [mem_insert, mem_image] at h0,
+    rcases h0 with rfl | ⟨a, -, rfl⟩,
+    left; refl,
+    right; use a
+  end,
+
+  rintros x ⟨a, b, h2, h3, rfl⟩,
+  replace h2 := h0 a h2,
+  replace h3 := h0 b h3,
+  rcases h2 with rfl | ⟨u, rfl⟩; rcases h3 with rfl | ⟨v, rfl⟩,
+  right; rw sub_self; exact dvd_zero 4,
+  left; rw [← neg_sub, odd_neg]; exact odd_four_mul_neg_one v,
+  left; exact odd_four_mul_neg_one u,
+  right; rw ← mul_sub; exact ⟨u - v, rfl⟩
 end
 
 end main_results
