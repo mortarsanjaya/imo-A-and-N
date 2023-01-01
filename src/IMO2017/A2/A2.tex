@@ -1,0 +1,159 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\Z}{\mathbb{Z}}
+
+\DeclareMathOperator{\rchar}{char}
+
+\newtheorem{lemma}{Lemma}
+
+
+\title{IMO 2017 A2}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $R$ be a commutative ring of characteristic zero.
+Given $q \in R$, we say that a finite set $S \subseteq R$ is \emph{$q$-good} if for any $u, v \in S$, there exists $a, b, c, d \in S$ such that $quv = a^2 + b^2 - c^2 - d^2$.
+Given $k \geq 0$, we say that $q \in R$ is \emph{$k$-excellent} if for any finite set $S \subseteq R$ of size $k$, the set $S - S := \{s - t : s, t \in S\}$ is $q$-good.
+Find all $k$-excellent elements of $R$.
+
+
+\subsection*{Answer}
+
+\begin{itemize}
+    \item If $k = 0$ or $k = 1$, any element of $R$ is $k$-excellent.
+    \item If $k = 2$, then the set of $k$-excellent elements is $\{-2, -1, 0, 1, 2\}$.
+    \item If $k \geq 3$, then the set of $k$-excellent elements is $\{-2, 0, 2\}$.
+\end{itemize}
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{http://www.imo-official.org/problems/IMO2017SL.pdf}
+
+We follow Solution 1 of the official solution for the case $k \geq 3$.
+For the case $k \geq 2$, the solution we present will involve reduction to the case where $R = \Z$.
+
+First, the case $k = 0$ and $k = 1$ are obvious.
+We have $\emptyset - \emptyset = \emptyset$, and $S - S = \{0\}$ if $|S| = 1$.
+Obviously, $\emptyset$ and $\{0\}$ are $q$-good regardless of the choice of $q \in R$.
+
+It is clear that if $q \in R$ is $k$-excellent, then $-q$ is also $k$-excellent.
+It is also clear that $0$ is always $k$-excellent; any set is $0$-good.
+In a less obvious way, $1$ is $2$-excellent and $2$ is $k$-excellent for any $k \geq 0$.
+These are what we prove next.
+
+\begin{lemma}\label{2017a2-1}
+Over any ring $R$, $1$ and $2$ are $2$-excellent.
+\end{lemma}
+\begin{proof}
+For any $S \subseteq R$ of size $2$, there exists $x \in R$ (non-zero) such that $S - S = \{-x, 0, x\}$.
+Now, for any $x \in R$, $T = \{-x, 0, x\}$ is $1$-good and $2$-good.
+Indeed, for any $u, v \in T$, we have $uv \in \{-x^2, 0, x^2\}$.
+All of $-2x^2$, $-x^2$, $0$, $x^2$, and $2x^2$ can be expressed as $a^2 + b^2 - c^2 - d^2$ for some $a, b, c, d \in T$.
+This shows that $1$ and $2$ are $2$-excellent.
+\end{proof}
+
+\begin{lemma}\label{2017a2-2}
+For any $k \geq 0$, over a commutative ring $R$, $2$ is $k$-excellent.
+\end{lemma}
+\begin{proof}
+It suffices to prove that $S - S$ is $2$-good for any finite set $S \subseteq R$.
+Indeed, take any $u, v \in S - S$, and express them as $u = w - x$, $v = y - z$ for some $w, x, y, z \in S$.
+The lemma follows from the equation
+\[ 2(w - x)(y - z) = (w - z)^2 + (x - y)^2 - (w - y)^2 - (x - z)^2. \]
+\end{proof}
+
+We now focus on proving that there are no other $k$-excellent elements of $R$.
+It turns out that they must be integers, and they are $k$-excellent over $\Z$.
+We prove these two results next.
+
+\begin{lemma}\label{2017a2-3}
+Let $R$ be a ring and $k \geq 3$.
+Then a $k$-excellent element of $R$ must be an integer.
+\end{lemma}
+\begin{proof}
+Take a finite set $S$ of size $k$ consisting only of integers, such that $1 \in S - S$.
+For example, $S = \{0, 1, 2, \ldots, k - 1\}$ works.
+All we need is that $S - S$ consists only of integers and it contains $1$.
+Indeed, by assumption, $S - S$ is $q$-good.
+Since $1 \in S - S$, we get $q = a^2 + b^2 - c^2 - d^2$ for some $a, b, c, d \in S - S$.
+In particular, $q$ has to be an integer.
+\end{proof}
+
+\begin{lemma}\label{2017a2-4}
+Let $R$ be a ring with characteristic zero and $k \geq 3$.
+Let $n \in \Z$ such that $n$ is $k$-excellent over $R$.
+Then $n$ is $k$-excellent over $\Z$.
+\end{lemma}
+\begin{proof}
+It suffices to show that for any finite subset $S \subseteq \Z$, if $S$ is $n$-good over $R$, then $S$ is also $n$-good over $\Z$.
+The lemma follows since $S - S$ is $n$-good over $R$ whenever $|S| = k$.
+
+Let $S \subseteq \Z$ be $n$-good over $R$.
+For any $u, v \in S$, there exists $a, b, c, d \in S$ such that $nuv = a^2 + b^2 - c^2 - d^2$ over $R$.
+But $R$ has characteristic zero, so this equation must also hold over $\Z$.
+This proves that $S$ is $n$-good over $\Z$.
+\end{proof}
+
+It remains to work over $\Z$.
+We show that for any $k \geq 2$, any $k$-excellent integers have absolute value at most $2$.
+We also show that for any $k \geq 3$, $1$ is not $k$-excellent.
+
+\begin{lemma}\label{2017a2-5}
+Over $\Z$, Any $k$-excellent integer has absolute value at most $2$.
+\end{lemma}
+\begin{proof}
+A more general statement is as follows: for any $q \in \Z$, if $|q| > 2$, then the only $q$-good sets are $\emptyset$ and $\{0\}$.
+This suffices to prove the lemma, as $S - S$ always contains a non-zero integer if $|S| \geq 2$.
+Without loss of generality, assume that $q > 2$.
+Let $T$ be a non-empty $q$-good set, and let $n$ be the element of $T$ with maximum absolute value.
+Since $T$ is $q$-good, we can write $qn^2 = a^2 + b^2 - c^2 - d^2 \leq 2n^2$ for some $a, b, c, d \in T$.
+Then $q > 2$ necessaily implies $n^2 \leq 0$ and thus $n = 0$.
+By maximality, this means $T = \{0\}$, as desired.
+\end{proof}
+
+\begin{lemma}\label{2017a2-6}
+For any $k \geq 3$, $1$ is not $k$-excellent over $\Z$.
+\end{lemma}
+\begin{proof}
+Take $S = \{0, 1, 4, 8, 12, \ldots, 4(k - 2)\}$.
+By this constructing, $S - S$ contains $1$ and $4$, and all its elements are either odd or divisible by $4$.
+In particular, for any $a \in S - S$, we have $a^2 \equiv 0, 1 \pmod{8}$.
+Thus $4 = 1 \cdot 1 \cdot 4$ cannot be represented as $a^2 + b^2 - c^2 - d^2$ for any $a, b, c, d \in S - S$.
+This shows that $1$ is not $k$-excellent over $\Z$.
+\end{proof}
+
+
+
+\subsection*{Extra notes}
+
+It is of interest to see what happens in a general ring of characteristic zero.
+The answer is still the same for $k \leq 2$, but for $k \geq 3$, $0$ might be the only $k$-excellent element.
+An example for $k \geq 3$ is as follows.
+
+Let $R$ be the free (non-commutative) ring $\Z[X, Y]$ over two variables.
+Then $2 \in R$ is not $3$-excellent.
+Indeed, take $S = \{0, X, Y\}$, so that $S - S = \{0, \pm X, \pm Y, \pm (X - Y)\}$.
+It is impossible to represent $2XY$ as $a^2 + b^2 - c^2 - d^2$ for some $a, b, c, d \in S - S$.
+The $XY$ and $YX$ coefficient of $a^2$ are the same for all $a \in S - S$, but this is false for $2XY$.
+
+At the time of writing, I do not know if there exists a non-commutative ring $R$ such that $2 \in R$ is $k$-excellent for some $k \geq 3$.
+
+
+
+\end{document}
