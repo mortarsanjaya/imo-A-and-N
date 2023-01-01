@@ -1,4 +1,9 @@
-import algebra.ring.basic data.finset.pointwise data.int.parity data.int.interval tactic.ring
+import
+  algebra.ring.basic
+  data.finset.pointwise
+  data.int.parity
+  data.int.interval
+  data.int.modeq
 
 /-! # IMO 2017 A2 -/
 
@@ -60,11 +65,6 @@ begin
   right; right; rw [neg_mul, ← sq],
   right; left; rw [neg_mul_neg, ← sq]
 end
-
-private lemma odd_four_mul_neg_one (c : ℤ) : odd (4 * c - 1) :=
-  by rw [int.odd_sub', iff_true_left odd_one, int.even_mul]; left; exact even_bit0 2
-
-
 
 
 variables {G : Type*} [add_group G] [decidable_eq G]
@@ -219,16 +219,91 @@ end
 private lemma good_int_bound {n : ℤ} {T : finset ℤ} (h : good n T) (h0 : ∃ k : ℤ, k ≠ 0 ∧ k ∈ T) :
   n ∈ ({0, 1, -1, 2, -2} : finset ℤ) :=
 begin
-  ---- Get the maximum modulus integer in `T`
-  -- ...
-  sorry
+  ---- Get the integer with maximum square in `T`
+  replace h0 : ∃ k : ℤ, k ≠ 0 ∧ k ∈ T ∧ ∀ m : ℤ, m ∈ T → m ^ 2 ≤ k ^ 2 :=
+  begin
+    sorry
+  end,
+
+  ---- Bound `a^2 + b^2` for `a, b ∈ T` 
+  rcases h0 with ⟨k, h0, h1, h2⟩,
+  replace h2 : ∀ m n : ℤ, m ∈ T → n ∈ T → m ^ 2 + n ^ 2 ≤ 2 * k ^ 2 :=
+    λ m n h3 h4, by rw two_mul; exact add_le_add (h2 m h3) (h2 n h4),
+  have h3 : ∀ m n : ℤ, 0 ≤ m ^ 2 + n ^ 2 := λ m n, add_nonneg (sq_nonneg m) (sq_nonneg n),
+
+  ---- Get the bound `|n| ≤ 2`
+  replace h := h k k h1 h1,
+  rcases h with ⟨a, b, c, d, ha, hb, hc, hd, h⟩; rw ← sq at h,
+  replace h1 := le_trans (le_of_eq_of_le h (sub_le_self _ (h3 c d))) (h2 a b ha hb),
+  rw [← neg_sub, eq_neg_iff_eq_neg, eq_comm] at h,
+  replace h := le_trans (le_of_eq_of_le h (sub_le_self _ (h3 a b))) (h2 c d hc hd),
+  rw [neg_le, ← neg_mul] at h,
+  rw mul_le_mul_right ((sq_pos_iff k).mpr h0) at h1 h,
+  replace h : |n| ≤ 2 := abs_le.mpr ⟨h, h1⟩,
+  clear ha hb hc hd h0 h1 h2 h3 a b c d k T,
+
+  ---- Finishing
+  simp_rw [mem_insert, mem_singleton],
+  rw [← abs_eq, ← or_assoc (n = 1), ← abs_eq, ← abs_nonpos_iff, ← int.lt_add_one_iff, zero_add,
+      ← or_assoc, ← le_iff_lt_or_eq, ← int.lt_add_one_iff, ← bit0, ← le_iff_lt_or_eq],
+  exacts [h, zero_le_one, zero_le_two]
 end
 
 private lemma not_good_one {T : finset ℤ}
   (h : (1 : ℤ) ∈ T) (h0 : (4 : ℤ) ∈ T) (h1 : ∀ x : ℤ, x ∈ T → odd x ∨ 4 ∣ x) :
   ¬good (1 : ℤ) T :=
 begin
-  sorry
+  ---- Some setup
+  intros h2; replace h2 := h2 1 4 h h0; clear h h0,
+  rw [one_mul, one_mul] at h2,
+  replace h1 : ∀ x, x ∈ T → ∃ c : ℤ, (c = 0 ∨ c = 1) ∧ x ^ 2 ≡ c [ZMOD 8] :=
+  begin
+    change (8 : ℤ) with (2 : ℤ) ^ 2 * 2,
+    intros x h; replace h1 := h1 x h,
+    rcases h1 with ⟨y, rfl⟩ | ⟨y, rfl⟩,
+    refine ⟨1, or.inr rfl, _⟩,
+    replace h := int.even_mul_succ_self y; cases h with z h,
+    rw [add_sq, one_pow, mul_one, ← mul_assoc, ← sq, mul_pow, ← mul_add, sq y, ← mul_add_one,
+        h, ← two_mul, ← mul_assoc, int.modeq_iff_dvd, ← sub_sub, sub_sub_cancel_left, dvd_neg],
+    exact ⟨z, rfl⟩,
+    refine ⟨0, or.inl rfl, _⟩,
+    rw [int.modeq_zero_iff_dvd, mul_pow],
+    exact dvd_mul_of_dvd_left ⟨2, rfl⟩ (y ^ 2)
+  end,
+
+  ---- Reduce to modulo `8` equality
+  rcases h2 with ⟨a, b, c, d, ha, hb, hc, hd, h2⟩,
+  replace ha := h1 a ha; generalize_hyp : a ^ 2 = p at h2 ha,
+  rcases ha with ⟨p0, hp, hp0⟩,
+  replace hb := h1 b hb; generalize_hyp : b ^ 2 = q at h2 hb,
+  rcases hb with ⟨q0, hq, hq0⟩,
+  replace hc := h1 c hc; generalize_hyp : c ^ 2 = r at h2 hc,
+  rcases hc with ⟨r0, hr, hr0⟩,
+  replace hd := h1 d hd; generalize_hyp : d ^ 2 = s at h2 hd,
+  rcases hd with ⟨s0, hs, hs0⟩,
+  have h := (hp0.add hq0).sub (hr0.add hs0),
+  rw [← h2, int.modeq_iff_dvd] at h,
+  clear h1 h2 hp0 hq0 hr0 hs0 a b c d p q r s T,
+
+  ---- `{0, 1} + {0, 1} ⊆ {0, 1, 2}`
+  have h1 : ∀ a b : ℤ, (a = 0 ∨ a = 1) → (b = 0 ∨ b = 1) →
+    a + b = 0 ∨ a + b = 1 ∨ a + b = 2 :=
+  begin
+    intros a b h h0,
+    rcases h with rfl | rfl; rcases h0 with rfl | rfl,
+    left; rw add_zero,
+    right; left; rw zero_add,
+    right; left; rw add_zero,
+    right; right; rw ← bit0
+  end,
+
+  have h0 := h1 p0 q0 hp hq; generalize_hyp : p0 + q0 = u at h h0 ⊢,
+  replace h1 := h1 r0 s0 hr hs; generalize_hyp : r0 + s0 = v at h h1 ⊢,
+  clear hp hq hr hs p0 q0 r0 s0,
+
+  ---- Finishing
+  revert h; rw imp_false,
+  rcases h0 with rfl | rfl | rfl; rcases h1 with rfl | rfl | rfl; norm_num
 end
 
 end good
@@ -336,10 +411,12 @@ begin
   rintros x ⟨a, b, h2, h3, rfl⟩,
   replace h2 := h0 a h2,
   replace h3 := h0 b h3,
+  have h1 : ∀ c : ℤ, odd (4 * c - 1) :=
+    λ c, by rw [int.odd_sub', iff_true_left odd_one, int.even_mul]; left; exact even_bit0 2,
   rcases h2 with rfl | ⟨u, rfl⟩; rcases h3 with rfl | ⟨v, rfl⟩,
   right; rw sub_self; exact dvd_zero 4,
-  left; rw [← neg_sub, odd_neg]; exact odd_four_mul_neg_one v,
-  left; exact odd_four_mul_neg_one u,
+  left; rw [← neg_sub, odd_neg]; exact h1 v,
+  left; exact h1 u,
   right; rw ← mul_sub; exact ⟨u - v, rfl⟩
 end
 
