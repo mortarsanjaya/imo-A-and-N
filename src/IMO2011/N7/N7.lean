@@ -107,40 +107,42 @@ end
 theorem final_solution (h : odd p) : ‖S (3 : ℚ_[p]) + S 4 - 3 * S 2‖ < 1 :=
 begin
   ---- Reduce to showing that an expression equivalent to `(2^p - 2)^2` has norm at most `p^{-2}`
-  have h0 := λ z : ℤ, S_equiv_mod_p_sq h (padic_norm_e.norm_int_le_one z),
+  set T := λ (z : ℤ), z ^ p - (z - 1) ^ p - 1,
+  have h0 : ∀ z : ℤ, ‖(p : ℚ_[p]) * S z + T z‖ ≤ p ^ (-2 : ℤ) :=
+    λ z, by simp_rw [T, int.cast_sub, int.cast_pow, int.cast_sub, int.cast_one];
+      exact S_equiv_mod_p_sq h (padic_norm_e.norm_int_le_one z),
   replace h : ‖((-3 : ℤ) : ℚ_[p])‖ ≤ 1 := padic_norm_e.norm_int_le_one (-3),
-  replace h := mul_le_of_le_one_of_le_of_nonneg h (h0 2) (norm_nonneg _),
-  rw ← norm_mul at h; replace h0 := ultra_norm_add_le (ultra_norm_add_le (h0 3) (h0 4)) h,
-  rw [add_add_add_comm, mul_add, ← mul_add, add_add_add_comm, mul_left_comm, ← mul_add] at h0,
+  replace h := mul_le_of_le_one_of_le_of_nonneg h (h0 2) (norm_nonneg _); rw ← norm_mul at h,
+  replace h0 := ultra_norm_add_le (ultra_norm_add_le (h0 3) (h0 4)) h; clear h,
+  rw [add_add_add_comm, mul_add, ← mul_add, add_add_add_comm, mul_left_comm,
+      ← mul_add, ← int.cast_mul, ← int.cast_add, ← int.cast_add] at h0,
   simp_rw [int.cast_neg, int.cast_bit1, int.cast_bit0, int.cast_one] at h0,
-  rw [neg_mul, ← sub_eq_add_neg, add_assoc] at h0,
-  generalize_hyp : S 3 + S 4 - 3 * S 2 = q at h0 ⊢,
-  clear h; generalize_hyp h : (3 : ℚ_[p]) ^ p - (3 - 1) ^ p - 1 +
-    (4 ^ p - (4 - 1) ^ p - 1 + (-3) * (2 ^ p - (2 - 1) ^ p - 1)) = r at h0,
-  revert h0; suffices : ‖r‖ ≤ p ^ (-2 : ℤ),
+  rw [sub_eq_add_neg, ← neg_mul]; revert h0,
+  suffices : ‖((T 3 + T 4 + (-3) * T 2 : ℤ) : ℚ_[p])‖ ≤ p ^ (-(2 : ℕ) : ℤ),
   { rw ← norm_neg at this,
-    intros h0; replace h0 := ultra_norm_add_le h0 this,
-    replace this : 0 < (p : ℝ) := by rw nat.cast_pos; exact (fact.out p.prime).pos,
+    intros h; replace h := ultra_norm_add_le h this,
+    replace this : 0 < (p : ℝ) := nat.cast_pos.mpr (fact.out p.prime).pos,
     rw [add_neg_cancel_right, norm_mul, padic_norm_e.norm_p, inv_mul_le_iff this,
-        mul_comm, ← zpow_add_one₀ (ne_of_gt this), bit0, neg_add,
-        neg_add_cancel_comm, zpow_neg_one, ← padic_norm_e.norm_p] at h0,
-    exact lt_of_le_of_lt h0 padic_norm_e.norm_p_lt_one },
-  
-  ---- Prove that `r = (2^p - 2)^2` (over `ℚ_[p]`)
-  clear q; simp_rw sub_sub at h,
-  rw [bit0, bit0, add_sub_assoc, add_sub_cancel, one_pow, ← two_mul, ← add_assoc,
-      sub_add_sub_comm, add_add_add_comm, ← bit0, bit1, add_sub_cancel, ← bit1, mul_pow,
-      ← sq, add_right_comm, add_comm (3 ^ p : ℚ_[p]), add_sub_add_right_eq_sub] at h,
-  generalize_hyp h0 : (2 : ℚ_[p]) ^ p = q at h,
-  replace h : r = (q - 2) ^ 2 := by rw ← h; ring,
-  subst h; subst h0,
+        mul_comm (p : ℝ), ← zpow_add_one₀ (ne_of_gt this)] at h,
+    change (-2 + 1 : ℤ) with (-1 : ℤ) at h,
+    rw [zpow_neg_one, ← padic_norm_e.norm_p] at h,
+    exact lt_of_le_of_lt h padic_norm_e.norm_p_lt_one },
 
-  ---- Prove that `‖(2^p - 2)^2‖ ≤ p^(-2)`
-  nth_rewrite 3 ← nat.cast_two,
-  rw [← int.cast_two, ← int.cast_pow, ← int.cast_sub, ← int.cast_pow,
-      padic_norm_e.norm_int_le_pow_iff_dvd, nat.cast_pow],
-  refine pow_dvd_pow_of_dvd ((zmod.int_coe_eq_int_coe_iff_dvd_sub _ _ _).mp _) 2,
-  rw [int.cast_pow, int.cast_two, zmod.pow_card]
+  ---- Reduce to `T(3) + T(4) - 3 T(2) = (2^p - 2)^2`
+  rw [padic_norm_e.norm_int_le_pow_iff_dvd, nat.cast_pow, neg_mul, ← sub_eq_add_neg],
+  suffices : T 3 + T 4 - 3 * T 2 = (2 ^ p - 2) ^ 2,
+    rw this; apply pow_dvd_pow_of_dvd;
+      rw [← zmod.int_coe_eq_int_coe_iff_dvd_sub, int.cast_pow, int.cast_two, zmod.pow_card],
+  
+  ---- Prove that `T(3) + T(4) - 3 T(2) = (2^p - 2)^2`
+  change T 3 with (3 : ℤ) ^ p - 2 ^ p - 1,
+  change T 4 with (2 * 2 : ℤ) ^ p - 3 ^ p - 1,
+  change T 2 with (2 : ℤ) ^ p - 1 ^ p - 1,
+  rw [one_pow, mul_pow, ← sq, sub_add_sub_comm, sub_add_sub_cancel'],
+  generalize : (2 : ℤ) ^ p = q,
+  rw [sub_eq_iff_eq_add, sub_sub q, ← bit0, sq, sq, ← add_mul, bit1,
+      ← add_assoc, sub_add_cancel, add_one_mul, sub_sub, sub_eq_iff_eq_add,
+      add_assoc, sub_add_add_cancel, ← mul_two, ← mul_add, sub_add_cancel]
 end
 
 end IMO2011N7
