@@ -1,0 +1,75 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\newtheorem*{lemma*}{Lemma}
+
+\title{IMO 2011 N7}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $p$ be an odd prime.
+For each $a \in \Q_p$, define
+\[ S_a = \sum_{i = 1}^{p - 1} \frac{a^i}{i} \in \Q_p. \]
+Prove that $\|S_3 + S_4 - 3 S_2\|_p < 1$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2011SL.pdf}
+
+We present Solution 1 of the official solution in the language of $p$-adics.
+That is, we start with the following lemma expressing $S_a$ for each $a \in \Z_p$ up to modulo $p$ precision.
+The result we need to prove is almost immediate afterwards.
+Note that $S_a \in \Z_p$ for $a \in \Z_p$, and $\|S_3 + S_4 - 3 S_2\|_p < 1$ is equivalent to $p \mid S_3 + S_4 - 3 S_2$ over $\Z_p$.
+
+\begin{lemma*}
+For any $a \in \Z_p$, $p S_a \equiv (a - 1)^p + 1 - a^p \pmod{p^2}$.
+\end{lemma*}
+\begin{proof}
+The main observation is that, for any $0 < k < p$,
+\[ \binom{p}{k} = \frac{p(p - 1) \ldots (p - (k - 1))}{k!} \equiv p \frac{(-1)^{k - 1}}{k} \pmod{p^2}. \]
+Rewrite as $p/k \equiv (-1)^{k - 1} \binom{p}{k} \pmod{p^2}$.
+Thus, by binomial expansion,
+\[ p S_a \equiv \sum_{i = 1}^{p - 1} \binom{p}{i} (-1)^{i - 1} a^i \equiv (a - 1)^p + 1 - a^p \pmod{p^2}. \]
+\end{proof}
+
+Due to the lemma, we have
+\begin{align*}
+    p (S_3 + S_4 - 3 S_2)
+    &\equiv (2^p + 1 - 3^p) + (3^p + 1 - 4^p) - 3 (2 - 2^p) \pmod{p^2} \\
+    &\equiv 4 \cdot 2^p - 4 - 4^p \pmod{p^2} \\
+    &\equiv -(2^p - 2)^2 \pmod{p^2}.
+\end{align*}
+But $p \mid 2^p - 2$ by Fermat's little theorem.
+We get $p^2 \mid p (S_3 + S_4 - 3 S_2)$, and thus $p \mid S_3 + S_4 - 3 S_2$, as desired.
+
+
+
+\subsection*{Implementation details}
+
+It seems to be more convenient to define the sum over $\Q_p$.
+This is the reason for the choice of problem statement.
+We will prove all results in terms of $\Q_p$ as opposed to $\Z_p$.
+
+At the time of writing, it seems that the \texttt{mathlib} API does not support working with general ultrametric spaces yet.
+
+
+
+\end{document}
