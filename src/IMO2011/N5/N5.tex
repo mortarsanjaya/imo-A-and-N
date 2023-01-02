@@ -1,0 +1,103 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+
+\newtheorem{lemma}{Lemma}
+
+\title{IMO 2011 N5 (P5)}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $G$ be an abelian group.
+We say that $f : G \to \N^+$ is \emph{good} if $f(x - y) \mid f(x) - f(y)$ for any $x, y \in G$.
+Find all good functions.
+
+
+
+\subsection*{Answer}
+
+Let $G = G_0 > G_1 > \ldots > G_k$ be an arbitrary strict chain of subgroups, $k \geq 0$.
+Let $n_0 < n_1 < \ldots < n_k$ be a sequence of positive integers such that $n_i \mid n_{i + 1}$ for each $0 \leq i < k$.
+Then the function $f = x \mapsto n_{i(x)}$, where $i(x) = \max\{i : x \in G_i\}$, is good.
+Futhermore, all good functions can be described as above.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2011SL.pdf}
+
+While our problem is a generalization of the original problem, the original problem is still useful here.
+We state it as a lemma, and use it to classify all good functions.
+To solve this problem, we proceed with lemmas.
+
+\begin{lemma}\label{2011n5-1}
+Let $f : G \to \N^+$ be a good function and $x, y \in G$.
+If $f(x) \leq f(y)$, then $f(x) \mid f(y)$.
+\end{lemma}
+\begin{proof}
+The divisibility is clear if $f(x) = f(y)$, so now suppose that $f(x) < f(y)$.
+Since $f$ is good, $f(x - y) \mid f(x) - f(y)$, so $f(x - y) \mid f(y) - f(x)$.
+Since $f(y) > f(x)$, this implies $f(y) \geq f(x) + f(x - y) > f(x - y)$.
+Now, $f(y) \mid f(x) - f(x - y)$, but both $f(x)$ and $f(x - y)$ are between $0$ and $f(y)$.
+This necessarily implies $f(x) = f(x - y)$.
+Finally, $f(x) = f(x - y) \mid f(x) - f(y)$ implies $f(x) \mid f(y)$.
+\end{proof}
+
+\begin{lemma}\label{2011n5-2}
+Let $f : G \to \N^+$ be a good function.
+Then $f(x) \mid f(0)$ for all $x \in G$.
+\end{lemma}
+\begin{proof}
+Plugging $y = 0$ gives us $f(x) \mid f(x) - f(0)$ and thus $f(x) \mid f(0)$.
+\end{proof}
+
+\begin{lemma}\label{2011n5-3}
+Let $f : G \to \N^+$ be a good function.
+For any $n \in \Z$ such that $n \mid f(0)$, the set $H_n = \{x \in G | n \mid f(x)\}$ is a subgroup of $G$.
+\end{lemma}
+\begin{proof}
+First, Lemma~\ref{2011n5-2} implies that $0 \in H_n$.
+Second, for any $x \in G$, we have $f(x) \mid f(0) - f(-x)$, so $f(x) \mid f(-x)$ since $f(x) \mid f(0)$.
+This implies that $H_n$ is closed under additive inverse.
+Finally, for any $x, y \in H_n$, we have $n \mid f(x) \mid f(x + y) - f(y) \implies n \mid f(x + y)$.
+So, $x + y \in H_n$, which proves that $H_n$ is closed under addition.
+\end{proof}
+
+Now, Lemma~\ref{2011n5-2} shows that $f(G)$ is finite.
+We can enumerate the elements of $f(G)$ as $n_0 < n_1 < \ldots n_k$ for some $k \geq 0$.
+Lemma~\ref{2011n5-1} shows a stronger property: we have $n_i \mid n_{i + 1}$ for all $i < k$.
+Now let $G_i = H_{n_i}$ for each $i \leq k$.
+It is easy to see that $G_0 = G$, and Lemma~\ref{2011n5-3} tells us that $G_{i + 1} \leq G_i$ for each $i < k$.
+It remains to show that $f$ matches the description in the answer section.
+
+Fix an arbitrary $x \in G$, and let $i(x) = \max\{i : x \in G_i\}$.
+Then $x \in G_{i(x)} = H_{n_{i(x)}}$, so $n_{i(x)} \mid f(x)$.
+But also, we have $n_i \nmid f(x)$ for all $i > i(x)$.
+Since $f(G) = \{n_0 < n_1 < \ldots < n_k\}$, this forces $f(x) = n_{i(x)}$, as desired.
+
+We now prove the converse.
+Fix $x, y \in G$, and for convenience, write $H = G_{i(x - y)}$.
+Then $x - y \in H$, and since $H$ is a subgroup, we have $x \in H \iff y \in H$.
+If $x, y \in H$, then $f(x - y)$ divides both $f(x)$ and $f(y)$, so we are done.
+If $x, y \notin H$, then $i(x), i(y) < i(x - y)$, so $x - y \in G_{i(x)}$ and $x - y \in G_{i(y)}$.
+Since $x - y, x \in G_{i(x)}$, we have $y \in G_{i(x)}$, so $i(x) \leq i(y)$.
+Similarly, $i(y) \leq i(x)$, so $i(x) = i(y)$ and thus $f(x) = f(y)$.
+
+
+
+\end{document}
