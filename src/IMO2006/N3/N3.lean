@@ -1,11 +1,33 @@
-import number_theory.arithmetic_function
+import algebra.big_operators.intervals number_theory.divisors
 
 /-! # IMO 2006 N3 -/
 
 namespace IMOSL
 namespace IMO2006N3
 
-open finset nat.arithmetic_function
+open finset
+
+section extra_lemmas
+
+private lemma exists_sup_fn_fin (f : ℕ → ℕ) (c : ℕ) : ∃ K : ℕ, ∀ n : ℕ, n < c → f n ≤ K :=
+begin
+  induction c with c h,
+  exact ⟨0, λ n h, by exfalso; exact nat.not_lt_zero n h⟩,
+  cases h with K h,
+  refine ⟨max K (f c), λ n h0, _⟩,
+  rw [nat.lt_succ_iff, le_iff_eq_or_lt] at h0,
+  rcases h0 with rfl | h0,
+  exacts [le_max_right K (f n), le_trans (h n h0) (le_max_left K (f c))]
+end
+
+private lemma exists_lt_card_divisor (c : ℕ) : ∃ n : ℕ, c < n.divisors.card :=
+  ⟨2 ^ c, by rw [nat.divisors_prime_pow nat.prime_two, card_map, card_range, nat.lt_succ_iff]⟩
+
+end extra_lemmas
+
+
+
+
 
 private def g (n : ℕ) : ℕ := (range n).sum (λ x, n / (x + 1))
 def f (n : ℕ) : ℚ := ((g n : ℤ) : ℚ) / ((n : ℤ) : ℚ)
@@ -18,9 +40,9 @@ private lemma g_succ (n : ℕ) : g n.succ = g n + n.succ.divisors.card :=
     g, g, ← sum_add_distrib, sum_range_succ, nat.div_self n.succ_pos, add_left_inj];
   exact sum_congr rfl (λ x _, by rw [add_comm, nat.succ_div])
 
-private lemma g_sum : ∀ n : ℕ, g n = (range n.succ).sum (λ x, x.divisors.card)
-| 0 := by rw [g, sum_range_zero, sum_range_one, nat.divisors_zero, card_empty]
-| (n+1) := by rw [g_succ, sum_range_succ, g_sum]
+private lemma g_sum : ∀ n : ℕ, g n = (range n).sum (λ x, x.succ.divisors.card)
+| 0 := by rw [g, sum_range_zero, sum_range_zero]
+| (n+1) := by rw [g_succ, sum_range_succ, ← g_sum]
 
 private lemma two_le_card_divisors {n : ℕ} (h : 2 ≤ n) : 2 ≤ n.divisors.card :=
 begin
@@ -55,40 +77,36 @@ private lemma card_divisors_prime {p : ℕ} (hp : p.prime) : p.divisors.card = 2
 /-- Final solution, part 1 -/
 theorem final_solution_part1 : {n : ℕ | f n < f n.succ}.infinite :=
 begin
-  suffices : {n : ℕ | 0 < n ∧ ∀ m : ℕ, m ≤ n → m.divisors.card < n.succ.divisors.card}.infinite,
-  { refine set.infinite.mono _ this; clear this,
-    rintros n ⟨h, h0⟩,
-    rw [set.mem_set_of_eq, f, f, rat.div_lt_div_iff_mul_lt_mul],
-    rotate 1,
-    rwa int.coe_nat_pos,
-    rw int.coe_nat_pos; exact n.succ_pos,
-    rw [← nat.cast_mul, ← nat.cast_mul, nat.cast_lt, mul_comm, mul_comm (g n.succ),
-        g_succ, nat.succ_mul, mul_add, add_lt_add_iff_left, g_sum, sum_range_succ',
-        nat.divisors_zero, card_empty, add_zero, ← smul_eq_mul, nsmul_eq_sum_const],
-    refine sum_lt_sum (λ m h1, le_of_lt (h0 _ _)) ⟨0, mem_range.mpr h, _⟩,
-    rwa [nat.succ_le_iff, ← mem_range],
-    rw [zero_add, nat.divisors_one, card_singleton, ← nat.succ_le_iff],
-    exact two_le_card_divisors (nat.succ_le_succ h) },
-
+  ---- Use unboundedness and pick a suitable number
   refine set.infinite_of_not_bdd_above _,
-  simp_rw [bdd_above, upper_bounds, set.nonempty, not_exists, set.mem_set_of_eq, not_forall],
-  intros b,
-  -- We take `x` to be the minimal `nat` with `d(x + 1) > b + 1`.
-  have h : ∃ y : ℕ, b + 1 < y.succ.divisors.card :=
-    ⟨2 ^ (b + 1) - 1, by rw [nat.succ_eq_add_one, nat.sub_add_cancel (nat.one_le_pow' _ 1),
-      nat.divisors_prime_pow nat.prime_two, card_map, card_range, nat.lt_succ_iff] ⟩,
-  use nat.find h; rw [and_comm, ← and_assoc, not_le],
-  refine ⟨_, λ m h0, lt_of_le_of_lt _ (nat.find_spec h)⟩,
-  { rw [and_iff_left_of_imp pos_of_gt, ← not_le]; intros h0,
-    replace h0 : ∃ y, y ≤ b ∧ b + 1 < y.succ.divisors.card := ⟨nat.find h, h0, nat.find_spec h⟩,
-    clear h; rcases h0 with ⟨y, h, h0⟩,
-    revert h; refine not_le_of_lt (nat.succ_lt_succ_iff.mp (lt_of_lt_of_le h0 _)),
-    rw nat.divisors; convert finset.card_filter_le _ _,
-    rw list.length_range' },
-  { cases m with m m,
-    rw [nat.divisors_zero, card_empty]; exact nat.zero_le _,
-    have h1 := nat.find_min h h0,
-    exact le_of_not_lt h1 }
+  rintros ⟨N, h⟩; rw mem_upper_bounds at h,
+  obtain ⟨c, h0, h1⟩ : ∃ c : ℕ, N.succ < c ∧ ∀ n : ℕ, n < c → n.divisors.card < c.divisors.card :=
+  begin
+    obtain ⟨K, h0⟩ := exists_sup_fn_fin (λ x, x.divisors.card) N.succ.succ,
+    have h1 := exists_lt_card_divisor K,
+    refine ⟨nat.find h1, _, λ n h2, lt_of_le_of_lt _ (nat.find_spec h1)⟩,
+    rw nat.lt_find_iff; intros n h2,
+    exact not_lt_of_le (h0 n $ nat.lt_succ_of_le h2),
+    replace h2 := nat.find_min h1 h2,
+    rwa not_lt at h2
+  end,
+
+  ---- Change `c` to `c.succ`, and then prove that the new value of `c` works
+  obtain ⟨c, rfl⟩ : ∃ n : ℕ, c = n.succ :=
+    nat.exists_eq_succ_of_ne_zero (ne_of_gt $ pos_of_gt h0),
+  revert h0; rw [imp_false, not_lt]; refine nat.succ_le_succ (h c _),
+  rw [set.mem_set_of_eq, f, f],
+  clear h; rcases eq_or_ne c 0 with rfl | h,
+  rw [int.coe_nat_zero, int.cast_zero, div_zero, g, sum_range_one,
+      zero_add, nat.div_one, int.coe_nat_one, int.cast_one, div_one],
+  exact one_pos,
+  rw [rat.div_lt_div_iff_mul_lt_mul, ← nat.cast_mul, ← nat.cast_mul,
+      nat.cast_lt, g_succ, nat.mul_succ, add_mul, add_lt_add_iff_left,
+      mul_comm, ← smul_eq_mul, nsmul_eq_sum_const, g_sum],
+  refine sum_lt_sum_of_nonempty (nonempty_range_iff.mpr h) (λ i h0, h1 _ _),
+  rw mem_range at h0; exact nat.succ_le_succ h0,
+  rwa [int.coe_nat_pos, zero_lt_iff],
+  rw int.coe_nat_pos; exact c.succ_pos
 end
 
 
@@ -105,11 +123,10 @@ begin
   rw [nat.succ_le_succ_iff, nat.succ_le_iff] at h2,
   revert h2; rw [imp_false, not_lt]; apply h,
 
-  ---- Now prove that `f(n + 1) < f(n)`
+  ---- Now prove that `f(n + 1) < f(n)` (here `n + 1` is prime)
   rw nat.succ_le_succ_iff at h1,
-  rw [set.mem_set_of_eq, f, f, rat.div_lt_div_iff_mul_lt_mul],
-  rw [← nat.cast_mul, ← nat.cast_mul, nat.cast_lt, mul_comm, mul_comm (g n),
-      g_succ, card_divisors_prime h0, mul_add, nat.succ_mul, add_lt_add_iff_left, mul_comm],
+  rw [set.mem_set_of_eq, f, f, rat.div_lt_div_iff_mul_lt_mul, ← nat.cast_mul, ← nat.cast_mul,
+      nat.cast_lt, g_succ, card_divisors_prime h0, add_mul, nat.mul_succ, add_lt_add_iff_left],
   exact two_mul_lt h1,
   rw int.coe_nat_pos; exact n.succ_pos,
   rw int.coe_nat_pos; refine lt_of_lt_of_le _ h1,
