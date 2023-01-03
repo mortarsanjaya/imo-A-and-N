@@ -283,7 +283,3 @@ begin
       refine ⟨N, λ n h0, _⟩,
       rw le_iff_exists_add at h0; rcases h0 with ⟨c, rfl⟩,
       simp_rw [add_comm N, add_right_comm c N, iterate_add, comp_app, h] } }
-end
-
-end IMO2006A1
-end IMOSL
