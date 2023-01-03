@@ -25,8 +25,8 @@ private lemma pnat_to_nat_prop2 {P : ℕ+ → ℕ+ → Prop} :
 
 private lemma succ_pnat_add_succ_pnat (m n : ℕ) :
   m.succ_pnat + n.succ_pnat = (m + n).succ_pnat + 1 :=
-  by simp_rw [← pnat.coe_inj, pnat.add_coe, nat.succ_pnat_coe,
-              nat.add_succ, nat.succ_add, positive.coe_one]
+  by rw ← pnat.coe_inj; simp_rw [pnat.add_coe, nat.succ_pnat_coe];
+    rw [nat.add_succ, nat.succ_add, positive.coe_one]
 
 private lemma good_iff_good' (f : ℕ+ → ℕ+) : good f ↔ good' (λ x, (f x.succ_pnat).nat_pred) :=
 begin
