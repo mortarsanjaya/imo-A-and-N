@@ -1,50 +1,44 @@
-import number_theory.legendre_symbol.quadratic_reciprocity
+import number_theory.legendre_symbol.quadratic_char
 
 /-! # IMO 2007 N2, Extra Version -/
 
 namespace IMOSL
 namespace IMO2007N2
 
-/-- Final solution, part 2 -/
-theorem final_solution_part2 (p : ℕ) [fact p.prime] :
-  ∃ a : zmod p, a ^ 8 = 16 :=
+variables {F : Type*} [field F] [fintype F]
+
+private lemma not_is_square_ne_zero {a : F} (h : ¬is_square a) : a ≠ 0 :=
+  by rintros rfl; exact h (is_square_zero F)
+
+private lemma is_square_or_mul [decidable_eq F] (a b : F) :
+  is_square a ∨ is_square b ∨ is_square (a * b) :=
 begin
-  rw [bit0, ← two_mul]; simp only [pow_mul],
-  have X : (2 : zmod p) ^ 4 = 16 := by norm_num,
-  rw ← X; clear X,
-  by_cases h : is_square (-1 : zmod p),
+  simp_rw or_iff_not_imp_left; intros h h0,
+  have h1 : a * b ≠ 0 := mul_ne_zero (not_is_square_ne_zero h) (not_is_square_ne_zero h0),
+  rw ← quadratic_char_neg_one_iff_not_is_square at h h0,
+  rw [← quadratic_char_one_iff_is_square h1, map_mul, h0, h, neg_mul_neg, mul_one]
+end
 
-  ---- Case 1: `-1` is a square mod `p`.
-  { cases h with i h,
-    rw ← sq at h,
-    use 1 + i; rw [add_sq', one_pow, ← h, add_neg_self, zero_add, mul_one, mul_pow],
-    change _ * i ^ (2 + 2) = _,
-    rw [← two_mul, pow_mul, ← h, neg_pow_bit0, one_pow, mul_one] },
+
+
+/-- Final solution, part 2 -/
+theorem final_solution_part2 [decidable_eq F] : ∃ a : F, a ^ 8 = 16 :=
+begin
+  ---- Reduce to finding a square `c : F` such that `c ^ 4 = 16`
+  suffices : ∃ a : F, is_square a ∧ a ^ 4 = 2 ^ 4,
+    rcases this with ⟨_, ⟨c, rfl⟩, h⟩; use c;
+      rw [bit0, ← two_mul, pow_mul, sq, h]; norm_num,
+
+  ---- If `2` or `-2` is a square mod `p`, we are easily done
+  rcases (is_square_or_mul (-1 : F) (2 : F)).symm with (h | h) | ⟨i, h⟩,
+  exact ⟨2, h, rfl⟩,
+  exact ⟨(-1) * 2, h, by rw [neg_one_mul, neg_pow_bit0]⟩,
   
-  by_cases h0 : is_square (2 : zmod p),
-
-  ---- Case 2: `2` is a square mod `p`.
-  { cases h0 with a h0,
-    use a; rw [sq, ← h0] },
-
-  ---- Case 3: `-1` and `2` are not squares mod `p`.
-  { rw [← int.cast_one, ← int.cast_neg, ← legendre_sym.eq_neg_one_iff] at h,
-    rw [← int.cast_two, ← legendre_sym.eq_neg_one_iff] at h0,
-    suffices : (2 : zmod p) ≠ 0,
-    { replace h : legendre_sym p (-2) = 1 :=
-        by rw [← neg_one_mul, legendre_sym.mul, h, h0, neg_mul_neg, mul_one],
-      rw [← neg_ne_zero, ← int.cast_two, ← int.cast_neg] at this,
-      rw [legendre_sym.eq_one_iff p this, int.cast_neg, int.cast_two] at h,
-      cases h with a h,
-      use a; rw [sq, ← h, neg_pow_bit0] },
-
-    -- Now it remains to show that `-2 ≢ 0 mod p`
-    apply ring.two_ne_zero,
-    contrapose! h0; rw ring_char.eq (zmod p) p at h0,
-    simp_rw [h0]; suffices : legendre_sym 2 2 = 0,
-      rw [this, ne.def, zero_eq_neg]; exact one_ne_zero,
-    rw [legendre_sym.eq_zero_iff, int.cast_two],
-    exact char_two.two_eq_zero }
+  -- The case where `-1` is a square mod `p` remains
+  rw ← sq at h; refine ⟨2 * i, ⟨1 + i, _⟩, _⟩,
+  rw [← sq, add_sq', one_pow, ← h, add_neg_self, zero_add, mul_one],
+  rw [mul_comm, mul_pow]; change i ^ (2 * 2) * 2 ^ 4 = 2 ^ 4,
+  rw [pow_mul, ← h, neg_one_sq, one_mul]
 end
 
 end IMO2007N2

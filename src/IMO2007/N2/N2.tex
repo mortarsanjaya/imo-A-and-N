@@ -25,8 +25,7 @@ Prove that $b = A^n$ for some integer $A$.
 
 \subsubsection*{Extra Problem}
 
-Prove that, for each $p$ prime, there exists an integer $a$ such that $a^8 \equiv 16 \pmod{p}$.
-
+Prove that, in any finite field $F$, there exists $a \in F$ such that $a^8 = 16$.
 
 
 
@@ -43,13 +42,11 @@ But $1 - ab$ and $b$ are coprime, so indeed $b$ must be an $n^{\text{th}}$ power
 
 \subsubsection*{Solution for Extra Problem}
 
-If either $2$ or $-2$ is a quadratic residue modulo $p$, then we are done.
-Indeed, we can pick an integer $a$ such that $a^2 \equiv \pm 2 \pmod{p}$.
-But this implies $a^8 \equiv 16 \pmod{p}$.
-
-Otherwise, $-1$ must be a quadratic residue modulo $p$.
-We denote by $i$ an integer such that $i^2 \equiv -1 \pmod{p}$.
-Then $(1 + i)^2 \equiv 2i \pmod{p}$, and $(2i)^4 \equiv 16 \pmod{p}$.
+If either $2$ or $-2$ is a square in $F$, then we are done.
+Indeed, we can pick $a \in F$ such that $a^2 = \pm 2$, and thus $a^8 = 16$.
+Otherwise, $-1$ must be a square in $F$.
+Take some $i \in F$ such that $i^2 = -1$.
+Then $(1 + i)^2 = 2i$, and thus $(1 + i)^8 = (2i)^4 = 16$.
 
 
 
@@ -58,7 +55,7 @@ Then $(1 + i)^2 \equiv 2i \pmod{p}$, and $(2i)^4 \equiv 16 \pmod{p}$.
 The extra is mentioned in the comment section of the official solution.
 It emphasizes that $k$ cannot be restricted to primes only; $16$ is not an $8^{\text{th}}$ power.
 
-We will implement the extra problem in \texttt{N2\_extra.lean} and using \texttt{zmod p}.
+We will implement the extra problem in \texttt{N2\_extra.lean}.
 
 
 
