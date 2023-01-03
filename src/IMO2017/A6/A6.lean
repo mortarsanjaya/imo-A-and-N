@@ -101,63 +101,69 @@ end basic_results
 theorem final_solution_char_ne_two {R : Type*} [division_ring R] (Rchar : ring_char R ≠ 2) :
   ∀ f : R → R, good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ (f = λ x, x - 1)) :=
 begin
-  ---- Reduce just to proving that if `f` is good and `f(0) = 1`, then `f` is injective.
-  suffices : ∀ f : R → R, good f → f 0 = 1 → f = has_sub.sub 1,
-  { refine λ f, ⟨λ h, _, λ h, _⟩,
-    rw or_iff_not_imp_left; intros h0,
+  ---- Change `f = λ x, x - 1` to `-f = λ x, 1 - x`, which is way more convenient to handle
+  intros f; conv_rhs { congr, skip, congr, skip, rw ← neg_inj,
+    congr, skip, rw pi.neg_def, funext, rw neg_sub },
+
+  ---- `←` direction: easy
+  symmetry; refine ⟨λ h, _, λ h, _⟩,
+  rcases h with rfl | rfl | h,
+  exact good_zero,
+  exact good_one_sub_self,
+  rw ← neg_neg f; apply good_neg,
+  rw h; exact good_one_sub_self,
+
+  ---- `→` direction: reduce to showing that `f(0) = 1` implies `f = λ x, 1 - x`
+  rw or_iff_not_imp_left; revert h f,
+  suffices : ∀ {f : R → R}, good f → f 0 = 1 → f = has_sub.sub 1,
+  { intros f h h0,
     replace h0 := good_map_zero_sq h h0,
     rw sq_eq_one_iff at h0; cases h0 with h0 h0,
-    left; exact this f h h0,
-    right; rw ← neg_inj; convert this (-f) (good_neg h) _,
-    simp only [pi.neg_def, neg_sub],
-    rw [pi.neg_apply, h0, neg_neg],
-    rcases h with rfl | rfl | rfl,
-    exact good_zero,
-    exact good_one_sub_self,
-    convert good_neg good_one_sub_self,
-    simp only [pi.neg_def, neg_sub] },
-  intros f h h0; refine good_map_eq_one_sub_self_of_inj h h0 _,
-
-  ---- Reduce injectivity to: `∀ c, f(c) = f(-c) → c = 0`
-  have X := good_shift h h0,
-  have h1 : ∀ t : R, f (f (-1) * f t) + f t + 1 = f (-t) :=
-    λ t, by rw [← neg_one_mul t, ← h (-1), add_assoc, ← X (-1 + t), neg_add_cancel_comm],
-  suffices h2 : ∀ c : R, f c = f (-c) → c = 0,
-  { intros a b h3,
-    rw ← sub_eq_zero; apply h2,
-    replace h2 : ∀ {x y : R}, f x = f y → f (-x) = f (-y) := λ x y hxy, by rw [← h1, hxy, h1],
-    replace h1 : f (a * b) = f (b * a) := by rw [← h, ← h b a, h3, add_comm a],
-    replace h0 := h a (-b),
-    rwa [h3, ← h2 h3, mul_neg, h2 h1, ← mul_neg, ← h b, add_right_inj,
-         ← sub_eq_add_neg, ← sub_eq_add_neg, ← neg_sub a] at h0 },
+    left; exact this h h0,
+    right; refine this (good_neg h) _,
+    rw [pi.neg_apply, h0, neg_neg] },
   
+  ---- Some setup
+  intros f h h0,
+  have h1 := good_shift h h0,
+  have h2 : ∀ t : R, f (f (-1) * f t) + f t + 1 = f (-t) :=
+    λ t, by rw [← neg_one_mul t, ← h (-1), add_assoc, ← h1 (-1 + t), neg_add_cancel_comm],
+
+  ---- Reduce to `∀ c, f c = f (-c) → c = 0`
+  suffices h3 : ∀ {c}, f c = f (-c) → c = 0,
+  { refine good_map_eq_one_sub_self_of_inj h h0 (λ a b h4, _),
+    rw ← sub_eq_zero; apply h3,
+    replace h2 : ∀ {x y}, f x = f y → f (-x) = f (-y) := λ x y h5, by rw [← h2, h5, h2],
+    replace h1 : f (a * b) = f (b * a) := by rw [← h, ← h b a, h4, add_comm a],
+    replace h0 := h a (-b),
+    rwa [h4, ← h2 h4, mul_neg, h2 h1, ← mul_neg, ← h b, add_right_inj,
+         ← sub_eq_add_neg, ← sub_eq_add_neg, ← neg_sub a] at h0 },
+
   ---- Prove `∀ c, f(c) = f(-c) → c = 0`
-  intros c h2,
-  rw ← h1 at h2,
-  replace h1 := good_map_eq_zero_iff h h0,
-  rwa [add_right_comm, self_eq_add_left, ← sub_add_cancel (_ * f c) 1, X, h1, sub_eq_iff_eq_add,
-       ← X, neg_add_self, h0, mul_right_eq_self₀, ← bit0, or_iff_left (ring.two_ne_zero Rchar),
-       ← X, add_left_eq_self, h1, add_left_eq_self] at h2
+  intros c h3; rw ← h2 at h3,
+  replace h2 := good_map_eq_zero_iff h h0,
+  rwa [add_right_comm, self_eq_add_left, ← sub_add_cancel (_ * f c) 1, h1, h2, sub_eq_iff_eq_add,
+       ← h1, neg_add_self, h0, mul_right_eq_self₀, ← bit0, or_iff_left (ring.two_ne_zero Rchar),
+       ← h1, add_left_eq_self, h2, add_left_eq_self] at h3
 end
 
 
 
 /-- Final solution, `F` is a field, `char(F) = 2` -/
 theorem final_solution_field_char_two {F : Type*} [field F] [char_p F 2] :
-  ∀ f : F → F, good f ↔ f = 0 ∨ f = λ x, x + 1 :=
+  ∀ f : F → F, good f ↔ f = 0 ∨ f = has_add.add 1 :=
 begin
-  ---- Again, reduce just to proving that if `f` is good and `f(0) = 1`, then `f` is injective.
-  suffices : ∀ f : F → F, good f → f 0 = 1 → f = λ x, 1 - x,
-  { intros f,
-    conv_rhs { congr, skip, congr, skip, funext, rw [add_comm, ← char_two.sub_eq_add] },
-    refine ⟨λ h, _, λ h, _⟩,
-    rw or_iff_not_imp_left; intros h0,
-    replace h0 := good_map_zero_sq h h0,
-    rw [sq_eq_one_iff, char_two.neg_eq, or_self] at h0,
-    exact this f h h0,
-    rcases h with rfl | rfl,
+  ---- `←` direction: easy
+  rw ← char_two.sub_eq_add',
+  intros f; symmetry; refine ⟨λ h, _, λ h, _⟩,
+  { rcases h with rfl | rfl,
     exacts [good_zero, good_one_sub_self] },
-  intros f h h0; refine good_map_eq_one_sub_self_of_inj h h0 (λ a b h1, _),
+  
+  ---- `→` direction: Reduce to showing that if `f(0) ≠ 0`, then `f` is injective
+  rw or_iff_not_imp_left; intros h0,
+  replace h0 := good_map_zero_sq h h0,
+  rw [sq_eq_one_iff, char_two.neg_eq, or_self] at h0,
+  refine good_map_eq_one_sub_self_of_inj h h0 (λ a b h1, _),
 
   ---- First, remove the case `a = 0` and `b = 0`
   have X := good_shift h h0,
@@ -215,15 +221,14 @@ end
 
 /-- Final solution, `F` is a field -/
 theorem final_solution_field {F : Type*} [field F] :
-  ∀ f : F → F, good f ↔ (f = 0 ∨ (f = λ x, 1 - x) ∨ (f = λ x, x - 1)) :=
+  ∀ f : F → F, good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ (f = λ x, x - 1)) :=
 begin
   cases ne_or_eq (ring_char F) 2 with h h,
   exact final_solution_char_ne_two h,
   haveI : char_p F 2 := ring_char.of_eq h,
-  intros f; convert final_solution_field_char_two f,
-  simp only [char_two.sub_eq_add],
-  rw [eq_iff_iff, or_iff_right_iff_imp],
-  rintros rfl; funext x; exact add_comm 1 x
+  intros f; rw [final_solution_field_char_two f, char_two.sub_eq_add'],
+  conv_rhs { congr, skip, congr, skip, congr, skip, funext, rw add_comm },
+  rw or_self
 end
 
 end IMO2017A6
