@@ -18,17 +18,17 @@ section ring
 variables {R : Type*} [ring R]
 
 private lemma good_zero : good (0 : R → R) :=
-  λ x y, by simp only [pi.zero_apply, add_zero]
+  λ x y, add_zero 0
 
-private lemma good_one_sub_self : good (λ x : R, 1 - x) :=
-  λ x y, by dsimp only []; rw [sub_add, sub_right_inj, mul_one_sub,
-    one_sub_mul, ← sub_sub, sub_sub_sub_cancel_left, sub_sub_cancel]
+private lemma good_one_sub_self : good (has_sub.sub (1 : R)) :=
+  λ x y, by rw [sub_add, sub_right_inj, sub_eq_iff_eq_add', sub_add,
+    add_sub_assoc, ← one_sub_mul, ← sub_sub, ← mul_one_sub]
 
 variables {f : R → R} (h : good f)
 include h
 
 private lemma good_neg : good (-f) :=
-  λ x y, by simp only [pi.neg_apply]; rw [neg_mul_neg, ← neg_add, h]
+  λ x y, by iterate 5 { rw pi.neg_apply }; rw [neg_mul_neg, ← neg_add, h]
 
 private lemma good_special_equality {x y : R} (h0 : x * y = 1) : f (f (x + 1) * f (y + 1)) = 0 :=
   by replace h := h (x + 1) (y + 1);
@@ -57,12 +57,12 @@ include h
 
 private lemma good_map_eq_zero {c : R} (h0 : f ≠ 0) (h1 : f c = 0) : c = 1 :=
 begin
-  contrapose! h0,
+  contrapose h0; rw not_not,
   suffices : f 0 = 0,
-  { funext x; replace h := h 0 x,
-    rwa [zero_add, zero_mul, this, zero_mul, this, zero_add] at h },
+    funext x; replace h := h 0 x;
+      rwa [zero_add, zero_mul, this, zero_mul, this, zero_add] at h,
   obtain ⟨x, rfl⟩ : ∃ x : R, x + 1 = c := ⟨c - 1, sub_add_cancel c 1⟩,
-  rw [ne.def, add_left_eq_self] at h0,
+  rw add_left_eq_self at h0,
   replace h := good_special_equality h (mul_inv_cancel h0),
   rwa [h1, zero_mul] at h
 end
@@ -78,13 +78,13 @@ begin
 end
 
 private lemma good_shift (h0 : f 0 = 1) (x : R) : f (x + 1) + 1 = f x :=
- by have h1 := h x 1; rwa [good_map_one h, mul_zero, h1, mul_one, add_comm, h0] at h1
+  by have h1 := h x 1; rwa [good_map_one h, mul_zero, h1, mul_one, add_comm, h0] at h1
 
 private lemma good_map_eq_zero_iff (h0 : f 0 = 1) (c : R) : f c = 0 ↔ c = 1 :=
 begin
-  symmetry; refine ⟨_, good_map_eq_zero h _⟩,
-  rintros rfl; exact good_map_one h,
-  rintros rfl; exfalso; exact zero_ne_one h0
+  refine ⟨good_map_eq_zero h _, _⟩,
+  rintros rfl; exfalso; exact zero_ne_one h0,
+  rintros rfl; exact good_map_one h
 end
 
 end division_ring
@@ -99,10 +99,10 @@ end basic_results
 
 /-- Final solution, `char(R) ≠ 2` -/
 theorem final_solution_char_ne_two {R : Type*} [division_ring R] (Rchar : ring_char R ≠ 2) :
-  ∀ f : R → R, good f ↔ (f = 0 ∨ (f = λ x, 1 - x) ∨ (f = λ x, x - 1)) :=
+  ∀ f : R → R, good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ (f = λ x, x - 1)) :=
 begin
   ---- Reduce just to proving that if `f` is good and `f(0) = 1`, then `f` is injective.
-  suffices : ∀ f : R → R, good f → f 0 = 1 → f = λ x, 1 - x,
+  suffices : ∀ f : R → R, good f → f 0 = 1 → f = has_sub.sub 1,
   { refine λ f, ⟨λ h, _, λ h, _⟩,
     rw or_iff_not_imp_left; intros h0,
     replace h0 := good_map_zero_sq h h0,
