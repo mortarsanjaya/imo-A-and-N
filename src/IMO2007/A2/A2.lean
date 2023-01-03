@@ -117,8 +117,8 @@ begin
   intros m n; dsimp only [],
   rw [add_add_add_comm, ← add_assoc m, add_assoc, add_assoc (m + n), add_le_add_iff_left],
   by_cases h0 : K ∣ n + 1,
-  { simp_rw [if_pos h0, add_assoc m, add_left_comm m, nat.dvd_add_right h0, ← add_assoc,
-             add_le_iff_nonpos_right, nonpos_iff_eq_zero, ite_eq_right_iff],
+  { simp_rw [if_pos h0, add_assoc m, add_left_comm m, nat.dvd_add_right h0],
+    rw [← add_assoc, add_le_iff_nonpos_right, nonpos_iff_eq_zero, ite_eq_right_iff],
     intros h1; exfalso; exact ne_of_gt h (nat.eq_one_of_dvd_one h1) },
   { rw [if_neg h0, zero_add, add_zero, if_neg h0, add_zero],
     exact le_trans (ite_le_sup 1 0 _) le_self_add }
@@ -134,7 +134,7 @@ end
 theorem final_solution_nat_zero (k : ℕ) : (∃ f : ℕ → ℕ, good' f ∧ f 0 = k) ↔ k = 0 :=
 begin
   symmetry; refine ⟨λ h, ⟨λ _, 0, λ m n, _, h.symm⟩, λ h, _⟩,
-  simp_rw  add_zero,
+  simp_rw add_zero,
   rcases h with ⟨f, h, rfl⟩,
   by_contra h0; rw [← ne.def, ← pos_iff_ne_zero] at h0,
   refine not_le_of_lt (lt_of_lt_of_le (lt_add_of_pos_left _ h0) (h 0 0)) _,
