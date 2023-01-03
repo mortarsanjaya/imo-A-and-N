@@ -20,7 +20,7 @@
 
 Let $F$ be a totally ordered field.
 Define the sequence $(a_n)_{n \geq 0}$ in $F$ recursively by $a_0 = -1$ and, for all $n \geq 1$,
-\[ \sum_{k = 0}^n \frac{a_k}{n - k + 1} = 0. \tag{*}\label{2006a2-eq0} \]
+\[ a_n = - \sum_{k = 0}^{n - 1} \frac{a_k}{n + 1 - k}. \tag{*}\label{2006a2-eq0} \]
 Prove that $a_n > 0$ for each $n \geq 1$.
 
 
@@ -29,27 +29,18 @@ Prove that $a_n > 0$ for each $n \geq 1$.
 
 Official solution: \url{https://www.imo-official.org/problems/IMO2006SL.pdf}
 
-The following solution is just a rewriting of the official solution.
+We present the official solution below, with some modifications.
 The solution goes by strong induction.
+The base case $n = 1$ is trivial;~\eqref{2006a2-eq0} means $a_1 = 1/2 > 0$.
 
-\textit{\underline{Base case.}}
-For the case $n = 1$,~\eqref{2006a2-eq0} implies $a_1 = \frac{1}{2} > 0$.
-
-\textit{\underline{Induction step.}}
-Fix some $n > 1$, and suppose that $a_k > 0$ for every $0 < k \leq n$.
-Then,~\eqref{2006a2-eq0} yields
-\begin{align*}
-    0
-    &= (n + 2) \sum_{k = 0}^{n + 1} \frac{a_k}{n - k + 2} - (n + 1) \sum_{k = 0}^n \frac{a_k}{n - k + 1} \\
-    &= (n + 2) a_{n + 1} + \sum_{k = 0}^n a_k \left(\frac{n + 2}{n - k + 2} - \frac{n + 1}{n - k + 1}\right) \\
-    &= (n + 2) a_{n + 1} - \sum_{k = 0}^n a_k \frac{k}{(n - k + 2)(n - k + 1)} \\
-(n + 2) a_{n + 1}
-    &= \sum_{k = 0}^n a_k \frac{k}{(n - k + 2)(n - k + 1)}.
-\end{align*}
-The term of the sum at $k = 0$ vanishes.
-The rest of the terms are positive since $a_k > 0$ by induction hypothesis.
-Excluding the term at $k = 0$, the sum is non-empty, so $(n + 2) a_{n + 1}$ is positive.
-Induction step is complete.
+Now, fix some $n \geq 1$, and suppose that $a_k > 0$ for every $0 < k \leq n$.
+Due to~\eqref{2006a2-eq0}, the inequality $a_{n + 1} > 0$ is equivalent to
+\[ \sum_{k = 0}^n \frac_{a_k}{n + 2 - k} < 0 \iff a_0 + \sum_{k = 1}^n \frac{n + 2}{n + 2 - k} a_k < 0. \]
+Now, since $0 < k < n + 1 < n + 2$, we have $\frac{n + 2}{n + 2 - k} < \frac{n + 1}{n + 1 - k}$.
+Since $a_k > 0$ for each $0 < k \leq n$ and $n \geq 1$,
+\[ \sum_{k = 1}^n \frac{n + 2}{n + 2 - k} a_k < \sum_{k = 1}^n \frac{n + 1}{n + 1 - k} a_k. \]
+Finally, by~\eqref{2006a2-eq0} again,
+\[ a_0 + \sum_{k = 1}^n \frac{n + 1}{n + 1 - k} a_k = (n + 1) \sum_{k = 0}^n \frac{a_k}{n + 1 - k} = 0. \]
 
 
 
