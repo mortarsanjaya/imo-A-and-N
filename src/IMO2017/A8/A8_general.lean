@@ -90,7 +90,7 @@ begin
   refine ⟨λ x : G, ite (x = 0) (2 • g) (ite (x = g) 0 (2 • x)), _, λ x y h1, _⟩,
 
   ---- Show that the function is not monotone
-  { simp_rw [monotone, not_forall],
+  { rw monotone; simp_rw not_forall,
     refine ⟨0, g, le_of_lt h, _⟩,
     rw [if_pos rfl, if_neg (ne_of_gt h), if_pos rfl, not_le],
     exact smul_pos two_pos h },

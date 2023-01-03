@@ -10,20 +10,18 @@ theorem final_solution_original {R : Type*} [linear_ordered_ring R] [densely_ord
   (f : R → R) (h : ∀ x y : R, 0 < (f x + y) * (f y + x) → f x + y = f y + x) :
     ∀ x y : R, x ≤ y → f y + x ≤ f x + y :=
 begin
-  obtain ⟨g, rfl⟩ : ∃ g : R → R, id - g = f := ⟨id - f, sub_sub_self id f⟩,
-  simp only [pi.sub_def, id.def] at h ⊢,
+  obtain ⟨g, rfl⟩ : ∃ g : R → R, (λ x, x - g x) = f :=
+    ⟨id - f, funext (λ x, sub_sub_self x (f x))⟩,
   intros x y,
   rw [← add_sub_right_comm, ← add_sub_right_comm, add_comm y x, sub_le_sub_iff_left],
-  revert x y; apply final_solution_part1,
-  simp only []; intros x y h0,
-  replace h := h x y,
-  rw [← add_sub_right_comm, ← add_sub_right_comm, add_comm, sub_right_inj, add_comm] at h,
-  replace h := mt h (ne_of_lt h0),
-  split; contrapose! h,
-  apply mul_pos_of_neg_of_neg; rwa sub_neg,
-  exact lt_trans h h0,
-  apply mul_pos; rwa sub_pos,
-  exact lt_trans h0 h
+  revert x y; refine final_solution_part1 _ (λ x y h0, _),
+  replace h := h x y; contrapose h,
+  rw [← add_sub_right_comm, ← add_sub_right_comm, add_comm, sub_right_inj, add_comm, not_imp],
+  refine ⟨_, ne_of_lt h0⟩,
+  rw [not_and_distrib, not_le, not_le, ← sub_neg, or_comm, ← sub_pos] at h,
+  cases h with h h,
+  exacts [mul_pos (lt_trans h (sub_lt_sub_left h0 (x + y))) h,
+    mul_pos_of_neg_of_neg h (lt_trans (sub_lt_sub_left h0 (x + y)) h)]
 end
 
 end IMO2017A8
