@@ -10,16 +10,14 @@ variables {F : Type*} [linear_ordered_field F] [floor_ring F]
 
 /-- For any `r : F` with `1 < r`, we have `⌊r⁻¹⌋ = 0`. -/
 lemma inv_floor_eq_zero {r : F} (h : 1 < r) : ⌊r⁻¹⌋ = 0 :=
-begin
-  rw [int.floor_eq_iff, int.cast_zero, zero_add, inv_nonneg],
-  exact ⟨le_of_lt (lt_trans zero_lt_one h), inv_lt_one h⟩
-end
+  by rw [int.floor_eq_iff, int.cast_zero, zero_add, inv_nonneg];
+    exact ⟨le_of_lt (lt_trans zero_lt_one h), inv_lt_one h⟩
 
 
 
 /-- Final solution -/
-theorem final_solution (f : F → R) : (∀ x y : F, f (⌊x⌋ * y) = f x * ⌊f y⌋) ↔
-  ∃ C : R, (C = 0 ∨ ⌊C⌋ = 1) ∧ f = λ _, C :=
+theorem final_solution (f : F → R) :
+  (∀ x y : F, f (⌊x⌋ * y) = f x * ⌊f y⌋) ↔ ∃ C : R, (C = 0 ∨ ⌊C⌋ = 1) ∧ f = λ _, C :=
 begin
   symmetry; refine ⟨λ h x y, _, λ h, ⟨f 0, _⟩⟩,
 
