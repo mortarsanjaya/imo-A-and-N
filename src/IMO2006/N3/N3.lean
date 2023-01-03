@@ -17,35 +17,32 @@ section g_prop
 private lemma lem1 (n : ℕ) : g n.succ = g n + n.succ.divisors.card :=
 begin
   rw [g, g, sum_range_succ, nat.div_self n.succ_pos],
-  conv_lhs { congr, congr, skip, funext, rw nat.succ_div, skip, skip },
+  simp_rw nat.succ_div,
   rw [sum_add_distrib, add_assoc, add_right_inj, nat.divisors,
       ← nat.cast_id (filter _ _).card, ← sum_boole, sum_Ico_eq_sum_range,
-      nat.add_sub_cancel, sum_range_succ, add_comm 1 n, if_pos (dvd_refl _)],
-  congr; funext x; rw add_comm
+      nat.add_sub_cancel, sum_range_succ, add_comm 1 n, if_pos $ dvd_refl _],
+  simp_rw add_comm
 end
 
-private lemma lem2 (n : ℕ) : g n = (range n.succ).sum (λ x, x.divisors.card) :=
-begin
-  induction n with n n_ih,
-  rw [g, sum_range_zero, sum_range_one, nat.divisors_zero, card_empty],
-  rw [lem1, sum_range_succ, ← n_ih]
-end
+private lemma lem2 : ∀ n : ℕ, g n = (range n.succ).sum (λ x, x.divisors.card)
+| 0 := by rw [g, sum_range_zero, sum_range_one, nat.divisors_zero, card_empty]
+| (n+1) := by rw [lem1, sum_range_succ, lem2]
 
 private lemma lem3 {n : ℕ} (h : 2 ≤ n) : 2 ≤ n.divisors.card :=
 begin
-  suffices : ({1, n} : finset ℕ) ⊆ n.divisors,
-  { convert card_le_of_subset this,
-    rw [card_insert_eq_ite, if_neg, card_singleton],
-    rw mem_singleton; exact ne_of_lt h },
-  rw [insert_subset, nat.mem_divisors, singleton_subset_iff, nat.mem_divisors],
-  replace h : n ≠ 0 := ne_of_gt (lt_of_lt_of_le two_pos h),
-  exact ⟨⟨one_dvd n, h⟩, dvd_refl n, h⟩
+  rw nat.succ_le_iff at h,
+  rw ← card_doubleton (ne_of_lt h),
+  refine card_le_of_subset (λ c h0, _),
+  rw nat.mem_divisors; rw [mem_insert, mem_singleton] at h0,
+  rcases h0 with rfl | rfl,
+  exacts [⟨one_dvd n, ne_of_gt $ pos_of_gt h⟩, ⟨dvd_refl c, ne_of_gt $ pos_of_gt h⟩]
 end
 
 private lemma lem4 : ∀ {n : ℕ}, 6 ≤ n → 2 * n < g n :=
 begin
   refine nat.le_induction _ (λ n h h0, _),
-  unfold g; repeat { rw sum_range_succ }; norm_num,
+  simp_rw [g, sum_range_succ],
+  rw [sum_range_zero, zero_add, zero_add]; norm_num,
   rw [mul_add_one, lem1],
   refine add_lt_add_of_lt_of_le h0 (lem3 _),
   rw nat.succ_le_succ_iff; refine le_trans _ h,
@@ -53,7 +50,7 @@ begin
 end
 
 private lemma lem5 {p : ℕ} (hp : p.prime) : p.divisors.card = 2 :=
-by rw [nat.prime.divisors hp, card_doubleton hp.ne_one.symm]
+  by rw [nat.prime.divisors hp, card_doubleton hp.ne_one.symm]
 
 end g_prop
 
