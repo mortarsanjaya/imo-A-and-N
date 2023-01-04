@@ -1,5 +1,4 @@
-import algebra.field.basic algebra.big_operators.intervals algebra.periodic
-  algebra.order.field.canonical.defs
+import algebra.order.field.canonical.defs algebra.big_operators.intervals algebra.periodic
 
 /-! # IMO 2010 A3 -/
 
@@ -9,6 +8,8 @@ namespace IMO2010A3
 open finset function
 
 variables {F : Type*} [canonically_linear_ordered_semifield F]
+
+
 
 section extra_lemmas
 
