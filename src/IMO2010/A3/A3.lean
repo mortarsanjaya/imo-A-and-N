@@ -6,9 +6,6 @@ import algebra.field.basic algebra.big_operators.intervals algebra.periodic
 namespace IMOSL
 namespace IMO2010A3
 
-set_option profiler true
-set_option profiler.threshold 0.2
-
 open finset function
 
 variables {F : Type*} [canonically_linear_ordered_semifield F]
@@ -54,23 +51,26 @@ begin
   refine ⟨⟨λ i, ite (even i) (c / 2) 0, ⟨λ i, _, λ i, if_congr _ rfl rfl⟩, _⟩, _⟩,
 
   ---- The choice of `x` is good
-  { simp_rw [nat.even_add, even_two, nat.not_even_one, iff_true, iff_false],
-    rw ite_not; by_cases h : even i,
-    rw [if_pos h, if_pos h, add_zero, add_halves],
-    rw [if_neg h, zero_add, add_zero, if_neg h],
-    exact half_le_self (zero_le c) },
+  { dsimp only []; by_cases h : even i,
+    rw [if_pos h, if_neg, add_zero, if_pos, add_halves],
+    rwa [nat.even_add_one, nat.even_add_one, not_not],
+    rwa [nat.even_add_one, not_not],
+    rw [if_neg h, zero_add, if_pos, if_neg, add_zero],
+    exact half_le_self (zero_le c),
+    rwa [nat.even_add_one, nat.even_add_one, not_not],
+    rwa nat.even_add_one },
 
   ---- The choice of `x` is `2n`-periodic
   rw [nat.even_add, iff_true_intro (even.mul_right even_two n), iff_true],
 
   ---- The choice of `x` gives the lower bound `n (c/2)^2`
-  { simp only []; induction n with n h,
+  { dsimp only []; induction n with n h,
     rw [zero_smul, mul_zero, sum_range_zero],
     rw [nat.mul_succ, sum_range_succ, sum_range_succ, h, succ_nsmul', add_assoc, add_right_inj],
     replace h : even (2 * n) := even_two.mul_right n,
     rw [if_pos h, if_pos, if_neg, zero_mul, add_zero, ← sq],
-    rw [nat.even_add, iff_true_intro h, true_iff]; exact nat.not_even_one,
-    rw [nat.even_add, iff_true_intro h, true_iff]; exact even_two },
+    rwa [nat.even_add_one, not_not],
+    rwa [nat.even_add_one, nat.even_add_one, not_not] },
 
   ---- The upper bound is indeed `n (c/2)^2`
   { rw mem_upper_bounds; intros s h,
@@ -80,21 +80,6 @@ begin
     rw [nat.mul_succ, sum_range_succ, sum_range_succ, add_assoc, succ_nsmul'],
     exact add_le_add h0 (special_ineq (h $ 2 * n) (h $ 2 * n + 1)) }
 end
-
-/-
-
-
-/-- Final solution -/
-theorem final_solution (n : ℕ) :
-  is_greatest ((λ x : ℕ → ℝ≥0, target_sum x n) '' {x | good x ∧ periodic x (2 * n)})
-    ((n : ℝ≥0) / 4) :=
-begin
-  refine ⟨⟨_, ⟨bin_even_good, λ k, _⟩, bin_even_target_sum n⟩, λ a h, _⟩,
-  simp only [nat.even_add, even_two_mul, iff_true],
-  rcases h with ⟨x, ⟨h, -⟩, rfl⟩,
-  exact target_sum_good_bound h n
-end
--/
 
 end IMO2010A3
 end IMOSL
