@@ -1,69 +1,87 @@
-import data.real.nnreal algebra.big_operators.intervals algebra.periodic
+import algebra.field.basic algebra.big_operators.intervals algebra.periodic
+  algebra.order.field.canonical.defs
 
 /-! # IMO 2010 A3 -/
 
 namespace IMOSL
 namespace IMO2010A3
 
+set_option profiler true
+set_option profiler.threshold 0.2
+
 open finset function
-open_locale nnreal
 
-def good (x : ℕ → ℝ≥0) := ∀ j : ℕ, x j + x (j + 1) + x (j + 2) ≤ 1
-def target_sum (x : ℕ → ℝ≥0) (n : ℕ) := (range (2 * n)).sum (λ i, x i * x (i + 2))
+variables {F : Type*} [canonically_linear_ordered_semifield F]
 
+section extra_lemmas
 
-
-private lemma lem1 {a b c d : ℝ≥0} (h : a + b + c ≤ 1) (h0 : b + c + d ≤ 1) :
-  a * c + b * d ≤ 1 / 4 :=
+private lemma AM_GM (a b : F) : 2 * a * b ≤ a ^ 2 + b ^ 2 :=
 begin
-  ---- Letting `x = b + c`, reduce to `x ≤ x^2 + 1/4`
-  rw add_assoc at h,
-  generalize_hyp hx : b + c = x at h h0,
-  rw [← add_le_add_iff_left (x * c), ← add_assoc, ← add_mul, add_comm x],
-  refine le_trans (add_le_add_right (mul_le_mul_of_nonneg_right h (zero_le _)) _) _,
-  rw [one_mul, ← add_le_add_iff_right (b * x), add_assoc, ← mul_add, add_comm d],
-  refine le_trans (add_le_add_left (mul_le_mul_of_nonneg_left h0 (zero_le _)) _) _,
-  rw [mul_one, add_right_comm, mul_comm, ← add_mul, add_comm, hx, ← sq],
-  clear h h0 hx a b c d,
-
-  ---- Prove that `x ≤ x^2 + 1/4`
-  rcases x with ⟨x, h⟩,
-  rw [← nnreal.coe_le_coe, nonneg.coe_add, nonneg.mk_pow, subtype.coe_mk, subtype.coe_mk],
-  convert two_mul_le_add_sq x (1 / 2),
-  rw [mul_right_comm, mul_div_cancel' 1 (two_ne_zero : (2 : ℝ) ≠ 0), one_mul],
-  norm_num
+  rw le_iff_exists_add,
+  cases le_total a b with h h; rw le_iff_exists_add at h;
+    rcases h with ⟨c, rfl⟩; use c ^ 2,
+  rw [add_sq, ← add_assoc, ← add_assoc, ← two_mul, sq, ← mul_assoc, ← mul_add],
+  rw [add_sq, add_right_comm, add_right_comm _ _ (b ^ 2),
+      ← two_mul, sq, ← mul_assoc, ← mul_add, mul_right_comm]
 end
 
-private lemma target_sum_good_bound {x : ℕ → ℝ≥0} (h : good x) (n : ℕ) :
-  target_sum x n ≤ (n : ℝ≥0) / 4 :=
+private lemma special_ineq {w x y z c : F} (h : w + x + y ≤ c) (h0 : x + y + z ≤ c) :
+  w * y + x * z ≤ (c / 2) ^ 2 :=
 begin
-  unfold target_sum; induction n with n n_ih,
-  rw [mul_zero, sum_range_zero, nat.cast_zero, zero_div],
-  rw [nat.mul_succ, sum_range_succ, sum_range_succ, add_assoc, nat.cast_succ, add_div],
-  exact add_le_add n_ih (lem1 (h _) (h _))
+  rw [← add_le_add_iff_right (x * (x + y)), add_assoc, ← mul_add, add_comm z],
+  refine le_trans (add_le_add_left (mul_le_mul_left' h0 _) _) _; clear h0 z,
+  rw [add_comm, ← add_le_add_iff_right ((x + y) * y), add_assoc, ← add_mul, ← add_assoc],
+  refine le_trans (add_le_add_left (mul_le_mul_right' h _) _) _; clear h w,
+  rw [mul_comm, ← mul_add, add_assoc, mul_comm x, ← mul_add, ← sq],
+  nth_rewrite 0 ← mul_div_cancel' c two_ne_zero,
+  exact AM_GM (c / 2) (x + y)
 end
 
-private lemma bin_even_good : good (λ j, ite (even j) (1 / 2) 0) :=
+end extra_lemmas
+
+
+
+
+
+
+
+/-- Final solution -/
+theorem final_solution (n : ℕ) (c : F) :
+  is_greatest ((λ x : ℕ → F, (range (2 * n)).sum (λ i, x i * x (i + 2))) ''
+    {x | (∀ j : ℕ, x j + x (j + 1) + x (j + 2) ≤ c) ∧ periodic x (2 * n)})
+      (n • (c / 2) ^ 2) :=
 begin
-  intros j; simp only [nat.even_add_one, not_not],
-  rw [ite_not, apply_ite2 has_add.add, add_zero, zero_add, apply_ite2 has_add.add,
-      add_zero, ← add_div, ← bit0, div_self (two_ne_zero : (2 : ℝ≥0) ≠ 0)],
-  by_cases h : even j,
-  rw if_pos h,
-  rw [if_neg h, one_div, nnreal.inv_le two_ne_zero, mul_one],
-  exact one_le_two
+  refine ⟨⟨λ i, ite (even i) (c / 2) 0, ⟨λ i, _, λ i, if_congr _ rfl rfl⟩, _⟩, _⟩,
+
+  ---- The choice of `x` is good
+  { simp_rw [nat.even_add, even_two, nat.not_even_one, iff_true, iff_false],
+    rw ite_not; by_cases h : even i,
+    rw [if_pos h, if_pos h, add_zero, add_halves],
+    rw [if_neg h, zero_add, add_zero, if_neg h],
+    exact half_le_self (zero_le c) },
+
+  ---- The choice of `x` is `2n`-periodic
+  rw [nat.even_add, iff_true_intro (even.mul_right even_two n), iff_true],
+
+  ---- The choice of `x` gives the lower bound `n (c/2)^2`
+  { simp only []; induction n with n h,
+    rw [zero_smul, mul_zero, sum_range_zero],
+    rw [nat.mul_succ, sum_range_succ, sum_range_succ, h, succ_nsmul', add_assoc, add_right_inj],
+    replace h : even (2 * n) := even_two.mul_right n,
+    rw [if_pos h, if_pos, if_neg, zero_mul, add_zero, ← sq],
+    rw [nat.even_add, iff_true_intro h, true_iff]; exact nat.not_even_one,
+    rw [nat.even_add, iff_true_intro h, true_iff]; exact even_two },
+
+  ---- The upper bound is indeed `n (c/2)^2`
+  { rw mem_upper_bounds; intros s h,
+    rw set.mem_image at h; rcases h with ⟨x, ⟨h, -⟩, rfl⟩,
+    induction n with n h0,
+    rw [zero_smul, mul_zero, sum_range_zero],
+    rw [nat.mul_succ, sum_range_succ, sum_range_succ, add_assoc, succ_nsmul'],
+    exact add_le_add h0 (special_ineq (h $ 2 * n) (h $ 2 * n + 1)) }
 end
 
-private lemma bin_even_target_sum (n : ℕ) :
-  target_sum (λ j, ite (even j) (1 / 2) 0) n = (n : ℝ≥0) / 4 :=
-begin
-  unfold target_sum; induction n with n n_ih,
-  rw [mul_zero, sum_range_zero, nat.cast_zero, zero_div],
-  rw [nat.mul_succ, sum_range_succ, sum_range_succ, n_ih, add_assoc, nat.cast_succ, add_div],
-  simp only [nat.even_add_one, not_not, even.mul_right even_two]; simp only [not_true],
-  rw [if_true, if_false, zero_mul, add_zero, one_div_mul_one_div, bit0, ← two_mul]
-end
-
+/-
 
 
 /-- Final solution -/
@@ -76,6 +94,7 @@ begin
   rcases h with ⟨x, ⟨h, -⟩, rfl⟩,
   exact target_sum_good_bound h n
 end
+-/
 
 end IMO2010A3
 end IMOSL

@@ -6,10 +6,7 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{5pt}
 
-\newcommand{\N}{\mathbb{N}}
-\newcommand{\R}{\mathbb{R}}
-
-\newtheorem{lemma}{Lemma}
+\newtheorem*{claim}{Claim}
 
 \title{IMO 2010 A3}
 \author{}
@@ -23,40 +20,48 @@
 
 \subsection*{Problem}
 
-Fix a positive integer $n$.
+Let $F$ be a canonically ordered semifield.
+Fix a positive integer $n$ and $c \in F$.
 Determine the maximal possible value of
-\[ \sum_{i = 1}^{2n} x_i x_{i + 2} \tag{*}\label{eq0} \]
-    over all non-negative real numbers $x_1, x_2, \ldots, x_{2n}$ such that $x_i + x_{i + 1} + x_{i + 2} \leq 1$ for all $i = 1, 2, \ldots, 2n$.
+\[ \sum_{i = 1}^{2n} x_i x_{i + 2} \tag{*}\label{2010a3-eq0} \]
+    over all $x_1, x_2, \ldots, x_{2n} \in R$ such that $x_i + x_{i + 1} + x_{i + 2} \leq c$ for all $i = 1, 2, \ldots, 2n$.
 Here, we denote $x_{2n + 1} = x_1$ and $x_{2n + 2} = x_2$.
+
+
+
+\subsection*{Answer}
+
+$n (c/2)^2$.
 
 
 
 \subsection*{Solution}
 
-\textbf{Answer.} $n/4$.
-
 Official solution: \url{https://www.imo-official.org/problems/IMO2010SL.pdf}
 
-To show that $n/4$ is attainable, we take $x_i = 1/2$ if $i$ is odd and $x_i = 0$ if $i$ is even.
-Clearly, $x_i + x_{i + 1} + x_{i + 2} \leq 1$ for each $i$, and~\eqref{eq0} becomes $n/4$.
-For the converse, we use the following lemma.
+The official solution works in this more general setting.
+We present Solution 1.
 
-\begin{lemma}\label{lem1}
-Let $a, b, c, d$ be non-negative real numbers such that $a + b + c \leq 1$ and $b + c + d \leq 1$.
-Then $ac + bd \leq 1/4$.
-\end{lemma}
+To show that $n (c/2)^2$ is attainable, we take $x_i = c/2$ if $i$ is even and $x_i = 0$ if $i$ is odd.
+Then $x_i x_{i + 2}$ equals $(c/2)^2$ when $i$ is even and $0$ when $i$ is odd.
+Thus, the expression~\eqref{2010a3-eq0} equals $n (c/2)^2$.
+The converse follows from the following claim, which implies
+\[ \sum_{i = 1}^{2n} x_i x_{i + 2} = \sum_{i = 1}^n (x_{2i} x_{2i + 2} + x_{2i + 1} x_{2i + 3}) \leq \sum_{i = 1}^n (c/2)^2 = n (c/2)^2. \]
+
+\bgin{claim}
+Let $w, x, y, z \in R$ such that $w + x + y, x + y + z \leq c$.
+Then $wy + xz \leq (c/2)^2$.
+\end{claim}
 \begin{proof}
-\[ ac + bd \leq (1 - b - c)b + (1 - b - c)c = (1 - (b + c))(b + c) \leq \frac{1}{4}. \]
+We have $wy + xz + (x + y)^2 = (w + x + y) y + x (x + y + z) \leq c(x + y) \leq (c/2)^2 + (x + y)^2$.
+Cancel out $(x + y)^2$ from both sides proves the claim.
 \end{proof}
-
-The lemma implies
-\[ \sum_{i = 1}^{2n} x_i x_{i + 2} = \sum_{i = 1}^n (x_{2i} x_{2i + 2} + x_{2i + 1} x_{2i + 3}) \leq \sum_{i = 1}^n \frac{1}{4} = \frac{n}{4}. \]
 
 
 
 \subsection*{Implementation details}
 
-We represent the $2n$ non-negative real numbers using a $2n$-periodic sequence from $\N$ to $\R_{\geq 0}$.
+We represent the $2n$ elements using a $2n$-periodic sequence.
 
 
 
