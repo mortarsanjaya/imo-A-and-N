@@ -20,7 +20,8 @@ namespace zmod
 
 @[simp] lemma unit_of_coprime_one {p : ℕ} [fact p.prime] (h0 : nat.coprime 1 p) :
   zmod.unit_of_coprime 1 h0 = 1 :=
-  by simp only [zmod.unit_of_coprime, nat.cast_one, inv_one]; refl
+  by rw zmod.unit_of_coprime;
+    conv_lhs { congr, rw nat.cast_one, skip, rw [nat.cast_one, inv_one] }; refl
 
 
 
@@ -37,41 +38,36 @@ variables {p : ℕ} [fact (p.prime)]
 @[simp] theorem map_zero : ord_compl p 0 = 1 :=
   by rw [ord_compl, dif_pos rfl]
 
-@[simp] theorem map_ne_zero_val {n : ℕ} (h : n ≠ 0) :
+@[simp] theorem map_ne_zero_zmod {n : ℕ} (h : n ≠ 0) :
+  (zmod.ord_compl p n : zmod p) = ((ord_compl[p] n : ℕ) : zmod p) :=
+  by rw [ord_compl, dif_neg h, zmod.coe_unit_of_coprime]
+
+theorem map_ne_zero_val {n : ℕ} (h : n ≠ 0) :
   (zmod.ord_compl p n : zmod p).val = ord_compl[p] n % p :=
-  by rw [zmod.ord_compl, dif_neg h, zmod.coe_unit_of_coprime, zmod.val_nat_cast]
+  by rw [map_ne_zero_zmod h, zmod.val_nat_cast]
 
 @[simp] theorem map_one : ord_compl p 1 = 1 :=
-  by simp only [ord_compl, dif_neg one_ne_zero, nat.factorization_one,
-    finsupp.coe_zero, pi.zero_apply, pow_zero, nat.div_one, unit_of_coprime_one]
+begin
+  rw [ord_compl, dif_neg nat.one_ne_zero],
+  conv_lhs { congr, rw [nat.factorization_one, finsupp.coe_zero,
+    pi.zero_apply, pow_zero, nat.div_one] },
+  exact unit_of_coprime_one _
+end
 
 @[simp] theorem map_mul {m n : ℕ} (hm : m ≠ 0) (hn : n ≠ 0) :
   ord_compl p (m * n) = ord_compl p m * ord_compl p n :=
-begin
-  rw ← units.eq_iff,
-  simp only [ord_compl, zmod.unit_of_coprime, units.coe_mul],
-  rw [dif_neg hm, dif_neg hn, dif_neg (mul_ne_zero hm hn)],
-  simp only [units.coe_mk],
-  rw [nat.ord_compl_mul, nat.cast_mul]
-end
+  by rw [← units.eq_iff, map_ne_zero_zmod (nat.mul_ne_zero hm hn), units.coe_mul,
+    map_ne_zero_zmod hm, map_ne_zero_zmod hn, nat.ord_compl_mul, nat.cast_mul]
 
-@[simp] theorem map_pow (m k : ℕ) :
-  ord_compl p (m ^ k) = ord_compl p m ^ k :=
-begin
-  induction k with k k_ih,
-  rw [pow_zero, map_one, pow_zero],
-  by_cases hm : m = 0,
-  rw [hm, pow_succ, zero_mul, map_zero, one_pow],
-  rw [pow_succ, map_mul hm (pow_ne_zero k hm), k_ih, pow_succ]
-end
+@[simp] theorem map_pow : ∀ m k : ℕ, ord_compl p (m ^ k) = ord_compl p m ^ k
+| _ 0 := by rw [pow_zero, map_one, pow_zero]
+| 0 (k+1) := by rw [zero_pow k.succ_pos, map_zero, one_pow]
+| (m+1) (k+1) := by rw [pow_succ, pow_succ, ← map_pow,
+  map_mul m.succ_ne_zero (pow_ne_zero _ m.succ_ne_zero), map_pow]
 
 @[simp] lemma map_self : ord_compl p p = 1 :=
-begin
-  have hp := fact.out p.prime,
-  rw [ord_compl, dif_neg hp.ne_zero],
-  convert unit_of_coprime_one p.coprime_one_left,
-  rw [nat.prime.factorization_self hp, pow_one, nat.div_self hp.pos]
-end
+  by have h := fact.out p.prime; rw [← units.coe_eq_one, map_ne_zero_zmod h.ne_zero,
+    h.factorization_self, pow_one, nat.div_self h.pos, nat.cast_one]
 
 @[simp] lemma map_self_pow (k : ℕ) : ord_compl p (p ^ k) = 1 :=
   by rw [map_pow, map_self, one_pow]
