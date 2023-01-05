@@ -92,6 +92,10 @@ end
 lemma map_coprime_val {t : ℕ} (h : t.coprime p) : (ord_compl p t : zmod p).val = t % p :=
   by rw [map_coprime h, zmod.coe_unit_of_coprime, zmod.val_nat_cast]
 
+lemma map_zmod_unit_val {x : (zmod p)ˣ} : ord_compl p (x : zmod p).val = x :=
+  by rw [units.ext_iff, map_coprime (zmod.val_coe_unit_coprime x),
+    zmod.coe_unit_of_coprime, zmod.nat_cast_val, zmod.cast_id', id.def]
+
 lemma map_coprime_mod_p {t : ℕ} (h : t.coprime p) : ord_compl p t = ord_compl p (t % p) :=
 begin
   refine units.ext (zmod.val_injective p _),
