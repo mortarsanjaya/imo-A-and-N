@@ -1,11 +1,9 @@
-import data.int.basic data.pi.algebra data.int.order.basic algebra.ring.regular
+import data.int.order.basic algebra.ring.regular
 
 /-! # IMO 2019 A1 (P1) -/
 
 namespace IMOSL
 namespace IMO2019A1
-
-open function
 
 /-- Final solution -/
 theorem final_solution {N : ℤ} (h : N ≠ 0) (f : ℤ → ℤ) :
