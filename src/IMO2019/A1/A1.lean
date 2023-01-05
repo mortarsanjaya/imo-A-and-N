@@ -15,8 +15,8 @@ begin
   ---- Easier direction: `←`
   symmetry; refine ⟨λ h0 a b, _, λ h0, _⟩,
   rcases h0 with rfl | ⟨c, rfl⟩,
-  simp_rw [pi.zero_apply, zero_add, mul_zero],
-  simp only []; rw [add_right_comm, ← mul_add, ← add_assoc, ← mul_add],
+  rw [pi.zero_apply, zero_add, pi.zero_apply, mul_zero, pi.zero_apply],
+  rw [add_right_comm, ← mul_add, ← add_assoc, ← mul_add],
 
   ---- Harder direction: `→`; start with proving linearity
   have h1 : ∀ n : ℤ, N * (f (n + 1) - f n) = f N - f 0 :=
@@ -35,16 +35,12 @@ begin
 
   ---- Now prove that either `q = N` or `q = c = 0`
   rcases h1 with ⟨q, c, rfl⟩,
-  dsimp only [] at h0,
-  rcases eq_or_ne q N with rfl | h1,
+  rcases eq_or_ne N q with rfl | h1,
   right; use c,
-  have h2 := h0 0 0,
-  rw [mul_zero, add_zero, mul_zero, zero_add, add_comm, add_left_inj,
-      mul_eq_mul_right_iff, eq_comm, or_iff_right h1] at h2,
-  subst h2; replace h0 := h0 1 0,
-  simp_rw [mul_zero, add_zero, mul_one] at h0,
-  rw [mul_zero, add_zero, mul_eq_mul_left_iff, eq_comm, or_iff_right h1] at h0,
-  left; simp_rw [h0, zero_mul, add_zero]; refl
+  left; funext n,
+  replace h0 := h0 n 0,
+  rwa [add_right_comm, add_zero, add_left_inj, mul_left_comm, ← mul_add,
+    ← add_assoc, ← mul_add, add_zero, mul_eq_mul_right_iff, or_iff_right h1] at h0
 end
 
 end IMO2019A1

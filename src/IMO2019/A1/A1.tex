@@ -38,23 +38,20 @@ $n \mapsto 0$ and $n \mapsto Nn + c$ for some $c \in \Z$.
 
 Official solution: \url{https://www.imo-official.org/problems/IMO2019SL.pdf}
 
-The following solution is a rewriting of Solution 1.
-However, after determining linearity of $f$, we do more substitution to determine all $f$ satisfying~\eqref{2019a1-eq0}.
-Note that it is easy to check that $n \mapsto 0$ and $n \mapsto Nn + c$ satisfies~\eqref{2019a1-eq0} for any $c \in \Z$.
+We present Solution 1 of the official solution.
+After obtaining linearity, we substitute $b = 0$ instead of just staring at the polynomial identity.
+It is easy to check that $n \mapsto 0$ and $n \mapsto Nn + c$ satisfies~\eqref{2019a1-eq0} for any $c \in \Z$.
 
 Start by substituting $(a, b) = (0, n + 1)$ and $(a, b) = (1, n)$ into~\eqref{2019a1-eq0}.
 Comparing the two obtained equalities give us
 \[ f(N) + N f(n) = f(0) + N f(n + 1) \implies f(n + 1) - f(n) = \frac{f(N) - f(0)}{N}. \]
 Standard induction on both sides reveal that $f$ is linear, i.e. $f(n) = qn + c$ for some $q, c \in \Z$.
-Plugging $(a, b) = (0, 0)$ into~\eqref{2019a1-eq0} gives us $(N + 1) c = f(c) = (q + 1) c$.
-If $q = N$, we are done, so now assume that $q \neq N$.
-Then the equality gives us $c = 0$, so $f(n) = qn$ for all $n \in \Z$.
-Now, plugging $(a, b) = (1, 0)$ into~\eqref{2019a1-eq0} gives us $qN = q^2$.
-Since $q \neq N$, we get $q = 0$, as desired.
+Finally, substitute this equality and $b = 0$ into~\eqref{2019a1-eq0}.
+The equation reduces to $qNa + c + Nc = q(qa + c) + c \iff N(qa + c) = q(qa + c)$ for all $a \in \Z$.
+In particular, we have either $q = N$ or $f(a) = qa + c = 0$ for all $a \in \Z$.
+The former also yields the solution $f(x) = Nx + c$.
 
 
-
-\newpage
 
 \subsection*{Extra}
 
@@ -63,13 +60,12 @@ Let $G$ be an additive abelian group.
 Fix an arbitrary function $g : G \to G$ with $g(0) = 0$.
 Fix some $T \in End(G)$, and assume that $T$ is injective.
 Determine all functions $f : G \to G$ such that, for all $x, y \in G$,
-\[ f(g(x)) + Tf(y) = f(f(x + y)). \]
+\[ f(g(x)) + T f(y) = f(f(x + y)). \]
 
 One can show that all such functions can be described by $\phi + C$, where $\phi \in \End(G)$ and $C \in G$ satisfies $\phi \circ g = T \phi = \phi^2$ and $\phi(C) = T(C)$.
 For a proof, one can follow Solution 2 to do the necessary reductions.
-However, this does not seem to make the problem much more difficult.
-Thus, it is not much worth implementing this generalized problem.
-
+However, this does not seem to significantly change the problem.
+Meanwhile, it requires a non-trivial amount of change in implementation.
 
 
 
