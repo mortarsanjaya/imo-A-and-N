@@ -58,7 +58,7 @@ section results
 /-- If `P` is wide, then `P(n)` holds for infinitely many `n`,
   even if `P` is not divisor-closed. -/
 theorem infinite_pred_of_wide {P : ℕ → Prop} (h0 : wide P) : (set_of P).infinite :=
-  by refine set.infinite.mono (λ x h1, _) h0; exact h1.2
+  h0.mono (λ x h1, h1.2)
 
 /-- If `P` is `p`-strong for some `p ≥ 2`, not necessarily prime, then
   `P(n)` holds for infinitely many `n`, even if `P` is not divisor-closed. -/
@@ -79,15 +79,13 @@ lemma dc_at_one {n : ℕ} (h0 : n ≠ 0) (h1 : P n) : P 1 :=
 theorem dc_not_strong_iff {p : ℕ} (h0 : p ≠ 0) :
   ¬strong p P ↔ (∃ c : ℕ, ∀ k : ℕ, P (p ^ k) ↔ k < c) :=
 begin
-  simp only [strong, not_exists, not_forall],
-  refine ⟨λ h1, ⟨nat.find h1, (λ k, ⟨λ h2, _, λ h2, _⟩)⟩, λ h1, _⟩,
-  { rw ← not_le; intros h3,
-    exact nat.find_spec h1 (h _ (pow_ne_zero k h0) h2 _ (pow_dvd_pow _ h3)) },
-  { have h3 := nat.find_min h1 h2,
-    rwa not_not at h3 },
-  { cases h1 with c h1,
-    use c; rw h1,
-    exact lt_irrefl c }
+  rw [strong, not_forall],
+  refine ⟨λ h1, ⟨nat.find h1, (λ k, ⟨λ h2, _, λ h2, not_not.mp (nat.find_min h1 h2)⟩)⟩, λ h1, _⟩,
+  rw ← not_le; intros h3,
+  exact nat.find_spec h1 (h _ (pow_ne_zero k h0) h2 _ (pow_dvd_pow _ h3)),
+  cases h1 with c h1,
+  refine ⟨c, _⟩; rw h1,
+  exact lt_irrefl c
 end
 
 /-- Using choice, given a predicate `P` that is not `p`-strong for any `p` prime, construct a
@@ -101,7 +99,8 @@ begin
   replace h1 := classical.axiom_of_choice h1,
   cases h1 with x h1,
   refine ⟨(λ p, dite p.prime (λ hp : p.prime, x ⟨p, hp⟩) (λ _, 0)), (λ p h2, _), (λ p hp k, _)⟩,
-  contrapose! h2; rw dif_neg h2,
+  rw [ne.def, dite_eq_right_iff, not_forall] at h2,
+  cases h2 with h2 h3; exact h2,
   rw [dif_pos hp, ← h1, subtype.coe_mk]
 end
 
@@ -111,10 +110,8 @@ This is just a weak version of `dc_not_strong_aoc_map_iff`. -/
 theorem dc_not_strong_aoc_map (h0 : ∀ p : ℕ, p.prime → ¬strong p P) :
   ∃ x : ℕ → ℕ, (∀ p : ℕ, x p ≠ 0 → p.prime) ∧
     ∀ (p : ℕ) (hp : p.prime) (k : ℕ), P (p ^ k) → k ≤ x p :=
-begin
-  rcases dc_not_strong_aoc_map_iff h h0 with ⟨x, h1, h2⟩,
-  exact ⟨x, h1, λ p hp k h3, le_of_lt ((h2 p hp k).mp h3)⟩
-end
+  by rcases dc_not_strong_aoc_map_iff h h0 with ⟨x, h1, h2⟩;
+    exact ⟨x, h1, λ p hp k h3, le_of_lt ((h2 p hp k).mp h3)⟩
 
 /-- Using choice, given a predicate `P` that is not `p`-strong for any `p` prime, under the
   condition `P(1)`, construct a map `x : nat.primes → ℕ` such that `P(p^k) ↔ k ≤ x_p` for any
@@ -138,7 +135,7 @@ theorem dc_not_wide_strong_aoc_finsupp
   ∃ x : ℕ →₀ ℕ, (∀ p : ℕ, x p ≠ 0 → p.prime) ∧
     ∀ (p : ℕ) (hp : p.prime) (k : ℕ), P (p ^ k) ↔ k ≤ x p :=
 begin
-  simp only [wide, set.not_infinite] at h0,
+  rw [wide, set.not_infinite] at h0,
   replace h2 := dc_not_strong_aoc_map_iff' h h1 h2,
   clear h h1; rcases h2 with ⟨x, h, h1⟩,
   refine ⟨⟨h0.to_finset, x, (λ p, _)⟩, ⟨h, h1⟩⟩,
@@ -154,33 +151,27 @@ end
 theorem dc_wide_or_strong_of_infinite (h0 : (set_of P).infinite) :
   wide P ∨ ∃ p : ℕ, p.prime ∧ strong p P :=
 begin
-  by_cases h1 : ¬P 1,
-  rcases set.infinite.exists_nat_lt h0 0 with ⟨n, h2, h3⟩,
-  exfalso; exact h1 (dc_at_one h (ne_of_gt h3) h2),
-  contrapose! h0,
-  rw not_not at h1,
-  replace h0 := dc_not_wide_strong_aoc_finsupp h h0.1 h0.2 h1,
-  clear h1; rcases h0 with ⟨x, h0, h1⟩,
-  suffices : ∃ N : ℕ, 0 < N ∧ ∀ n : ℕ, P n → n = 0 ∨ n ∣ N,
-  { rcases this with ⟨N, hN, this⟩,
-    refine not_not.mpr (set.finite.subset (finset.range N.succ).finite_to_set (λ n h2, _)),
-    rw [finset.mem_coe, finset.mem_range, nat.lt_succ_iff],
-    rcases this n h2 with rfl | h2,
-    exacts [N.zero_le, nat.le_of_dvd hN h2] },
-  use x.prod has_pow.pow,
-  rw and_iff_left_of_imp,
-  { refine nat.prod_pow_pos_of_zero_not_mem_support (λ h2, _),
-    rw finsupp.mem_support_iff at h2,
-    exact nat.not_prime_zero (h0 0 h2) },
-  { intros h2 n h3,
-    rcases eq_or_ne n 0 with rfl | h4,
-    left; refl,
-    rw [or_iff_right h4, ← nat.factorization_le_iff_dvd h4 (ne_of_gt h2),
-        nat.prod_pow_factorization_eq_self (by simp; exact h0), finsupp.le_iff],
-    rintros p h5,
-    replace h5 : p.prime := nat.prime_of_mem_factorization h5,
-    rw [nat.factorization_def n h5, ← h1 p h5],
-    exact h n h4 h3 _ pow_padic_val_nat_dvd }
+  ---- First find `x : primes →₀ ℕ` such that `P(n) → ∀ p, v_p(n) ≤ x_p`
+  have h1 : P 1 := by rcases h0.exists_nat_lt 0 with ⟨n, h1, h2⟩;
+    exact dc_at_one h (ne_of_gt h2) h1,
+  by_contra' h2; replace h2 := dc_not_wide_strong_aoc_finsupp h h2.1 h2.2 h1,
+  clear h1; rcases h2 with ⟨x, h1, h2⟩,
+
+  ---- Now take any `m > ∏_p p^{x_p}` and get a contradiction
+  replace h0 := h0.exists_nat_lt (x.prod has_pow.pow),
+  rcases h0 with ⟨m, h0, h3⟩,
+  revert h3; rw [imp_false, not_lt],
+  cases eq_or_ne m 0 with h3 h3,
+  rw h3; exact (x.prod pow).zero_le,
+  have h4 : 0 < x.prod pow := nat.prod_pow_pos_of_zero_not_mem_support
+    (λ h4, nat.not_prime_zero (h1 0 $ finsupp.mem_support_iff.mp h4)),
+  refine nat.le_of_dvd h4 _,
+  rw [← nat.factorization_le_iff_dvd h3 (ne_of_gt h4),
+      nat.prod_pow_factorization_eq_self _, finsupp.le_iff],
+  intros p h5; replace h5 : p.prime := nat.prime_of_mem_factorization h5,
+  rw [nat.factorization_def m h5, ← h2 p h5],
+  exact h m h3 h0 _ pow_padic_val_nat_dvd,
+  intros p h5; exact h1 p (finsupp.mem_support_iff.mp h5)
 end
 
 /-- Assuming choice, `P(n)` holds for infinitely many `n` iff
