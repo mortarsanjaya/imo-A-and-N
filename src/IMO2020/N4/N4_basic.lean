@@ -103,7 +103,7 @@ begin
   cases h0 with c h0; rw ← mul_two at h0,
   have h1 : q ^ k ∣ (2 ^ c + 1) * (2 ^ c - 1) :=
     by rw [← nat.sq_sub_sq, one_pow, ← pow_mul, ← h0]; exact p_dvd_two_pow_order_two_mod_p h,
-  use c; refine (nat.coprime.dvd_mul_right (nat.coprime.pow_left _ _)).mp h1,
+  refine ⟨c, (nat.coprime.dvd_mul_right (nat.coprime.pow_left _ _)).mp h1⟩,
   rw hq.coprime_iff_not_dvd,
 
   ---- Reduce to showing `q ∣ 2 ^ c + 1`
@@ -112,7 +112,7 @@ begin
     rw [← nat.sub_add_cancel (nat.one_le_pow c 2 two_pos),
         add_assoc, ← nat.dvd_add_iff_right h2, ← bit0] at this,
     refine not_dvd_of_coprime hq.ne_one (two_coprime_p _) this,
-    clear h0; contrapose! h,
+    clear h0; contrapose h,
     rw [nat.odd_iff_not_even, not_not] at h ⊢,
     rw nat.even_pow; exact ⟨h, ne_of_gt hk⟩ },
   
@@ -157,11 +157,10 @@ begin
   intros i j h,
   rw le_iff_exists_add at h,
   rcases h with ⟨c, rfl⟩,
-  rw add_comm; simp only [iterate_add, comp_app],
-  generalize : F p^[i] n = k,
   induction c with c c_ih,
-  rw [iterate_zero, id.def],
-  rw [iterate_succ', comp_app],
+  rw add_zero,
+  rw nat.add_succ,
+  simp_rw iterate_succ',
   exact le_trans c_ih (self_le_F p _)
 end
 
@@ -176,9 +175,9 @@ lemma S_succ (p k n : ℕ) : S p k.succ n = S p k n + (2 ^ k * n % p) :=
 
 lemma S_succ' (p k n : ℕ) : S p k.succ n = S p k (2 * n) + n % p :=
 begin
-  unfold S; convert sum_range_succ' _ _,
-  funext k; rw [← mul_assoc, ← pow_succ'],
-  rw [pow_zero, one_mul]
+  rw [S, sum_range_succ', pow_zero, one_mul, add_left_inj, S],
+  refine sum_congr rfl (λ x _, _),
+  rw [pow_succ', mul_assoc]
 end
 
 lemma S_mod_p (p k n : ℕ) : S p k n = S p k (n % p) :=
@@ -204,15 +203,16 @@ end
 
 lemma S_add_SS (p k k0 n : ℕ) : S p (k + k0) n = S p k n + S p k0 (2 ^ k * n) :=
 begin
-  unfold S; convert sum_range_add _ _ _,
-  funext x; rw [pow_add, mul_assoc, mul_left_comm]
+  rw [S, sum_range_add, S, add_right_inj, S],
+  refine sum_congr rfl (λ x _, _),
+  rw [add_comm, pow_add, mul_assoc]
 end
 
 lemma F_switch_sign {p a b : ℕ} (h0 : b < a) (h1 : F p a < F p b) :
   ∃ k x y : ℕ, p / 2 + x < y ∧ y < p ∧ a = x + (k + 1) * p ∧ b = y + k * p :=
 begin
   ---- Throw out the case `p = 0`
-  unfold F at h1,
+  rw [F, F] at h1,
   rcases p.eq_zero_or_pos with rfl | h,
   rw [nat.mod_zero, ← two_mul, nat.mod_zero, ← two_mul] at h1,
   exfalso; exact lt_asymm h1 ((mul_lt_mul_left two_pos).mpr h0),
@@ -267,8 +267,7 @@ begin
     rw [nat.odd_iff, ← nat.two_dvd_ne_zero] at h,
     rwa [← nat.coprime, nat.coprime_comm, nat.prime_two.coprime_iff_not_dvd]
   end,
-  unfold F at h0,
-  rw [nat.mul_add_mod, nat.mul_add_mod, add_left_inj, add_left_inj] at h0,
+  rw [F, F, nat.mul_add_mod, nat.mul_add_mod, add_left_inj, add_left_inj] at h0,
   rw h0
 end
 
