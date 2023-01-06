@@ -1,6 +1,6 @@
 import algebra.char_p.two
 
-/-! # IMO 2009 A7, Generalized Version -/
+/-! # IMO 2009 A7 -/
 
 namespace IMOSL
 namespace IMO2009A7
@@ -17,7 +17,7 @@ section basic_results
 variables {R : Type*} [ring R]
 
 private lemma good_id : good (λ x : R, x) :=
-  λ x y, by simp only []; rw [mul_add, ← sq, add_comm]
+  λ x y, by rw [mul_add, ← sq, add_comm]
 
 variables [is_domain R] {f : R → R} (h : good f)
 include h
