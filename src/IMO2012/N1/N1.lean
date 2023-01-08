@@ -10,6 +10,22 @@ def admissible {R : Type*} [semiring R] (A : set R) :=
 
 
 
+private lemma admissible_ideal {R : Type*} [comm_semiring R] (I : ideal R) :
+  admissible (I : set R) :=
+  λ u v h h0 r, by rw [sq, mul_right_comm, ← add_mul, sq];
+    exact I.add_mem (I.mul_mem_left (u + r * v) h) (I.mul_mem_left v h0)
+
+private lemma admissible_mem_sq_mul {R : Type*} [comm_ring R]
+  {A : set R} (h : admissible A) {z : R} (h0 : z ∈ A) (k : R) :
+  k * z ^ 2 ∈ A :=
+  by replace h := h z z h0 h0 (k - (1 + 1));
+    rwa [mul_assoc, ← sq, ← one_add_mul, ← add_one_mul,
+      add_right_comm, add_sub_cancel'_right] at h
+
+
+
+
+
 /-- Final solution -/
 theorem final_solution {R : Type*} [comm_ring R] (x y : R) :
   (∀ A : set R, admissible A → x ∈ A → y ∈ A → ∀ z : R, z ∈ A) ↔ is_coprime x y :=
@@ -17,26 +33,22 @@ begin
   refine ⟨λ h, _, λ h A h0 h1 h2, _⟩,
 
   ---- If the only admissible set containing `x` and `y` is `R`, then `x` and `y` are coprime.
-  { have h0 : ∀ I : ideal R, admissible (I : set R) :=
-      λ I u v h h0 r, by rw [sq, mul_right_comm, ← add_mul, sq];
-        exact I.add_mem (I.mul_mem_left _ h) (I.mul_mem_left _ h0),
-    replace h := h _ (h0 $ ideal.span {x, y}) (ideal.subset_span $ set.mem_insert x _)
+  { replace h := h _ (admissible_ideal $ ideal.span {x, y})
+      (ideal.subset_span $ set.mem_insert x _)
       (ideal.subset_span $ set.mem_insert_of_mem _ $ set.mem_singleton y) 1,
     rw [set_like.mem_coe, ideal.mem_span_insert] at h,
-    clear h0; rcases h with ⟨a, z, h0, h⟩,
+    rcases h with ⟨a, z, h0, h⟩,
     rw ideal.mem_span_singleton at h0; rcases h0 with ⟨b, rfl⟩,
     rw mul_comm y at h; exact ⟨a, b, h.symm⟩ },
 
   ---- If `x` and `y` are coprime, the only admissible set `x` and `y` is `R`
-  { have h3 : ∀ z : R, z ∈ A → (∀ k : R, k * z ^ 2 ∈ A) :=
-      λ x h3 k, by replace h3 := h0 x x h3 h3 (k - (1 + 1));
-        rwa [mul_assoc, ← sq, ← one_add_mul, add_comm (1 : R),
-             ← add_one_mul, add_assoc, sub_add_cancel] at h3,
-    suffices : (1 : R) ∈ A,
-      intros x; rw [← mul_one x, ← one_pow 2]; exact h3 1 this x,
-    replace h : is_coprime (x ^ 2) (y ^ 2) := is_coprime.pow h,
+  suffices : (1 : R) ∈ A,
+  { intros x,
+    rw [← mul_one x, ← one_pow 2],
+    exact admissible_mem_sq_mul h0 this x },
+  { replace h : is_coprime (x ^ 2) (y ^ 2) := is_coprime.pow h,
     rcases h with ⟨a, b, h⟩,
-    replace h0 := h0 _ _ (h3 x h1 a) (h3 y h2 b) 2,
+    replace h0 := h0 _ _ (admissible_mem_sq_mul h0 h1 a) (admissible_mem_sq_mul h0 h2 b) 2,
     rwa [← add_sq, h, one_pow] at h0 }
 end 
 
