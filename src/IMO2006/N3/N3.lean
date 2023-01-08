@@ -9,11 +9,10 @@ open finset
 
 section extra_lemmas
 
-private lemma exists_sup_fn_fin (f : ℕ → ℕ) (c : ℕ) : ∃ K : ℕ, ∀ n : ℕ, n < c → f n ≤ K :=
-begin
-  induction c with c h,
-  exact ⟨0, λ n h, by exfalso; exact nat.not_lt_zero n h⟩,
-  cases h with K h,
+private lemma exists_sup_fn_fin (f : ℕ → ℕ) : ∀ c : ℕ, ∃ K : ℕ, ∀ n : ℕ, n < c → f n ≤ K
+| 0 := ⟨0, λ n h, absurd h (nat.not_lt_zero n)⟩
+| (c+1) := begin
+  cases exists_sup_fn_fin c with K h,
   refine ⟨max K (f c), λ n h0, _⟩,
   rw [nat.lt_succ_iff, le_iff_eq_or_lt] at h0,
   rcases h0 with rfl | h0,
@@ -30,7 +29,8 @@ end extra_lemmas
 
 
 private def g (n : ℕ) : ℕ := (range n).sum (λ x, n / (x + 1))
-def f (n : ℕ) : ℚ := ((g n : ℤ) : ℚ) / ((n : ℤ) : ℚ)
+
+@[nolint doc_blame] def f (n : ℕ) : ℚ := ((g n : ℤ) : ℚ) / ((n : ℤ) : ℚ)
 
 
 
@@ -41,7 +41,7 @@ private lemma g_succ (n : ℕ) : g n.succ = g n + n.succ.divisors.card :=
   exact sum_congr rfl (λ x _, by rw [add_comm, nat.succ_div])
 
 private lemma g_sum : ∀ n : ℕ, g n = (range n).sum (λ x, x.succ.divisors.card)
-| 0 := by rw [g, sum_range_zero, sum_range_zero]
+| 0 := rfl
 | (n+1) := by rw [g_succ, sum_range_succ, ← g_sum]
 
 private lemma two_le_card_divisors {n : ℕ} (h : 2 ≤ n) : 2 ≤ n.divisors.card :=
@@ -61,8 +61,7 @@ begin
   rw [sum_range_one, zero_add]; norm_num,
   rw [mul_add_one, g_succ],
   refine add_lt_add_of_lt_of_le h0 (two_le_card_divisors _),
-  rw nat.succ_le_succ_iff; refine le_trans _ h,
-  norm_num
+  exact nat.succ_le_succ (le_trans (nat.succ_le_succ $ nat.zero_le 5) h)
 end
 
 private lemma card_divisors_prime {p : ℕ} (hp : p.prime) : p.divisors.card = 2 :=
@@ -129,8 +128,7 @@ begin
       nat.cast_lt, g_succ, card_divisors_prime h0, add_mul, nat.mul_succ, add_lt_add_iff_left],
   exact two_mul_lt h1,
   rw int.coe_nat_pos; exact n.succ_pos,
-  rw int.coe_nat_pos; refine lt_of_lt_of_le _ h1,
-  norm_num
+  rw int.coe_nat_pos; exact lt_of_lt_of_le (nat.succ_pos 5) h1
 end
 
 end IMO2006N3
