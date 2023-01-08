@@ -28,22 +28,18 @@ end
 theorem final_solution_general_ring {R : Type*} [comm_ring R] {k : ℕ} (hk : 0 < k)
   {a : ℕ → R} (h : periodic a k) (h0 : ∀ i : ℕ, a i * (a i.succ - 1) = 0) :
   ∀ i j : ℕ, a i = a j :=
-begin
-  conv at h0 { find (_ = _) { rw [mul_sub_one, sub_eq_zero] } },
-  exact final_solution_general_monoid hk h h0
-end
+  final_solution_general_monoid hk h
+    (λ i, by rw [← sub_eq_zero, ← mul_sub_one]; exact h0 i)
 
 /-- Generalized version with integers using divisibility -/
 theorem final_solution_int_div {k : ℕ} (hk : 0 < k) {a : ℕ → ℤ} (h : periodic a k)
   (n : ℕ) (h0 : ∀ i : ℕ, (n : ℤ) ∣ a i * (a i.succ - 1)) :
   ∀ i j : ℕ, (n : ℤ) ∣ a i - a j :=
 begin
-  intros i j,
-  rw [← int.modeq_iff_dvd, ← zmod.int_coe_eq_int_coe_iff],
-  conv at h0 { find (_ ∣ _) {
-    rw [← zmod.int_coe_zmod_eq_zero_iff_dvd, int.cast_mul, int.cast_sub, int.cast_one] } },
-  refine final_solution_general_ring hk _ h0 j i,
-  intros x; simp only []; rw h
+  intros i j; rw [← int.modeq_iff_dvd, ← zmod.int_coe_eq_int_coe_iff, eq_comm],
+  revert i j; refine final_solution_general_ring hk (periodic.comp h coe) (λ i, _),
+  rw [← int.cast_one, ← int.cast_sub, ← int.cast_mul, zmod.int_coe_zmod_eq_zero_iff_dvd],
+  exact h0 i
 end
 
 /-- Final solution -/
