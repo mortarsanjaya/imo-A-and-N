@@ -2,9 +2,6 @@ import data.pnat.basic data.nat.periodic
 
 /-! # IMO 2009 A3 (P5) -/
 
-set_option profiler true
-set_option profiler.threshold 0.05
-
 namespace IMOSL
 namespace IMO2009A3
 
