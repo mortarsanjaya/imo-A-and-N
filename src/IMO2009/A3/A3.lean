@@ -2,6 +2,9 @@ import data.pnat.basic data.nat.periodic
 
 /-! # IMO 2009 A3 (P5) -/
 
+set_option profiler true
+set_option profiler.threshold 0.05
+
 namespace IMOSL
 namespace IMO2009A3
 
@@ -29,8 +32,8 @@ private lemma pnat_to_nat_prop2 {P : ℕ+ → ℕ+ → Prop} :
 
 private lemma succ_pnat_add_succ_pnat (m n : ℕ) :
   m.succ_pnat + n.succ_pnat = (m + n).succ_pnat + 1 :=
-  by simp_rw [← pnat.coe_inj, pnat.add_coe, nat.succ_pnat_coe,
-              nat.add_succ, nat.succ_add, positive.coe_one]
+  by rw [← pnat.coe_inj, pnat.add_coe, pnat.add_coe, nat.succ_pnat_coe, nat.succ_pnat_coe,
+         nat.succ_pnat_coe, nat.add_succ, nat.succ_add, positive.coe_one]
 
 private lemma pnat_add_sub_cancel (m n : ℕ+) : m + n - n = m :=
   by rw [← add_right_inj n, pnat.add_sub_of_lt (n.lt_add_left m), add_comm]
@@ -52,7 +55,7 @@ theorem final_solution_nat (f : ℕ → ℕ) :
 begin
   ---- First, the easier direction: `←`
   symmetry; split,
-  { rintros rfl; dsimp only [],
+  { rintros rfl,
     refine ⟨λ x y, by rw add_comm, λ x y, _, λ x y, _⟩,
     rw ← add_assoc; exact le_add_self,
     rw add_assoc; exact le_self_add },
@@ -117,7 +120,8 @@ theorem final_solution_pnat (f : ℕ+ → ℕ+) :
       ↔ f = λ x, x :=
 begin
   obtain ⟨g, rfl⟩ : ∃ g : ℕ → ℕ, f = λ x, (g x.nat_pred).succ_pnat :=
-    ⟨λ x, (f x.succ_pnat).nat_pred, funext (λ x, by simp_rw pnat.succ_pnat_nat_pred)⟩,
+    ⟨λ x, (f x.succ_pnat).nat_pred,
+      funext (λ x, by rw [pnat.succ_pnat_nat_pred, pnat.succ_pnat_nat_pred])⟩,
   simp_rw [pnat_to_nat_prop2, funext_iff, pnat_to_nat_prop, nat.nat_pred_succ_pnat,
            nat.succ_pnat_inj, ← funext_iff, succ_pnat_add_succ_pnat, pnat_add_sub_cancel,
            nat.nat_pred_succ_pnat, pnat.lt_add_one_iff, nat.succ_pnat_le_succ_pnat],
