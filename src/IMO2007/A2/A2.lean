@@ -31,9 +31,12 @@ private lemma succ_pnat_add_succ_pnat (m n : ℕ) :
 private lemma good_iff_good' (f : ℕ+ → ℕ+) : good f ↔ good' (λ x, (f x.succ_pnat).nat_pred) :=
 begin
   obtain ⟨g, rfl⟩ : ∃ g : ℕ → ℕ, f = λ x, (g x.nat_pred).succ_pnat :=
-    ⟨λ x, (f x.succ_pnat).nat_pred, funext (λ x, by simp_rw pnat.succ_pnat_nat_pred)⟩,
-  simp_rw [good, pnat_to_nat_prop2, nat.nat_pred_succ_pnat, succ_pnat_add_succ_pnat,
-           add_le_add_iff_right, nat.succ_pnat_le_succ_pnat, good'],
+    ⟨λ x, (f x.succ_pnat).nat_pred,
+      funext (λ x, by rw [pnat.succ_pnat_nat_pred, pnat.succ_pnat_nat_pred])⟩,
+  rw [good, pnat_to_nat_prop2],
+  refine forall₂_congr (λ m n, _),
+  rw [nat.nat_pred_succ_pnat, succ_pnat_add_succ_pnat, succ_pnat_add_succ_pnat,
+      add_le_add_iff_right, nat.succ_pnat_le_succ_pnat],
   refl
 end
 
@@ -46,7 +49,7 @@ begin
     refine ⟨_, h, _⟩,
     rw pnat.succ_pnat_nat_pred },
   { rcases h with ⟨f, h, h0⟩,
-    replace h : good (λ x, (f x.nat_pred).succ_pnat) := by rw good_iff_good'; convert h,
+    replace h : good (λ x, (f x.nat_pred).succ_pnat) := by rw good_iff_good'; exact h,
     refine ⟨_, h, _⟩,
     rw [h0, pnat.succ_pnat_nat_pred] }
 end
@@ -133,13 +136,10 @@ end
 /-- Final solution, `nat` version, `N = 0` -/
 theorem final_solution_nat_zero (k : ℕ) : (∃ f : ℕ → ℕ, good' f ∧ f 0 = k) ↔ k = 0 :=
 begin
-  symmetry; refine ⟨λ h, ⟨λ _, 0, λ m n, _, h.symm⟩, λ h, _⟩,
-  simp_rw add_zero,
+  refine ⟨λ h, _, λ h, ⟨λ _, 0, λ m n, by rw add_zero, h.symm⟩⟩,
   rcases h with ⟨f, h, rfl⟩,
   by_contra h0; rw [← ne.def, ← pos_iff_ne_zero] at h0,
-  refine not_le_of_lt (lt_of_lt_of_le (lt_add_of_pos_left _ h0) (h 0 0)) _,
-  rw ← nat.succ_le_iff at h0,
-  exact good'_monotone h h0
+  exact not_le_of_lt (lt_of_lt_of_le (lt_add_of_pos_left _ h0) (h 0 0)) (good'_monotone h h0)
 end
 
 /-- Final solution, `nat` version, `N > 0` -/
