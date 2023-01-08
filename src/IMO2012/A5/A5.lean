@@ -4,7 +4,7 @@ import
   extra.real_hom.nnreal_odd_ext
   extra.real_prop.real_quadratic_sol
 
-/-! # IMO 2012 A5, Generalized Version -/
+/-! # IMO 2012 A5 -/
 
 namespace IMOSL
 namespace IMO2012A5
@@ -12,33 +12,88 @@ namespace IMO2012A5
 open function nnreal
 open_locale nnreal
 
-def fn_eq {R : Type*} [ring R] (f : ℝ → R) := ∀ x y : ℝ, f (1 + x * y) - f(x + y) = f x * f y
+def good {R S : Type*} [ring R] [ring S] (f : R → S) :=
+  ∀ x y : R, f (1 + x * y) - f(x + y) = f x * f y
+
+
+
+section extra_lemmas
+
+private lemma one_add_mul_sub_add {R : Type*} [ring R] (x y : R) :
+  (1 + x * y) - (x + y) = (x - 1) * (y - 1) :=
+  by rw [add_comm, ← sub_add_sub_comm, ← mul_sub_one,
+    ← neg_sub y, ← sub_eq_add_neg, ← sub_one_mul]
+
+private lemma one_add_mul_add_add {R : Type*} [ring R] (x y : R) :
+  (1 + x * y) + (x + y) = (x + 1) * (y + 1) :=
+  by rw [add_add_add_comm, ← add_one_mul, add_comm 1 x, ← mul_one_add, add_comm 1 y]
+
+end extra_lemmas
+
+
+
+
+
+section basic_results
+
+section answer
+
+variables {R S : Type*} [ring R]
+
+private lemma good_zero [ring S] : good (λ (_ : R), (0 : S)) :=
+  λ x y, by rw [sub_zero, mul_zero]
+
+private lemma good_hom_sub_one [ring S] (φ : R →+* S) :
+  good (λ (x : R), φ x - 1) :=
+  λ x y, by rw [sub_sub_sub_cancel_right, φ.map_add, φ.map_one, φ.map_add, φ.map_mul];
+    exact one_add_mul_sub_add (φ x) (φ y)
+
+private lemma good_hom_sq_sub_one [comm_ring S] (φ : R →+* S) :
+  good (λ (x : R), φ x ^ 2 - 1) :=
+  λ x y, by rw [sub_sub_sub_cancel_right, φ.map_add, φ.map_one, φ.map_add, φ.map_mul, sq_sub_sq,
+    one_add_mul_sub_add, one_add_mul_add_add, mul_mul_mul_comm, ← sq_sub_sq, ← sq_sub_sq, one_pow]
+
+end answer
+
+
+private lemma good_subst_neg_one {R S : Type*} [ring R] [ring S] {f : R → S} (h : good f) (x : R) :
+  f x - f (-x) = f (-1) * f (1 - x) :=
+  by rw [← h, neg_one_mul, neg_sub, add_sub_cancel'_right, ← add_sub_assoc, neg_add_self, zero_sub]
+
+
+section domain
+
+variables {R S : Type*} [ring R] [comm_ring S] [is_domain S] {f : R → S} (h : good f)
+include h
+
+private lemma good_map_one : f 1 = 0 :=
+  by replace h := h 1 1; rwa [mul_one, sub_self, zero_eq_mul_self] at h
+
+private lemma good_eq_zero_of_map_zero_ne_neg_one (h0 : f 0 ≠ -1) : f = 0 :=
+  funext (λ x, by have h1 := h x 0; rwa [mul_zero, add_zero, good_map_one h, zero_sub,
+    add_zero, ← mul_neg_one, mul_eq_mul_left_iff, eq_comm, or_iff_right h0] at h1)
+
+end domain
+
+end basic_results
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 section results
 
-variables {R : Type*} [comm_ring R] [is_domain R] {f : ℝ → R} (feq : fn_eq f)
+variables {R : Type*} [comm_ring R] [is_domain R] {f : ℝ → R} (feq : good f)
 include feq
-
-private lemma lem1_1 : f 1 = 0 :=
-begin
-  replace feq := feq 1 1,
-  rwa [mul_one, sub_self, zero_eq_mul_self] at feq
-end
-
-private lemma lem1_2 (h : f 0 ≠ -1) : f = 0 :=
-begin
-  funext x,
-  have h0 := feq x 0,
-  rwa [mul_zero, add_zero, lem1_1 feq, zero_sub, add_zero, ← mul_neg_one,
-       mul_eq_mul_left_iff, eq_comm, or_iff_right h] at h0
-end
-
-private lemma lem1_3 (x : ℝ) : f x - f (-x) = f (-1) * f (1 - x) :=
-  by rw [← feq, neg_one_mul, neg_sub, add_sub_cancel'_right,
-         ← add_sub_assoc, neg_add_self, zero_sub]
-
 
 
 section case_fneg1_ne_0
@@ -49,13 +104,13 @@ include fneg1_ne_0
 private lemma lem2_1 : f 0 = -1 :=
 begin
   contrapose! fneg1_ne_0 with f0_ne_neg1,
-  rw [lem1_2 feq f0_ne_neg1, pi.zero_apply]
+  rw [good_eq_zero_of_map_zero_ne_neg_one feq f0_ne_neg1, pi.zero_apply]
 end
 
 private lemma lem2_2 (x : ℝ) : f (2 - x) = -f x :=
 begin
-  have h := lem1_3 feq (-(1 - x)),
-  rwa [neg_neg, ← neg_sub, lem1_3 feq (1 - x), ← mul_neg, mul_eq_mul_left_iff,
+  have h := good_subst_neg_one feq (-(1 - x)),
+  rwa [neg_neg, ← neg_sub, good_subst_neg_one feq (1 - x), ← mul_neg, mul_eq_mul_left_iff,
        or_iff_left fneg1_ne_0, sub_sub_cancel, sub_neg_eq_add, ← add_sub_assoc, eq_comm] at h
 end
 
@@ -105,17 +160,17 @@ begin
   cases h with h h,
   exact h,
   have h0 := lem2_3 feq fneg1_ne_0 (-1),
-  rw [bit0, neg_add_cancel_comm_assoc, h, add_zero, lem1_1 feq, eq_comm] at h0,
+  rw [bit0, neg_add_cancel_comm_assoc, h, add_zero, good_map_one feq, eq_comm] at h0,
   exfalso; exact fneg1_ne_0 h0
 end
 
 private lemma lem2_6 : ∃ φ : ℝ →+* R, f = φ - 1 :=
 begin
   use f + 1; simp,
-  exact lem1_1 feq,
+  exact good_map_one feq,
   intros x y,
   have h := feq x y,
-  rw [sub_eq_iff_eq_add, lem2_5 feq fneg1_ne_0, lem1_1 feq, zero_add] at h,
+  rw [sub_eq_iff_eq_add, lem2_5 feq fneg1_ne_0, good_map_one feq, zero_add] at h,
   rw [h, lem2_5 feq fneg1_ne_0, add_one_mul, mul_add_one, add_assoc, add_assoc],
   rw [lem2_1 feq fneg1_ne_0, neg_add_self],
   intros x y; rw [lem2_5 feq fneg1_ne_0, add_assoc, add_add_add_comm]
@@ -131,7 +186,7 @@ variable (fneg1_eq_0 : f (-1) = 0)
 include fneg1_eq_0
 
 private lemma lem3_1 (x : ℝ) : f (-x) = f x :=
-  by rw [eq_comm, ← sub_eq_zero, lem1_3 feq x, fneg1_eq_0, zero_mul]
+  by rw [eq_comm, ← sub_eq_zero, good_subst_neg_one feq x, fneg1_eq_0, zero_mul]
 
 private lemma lem3_2 (u v : ℝ≥0) : f (1 + v / 4) - f (1 - v / 4) = f (sqrt (u + v)) - f (sqrt u) :=
 begin
@@ -181,7 +236,7 @@ end
 private lemma lem3_5 : ∃ φ : ℝ≥0 →+* R, f = λ x : ℝ, φ (x.nnabs ^ 2) - 1 :=
 begin
   use λ x, f (sqrt x) + 1,
-  rw [sqrt_one, nonneg.coe_one, lem1_1 feq, zero_add],
+  rw [sqrt_one, nonneg.coe_one, good_map_one feq, zero_add],
   intros x y; rw [sqrt_mul, nonneg.coe_mul, lem3_4 feq fneg1_eq_0 f0_eq_neg1],
   rw [sqrt_zero, nonneg.coe_zero, f0_eq_neg1, neg_add_self],
   intros x y; rw [lem3_3 feq fneg1_eq_0 f0_eq_neg1, add_add_add_comm, add_assoc],
@@ -198,14 +253,15 @@ end results
 
 
 
+
 /-- Final solution -/
-theorem final_solution_general {R : Type*} [comm_ring R] [is_domain R] (f : ℝ → R) : fn_eq f ↔
+theorem final_solution_general {R : Type*} [comm_ring R] [is_domain R] (f : ℝ → R) : good f ↔
   f = 0 ∨ (∃ φ : ℝ →+* R, f = φ - 1) ∨ (∃ φ : ℝ≥0 →+* R, f = λ x : ℝ, φ (x.nnabs ^ 2) - 1) :=
 begin
   split,
   { intros feq,
     cases ne_or_eq (f 0) (-1) with h h,
-    left; exact lem1_2 feq h,
+    left; exact good_eq_zero_of_map_zero_ne_neg_one feq h,
     right; cases eq_or_ne (f (-1)) 0 with h0 h0,
     right; exact lem3_5 feq h0 h,
     left; exact lem2_6 feq h0 },
@@ -224,11 +280,11 @@ end
 
 /-- Final solution, case char(R) ≠ 0 -/
 theorem final_solution_char_ne_0 {R : Type*} [comm_ring R] [is_domain R]
-    (p : ℕ) [fact (p ≠ 0)] [char_p R p] (f : ℝ → R) : fn_eq f ↔ f = 0 :=
+    (p : ℕ) [fact (p ≠ 0)] [char_p R p] (f : ℝ → R) : good f ↔ f = 0 :=
   by rw [final_solution_general, is_empty.exists_iff, is_empty.exists_iff, or_false, or_false]
 
 /-- Final solution, case R = ℝ -/
-theorem final_solution_real (f : ℝ → ℝ) : fn_eq f ↔ f = 0 ∨ (f = id - 1) ∨ (f = λ x, x ^ 2 - 1) :=
+theorem final_solution_real (f : ℝ → ℝ) : good f ↔ f = 0 ∨ (f = id - 1) ∨ (f = λ x, x ^ 2 - 1) :=
 begin
   rw [final_solution_general, unique.exists_iff, unique.exists_iff],
   unfold default; congr',
