@@ -71,7 +71,7 @@ private lemma good_map_one : f 1 = 0 :=
 
 private lemma good_eq_zero_of_map_zero_ne_neg_one (h0 : f 0 ≠ -1) : f = 0 :=
   funext (λ x, by have h1 := h x 0; rwa [mul_zero, add_zero, good_map_one h, zero_sub,
-    add_zero, ← mul_neg_one, mul_eq_mul_left_iff, eq_comm, or_iff_right h0] at h1)
+    add_zero, ← mul_neg_one, mul_eq_mul_left_iff, or_iff_right h0.symm] at h1)
 
 end domain
 
@@ -265,10 +265,10 @@ begin
     right; cases eq_or_ne (f (-1)) 0 with h0 h0,
     right; exact lem3_5 feq h0 h,
     left; exact lem2_6 feq h0 },
-  { rintros (rfl | ⟨φ, rfl⟩ | ⟨φ, h⟩) x y,
-    simp only [pi.zero_apply]; rw [sub_zero, mul_zero],
-    simp only [pi.sub_apply, pi.one_apply, map_add],
-    rw [map_one, add_sub_cancel', map_mul, add_sub_assoc, ← sub_sub, sub_one_mul, mul_sub_one],
+  { rintros (rfl | ⟨φ, rfl⟩ | ⟨φ, h⟩),
+    exact good_zero,
+    exact good_hom_sub_one φ,
+    intros x y,
     conv at h { congr, skip, funext,
       rw [← extra.nnreal_ring_hom.coe_fn_apply, nnreal.coe_pow, real.coe_nnabs, pow_bit0_abs] },
     subst h; simp only [],
@@ -287,8 +287,9 @@ theorem final_solution_char_ne_0 {R : Type*} [comm_ring R] [is_domain R]
 theorem final_solution_real (f : ℝ → ℝ) : good f ↔ f = 0 ∨ (f = id - 1) ∨ (f = λ x, x ^ 2 - 1) :=
 begin
   rw [final_solution_general, unique.exists_iff, unique.exists_iff],
-  unfold default; congr',
-  funext; rw [nnreal.coe_to_real_hom, nnreal.coe_pow, real.coe_nnabs, pow_bit0_abs]
+  unfold default; refine or_congr_right' (or_congr_right' _),
+  conv_lhs { congr, skip, funext,
+    rw [nnreal.coe_to_real_hom, nnreal.coe_pow, real.coe_nnabs, pow_bit0_abs] }
 end
 
 end IMO2012A5
