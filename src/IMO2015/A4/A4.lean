@@ -6,9 +6,9 @@ namespace IMOSL
 namespace IMO2015A4
 
 open function
-open_locale non_zero_divisors
 
-def good {R : Type*} [ring R] (f : R → R) := ∀ x y : R, f (x + f (x + y)) + f (x * y) = x + f (x + y) + f x * y
+def good {R : Type*} [ring R] (f : R → R) :=
+  ∀ x y : R, f (x + f (x + y)) + f (x * y) = x + f (x + y) + f x * y
 
 
 
