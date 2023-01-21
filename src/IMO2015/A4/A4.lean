@@ -1,6 +1,6 @@
 import algebra.char_p.two
 
-/-! # IMO 2015 A4 (P5), Generalized Version -/
+/-! # IMO 2015 A4 (P5) -/
 
 namespace IMOSL
 namespace IMO2015A4
