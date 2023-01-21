@@ -5,22 +5,40 @@ import algebra.char_p.two
 namespace IMOSL
 namespace IMO2015A4
 
-open function
-
 def good {R : Type*} [ring R] (f : R → R) :=
   ∀ x y : R, f (x + f (x + y)) + f (x * y) = x + f (x + y) + f x * y
 
 
 
+section basic_results
+
+variables {R : Type*} [ring R]
+
+private lemma good_id : good (id : R → R) :=
+  λ x y, rfl
+
+private lemma good_two_sub : good (has_sub.sub (2 : R)) :=
+  λ x y, by rw [add_sub_left_comm x, sub_add_cancel', sub_add_cancel', neg_neg,
+    add_sub_left_comm, add_assoc, add_right_inj, ← one_sub_mul, ← neg_one_mul,
+    ← add_mul, ← add_sub_assoc, bit0, neg_add_cancel_comm_assoc]
+
+end basic_results
+
+
+
+
+
+
+
 /-- Final solution, case 1: `char(R) ≠ 2` -/
 theorem final_solution_char_ne_two {R : Type*} [ring R] [is_domain R] (Rchar : ring_char R ≠ 2) :
-  ∀ f : R → R, good f ↔ f = (λ x, x) ∨ f = (λ x, 2 - x) :=
+  ∀ f : R → R, good f ↔ f = id ∨ f = has_sub.sub 2 :=
 begin
-  intros f; symmetry; refine ⟨λ h x y, _, λ h, _⟩,
-  rcases h with rfl | rfl; simp only [],
-  rw [← add_sub_assoc, ← add_sub_assoc, add_sub_add_left_eq_sub, sub_sub_cancel,
-      sub_mul, ← add_sub_assoc, sub_left_inj, two_mul, sub_add_add_cancel, add_comm],
-  
+  ---- `←` direction has been done
+  intros f; symmetry; refine ⟨λ h, _, λ h, _⟩,
+  { rcases h with rfl | rfl,
+    exacts [good_id, good_two_sub] },
+
   ---- One important equality and the case `f(0) ≠ 0`
   have h0 : ∀ t : R, f (t + f (t + 1)) = t + f (t + 1) :=
     λ t, by replace h := h t 1; rwa [mul_one, mul_one, add_left_inj] at h,
@@ -71,13 +89,14 @@ end
 
 /-- Final solution, case 2: `char(R) = 2` -/
 theorem final_solution_char_eq_two {R : Type*} [ring R] [is_domain R] [char_p R 2] :
-  ∀ f : R → R, good f ↔ f = (λ x, x) :=
+  ∀ f : R → R, good f ↔ f = id :=
 begin
   ---- Easy case and changing `f` to `g + id`
-  intros f; symmetry; refine ⟨λ h x y, by subst h, λ h, _⟩,
+  intros f; symmetry; refine ⟨λ h, _, λ h, _⟩,
+  rw h; exact good_id,
   unfold good at h,
-  obtain ⟨g, rfl⟩ : ∃ g : R → R, g + (λ x, x) = f := ⟨f - id, sub_add_cancel f id⟩,
-  rw add_left_eq_self; simp only [pi.add_apply] at h,
+  obtain ⟨g, rfl⟩ : ∃ g : R → R, g + id = f := ⟨f - id, sub_add_cancel f id⟩,
+  rw add_left_eq_self; simp_rw [pi.add_apply, id.def] at h,
   conv at h { find (_ = _) { rw [← add_assoc, add_mul, ← add_assoc _ _ (x * y),
     add_left_inj, add_right_comm _ _ (g (x * y)), add_comm, add_right_inj,
     add_left_comm, ← add_assoc x, char_two.add_self_eq_zero, zero_add] } },
@@ -121,12 +140,12 @@ end
 
 /-- Final solution -/
 theorem final_solution {R : Type*} [ring R] [is_domain R] :
-  ∀ f : R → R, good f ↔ f = (λ x, x) ∨ f = (λ x, 2 - x) :=
+  ∀ f : R → R, good f ↔ f = id ∨ f = has_sub.sub 2 :=
 begin
   cases ne_or_eq (ring_char R) 2 with h h,
   exact final_solution_char_ne_two h,
   haveI : char_p R 2 := ring_char.of_eq h,
-  simp only [char_two.two_eq_zero, char_two.sub_eq_add, zero_add, or_self],
+  simp_rw [char_two.two_eq_zero, char_two.sub_eq_add', zero_add_eq_id, or_self],
   exact final_solution_char_eq_two
 end
 
