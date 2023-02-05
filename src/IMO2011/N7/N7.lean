@@ -45,7 +45,7 @@ begin
       neg_mul, sub_neg_eq_add, ← mul_add, ← nat.cast_add],
   refine dvd_mul_of_dvd_right (int.coe_nat_dvd.mpr _) _,
   rw [nat.choose_succ_right_eq p k.succ, ← mul_add, nat.add_sub_of_le (le_of_lt h0), sq],
-  exact mul_dvd_mul_right ((fact.out p.prime).dvd_choose_self k.succ_pos h0) p
+  exact mul_dvd_mul_right ((fact.out p.prime).dvd_choose_self (ne_of_gt k.succ_pos) h0) p
 end
 
 private lemma ultra_norm_add_le {t : ℝ} {a b : ℚ_[p]} (h : ‖a‖ ≤ t) (h0 : ‖b‖ ≤ t) :
