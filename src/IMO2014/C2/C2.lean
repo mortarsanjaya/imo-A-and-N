@@ -9,7 +9,7 @@ open multiset
 open_locale nnreal
 
 def good {α : Type*} [has_add α] (S T : multiset α) :=
-  ∃ (R : multiset α) (a b : α), S = R + {a, b} ∧ T = R + repeat (a + b) 2
+  ∃ (R : multiset α) (a b : α), S = R + {a, b} ∧ T = R + replicate 2 (a + b)
 
 
 
@@ -56,7 +56,7 @@ end extra_lemmas
 private lemma good_card_eq {α : Type*} [has_add α] {S T : multiset α} (h : good S T) :
   T.card = S.card :=
   by rcases h with ⟨R, a, b, rfl, rfl⟩;
-    rw [card_add, card_repeat, card_add, insert_eq_cons, card_cons, card_singleton]
+    rw [card_add, card_replicate, card_add, insert_eq_cons, card_cons, card_singleton]
 
 private lemma good_chain_card_eq {α : Type*} [has_add α]
   {S : multiset α} {C : list (multiset α)} (h : list.chain good S C) :
@@ -73,7 +73,7 @@ begin
   rcases h with ⟨R, a, b, rfl, rfl⟩,
   simp_rw [prod_add, insert_eq_cons, prod_cons, prod_singleton],
   rw mul_left_comm; apply mul_le_mul_left',
-  rw [prod_repeat, add_sq', bit0, add_mul, ← mul_assoc, add_le_add_iff_right, ← nnreal.coe_le_coe],
+  rw [prod_replicate, add_sq', bit0, add_mul, ← mul_assoc, add_le_add_iff_right, ← nnreal.coe_le_coe],
   simp_rw [nnreal.coe_add, nnreal.coe_pow, nnreal.coe_mul],
   rw [nnreal.coe_bit0, nnreal.coe_one, ← sub_nonneg, ← sub_sq'],
   exact sq_nonneg (a - b)
@@ -104,13 +104,13 @@ private lemma good_chain_le_sum
 
 /-- Final solution -/
 theorem final_solution {m : ℕ} (h : 0 < m) {C : list (multiset ℝ≥0)}
-  (h0 : C.length = m * 2 ^ (m - 1)) (h1 : list.chain good (repeat (1 : ℝ≥0) (2 ^ m)) C) :
-  4 ^ m ≤ (cons_last (repeat (1 : ℝ≥0) (2 ^ m)) C).sum :=
+  (h0 : C.length = m * 2 ^ (m - 1)) (h1 : list.chain good (replicate (2 ^ m) (1 : ℝ≥0)) C) :
+  4 ^ m ≤ (cons_last (replicate (2 ^ m) (1 : ℝ≥0)) C).sum :=
 begin
   have h2 := good_chain_le_sum h1,
   rw h0 at h2; clear h0 h1,
-  generalize_hyp : (cons_last  (repeat (1 : ℝ≥0) (2 ^ m)) C).sum = x at h2 ⊢,
-  rw [prod_repeat, one_pow, mul_one, card_repeat, bit0, ← mul_two, ← sq, ← pow_mul,
+  generalize_hyp : (cons_last (replicate (2 ^ m) (1 : ℝ≥0)) C).sum = x at h2 ⊢,
+  rw [prod_replicate, one_pow, mul_one, card_replicate, bit0, ← mul_two, ← sq, ← pow_mul,
       mul_left_comm, ← pow_succ, nat.sub_add_cancel h, pow_mul] at h2,
   replace h2 := le_of_pow_le_pow (2 ^ m) (zero_le (x / ↑(2 ^ m))) (pow_pos two_pos _) h2,
   rw [nat.cast_pow, nat.cast_bit0, nat.cast_one,
