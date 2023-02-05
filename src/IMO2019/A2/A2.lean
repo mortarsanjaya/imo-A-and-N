@@ -52,7 +52,7 @@ include ha
 
 private lemma lem5 : a.sum ≤ a.card * a.fold max 0 :=
   by convert sum_le_sum_map (const R (a.fold max 0)) (lem1 a);
-    rw [map_const, sum_repeat, nsmul_eq_mul]
+    rw [map_const, sum_replicate, nsmul_eq_mul]
 
 private lemma lem6 : (a.map (λ c, c ^ 2)).sum ≤ a.sum * a.fold max 0 :=
 begin
