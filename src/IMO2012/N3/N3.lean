@@ -1,4 +1,4 @@
-import data.nat.choose.basic data.nat.parity
+import data.nat.choose.basic data.nat.prime data.nat.parity
 
 /-! # IMO 2012 N3 -/
 
