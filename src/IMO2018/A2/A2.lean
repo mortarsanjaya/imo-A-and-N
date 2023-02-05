@@ -2,6 +2,7 @@ import
   data.real.basic
   extra.periodic.big_operators
   data.nat.periodic
+  data.nat.prime
   algebra.big_operators.order
   tactic.fin_cases
 
