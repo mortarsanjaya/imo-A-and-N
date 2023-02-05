@@ -150,13 +150,13 @@ begin
   rcases r.eq_zero_or_pos with rfl | h0,
   rw [eq_self_iff_true, true_or, true_iff, nat.digits_zero],
   intros c h0; exfalso; exact h0,
-  rw [nat.digits_def' (le_add_self : 2 ≤ 2 + 2) h0,
+  rw [nat.digits_def' (nat.succ_lt_succ $ nat.succ_pos 2) h0,
       nat.mod_eq_of_lt h, nat.div_eq_zero h, nat.digits_zero],
   simp_rw list.mem_singleton; rw forall_eq,
 
   ---- Case 2: `0 < q`
   replace k_ih := k_ih q (nat.lt_add_right q (4 * q) r (lt_mul_left h0 (by norm_num : 1 < 4))),
-  rw [k_ih, add_comm, nat.digits_add 4 le_add_self r q h (or.inr h0)]; clear k_ih h h0,
+  rw [k_ih, add_comm, nat.digits_add 4 (nat.succ_lt_succ $ nat.succ_pos 2) r q h $ or.inr $ ne_of_gt h0],
   simp_rw list.mem_cons_iff; rw [forall_eq_or_imp, and_comm]
 end
 
