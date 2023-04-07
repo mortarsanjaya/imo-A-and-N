@@ -40,60 +40,45 @@ variables {R : Type*} [linear_ordered_ring R] [floor_ring R]
 def f (r : R) := (⌊r⌋ : R) * int.fract r
 
 private lemma f_nonneg_of_nonneg {r : R} (h : 0 ≤ r) : 0 ≤ f r :=
-  mul_nonneg (by rwa [int.cast_nonneg, int.le_floor, int.cast_zero]) (int.fract_nonneg r)
+  mul_nonneg (int.cast_nonneg.mpr $ int.le_floor.mpr $ le_of_eq_of_le int.cast_zero h)
+    (int.fract_nonneg r)
 
-private lemma f_iterate_nonneg {r : R} (h : 0 ≤ r) (n : ℕ) : 0 ≤ (f^[n] r) :=
-begin
-  induction n with n n_ih,
-  rw [iterate_zero, id.def]; exact h,
-  rw [iterate_succ', comp_app]; exact f_nonneg_of_nonneg n_ih
-end
+private lemma f_iterate_nonneg {r : R} (h : 0 ≤ r) : ∀ n : ℕ, 0 ≤ (f^[n] r)
+| 0 := h
+| (n+1) := by rw iterate_succ'; exact f_nonneg_of_nonneg (f_iterate_nonneg n)
 
 private lemma f_floor_eq_zero {r : R} (h : ⌊r⌋ = 0) : f r = 0 :=
   by rw [f, h, int.cast_zero, zero_mul]
 
 private lemma f_floor_lt_floor_of_ge_one {r : R} (h : 1 ≤ r) : ⌊f r⌋ < ⌊r⌋ :=
-begin
-  rw [int.floor_lt, f, ← sub_pos, ← mul_one_sub]; apply mul_pos,
-  rwa [int.cast_pos, ← int.add_one_le_iff, zero_add, int.le_floor, int.cast_one],
-  rw sub_pos; exact int.fract_lt_one r
-end
+  by rw [int.floor_lt, f, ← sub_pos, ← mul_one_sub];
+    exact mul_pos (int.cast_pos.mpr $ int.floor_pos.mpr h) (sub_pos.mpr $ int.fract_lt_one r)
 
 
 private lemma f_nonpos_of_nonpos {r : R} (h : r ≤ 0) : f r ≤ 0 :=
   mul_nonpos_of_nonpos_of_nonneg (le_trans (int.floor_le r) h) (int.fract_nonneg r)
 
-private lemma f_iterate_nonpos {r : R} (h : r ≤ 0) (n : ℕ) : f^[n] r ≤ 0 :=
-begin
-  induction n with n n_ih,
-  rw [iterate_zero, id.def]; exact h,
-  rw [iterate_succ', comp_app]; exact f_nonpos_of_nonpos n_ih
-end
+private lemma f_iterate_nonpos {r : R} (h : r ≤ 0) : ∀ n : ℕ, f^[n] r ≤ 0
+| 0 := h
+| (n+1) := by rw iterate_succ'; exact f_nonpos_of_nonpos (f_iterate_nonpos n)
 
 private lemma f_floor_ge_of_nonpos {r : R} (h : r ≤ 0) : ⌊r⌋ ≤ ⌊f r⌋ :=
-begin
-  rw [int.le_floor, f, ← sub_nonpos, ← mul_one_sub]; apply mul_nonpos_of_nonpos_of_nonneg,
-  rw int.cast_nonpos; exact int.floor_nonpos h,
-  rw sub_nonneg; exact le_of_lt (int.fract_lt_one r)
-end
+  by rw [int.le_floor, f, ← sub_nonpos, ← mul_one_sub];
+    exact mul_nonpos_of_nonpos_of_nonneg (int.cast_nonpos.mpr $ int.floor_nonpos h)
+      (sub_nonneg.mpr $ le_of_lt $ int.fract_lt_one r)
 
-private lemma f_between_neg_one_and_zero {r : R} (h : -1 < r) (h0 : r < 0) :
-  f r = -1 - r ∧ (f^[2]) r = r :=
+private lemma f_Ioo_neg_one_zero {r : R} (h : -1 < r) (h0 : r < 0) : f r = -1 - r :=
 begin
-  revert r h h0,
-  suffices : ∀ {r : R}, -1 < r → r < 0 → f r = -1 - r,
-  { intros r h1 h2,
-    have h3 := this h1 h2,
-    refine ⟨h3, _⟩,
-    rw ← sub_neg at h1; rw [← add_right_neg (1 : R), ← neg_lt_sub_iff_lt_add] at h2,
-    rw [iterate_succ, iterate_one, comp_app, h3, this h2 h1, sub_sub_cancel] },
-  
-  intros r h h0,
-  suffices : ⌊r⌋ = -1,
-    rw [f, int.fract, this, int.cast_neg, int.cast_one, neg_one_mul, neg_sub],
+  suffices h1 : ⌊r⌋ = -1,
+    rw [f, int.fract, h1, int.cast_neg, int.cast_one, neg_one_mul, neg_sub],
   rw [int.floor_eq_iff, int.cast_neg, int.cast_one, neg_add_self],
   exact ⟨le_of_lt h, h0⟩
 end
+
+private lemma f2_Ioo_neg_one_zero {r : R} (h : -1 < r) (h0 : r < 0) : (f^[2]) r = r :=
+  by rw [iterate_succ, comp_app, iterate_one, f_Ioo_neg_one_zero h h0];
+    exact (f_Ioo_neg_one_zero (lt_sub_iff_add_lt.mpr $ add_lt_iff_neg_left.mpr h0)
+      $ sub_neg.mpr h).trans (sub_sub_self (-1) r)
 
 private lemma f_special_value {k : ℕ} {r : R} (h : (k + 1 : R) * r = -k ^ 2) : f r = r :=
 begin
@@ -278,8 +263,7 @@ begin
       rintros n - h0; rw [iterate_succ', comp_app, h0, h] },
 
     -- Subcase 2.2: `-1 < f^N(x) < 0` for some `N : ℕ`
-    { replace h := f_between_neg_one_and_zero h h0,
-      rcases h with ⟨-, h⟩; clear h0,
+    { replace h := f2_Ioo_neg_one_zero h h0; clear h0,
       refine ⟨N, λ n h0, _⟩,
       rw le_iff_exists_add at h0; rcases h0 with ⟨c, rfl⟩,
       simp_rw [add_comm N, add_right_comm c N, iterate_add, comp_app, h] } }
