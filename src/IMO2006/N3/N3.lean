@@ -28,9 +28,11 @@ end extra_lemmas
 
 
 
-private def g (n : ℕ) : ℕ := (range n).sum (λ x, n / (x + 1))
+/-- `g(n) = ⌊n/1⌋ + ⌊n/2⌋ + … + ⌊n/n⌋` -/
+def g (n : ℕ) : ℕ := (range n).sum (λ x, n / (x + 1))
 
-@[nolint doc_blame] def f (n : ℕ) : ℚ := ((g n : ℤ) : ℚ) / ((n : ℤ) : ℚ)
+/-- `f(n) = g(n)/n`, as a rational. -/
+def f (n : ℕ) : ℚ := ((g n : ℤ) : ℚ) / ((n : ℤ) : ℚ)
 
 
 
