@@ -246,7 +246,7 @@ begin
   cases le_total 0 x with h h,
 
   ---- Case 1: `x ≥ 0`
-  { lift ⌊x⌋ to ℕ using by rwa [int.le_floor, int.cast_zero] with K h0,
+  { lift ⌊x⌋ to ℕ using int.floor_nonneg.mpr h with K h0,
     replace h := final_solution_x_nonneg h,
     simp_rw [← h0, nat.cast_lt, ← nat.succ_le_iff] at h,
     exact ⟨K + 1, λ n h1, by rw [h n h1, h (n + 2) (le_add_right h1)]⟩ },
