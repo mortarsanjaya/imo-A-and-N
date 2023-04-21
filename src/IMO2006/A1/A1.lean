@@ -230,7 +230,7 @@ begin
   ---- Work on the case `d < -1`
   left; rw lt_neg at h0,
   lift -d to ℕ using le_trans zero_le_one (le_of_lt h0) with k h2,
-  rw eq_neg_iff_eq_neg at h2; subst h2,
+  rw [eq_neg_iff_add_eq_zero, add_comm, ← eq_neg_iff_add_eq_zero] at h2; subst h2,
   rw nat.one_lt_cast at h0,
   refine ⟨N, k, f_floor_iterate_const h0 (λ n, _)⟩,
   replace h1 := h1 (n + N) le_add_self,
