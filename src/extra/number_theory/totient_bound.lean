@@ -57,12 +57,15 @@ begin
     refine le_trans (nat.mul_le_mul_left 2 h0) _,
     norm_num },
   { rw [nat.totient_prime_pow_succ nat.prime_three, bit1, nat.add_sub_cancel, ← bit1,
-        ← mul_assoc, mul_le_iff_le_one_left (two_pos : 0 < 2), le_iff_eq_or_lt,
-        nat.mul_eq_one_iff, nat.lt_one_iff, mul_eq_zero, nat.totient_eq_one_iff] at h0,
-    clear h; rcases h0 with ⟨h | h, h0⟩ | h | h,
+        ← mul_assoc, mul_le_iff_le_one_left (nat.succ_pos 1), nat.le_add_one_iff, zero_add,
+        le_zero_iff, mul_eq_zero, or_iff_left (pow_ne_zero b $ nat.succ_ne_zero 2)] at h0,
+    clear h; rcases h0 with h | h,
+    exfalso; exact ne_of_gt (nat.totient_pos $ pow_pos (nat.succ_pos 1) a) h,
+    have h0 : 3 ^ b = 1 := nat.eq_one_of_mul_eq_one_left h,
+    have h2 : 1 < 3 := nat.succ_lt_succ (nat.succ_pos 1),
+    have h1 : b = 0 := by library_search,
     rw [h, one_mul, pow_succ, h0, mul_one]; norm_num,
     rw [h, pow_succ, h0, mul_one]; norm_num,
-    exfalso; exact ne_of_gt (nat.totient_pos (pow_pos two_pos a)) h,
     exfalso; refine ne_of_gt (pow_pos _ b) h; exact three_pos }
 end
 

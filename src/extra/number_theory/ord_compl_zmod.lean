@@ -101,7 +101,7 @@ begin
   refine units.ext (zmod.val_injective p _),
   rw [map_coprime_val h, map_coprime_val, nat.mod_mod],
   rw nat.coprime at h ⊢,
-  rw ← h; apply nat.modeq.gcd_eq_of_modeq,
+  rw ← h; apply nat.modeq.gcd_eq,
   rw [nat.modeq, nat.mod_mod]
 end
 
