@@ -43,13 +43,12 @@ Suppose that, for any $y \in M$ such that $xyx = yxy$, we have $x = y$.
 Then $x^m = x$ for some $m > 1$.
 \end{claim}
 \begin{proof}
-Since $M$ is finite, there exists $k > n$ such that $x^k = x^n$.
-Write $k = n + t$, where $t > 0$, and take $y = x^{dt + 1}$ where $d > 0$ is large enough so that $dt + 3 \geq n$.
-For example, since $t > 0$, we can take $d = \max\{n, 1\}$.
-Then $xyx = x^{dt + 3}$ and $yxy = x^{2dt + 3}$.
-But since $dt + 3 \geq n$ and $x^{n + t} = x^n$, we have $x^{2dt + 3} = x^{dt + 3}$.
-So, $xyx = yxy$, and thus $x^{dt + 1} = y = x$.
-We can then take $m = dt + 1$, which works since $d > 0$.
+Since $M$ is finite, there exists $k > 0$ and $n \geq 0$ such that $x^{n + k} = x^n$.
+Take $y = x^{dk + 1}$, where $d > 0$ is large enough so that $dk + 3 \geq n$.
+Then $xyx = x^{dk + 3}$ and $yxy = x^{2dk + 3}$.
+Since $dk + 3 \geq n$ and $x^{n + k} = x^n$, we have $x^{2dk + 3} = x^{dk + 3}$.
+So, $xyx = yxy$, and thus $x^{dk + 1} = y = x$.
+We can then take $m = dk + 1$, which works since $d > 0$.
 \end{proof}
 
 
