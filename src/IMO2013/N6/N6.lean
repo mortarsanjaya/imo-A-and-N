@@ -1,4 +1,4 @@
-import data.rat.default data.pnat.basic tactic.fin_cases
+import data.rat.floor data.pnat.basic
 
 /-! # IMO 2013 N6 -/
 
