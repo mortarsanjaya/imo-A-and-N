@@ -88,7 +88,7 @@ begin
   { refine λ f, ⟨λ h, _, λ h, _⟩,
     cases sq_eq_one_iff.mp (good_map_one_sq h) with h0 h0,
     left; exact this f h h0,
-    right; rw [← pi.neg_def, eq_neg_iff_eq_neg, eq_comm],
+    right; rw [← pi.neg_def, eq_neg_iff_add_eq_zero, ← neg_eq_iff_add_eq_zero],
     exact this (-f) (good_neg h) (by simp_rw [pi.neg_def, h0, neg_neg]),
     rcases h with rfl | rfl,
     exacts [good_id, good_neg good_id] },
