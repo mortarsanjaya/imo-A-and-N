@@ -11,8 +11,9 @@ namespace IMO2021A8
 
 open function real IMOSL.extra.real
 
-def fn_eq {R : Type*} [ring R] (f : ℝ → R) := ∀ a b c : ℝ, (f a - f b) * (f b - f c) * (f c - f a)
-  = f(a * b ^ 2 + b * c ^ 2 + c * a ^ 2) - f(b * a ^ 2 + c * b ^ 2 + a * c ^ 2)
+def fn_eq {R S : Type*} [ring R] [ring S] (f : R → S) :=
+  ∀ a b c : R, (f a - f b) * (f b - f c) * (f c - f a)
+    = f (a * b ^ 2 + b * c ^ 2 + c * a ^ 2) - f (b * a ^ 2 + c * b ^ 2 + a * c ^ 2)
 
 
 
@@ -97,10 +98,12 @@ end extra
 
 section results
 
-private lemma lem1_1 {R : Type*} [ring R] {f : ℝ → R} (C : R) : fn_eq (f + const ℝ C) ↔ fn_eq f :=
+private lemma lem1_1 {R S : Type*} [ring R] [ring S] {f : R → S} (C : S) :
+  fn_eq (f + const R C) ↔ fn_eq f :=
   by simp only [fn_eq, const_apply, add_sub_add_right_eq_sub, pi.add_apply]
 
-private lemma lem1_2 {R : Type*} [ring R] {f : ℝ → R} : fn_eq (-f) ↔ fn_eq f :=
+private lemma lem1_2 {R S : Type*} [ring R] [ring S] {f : R → S} :
+  fn_eq (-f) ↔ fn_eq f :=
 begin
   simp only [fn_eq, pi.neg_apply],
   conv_lhs { find (_ = _) { rw [← neg_sub', ← neg_sub', neg_mul_neg,
