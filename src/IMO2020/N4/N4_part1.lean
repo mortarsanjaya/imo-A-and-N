@@ -1,4 +1,4 @@
-import IMO2020.N4.N4_basic extra.number_theory.totient_bound data.nat.prime_norm_num
+import IMO2020.N4.N4_basic extra.number_theory.totient_bound data.nat.prime_norm_num tactic.swap_var
 
 /-! # IMO 2020 N4, Generalized Version (Part 1) -/
 
@@ -31,7 +31,7 @@ begin
   refine nat.gcd.induction k m (λ i, _) (λ i j hi h, _); clear k m,
   rw [pow_zero, nat.sub_self, nat.gcd_zero_left, nat.gcd_zero_left],
   rw [nat.gcd_rec i j, ← h, nat.gcd_comm]; clear h,
-  refine nat.modeq.gcd_eq_of_modeq (nat.modeq.add_right_cancel' 1 _),
+  refine nat.modeq.gcd_eq (nat.modeq.add_right_cancel' 1 _),
   obtain ⟨q, r, h0, rfl⟩ : ∃ q r : ℕ, r < i ∧ q * i + r = j :=
     ⟨j / i, j % i, j.mod_lt hi, nat.div_add_mod' j i⟩,
   replace h : ∀ k : ℕ, 1 ≤ n ^ k := λ k, nat.one_le_pow k n h,
@@ -160,14 +160,17 @@ private lemma alternating_S0_eq {a b : ℕ} (h0 : alternating p a b) : S0 h a = 
 begin
   contrapose h0; rw [alternating, not_and_distrib],
   rw [← ne.def, ne_iff_lt_or_gt, gt_iff_lt] at h0,
-  wlog h0 : S0 h a < S0 h b := h0 using [a b, b a],
-  replace h0 := eventually_F_lt_of_S0_lt h h0,
-  cases h0 with N h0,
-  right; intros h1,
-  replace h1 := h1.exists_nat_lt N,
-  rcases h1 with ⟨n, h1, h2⟩,
-  rw set.mem_set_of_eq at h1,
-  exact lt_asymm h1 (h0 n (le_of_lt h2))
+  cases h0 with h0 h0,
+  right,
+  work_on_goal 2 { swap_var [a b], left },
+  all_goals {
+    replace h0 := eventually_F_lt_of_S0_lt h h0,
+    cases h0 with N h0,
+    intros h1,
+    replace h1 := h1.exists_nat_lt N,
+    rcases h1 with ⟨n, h1, h2⟩,
+    rw set.mem_set_of_eq at h1,
+    exact lt_asymm h1 (h0 n (le_of_lt h2)) }
 end
 
 private lemma alternating_consecutive {a b : ℕ} (h0 : alternating p a b) :

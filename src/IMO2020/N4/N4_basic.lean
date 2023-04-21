@@ -263,7 +263,7 @@ begin
     convert nat.div_add_mod' y p using 2,
     replace h0 : (F p x) % p = (F p y) % p := congr_arg (λ c, c % p) h0,
     rw [F_mod_p, F_mod_p, ← nat.modeq] at h0,
-    refine nat.modeq.modeq_cancel_left_of_coprime _ h0,
+    refine nat.modeq.cancel_left_of_coprime _ h0,
     rw [nat.odd_iff, ← nat.two_dvd_ne_zero] at h,
     rwa [← nat.coprime, nat.coprime_comm, nat.prime_two.coprime_iff_not_dvd]
   end,

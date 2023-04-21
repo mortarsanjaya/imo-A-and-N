@@ -61,12 +61,9 @@ begin
         le_zero_iff, mul_eq_zero, or_iff_left (pow_ne_zero b $ nat.succ_ne_zero 2)] at h0,
     clear h; rcases h0 with h | h,
     exfalso; exact ne_of_gt (nat.totient_pos $ pow_pos (nat.succ_pos 1) a) h,
-    have h0 : 3 ^ b = 1 := nat.eq_one_of_mul_eq_one_left h,
-    have h2 : 1 < 3 := nat.succ_lt_succ (nat.succ_pos 1),
-    have h1 : b = 0 := by library_search,
-    rw [h, one_mul, pow_succ, h0, mul_one]; norm_num,
-    rw [h, pow_succ, h0, mul_one]; norm_num,
-    exfalso; refine ne_of_gt (pow_pos _ b) h; exact three_pos }
+    rw [pow_succ, nat.eq_one_of_mul_eq_one_left h, mul_one],
+    replace h := nat.totient_eq_one_iff.mp (nat.eq_one_of_mul_eq_one_right h),
+    cases h with h h; rw h; norm_num }
 end
 
 lemma big_two_lt_totient' {n : ℕ} (h : 5 ≤ n) (h0 : n ≠ 6) : 2 < n.totient :=
