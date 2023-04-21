@@ -83,8 +83,10 @@ begin
   have h2 : f 1 = 1 :=
   begin
     suffices : ∀ n : ℕ, f (n * f 1) = n,
-      replace this := congr_arg f (this (f 1));
-        rwa [h0, h0, nat.mul_eq_one_iff, and_self] at this,
+    { replace this := congr_arg f (this (f 1)),
+      rw [h0, h0] at this,
+      exact nat.eq_one_of_mul_eq_one_left this },
+      
     intros n; induction n using nat.strong_induction_on with n n_ih; cases n,
     rw [zero_mul, h1],
     replace h := h (n * f 1),
