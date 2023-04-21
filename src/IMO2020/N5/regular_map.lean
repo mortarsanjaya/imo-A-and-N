@@ -220,7 +220,7 @@ begin
   rw [hf n h0, ← h, ← hf],
   unfold nat.coprime at h0 ⊢,
   rw ← nat.modeq at h,
-  rw [nat.modeq.gcd_eq_of_modeq h, h0]
+  rw [nat.modeq.gcd_eq h, h0]
 end
 
 /-- Distinction between `p`-regular and `q`-regular for `p < q` -/

@@ -55,9 +55,10 @@ lemma self_lt : ∀ n : ℕ, n < p n :=
 /-- Equivalence of primes in the chain modulo `4`. -/
 lemma eq_mod_four (k m : ℕ) : p k ≡ p m [MOD 4] :=
 begin
-  wlog : k ≤ m,
-  refine nat.le_induction rfl (λ n _ h, h.trans _) m case,
-  exact (nat.modeq.of_modeq_mul_right _ (p.stacking n)).symm
+  wlog h : k ≤ m,
+  refine (this p m k $ le_of_not_ge h).symm,
+  refine nat.le_induction rfl (λ n _ h, h.trans _) m h,
+  exact (nat.modeq.of_mul_right _ $ p.stacking n).symm
 end
 
 /-- Each prime in the chain must be odd. -/
@@ -65,7 +66,7 @@ lemma odd (n : ℕ) : odd (p n) :=
 begin
   have h := p.eq_mod_four n 2,
   rw [bit0, ← two_mul] at h,
-  replace h := nat.modeq.of_modeq_mul_right _ h,
+  replace h := nat.modeq.of_mul_right _ h,
   rw nat.modeq at h,
   rw [nat.odd_iff, h],
   exact (or_iff_right (ne_of_gt (p.self_lt 2))).mp (p.is_prime 2).eq_two_or_odd
@@ -77,7 +78,7 @@ begin
   refine nat.le_induction rfl (λ n h0 h1, nat.modeq.trans _ h1) _ h,
   obtain ⟨c, h2⟩ : (p k).pred.factorial ∣ (p n).pred.factorial :=
     nat.factorial_dvd_factorial (nat.pred_le_pred (p.ascending.monotone h0)),
-  refine nat.modeq.of_modeq_mul_right c _,
+  refine nat.modeq.of_mul_right c _,
   rw [mul_assoc, ← h2],
   exact p.stacking n
 end
@@ -107,7 +108,7 @@ begin
   congr' 1; rw ← nat.modeq,
   suffices : b.nat_abs ∣ (p k).pred.factorial,
   { cases this with c h,
-    refine (nat.modeq.of_modeq_mul_right c _).symm,
+    refine (nat.modeq.of_mul_right c _).symm,
     rw [mul_assoc, ← h]; exact eq_mod_factorial p hkm },
   refine nat.dvd_factorial (int.nat_abs_pos_of_ne_zero hb) _,
   rwa [nat.pred_eq_sub_one, ← nat.lt_iff_le_pred (p.is_prime k).pos]
@@ -116,7 +117,11 @@ end
 /-- For any `b : ℤ` and `k m : ℕ` with `|b| < min{p_k, p_m}`, we have `(b | p_k) = (b | p_m)`. -/
 theorem legendre_equiv_int {b : ℤ} {k m : ℕ} (hk : b.nat_abs < p k) (hm : b.nat_abs < p m) :
   J(b | p k) = J(b | p m) :=
-  by wlog : k ≤ m; exact legendre_equiv_int' p hk case
+begin
+  wlog h : k ≤ m,
+  refine (this p hm hk $ le_of_not_le h).symm,
+  exact legendre_equiv_int' p hk h,
+end
 
 /-- For any `b k m : ℕ` with `b < p_k` and `k ≤ m`, we have `(b | p_k) = (b | p_m)`. -/
 theorem legendre_equiv_nat' {b k m : ℕ} (hk : b < p k) (hkm : k ≤ m) : J(b | p k) = J(b | p m) :=
@@ -124,7 +129,11 @@ theorem legendre_equiv_nat' {b k m : ℕ} (hk : b < p k) (hkm : k ≤ m) : J(b |
 
 /-- For any `b k m : ℕ` with `b < min{p_k, p_m}`, we have `(b | p_k) = (b | p_m)`. -/
 theorem legendre_equiv_nat {b k m : ℕ} (hk : b < p k) (hm : b < p m) : J(b | p k) = J(b | p m) :=
-  by wlog : k ≤ m; exact legendre_equiv_nat' p hk case
+begin
+  wlog h : k ≤ m,
+  refine (this p hm hk $ le_of_not_le h).symm,
+  exact legendre_equiv_nat' p hk h
+end
 
 /-- An invariant for `p` based on congruence mod `4`, taking values `-1` or `1`. -/
 def χ₄ := χ₄ (p 0)
