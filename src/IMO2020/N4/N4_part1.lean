@@ -1,4 +1,4 @@
-import IMO2020.N4.N4_basic extra.number_theory.totient_bound data.nat.prime_norm_num tactic.swap_var
+import IMO2020.N4.N4_basic IMO2020.N4.extra.totient_bound data.nat.prime_norm_num tactic.swap_var
 
 /-! # IMO 2020 N4, Generalized Version (Part 1) -/
 
