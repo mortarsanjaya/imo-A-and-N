@@ -2,6 +2,9 @@ import data.int.modeq tactic.by_contra tactic.wlog
 
 /-! # IMO 2007 N6 (P5) -/
 
+set_option profiler true
+set_option profiler.threshold 0.1
+
 namespace IMOSL
 namespace IMO2007N6
 
@@ -113,10 +116,7 @@ begin
   replace h := nat_pred_descent h,
   dsimp only [P] at h,
   intros a b ha hb h0; by_contra' h1,
-  rw [← ne.def, ne_iff_lt_or_gt, gt_iff_lt] at h1,
-  have h2 := bad_symm h0,
-  wlog h1 : a < b := h1 using [a b, b a],
-  exact h a ⟨ha, b, h1, h0⟩
+  exact (lt_or_gt_of_ne h1).elim (λ h1, h a ⟨ha, b, h1, h0⟩) (λ h1, h b ⟨hb, a, h1, bad_symm h0⟩)
 end
 
 end IMO2007N6
