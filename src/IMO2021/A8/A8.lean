@@ -1,7 +1,5 @@
 import
   data.real.golden_ratio
-  algebra.order.complete_field
-  extra.real_hom.semifield_char0_hom
   extra.real_prop.real_nat_root
   extra.real_prop.real_quadratic_sol
   
@@ -538,22 +536,6 @@ begin
   { intros φ; split,
     all_goals { intros a b c, simp only [map_add, map_mul, map_pow], ring } }
 end
-
-/-- Final solution, case char(R) ≠ 0 -/
-theorem final_solution_char_ne_0 {R : Type*} [comm_ring R] [is_domain R]
-  (p : ℕ) [fact (p ≠ 0)] [char_p R p] (f : ℝ → R) : fn_eq f ↔ ∃ C : R, f = const ℝ C :=
-begin
-  rw final_solution_general,
-  apply or_iff_left,
-  simp only [is_empty.exists_iff, or_false],
-  exact not_false
-end
-
-/-- Final solution, case R = ℝ -/
-theorem final_solution_real (f : ℝ → ℝ) : fn_eq f ↔ (∃ C : ℝ, f = const ℝ C) ∨
-  ((∃ C : ℝ, f = id + const ℝ C) ∨ (∃ C : ℝ, f = (λ x, x ^ 3) + const ℝ C)) ∨
-  ((∃ C : ℝ, f = -id + const ℝ C) ∨ (∃ C : ℝ, f = -(λ x, x ^ 3) + const ℝ C)) :=
-  by simp only [final_solution_general, unique.exists_iff]; congr'
 
 end IMO2021A8
 end IMOSL
