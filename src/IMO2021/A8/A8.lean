@@ -523,7 +523,7 @@ begin
       replace h : injective g := λ x y h2,
         by rw [hg, pi.neg_apply, pi.neg_apply, neg_inj] at h2; exact h h2,
       rw [← neg_eq_zero, ← pi.neg_apply (f - _) 0, ← hg] at h0,
-      rw [eq_neg_iff_eq_neg, eq_comm, ← pi.neg_apply (f - _) 1, ← hg] at h1,
+      rw [eq_neg_iff_add_eq_zero, ← neg_eq_iff_add_eq_zero, ← pi.neg_apply (f - _) 1, ← hg] at h1,
       cases lem3_9 feq h h0 h1 with h2 h2,
       left; rcases thm3_1 feq h h0 h1 h2 with ⟨φ, h3⟩; use [φ, (f 0)],
       rw [← h3, hg, neg_neg, sub_add_cancel],
