@@ -244,7 +244,7 @@ begin
   replace h := h k k h1 h1,
   rcases h with ⟨a, b, c, d, ha, hb, hc, hd, h⟩; rw ← sq at h,
   replace h1 := le_trans (le_of_eq_of_le h (sub_le_self _ (h3 c d))) (h2 a b ha hb),
-  rw [← neg_sub, eq_neg_iff_eq_neg, eq_comm] at h,
+  rw [← neg_sub, eq_neg_iff_add_eq_zero, ← neg_eq_iff_add_eq_zero] at h,
   replace h := le_trans (le_of_eq_of_le h (sub_le_self _ (h3 a b))) (h2 c d hc hd),
   rw [neg_le, ← neg_mul] at h,
   rw mul_le_mul_right ((sq_pos_iff k).mpr h0) at h1 h,
