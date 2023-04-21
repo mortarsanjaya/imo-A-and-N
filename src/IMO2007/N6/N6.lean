@@ -2,9 +2,6 @@ import data.int.modeq tactic.by_contra tactic.wlog
 
 /-! # IMO 2007 N6 (P5) -/
 
-set_option profiler true
-set_option profiler.threshold 0.1
-
 namespace IMOSL
 namespace IMO2007N6
 
