@@ -1,6 +1,6 @@
 import
   data.real.sqrt
-  extra.real_hom.nnreal_odd_ext
+  IMO2012.A5.extra.nnreal_odd_ext
   extra.real_prop.real_quadratic_sol
 
 /-! # IMO 2012 A5 -/
