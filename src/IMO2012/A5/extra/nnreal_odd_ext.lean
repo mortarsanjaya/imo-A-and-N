@@ -175,6 +175,10 @@ begin
   rw [← coe_fn_apply, h, coe_fn_apply]
 end
 
+lemma coe_map_sq (φ : ℝ≥0 →+* R) (x : ℝ) : (φ : ℝ →+* R) x ^ 2 = φ x.nnabs ^ 2 :=
+  (le_or_lt 0 x).elim (λ h, congr_arg (λ y, y ^ 2) $ nnreal_odd_ext_of_nonneg φ h)
+    (λ h, (congr_arg (λ y, y ^ 2) $ nnreal_odd_ext_of_negative φ h).trans $ neg_sq _)
+
 instance to_real_ring_hom_unique : unique (ℝ≥0 →+* ℝ) :=
 { default := nnreal.to_real_hom,
   uniq := λ φ, by rw [← coe_inj, eq_iff_true_of_subsingleton]; trivial }
