@@ -1,0 +1,221 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\DeclareMathOperator{\rchar}{char}
+
+\newtheorem{lemma}{Lemma}
+\newtheorem*{claim}{Claim}
+
+\title{IMO 2012 A5}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $R$ be a ring and $S$ be an integral domain.
+Find all functions $f : R \to S$ such that, for any $x, y \in R$,
+\[ f(xy + 1) - f(x + y) = f(x) f(y). \tag{*}\label{2012a5-eq0} \]
+
+\textit{
+    Note: In the solution below, we will only completely solve the problem for the case $R = \R$.
+    We will present some cases in generality; the rest will be done with the assumption $R = \R$.}
+
+
+
+\subsection*{Answer}
+
+For $R = \R$, there are three classes of functions:
+\begin{itemize}
+    \item   $x \mapsto 0$,
+    \item   $x \mapsto \phi(x) - 1$, where $\phi : \R \to S$ is some ring homomorphism,
+    \item   $x \mapsto \phi(x)^2 - 1$, where $\phi : \R \to S$ is some ring homomorphism.
+\end{itemize}
+
+In general, the following nine classes of functions also satisfy~\eqref{2012a5-eq0}.
+It is unknown yet, but believed, that these are all the functions satisfying~\eqref{2012a5-eq0}.
+The first class is $x \mapsto 0$; the rest comes from composing the respective functions with a ring homomorphism from $R$.
+\begin{itemize}
+    \item   $S \to S$: $x \mapsto x - 1$.
+    \item   $\F_3 \to S$: $[0, 1, 2] \mapsto [-1, 0, 1]$.
+    \item   $S \to S$; $x \mapsto x^2 - 1$.
+    \item   $\F_2 \to S$; $[0, 1] \mapsto [-1, 0]$.
+    \item   $\F_3 \to S$; $[0, 1, 2] \mapsto [-1, 0, 0]$.
+    \item   $\F_4 \to S$; $[0, 1, X, X + 1] \mapsto [-1, 0, \phi, \psi]$.
+            Here, $\phi$ and $\psi$ are some elements of $S$ such that $\phi + \psi = 1$ and $\phi \psi = -1$.
+    \item   $\F_2[X]/\langle X^2 \rangle$; $[0, 1, X, X + 1] \mapsto [-1, 0, 1, 0]$.
+    \item   $\Z/4\Z$; $[0, 1, 2, 3] \mapsto [-1, 0, 1, 0]$.
+\end{itemize}
+
+
+
+\subsection*{Solution}
+
+Through this solution, we assume that $R$ is an arbitrary ring, except when specified.
+We also assume that $S$ is a domain, though not necessarily commutative in most cases.
+
+We start with some small observations.
+Clearly, if $x$ and $y$ commute, then $f(x)$ and $f(y)$ commute.
+Next, plugging $x = y = 1$ into~\eqref{2012a5-eq0} yields $f(1) = 0$.
+Now plugging $y = 0$ into~\eqref{2012a5-eq0} yields $-f(x) = f(x) f(0)$ for all $x \in R$.
+This means that either $f \equiv 0$ or $f(0) = -1$.
+From now on, we assume the latter.
+
+Plugging $y = -1$ into~\eqref{2012a5-eq0} yields $f(1 - x) - f(x - 1) = f(x) f(-1)$ for all $x \in R$.
+This also implies $f(-x) - f(x) = f(x + 1) f(-1)$ for all $x \in R$.
+At this point, we split into two cases: $f(-1) \neq 0$ and $f(-1) = 0$.
+The above equation is only saying that $f$ is even if $f(-1) = 0$.
+We start with the former case.
+
+
+\subsubsection*{Case 1: $f(-1) \neq 0$}
+
+The equation $f(-x) - f(x) = f(x + 1) f(-1)$ now easily yields
+\[ f(1 - x) = -f(1 + x). \tag{1.1}\label{2012a5-eq1-1} \]
+Now plug $x = 2$ into~\eqref{2012a5-eq0}.
+Using~\eqref{2012a5-eq1-1}, we have $f(2) = -f(0) = 1$ and $f(y + 2) = -f(-y)$, so
+\[ f(2y + 1) = f(y) - f(-y) = -f(y + 1) f(-1). \tag{1.2}\label{2012a5-eq1-2} \]
+By replacing $(x, y)$ with $(-x, -y)$ in~\eqref{2012a5-eq0}, we get $f(xy + 1) - f(-x - y) = f(-x) f(-y)$.
+Subtracting by~\eqref{2012a5-eq0} and applying~\eqref{2012a5-eq1-2} yields
+\[ -f(x + y + 1) f(-1) = f(x + y) - f(-x - y) = f(-x) f(-y) - f(x) f(y). \tag{1.3}\label{2012a5-eq1-3} \]
+
+For $x = y$,~\eqref{2012a5-eq1-2} yields $(f(-x) - f(x)) f(-1) = f(-x)^2 - f(x)^2$.
+Since $f(-x)$ and $f(x)$ commute, $f(-x)^2 - f(x)^2 = (f(-x) - f(x))(f(-x) + f(x))$.
+Thus, for any $x \in R$, we have either $f(-x) = f(x)$ or $f(-x) + f(x) = f(-1)$.
+Since $f(-x) - f(x) = f(x + 1) f(-1)$, the former is equivalent to $f(x + 1) = 0$.
+Replacing $x$ with $x - 1$, we get
+\[ f(x) \neq 0 \implies f(x - 1) - f(x + 1) = f(-1). \tag{1.4}\label{2012a5-eq1-4} \]
+
+On the other hand, suppose that $f(x) = 0$.
+Replace $x$ with $x - 1$ in~\eqref{2012a5-eq1-3}, then plug $y = x$.
+We get $f(2x - 1) - f(1 - 2x) = f(1 - x) f(-x)$.
+By~\eqref{2012a5-eq1-2}, $f(2x - 1) = f(x - 1) - f(1 - x) = -f(x) f(-1) = 0$, and $f(1 - 2x) = -f(1 - x) f(-1)$.
+Thus $f(x - 1) = f(1 - x)$ and $f(1 - x) f(-x) = f(1 - x) f(-1)$.
+In particular this also means $f(-x) f(1 - x) = f(-1) f(1 - x)$.
+Since $f(1 - x) = -f(x + 1)$, we get $f(-x) f(x + 1) = f(-1) f(x + 1)$.
+By plugging $y = -x - 1$, we get $f(-1) = f(-x) f(x + 1) = f(-1) f(x + 1)$.
+Since $f(-1) \neq 0$, this implies $f(x + 1) = 1$.
+In summary,
+\[ f(x) = 0 \implies f(x + 1) = 1 \text{ and } f(x - 1) = -1. \tag{1.5}\label{2012a5-eq1-5} \]
+
+\begin{claim}
+$f(-1) \in \{-2, 1\}$.
+\end{claim}
+\begin{proof}
+Due to~\eqref{2012a5-eq1-1}, the claim is equivalent to $f(3) \in \{-1, 2\}$.
+Now denote $C = f(3) = -f(-1)$ for convenience.
+Since $f(0) = -1$, we have $f(2) = 1$.
+By the equation $f(x + 2) + f(x) = C f(x + 1)$, we have $f(4) = C^2 - 1$ and $f(5) = C^3 - 2C$.
+Plugging $x = y = 2$ into~\eqref{2012a5-eq0} yields $C^3 - 2C - (C^2 - 1) = 1$, which is equivalent to $C(C + 1)(C - 2) = 0$.
+This proves the claim, since $C = -f(-1) \neq 0$.
+\end{proof}
+
+\begin{itemize}
+
+    \item
+    Subcase 1.1: $f(-1) = -2 \neq 0$.
+    In particular $\rchar(S) \neq 2$.
+
+    The corresponding solution is the map $S \to S$, $x \mapsto x - 1$.
+    That is, we claim that $f + 1 : R \to S$ is a ring homomorphism.
+    
+    Combining~\eqref{2012a5-eq1-4} and~\eqref{2012a5-eq1-5} yields $f(x - 1) - f(x + 1) = -2$ for all $x \in R$.
+    Using~\eqref{2012a5-eq1-1} and replacing $x$ with $x + 1$, we can rewrite this as $f(x) + f(-x) = -2$ for all $x \in R$.
+    On the other hand, we have $f(x) - f(-x) = 2 f(x + 1)$ for all $x \in R$.
+    Adding the two equations yields $2 f(x) = 2 (f(x + 1) - 1)$ for all $x \in R$.
+    Since $\rchar(S) \neq 2$, this yields $f(x + 1) = f(x) + 1$ for all $x \in R$.
+
+    Assuming that $f + 1$ is additive, it is easy to show that $f + 1$ is multiplicative.
+    Indeed, the original equality yields
+    \[ f(xy) + 1 = f(x) f(y) + f(x) + f(y) + 1 = (f(x) + 1)(f(y) + 1). \]
+    It remains to show that $f + 1$ is additive, i.e., $f(x + y) = f(x) + f(y) + 1$ for all $x, y \in R$.
+    We go back to~\eqref{2012a5-eq1-3} and use the equality $f(x) + f(-x) = -2$, giving us:
+    \[ 2 f(x + y + 1) = (f(x) + 2) (f(y) + 2) - f(x) f(y) = 2 (f(x) + f(y) + 2). \]
+    Again, $\rchar(S) \neq 2$, so $f(x + y) + 1 = f(x + y + 1) = f(x) + f(y) + 2$.
+    We are done.
+
+
+    \item
+    Subcase 1.2: $f(-1) = 1 \neq -2$.
+    In particular, $\rchar(S) \neq 3$.
+
+    The corresponding solution is the map $q : \F_3 \to S$, $[0, 1, 2] \mapsto [-1, 0, 1]$.
+    That is, we claim that there is a ring homomorphism $\phi : R \to \F_3$ such that $f = q \circ \phi$.
+
+    This time,~\eqref{2012a5-eq1-2} and~\eqref{2012a5-eq1-1} yields $f(x - 1) + f(x) + f(x + 1) = 0$ for all $x \in R$.
+    In particular, $f$ is $3$-periodic.
+    Then~\ref{2012a5-eq1-4} yields that, if $f(x) \neq 0$, then $f(x + 1) - f(x - 1) = -1$.
+    If $f(x), f(x - 1), f(x + 1)$ are all non-zero, then we have $f(x) - f(x + 1) = f(x + 1) - f(x - 1) = f(x - 1) - f(x) = -1$.
+    Adding all three equalities yield $0 = -3$ in $S$; a contradiction since $\rchar(S) \neq 3$.
+    As a result, one of the three expressions equal zero; the other two are determined by~\ref{2012a5-eq1-5}.
+    In particular, $(-1, 0, 1)$ is a cyclic permutation of $(f(x - 1), f(x), f(x + 1))$ for any $x \in R$.
+    
+    Given $c \in R$ with $f(c + 1) = 0$, we have $f(1 - c) = 0$ by~\eqref{2012a5-eq1-1}.
+    Then~\eqref{2012a5-eq1-5} yields $f(c) = f(-c) = -1$.
+    So~\eqref{2012a5-eq1-3} and~\eqref{2012a5-eq1-2} yields $-f(c + y + 1) = -f(c + 1)$.
+    Replacing $y$ with $y - 1$ yields $f(c + y) = f(y)$ for all $y \in R$.
+    Now plugging $x = c$ into~\eqref{2012a5-eq0} yields $f(cy + 1) = f(c + y) - f(y) = 0$ for all $y \in R$.
+    Similarly, plugging $y = c$ instead yields $f(xc + 1) = 0$ for all $x \in R$.
+
+    Now, consider the set $I = \{x \in R : f(x + 1) = 0\}$.
+    From the previous paragraph, it can be easily seen that $I$ is a double-sided ideal of $R$.
+    Also, $I$ is precisely the set of periods of $f$; $f(c + 1) = 0$ if and only if $f(c + y) = f(y)$ for all $y \in R$.
+    Thus there is an induced map $\tilde{f} : R/I \to S$ such that $f = \tilde{f} \circ \phi$, where $\phi : R \to R/I$ is the canonical map.
+    The map $\tilde{f}$ has the property that $\tilde{f}(x + 1) = 0 \iff x = 0$.
+
+    For each $x \in R$, recall that $f(x + c) = 0$ for some $c \in \{-1, 0, 1\}$.
+    That means $x$ reduces to either $-1$, $0$, or $1$ in $R/I$, which implies that $|R/I| \leq 3$.
+    Since $f$ is non-constant, we have $|R/I| = 3$, so $R/I$ is isomorphic to $\F_3$.
+    By recalling that $f(-1) = 1$, $f(0) = -1$, and $f(1) = 0$, we get that $\tilde{f} = q$, as desired.
+
+    \textit{Note:
+        For now, we implement all the results before setting up the ideal $I$.
+        For the case $R = \R$, there is a more immediate contradiction.
+        Indeed, $f(3x + 1) = 0$ for all $x \in \R$.
+        But plugging $x = -1/3$ yields $-1 = f(0) = 0$; a contradiction.}
+
+\end{itemize}
+
+
+\subsubsection*{Case 2: $f(-1) = 0$ (Not generalized)}
+
+\textit{Note: For now, we just work with the case $R = \R$.}
+
+Let us assume that $R = \R$ for this case.
+Then the only corresponding solution is $x \mapsto \phi(x)^2 - 1$.
+
+By the equation $f(x) - f(-x) = -f(x + 1) f(-1)$, this time, we get that $f$ is even.
+In particular we have $f(xy + 1) - f(x + y) = f(1 - xy) - f(x - y)$ for all $x, y \in \R$.
+Rearranging gives us $f(xy + 1) - f(xy - 1) = f(x + y) - f(x - y)$.
+In particular, for any $a, b \in \R$, solving for $x + y = a$ and $x - y = b$ gives us
+\[ f\left(\frac{a^2 - b^2}{4} + 1\right) - f\left(\frac{a^2 - b^2}{4} - 1\right) = f(a) - f(b). \]
+It follows that $f(a) - f(b) = f(c) - f(d)$ for any $a, b, c, d \in \R$ such that $a^2 - b^2 = c^2 - d^2$.
+In particular, since $f(0) = -1$, we have $f(\sqrt{u + v}) = f(\sqrt{u}) + f(\sqrt{v}) + 1$ for all $u, v \geq 0$.
+
+Now define $g : \R_{\geq 0} \to R$ by $g(x) = f(\sqrt{x})$ for all $x \geq 0$.
+Since $f$ is even, we have $f(x) = g(x^2)$ for all $x \in \R$.
+The previous paragraph implies that $g + 1$ is additive.
+It remains to show that it is multiplicative.
+Going back to~\eqref{2012a5-eq0}, for all $x, y \in \R$, we have
+\[ g(x^2) g(y^2) = g(1 + 2xy + x^2 y^2) - g(x^2 + 2xy + y^2) = g(1) + g(x^2 y^2) - g(x^2) - g(y^2). \]
+Note that $g(1) = f(1) = 0$.
+Thus rearranging gives $g(x^2 y^2) + 1 = (g(x^2) + 1)(g(y^2) + 1)$ for all $x, y \in \R$.
+Replacing with square roots prove that $g + 1$ is multiplicative.
+
+
+
+\end{document}
