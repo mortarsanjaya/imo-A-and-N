@@ -38,16 +38,14 @@ private lemma case1_1_lem4 (x y : R) : f (x + y) = f x + f y + 1 :=
     ← add_mul, mul_left_inj' (neg_ne_zero.mp $ ne_of_eq_of_ne h2.symm h1),
     case1_1_lem3 h h0 h1 h2, bit0, ← add_assoc, ← add_assoc, add_left_inj] at h3
 
-private lemma case1_1_lem5 (x y : R) : f (x * y) + 1 = (f x + 1) * (f y + 1) :=
-  by rw [add_one_mul, mul_add_one, add_assoc, ← add_assoc (f x),
-    ← case1_1_lem4 h h0 h1 h2, ← case1_1_lem3 h h0 h1 h2, ← sub_eq_iff_eq_add, h]
-
 theorem case1_1_sol : ∃ φ : R →+* S, f = λ x, φ x - 1 :=
+  let h3 := case1_1_lem4 h h0 h1 h2 in
   ⟨⟨λ x, f x + 1,
       add_left_eq_self.mpr (good_map_one h),
-      case1_1_lem5 h h0 h1 h2,
+      λ x y, by rw [add_one_mul, mul_add_one, add_assoc, ← add_assoc (f x),
+        ← h3, ← case1_1_lem3 h h0 h1 h2, ← sub_eq_iff_eq_add, h],
       add_eq_zero_iff_eq_neg.mpr h0,
-      λ x y, by rw [case1_1_lem4 h h0 h1 h2, add_add_add_comm, add_assoc]⟩,
+      λ x y, by rw [h3, add_add_add_comm, add_assoc]⟩,
     funext (λ x, by rw [ring_hom.coe_mk, add_sub_cancel])⟩
 
 end IMO2012A5
