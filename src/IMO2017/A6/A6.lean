@@ -43,9 +43,12 @@ private lemma good_map_map_zero_sq : f (f 0 ^ 2) = 0 :=
 private lemma good_map_eq_one_sub_self_of_inj (h0 : f 0 = 1) (h1 : injective f) :
   f = λ x, 1 - x :=
 begin
+  -- Reduce to `f(f(x)) + f(x) = 1` for all `x : R`
   suffices h2 : ∀ x : R, f (f x) + f x = 1,
   { funext x; rw [← h2 x, eq_sub_iff_add_eq, add_comm, add_left_inj],
     apply h1; rw [← add_left_inj (f (f x)), h2, add_comm, h2] },
+  
+  -- Prove `f(f(x)) + f(x) = 1` for all `x : R`
   intros x; replace h := h x 0,
   rwa [mul_zero, h0, mul_one, add_zero] at h
 end
@@ -61,13 +64,15 @@ include h
 private lemma good_map_eq_zero {c : R} (h0 : f ≠ 0) (h1 : f c = 0) : c = 1 :=
 begin
   contrapose h0; rw not_not,
-  suffices : f 0 = 0,
-    funext x; replace h := h 0 x;
-      rwa [zero_add, zero_mul, this, zero_mul, this, zero_add] at h,
-  obtain ⟨x, rfl⟩ : ∃ x : R, x + 1 = c := ⟨c - 1, sub_add_cancel c 1⟩,
-  rw add_left_eq_self at h0,
-  replace h := good_special_equality h (mul_inv_cancel h0),
-  rwa [h1, zero_mul] at h
+
+  -- First prove `f(0) = 0`.
+  rw ← sub_eq_zero at h0,
+  replace h0 := good_special_equality h (mul_inv_cancel h0),
+  rw [sub_add_cancel, h1, zero_mul] at h0,
+
+  -- Now use `f(0) = 0` to prove `f = 0`.
+  funext x; replace h := h 0 x,
+  rwa [zero_add, zero_mul, h0, zero_mul, h0, zero_add] at h
 end
 
 private lemma good_map_zero_sq (h0 : f ≠ 0) : f 0 ^ 2 = 1 :=
@@ -81,11 +86,8 @@ private lemma good_shift (h0 : f 0 = 1) (x : R) : f (x + 1) + 1 = f x :=
   by have h1 := h x 1; rwa [good_map_one h, mul_zero, h1, mul_one, add_comm, h0] at h1
 
 private lemma good_map_eq_zero_iff (h0 : f 0 = 1) (c : R) : f c = 0 ↔ c = 1 :=
-begin
-  refine ⟨good_map_eq_zero h _, _⟩,
-  rintros rfl; exfalso; exact zero_ne_one h0,
-  rintros rfl; exact good_map_one h
-end
+  ⟨good_map_eq_zero h (λ h1, absurd ((congr_fun h1 0).symm.trans h0) zero_ne_one),
+    λ h1, (congr_arg f h1).trans (good_map_one h)⟩
 
 end division_ring
 
