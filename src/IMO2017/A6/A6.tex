@@ -22,20 +22,15 @@
 
 \subsection*{Problem}
 
-Fix a ring $R$.
-In the following two cases, determine all functions $f : R \to R$ such that, for any $x, y \in R$,
+Fix a field $F$.
+Determine all functions $f : F \to F$ such that, for any $x, y \in F$,
 \[ f(f(x) f(y)) + f(x + y) = f(xy). \tag{*}\label{2017a6-eq0} \]
-\begin{enumerate}
-    \item   $R$ is a division ring with $\rchar(R) \neq 2$,
-    \item   $R$ is a field with $\rchar(R) = 2$.
-\end{enumerate}
+
 
 
 \subsection*{Answer}
 
 $x \mapsto 0$, $x \mapsto x - 1$, and $x \mapsto 1 - x$.
-
-In the case where $\rchar(R) = 2$, this reduces to just $x \mapsto 0$ and $x \mapsto x + 1$.
 
 
 
@@ -45,60 +40,58 @@ Reference: \url{https://artofproblemsolving.com/community/c6h1480146p8693244}
 
 The reference links to the solution in the AoPS thread for IMO 2017 P2 by the user \textbf{anantmudgal09} (see post \#75).
 The solution works for fields of characteristic not equal to $2$.
-With a careful modification, the solution works for any division rings $R$ with $\rchar(R) \neq 2$.
 We write the same solution here with the necessary modification and a bit of rewording.
-We provide our own solution for the case where $R$ is a field with $\rchar(R) = 2$.
+We provide our own solution for the case where $\rchar(F) = 2$.
 First, note that it is easy to check that all the provided functions satisfy~\eqref{2017a6-eq0}.
 
 We start with some small properties.
-First, for any $t \in R$, plugging $(x, y) = (t + 1, t^{-1} + 1)$ into~\eqref{2017a6-eq0} yields
+First, for any $t \in F$, plugging $(x, y) = (t + 1, t^{-1} + 1)$ into~\eqref{2017a6-eq0} yields
 \[ f(f(t + 1) f(t^{-1} + 1)) = 0. \tag{1}\label{2017a6-eq1} \]
-The above equation is useful in the following claim, but it is also useful for the solution in the case $\rchar(R) = 2$.
+The above equation is useful in the following claim, but it is also useful for the solution in the case $\rchar(F) = 2$.
 
 \begin{claim}
 Let $f$ be a function satisfying~\eqref{2017a6-eq0}.
 Then $-f$ also satisfies~\eqref{2017a6-eq0}.
-If $f \neq 0$, we also have $f(0)^2 = 1$, $f(1) = 0$, and for any $x \in R$, $f(x) = 0 \iff x = 1$.
+If $f \neq 0$, we also have $f(0)^2 = 1$, $f(1) = 0$, and for any $x \in F$, $f(x) = 0 \iff x = 1$.
 \end{claim}
 \begin{proof}
 The fact that $-f$ satisfies~\eqref{2017a6-eq0} is immediate.
 Plugging $(x, y) = (0, 0)$ into~\eqref{2017a6-eq0} yields $f(f(0)^2) = 0$.
-Thus, to prove the claim, it suffices to prove that, if $f \neq 0$, then $f(x) = 0$ implies $x = 1$ for any $x \in R$.
+Thus, to prove the claim, it suffices to prove that, if $f \neq 0$, then $f(x) = 0$ implies $x = 1$ for any $x \in F$.
 
 Write $x = t + 1$, and suppose that $f(t + 1) = 0$ but $t \neq 0$.
 Then~\eqref{2017a6-eq1} tells us that $f(0) = 0$.
-Finally, plugging $y = 0$ into~\eqref{2017a6-eq0} yields $f(x) = 0$ for all $x \in R$, i.e., $f \equiv 0$.
+Finally, plugging $y = 0$ into~\eqref{2017a6-eq0} yields $f(x) = 0$ for all $x \in F$, i.e., $f \equiv 0$.
 \end{proof}
 
-In view of the claim, it suffices to prove that, if $f$ satisfies~\eqref{2017a6-eq0} and $f(0) = 1$, then $f(x) = 1 - x$ for all $x \in R$.
+In view of the claim, it suffices to prove that, if $f$ satisfies~\eqref{2017a6-eq0} and $f(0) = 1$, then $f(x) = 1 - x$ for all $x \in F$.
 Thus, from now on, we assume that $f(0) = 1$.
 
 First, we reduce even more: it suffices to prove that $f$ is injective.
-Indeed, plugging $y = 0$ into~\eqref{2017a6-eq0} yields $f(f(x)) + f(x) = 1$ for all $x \in R$.
-This means $f(f(f(x))) = f(x) = 1 - f(f(x))$, so injectivity yields $f(f(x)) = x$ and thus $f(x) = 1 - x$ for all $x \in R$.
+Indeed, plugging $y = 0$ into~\eqref{2017a6-eq0} yields $f(f(x)) + f(x) = 1$ for all $x \in F$.
+This means $f(f(f(x))) = f(x) = 1 - f(f(x))$, so injectivity yields $f(f(x)) = x$ and thus $f(x) = 1 - x$ for all $x \in F$.
 It now remains to prove that $f$ is injective.
 
 One important equation throughout the rest of the proof is as follows.
-Plugging $y = 1$ into~\eqref{2017a6-eq0} yields that, for any $x \in R$,
+Plugging $y = 1$ into~\eqref{2017a6-eq0} yields that, for any $x \in F$,
 \[ f(x + 1) + 1 = f(x). \tag{2}\label{2017a6-eq2} \]
 
 
-\subsubsection*{Case 1: $R$ is a division ring and $\rchar(R) \neq 2$.}
+\subsubsection*{Case 1: $\rchar(F) \neq 2$.}
 
 First,~\eqref{2017a6-eq2} implies that $f(-1) = 2$.
-Thus, plugging $x = -1$ into~\eqref{2017a6-eq0} yields that for all $y \in R$,
+Thus, plugging $x = -1$ into~\eqref{2017a6-eq0} yields that for all $y \in F$,
 \[ f(2f(y)) + f(y) + 1 = f(-y). \]
-In particular, for any $a, b \in R$, $f(a) = f(b)$ implies $f(-a) = f(-b)$.
+In particular, for any $a, b \in F$, $f(a) = f(b)$ implies $f(-a) = f(-b)$.
 Furthermore, this means that $f(y) = f(-y)$ implies
 \[ f(2f(y)) = -1 \iff 2f(y) = 2 \iff f(y) = 1 \iff y = 0. \]
 
-Thus, it suffices to show that, for any $a, b \in R$, $f(a) = f(b)$ implies $f(a - b) = f(b - a)$.
-First, comparing~\eqref{2017a6-eq0} with  $(x, y) = (a, b)$ and $(x, y) = (b, a)$ gives us $f(ab) = f(ba)$.
-In the virtue of the previous paragraph, we get $f(-a) = f(-b)$, and in addition, $f(-ab) = f(-ba)$.
-Now, comparing~\eqref{2017a6-eq0} with $(x, y) = (a, -b)$ and $(x, y) = (b, -a)$ gives us the desired equality.
+Thus, it suffices to show that, for any $a, b \in F$, $f(a) = f(b)$ implies $f(a - b) = f(b - a)$.
+Indeed, by the previous paragraph, $f(-a) = f(-b)$.
+Comparing~\eqref{2017a6-eq0} with $(x, y) = (a, -b)$ and $(x, y) = (b, -a)$ gives us the desired equality.
 
 
-\subsubsection*{Case 2: $R$ is a field and $\rchar(R) = 2$.}
+\subsubsection*{Case 2: $\rchar(F) = 2$.}
 
 By~\eqref{2017a6-eq2}, it suffices to prove that $f(a + 1) = f(b + 1)$ implies $a = b$.
 The claim yields $f(x + 1) = 0 \iff x = 0$, so either $a = b = 0$ or $a, b \neq 0$.
@@ -108,10 +101,10 @@ The main step to get injectivity is proving $f(x + y) = f(xy) + 1$, where $x = a
 First, we see why the equality implies $a = b$.
 Indeed, by~\eqref{2017a6-eq0}, the equality yields
 \[ f(f(x) f(y)) = 1 \iff f(x) f(y) = 0 \iff x = 1 \lor y = 1. \]
-Since $x = a + b + 1$, $y = a^{-1} + b^{-1} + 1$, and $\rchar(R) = 2$, both $x = 1$ and $y = 1$ are equivalent to $a = b$.
+Since $x = a + b + 1$, $y = a^{-1} + b^{-1} + 1$, and $\rchar(F) = 2$, both $x = 1$ and $y = 1$ are equivalent to $a = b$.
 It now remains to show that indeed we have $f(x + y) = f(xy) + 1$.
 
-First, for any $a, b \in R$ with $f(a + 1) = f(b + 1)$, plugging $(x, y) = (a + 1, b^{-1} + 1)$ into~\eqref{2017a6-eq0} and using the claim yields
+First, for any $a, b \in F$ with $f(a + 1) = f(b + 1)$, plugging $(x, y) = (a + 1, b^{-1} + 1)$ into~\eqref{2017a6-eq0} and using the claim yields
 \[ f(ab^{-1} + a + b^{-1} + 1) = f(f(a + 1) f(b^{-1} + 1)) + f(a + b^{-1}) = f(a + b^{-1}). \]
 In particular, we have $f(ab^{-1} + a + b^{-1}) = f(1 + a + b^{-1})$.
 
@@ -127,13 +120,10 @@ By the claim, we get $f(x + y) = f(xy + 1) = f(xy) + 1$, as desired.
 
 \subsection*{Implementation details}
 
-Clearly, we break the claim into several small lemmas.
-We also implement~\eqref{2017a6-eq1} and~\eqref{2017a6-eq2} as a separate lemma.
-In the above step, we show that if $f(0) = 1$ and $f$ is injective, then $f(x) = 1 - x$ for all $x \in R$.
-This holds in any ring $R$, so we implement this result as another lemma as well.
-Another lemma we implement is checking that $x \mapsto 1 - x$ indeed satisfies~\eqref{2017a6-eq0}.
-As we deal with two very distinct cases, we implement the two cases as separate results.
-Lastly, we implement a wrapper for cases where $R$ is a field.
+With a careful modification, the solution for the case $\rchar(F) \neq 2$ is generalizable to division rings.
+Indeed, comparing~\eqref{2017a6-eq0} with $(x, y) = (a, b)$ and $(x, y) = (b, a)$ gives us $f(ab) = f(ba)$.
+Now we have $f(-a) = f(-b)$, and in addition, $f(-ab) = f(-ba)$.
+Comparing~\eqref{2017a6-eq0} with $(x, y) = (a, -b)$ and $(x, y) = (b, -a)$ again gives us the desired equality.
 
 
 
