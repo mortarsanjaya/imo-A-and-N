@@ -16,8 +16,8 @@ section basic_results
 
 variables {R : Type*} [ring R]
 
-private lemma good_id : good (λ x : R, x) :=
-  λ x y, by rw [mul_add, ← sq, add_comm]
+private lemma good_id : good (id : R → R) :=
+  λ x y, (mul_add x x y).trans $ (add_comm _ _).trans $ congr_arg (has_add.add _) (sq x).symm
 
 variables [is_domain R] {f : R → R} (h : good f)
 include h
@@ -31,29 +31,28 @@ begin
   exact pow_eq_zero h
 end
 
-private lemma good_special_identity1 (x : R) : f (x * f x) = x ^ 2 :=
+private lemma good_self_mul_map (x : R) : f (x * f x) = x ^ 2 :=
   by have h0 := h x 0; rwa [add_zero, mul_zero, good_map_zero h, zero_add] at h0
 
 private lemma good_inj : injective f :=
 begin
   suffices : ∀ x : R, f x = 0 ↔ x = 0,
   { intros x y h0,
-    have h1 := good_special_identity1 h x,
-    rw [h0, ← add_sub_cancel'_right x y, h, add_left_eq_self,
+    have h1 := good_self_mul_map h y,
+    rw [← h0, ← add_sub_cancel'_right y x, h, add_left_eq_self,
         this, mul_eq_zero, this, sub_eq_zero] at h1,
-    symmetry; revert h1; refine (or_iff_right_of_imp _).mp,
-    rintros rfl; rwa [good_map_zero h, eq_comm, this] at h0 },
+    exact h1.elim (λ h2, ((this x).mp $ h0.trans $ (this y).mpr h2).trans h2.symm) id },
   
-  refine λ x, ⟨λ h0, _, λ h0, by rw h0; exact good_map_zero h⟩,
-  have h1 := good_special_identity1 h x,
+  refine λ x, ⟨λ h0, _, λ h0, (congr_arg f h0).trans (good_map_zero h)⟩,
+  have h1 := good_self_mul_map h x,
   rw [h0, mul_zero, good_map_zero h, eq_comm] at h1,
   exact pow_eq_zero h1
 end
 
 private lemma good_odd (x : R) : f (-x) = -f x :=
 begin
-  have h0 := good_special_identity1 h (-x),
-  rw [neg_sq, ← good_special_identity1 h, neg_mul] at h0,
+  have h0 := good_self_mul_map h (-x),
+  rw [neg_sq, ← good_self_mul_map h, neg_mul] at h0,
   replace h0 := good_inj h h0,
   rw [← add_eq_zero_iff_neg_eq, ← mul_add, mul_eq_zero, add_eq_zero_iff_eq_neg] at h0,
   revert h0; refine (or_iff_right_of_imp _).mp,
@@ -62,14 +61,18 @@ end
 
 private lemma good_map_one_sq : f 1 ^ 2 = 1 :=
 begin
-  have h0 := good_special_identity1 h 1,
+  have h0 := good_self_mul_map h 1,
   rw [one_mul, one_pow] at h0,
-  replace h := good_special_identity1 h (f 1),
+  replace h := good_self_mul_map h (f 1),
   rwa [h0, mul_one, h0, eq_comm] at h
 end
 
 private lemma good_neg : good (-f) :=
-  λ x y, by simp_rw [pi.neg_def, mul_neg, neg_mul, good_odd h, neg_neg]; exact h x y
+  λ x y, by calc
+    _ = f (-(x * -f (x + y))) : (good_odd h _).symm
+    ... = f (x * f (x + y)) : by rw [mul_neg, neg_neg]
+    ... = f (f x * y) + x ^ 2 : h x y
+    ... = -f (-f x * y) + x ^ 2 : by rw [← good_odd h, neg_mul, neg_neg]
 
 end basic_results
 
@@ -158,7 +161,7 @@ begin
   intros c d h1,
   replace h0 := h c c,
   rw [char_two.add_self_eq_zero, good_map_zero h, mul_zero, good_map_zero h,
-      eq_comm, add_eq_zero_iff_eq_neg, char_two.neg_eq, ← good_special_identity1 h] at h0,
+      eq_comm, add_eq_zero_iff_eq_neg, char_two.neg_eq, ← good_self_mul_map h] at h0,
   replace h0 := good_inj h h0,
   rwa [h1, add_one_mul, mul_add_one, add_left_inj, eq_comm] at h0
 end
