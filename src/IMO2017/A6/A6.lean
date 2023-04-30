@@ -1,13 +1,14 @@
 import algebra.char_p.two
 
-/-! # IMO 2017 A6 (P2), Generalized Version -/
+/-! # IMO 2017 A6 (P2) -/
 
 namespace IMOSL
 namespace IMO2017A6
 
 open function
 
-def good {R : Type*} [ring R] (f : R → R) := ∀ x y : R, f (f x * f y) + f (x + y) = f (x * y)
+def good {R : Type*} [ring R] (f : R → R) :=
+  ∀ x y : R, f (f x * f y) + f (x + y) = f (x * y)
 
 
 
@@ -18,21 +19,23 @@ section ring
 variables {R : Type*} [ring R]
 
 private lemma good_zero : good (0 : R → R) :=
-  λ x y, add_zero 0
-
+  λ _ _, add_zero 0
+  
 private lemma good_one_sub_self : good (has_sub.sub (1 : R)) :=
-  λ x y, by rw [sub_add, sub_right_inj, sub_eq_iff_eq_add', sub_add,
-    add_sub_assoc, ← one_sub_mul, ← sub_sub, ← mul_one_sub]
+  λ x y, by rw [sub_add, sub_right_inj, sub_eq_iff_eq_add',
+    ← add_sub_right_comm, ← sub_sub_sub_eq, ← one_sub_mul, ← mul_one_sub]
 
 variables {f : R → R} (h : good f)
 include h
 
 private lemma good_neg : good (-f) :=
-  λ x y, by iterate 5 { rw pi.neg_apply }; rw [neg_mul_neg, ← neg_add, h]
+  λ x y, (neg_add _ _).symm.trans $ congr_arg has_neg.neg $
+    (congr_arg (λ z, f z + f (x + y)) $ neg_mul_neg _ _).trans (h x y)
 
-private lemma good_special_equality {x y : R} (h0 : x * y = 1) : f (f (x + 1) * f (y + 1)) = 0 :=
-  by replace h := h (x + 1) (y + 1);
-    rwa [add_one_mul, mul_add_one, h0, add_comm 1 x, add_left_eq_self] at h
+private lemma good_special_equality {x y : R} (h0 : x * y = 1) :
+  f (f (x + 1) * f (y + 1)) = 0 :=
+  add_left_eq_self.mp $ (h _ _).trans $
+    by rw [add_one_mul, mul_add_one, h0, add_comm 1 x]
 
 private lemma good_map_map_zero_sq : f (f 0 ^ 2) = 0 :=
   by replace h := h 0 0; rwa [add_zero, mul_zero, add_left_eq_self, ← sq] at h
@@ -71,11 +74,8 @@ private lemma good_map_zero_sq (h0 : f ≠ 0) : f 0 ^ 2 = 1 :=
   good_map_eq_zero h h0 (good_map_map_zero_sq h)
 
 private lemma good_map_one : f 1 = 0 :=
-begin
-  rcases eq_or_ne f 0 with rfl | h0,
-  rw pi.zero_apply,
-  rw ← good_map_zero_sq h h0; exact good_map_map_zero_sq h
-end
+  or.elim (eq_or_ne f 0) (λ h0, congr_fun h0 1) $
+    λ h0, (congr_arg f $ good_map_zero_sq h h0).symm.trans (good_map_map_zero_sq h)
 
 private lemma good_shift (h0 : f 0 = 1) (x : R) : f (x + 1) + 1 = f x :=
   by have h1 := h x 1; rwa [good_map_one h, mul_zero, h1, mul_one, add_comm, h0] at h1
