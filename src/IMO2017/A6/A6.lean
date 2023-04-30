@@ -12,6 +12,7 @@ def good {R : Type*} [ring R] (f : R → R) :=
 
 
 
+/-! Some basic results. -/
 section basic_results
 
 section ring
@@ -21,7 +22,7 @@ variables {R : Type*} [ring R]
 private lemma good_zero : good (0 : R → R) :=
   λ _ _, add_zero 0
   
-private lemma good_one_sub_self : good (has_sub.sub (1 : R)) :=
+private lemma good_one_sub : good (has_sub.sub (1 : R)) :=
   λ x y, by rw [sub_add, sub_right_inj, sub_eq_iff_eq_add',
     ← add_sub_right_comm, ← sub_sub_sub_eq, ← one_sub_mul, ← mul_one_sub]
 
@@ -40,8 +41,8 @@ private lemma good_special_equality {x y : R} (h0 : x * y = 1) :
 private lemma good_map_map_zero_sq : f (f 0 ^ 2) = 0 :=
   by replace h := h 0 0; rwa [add_zero, mul_zero, add_left_eq_self, ← sq] at h
 
-private lemma good_map_eq_one_sub_self_of_inj (h0 : f 0 = 1) (h1 : injective f) :
-  f = λ x, 1 - x :=
+private lemma good_eq_of_inj (h0 : f 0 = 1) (h1 : injective f) :
+  f = has_sub.sub 1 :=
 begin
   -- Reduce to `f(f(x)) + f(x) = 1` for all `x : R`
   suffices h2 : ∀ x : R, f (f x) + f x = 1,
@@ -58,7 +59,11 @@ end ring
 
 section division_ring
 
-variables {R : Type*} [division_ring R] {f : R → R} (h : good f)
+variables {R : Type*} [division_ring R]
+
+section
+
+variables {f : R → R} (h : good f)
 include h
 
 private lemma good_map_eq_zero {c : R} (h0 : f ≠ 0) (h1 : f c = 0) : c = 1 :=
@@ -78,6 +83,9 @@ end
 private lemma good_map_zero_sq (h0 : f ≠ 0) : f 0 ^ 2 = 1 :=
   good_map_eq_zero h h0 (good_map_map_zero_sq h)
 
+private lemma good_map_zero (h0 : f ≠ 0) : f 0 = 1 ∨ f 0 = -1 :=
+  sq_eq_one_iff.mp (good_map_zero_sq h h0)
+
 private lemma good_map_one : f 1 = 0 :=
   or.elim (eq_or_ne f 0) (λ h0, congr_fun h0 1) $
     λ h0, (congr_arg f $ good_map_zero_sq h h0).symm.trans (good_map_map_zero_sq h)
@@ -88,6 +96,21 @@ private lemma good_shift (h0 : f 0 = 1) (x : R) : f (x + 1) + 1 = f x :=
 private lemma good_map_eq_zero_iff (h0 : f 0 = 1) (c : R) : f c = 0 ↔ c = 1 :=
   ⟨good_map_eq_zero h (λ h1, absurd ((congr_fun h1 0).symm.trans h0) zero_ne_one),
     λ h1, (congr_arg f h1).trans (good_map_one h)⟩
+
+end
+
+
+/-- General framework for the proof. -/
+private lemma sol_of_good_map_zero_eq_one_imp_inj
+  (h : ∀ {f : R → R}, good f → f 0 = 1 → injective f) (f : R → R) :
+  good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ (f = λ x, -(1 - x))) :=
+  ⟨λ h0, or_iff_not_imp_left.mpr $ λ h1, or.elim (good_map_zero h0 h1)
+    (λ h2, or.inl $ good_eq_of_inj h0 h2 $ h h0 h2)
+    (λ h2, or.inr $ let h3 := neg_eq_iff_eq_neg.mpr h2, h4 := good_neg h0 in
+      neg_eq_iff_eq_neg.mp $ good_eq_of_inj h4 h3 $ h h4 h3),
+  λ h0, or.elim h0 (λ h1, cast (congr_arg good h1.symm) good_zero) $
+    λ h1, or.elim h1 (λ h2, cast (congr_arg good h2.symm) good_one_sub)
+      (λ h2, cast (congr_arg good h2.symm) (good_neg good_one_sub))⟩
 
 end division_ring
 
@@ -101,29 +124,9 @@ end basic_results
 
 /-- Final solution, `char(R) ≠ 2` -/
 theorem final_solution_char_ne_two {R : Type*} [division_ring R] (Rchar : ring_char R ≠ 2) :
-  ∀ f : R → R, good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ (f = λ x, x - 1)) :=
+  ∀ f : R → R, good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ (f = λ x, -(1 - x))) :=
 begin
-  ---- Change `f = λ x, x - 1` to `-f = λ x, 1 - x`, which is way more convenient to handle
-  intros f; conv_rhs { congr, skip, congr, skip, rw ← neg_inj,
-    congr, skip, rw pi.neg_def, funext, rw neg_sub },
-
-  ---- `←` direction: easy
-  symmetry; refine ⟨λ h, _, λ h, _⟩,
-  rcases h with rfl | rfl | h,
-  exact good_zero,
-  exact good_one_sub_self,
-  rw ← neg_neg f; apply good_neg,
-  rw h; exact good_one_sub_self,
-
-  ---- `→` direction: reduce to showing that `f(0) = 1` implies `f = λ x, 1 - x`
-  rw or_iff_not_imp_left; revert h f,
-  suffices : ∀ {f : R → R}, good f → f 0 = 1 → f = has_sub.sub 1,
-  { intros f h h0,
-    replace h0 := good_map_zero_sq h h0,
-    rw sq_eq_one_iff at h0; cases h0 with h0 h0,
-    left; exact this h h0,
-    right; refine this (good_neg h) _,
-    rw [pi.neg_apply, h0, neg_neg] },
+  apply sol_of_good_map_zero_eq_one_imp_inj,
   
   ---- Some setup
   intros f h h0,
@@ -133,7 +136,7 @@ begin
 
   ---- Reduce to `∀ c, f c = f (-c) → c = 0`
   suffices h3 : ∀ {c}, f c = f (-c) → c = 0,
-  { refine good_map_eq_one_sub_self_of_inj h h0 (λ a b h4, _),
+  { intros a b h4,
     rw ← sub_eq_zero; apply h3,
     replace h2 : ∀ {x y}, f x = f y → f (-x) = f (-y) := λ x y h5, by rw [← h2, h5, h2],
     replace h1 : f (a * b) = f (b * a) := by rw [← h, ← h b a, h4, add_comm a],
@@ -153,19 +156,10 @@ end
 
 /-- Final solution, `F` is a field, `char(F) = 2` -/
 theorem final_solution_field_char_two {F : Type*} [field F] [char_p F 2] :
-  ∀ f : F → F, good f ↔ f = 0 ∨ f = has_add.add 1 :=
+  ∀ f : F → F, good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ (f = λ x, -(1 - x))) :=
 begin
-  ---- `←` direction: easy
-  rw ← char_two.sub_eq_add',
-  intros f; symmetry; refine ⟨λ h, _, λ h, _⟩,
-  { rcases h with rfl | rfl,
-    exacts [good_zero, good_one_sub_self] },
-  
-  ---- `→` direction: Reduce to showing that if `f(0) ≠ 0`, then `f` is injective
-  rw or_iff_not_imp_left; intros h0,
-  replace h0 := good_map_zero_sq h h0,
-  rw [sq_eq_one_iff, char_two.neg_eq, or_self] at h0,
-  refine good_map_eq_one_sub_self_of_inj h h0 (λ a b h1, _),
+  apply sol_of_good_map_zero_eq_one_imp_inj,
+  intros f h h0 a b h1,
 
   ---- First, remove the case `a = 0` and `b = 0`
   have X := good_shift h h0,
@@ -223,15 +217,9 @@ end
 
 /-- Final solution, `F` is a field -/
 theorem final_solution_field {F : Type*} [field F] :
-  ∀ f : F → F, good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ (f = λ x, x - 1)) :=
-begin
-  cases ne_or_eq (ring_char F) 2 with h h,
-  exact final_solution_char_ne_two h,
-  haveI : char_p F 2 := ring_char.of_eq h,
-  intros f; rw [final_solution_field_char_two f, char_two.sub_eq_add'],
-  conv_rhs { congr, skip, congr, skip, congr, skip, funext, rw add_comm },
-  rw or_self
-end
+  ∀ f : F → F, good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ (f = λ x, -(1 - x))) :=
+  or.elim (ne_or_eq  (ring_char F) 2) final_solution_char_ne_two
+    (λ h, by haveI : char_p F 2 := ring_char.of_eq h; exact final_solution_field_char_two)
 
 end IMO2017A6
 end IMOSL
