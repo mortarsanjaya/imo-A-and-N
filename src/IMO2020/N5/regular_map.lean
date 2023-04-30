@@ -1,4 +1,4 @@
-import IMO2020.N5.additive_map extra.number_theory.ord_compl_zmod
+import IMO2020.N5.additive_map IMO2020.N5.extra.ord_compl_zmod
 
 /-!
 # `p`-regular maps
