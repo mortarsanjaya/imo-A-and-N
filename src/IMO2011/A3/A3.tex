@@ -3,6 +3,8 @@
 \usepackage{amsmath, amsfonts, amssymb, amsthm}
 \usepackage{hyperref}
 
+\DeclareMathOperator{\rchar}{char}
+
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{5pt}
 
@@ -28,7 +30,7 @@ Determine all functions $f, g : R \to R$ such that, for all $x, y \in R$,
 
 $(f, g) = x \mapsto (ax^2 + c, ax)$, for some $a, c \in R$ such that $a(a - 1) = c(a - 1) = 0$.
 
-In particular, if $R$ is an integral domain with characteristic not equal to $2$, then $(f, g) = x \mapsto (x^2 + c, x)$ and $(f, g) = (0, 0)$.
+If $R$ is an integral domain with $\rchar(R) \neq 2$, then $(f, g) = x \mapsto (x^2 + c, x)$ and $(f, g) = (0, 0)$.
 
 
 
