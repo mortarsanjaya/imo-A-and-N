@@ -31,11 +31,11 @@ Official solution: \url{https://www.imo-official.org/problems/IMO2006SL.pdf}
 
 We present the official solution below, with some modifications.
 The solution goes by strong induction.
-The base case $n = 1$ is trivial;~\eqref{2006a2-eq0} means $a_1 = 1/2 > 0$.
+The base case $n = 1$ is trivial, as~\eqref{2006a2-eq0} means $a_1 = 1/2 > 0$.
 
 Now, fix some $n \geq 1$, and suppose that $a_k > 0$ for every $0 < k \leq n$.
 Due to~\eqref{2006a2-eq0}, the inequality $a_{n + 1} > 0$ is equivalent to
-\[ \sum_{k = 0}^n \frac_{a_k}{n + 2 - k} < 0 \iff a_0 + \sum_{k = 1}^n \frac{n + 2}{n + 2 - k} a_k < 0. \]
+\[ \sum_{k = 0}^n \frac{a_k}{n + 2 - k} < 0 \iff a_0 + \sum_{k = 1}^n \frac{n + 2}{n + 2 - k} a_k < 0. \]
 Now, since $0 < k < n + 1 < n + 2$, we have $\frac{n + 2}{n + 2 - k} < \frac{n + 1}{n + 1 - k}$.
 Since $a_k > 0$ for each $0 < k \leq n$ and $n \geq 1$,
 \[ \sum_{k = 1}^n \frac{n + 2}{n + 2 - k} a_k < \sum_{k = 1}^n \frac{n + 1}{n + 1 - k} a_k. \]
