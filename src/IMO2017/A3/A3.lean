@@ -73,15 +73,14 @@ end
 theorem final_solution {S : Type*} [fintype S] [decidable_eq S]
   {f : function.End S} (h : ∀ g : S → S, f * g * f = g * f * g → g = f) :
   set.range (f ∘ f) = set.range f :=
-  (set.range_comp_subset_range f f).antisymm
-(begin
-  replace h := final_solution_monoid h,
-  rcases h with ⟨m, h, h0⟩,
-  nth_rewrite 0 ← h0,
-  rw [← nat.succ_le_iff, le_iff_exists_add] at h,
-  rcases h with ⟨c, rfl⟩,
-  rw pow_add; exact set.range_comp_subset_range _ (f ∘ f)
-end)
+  (set.range_comp_subset_range f f).antisymm $ begin
+    replace h := final_solution_monoid h,
+    rcases h with ⟨m, h, h0⟩,
+    nth_rewrite 0 ← h0,
+    rw [← nat.succ_le_iff, le_iff_exists_add] at h,
+    rcases h with ⟨c, rfl⟩,
+    rw pow_add; exact set.range_comp_subset_range _ (f ∘ f)
+  end
 
 end IMO2017A3
 end IMOSL
