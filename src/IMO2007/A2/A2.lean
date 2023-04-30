@@ -80,7 +80,7 @@ begin
   have h1 : ∀ m : ℕ, m * f K ≤ f (m * K) :=
   begin
     intros m; induction m with m m_ih,
-    rw [zero_mul, zero_mul]; exact zero_le _,
+    rw zero_mul; exact zero_le _,
     rw [nat.succ_mul, nat.succ_mul, ← hK, ← add_assoc, hK],
     exact le_trans (add_le_add m_ih (good'_monotone h (nat.le_of_succ_le h0))) (h _ _)
   end,
