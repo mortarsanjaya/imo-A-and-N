@@ -10,7 +10,7 @@ open finset
 section extra_lemmas
 
 private lemma exists_sup_fn_fin (f : ℕ → ℕ) : ∀ c : ℕ, ∃ K : ℕ, ∀ n : ℕ, n < c → f n ≤ K
-| 0 := ⟨0, λ n h, absurd h (nat.not_lt_zero n)⟩
+| 0 := ⟨0, λ n h, absurd h n.not_lt_zero⟩
 | (c+1) := begin
   cases exists_sup_fn_fin c with K h,
   refine ⟨max K (f c), λ n h0, _⟩,
