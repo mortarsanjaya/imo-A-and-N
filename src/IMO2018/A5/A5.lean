@@ -91,10 +91,10 @@ end
 
 
 /-- Final solution -/
-theorem final_solution {F V : Type*} [linear_ordered_field F] [add_comm_group V] [module F V] :
-  ∀ f : {x : F // 0 < x} → V, good f ↔ ∃ v1 v2 : V, f = λ x, (x : F) • v1 + (x⁻¹ : F) • v2 :=
+theorem final_solution (f : {x : F // 0 < x} → V) :
+  good f ↔ ∃ v1 v2 : V, f = λ x, (x : F) • v1 + (x⁻¹ : F) • v2 :=
 begin
-  intros f; symmetry; refine ⟨λ h, _, λ h, _⟩,
+  symmetry; refine ⟨λ h, _, λ h, _⟩,
   rcases h with ⟨v1, v2, rfl⟩,
   exact smul_add_inv_smul_is_good v1 v2,
   obtain ⟨a, b, h0⟩ : ∃ a b : {x : F // 0 < x}, a ≠ b :=
