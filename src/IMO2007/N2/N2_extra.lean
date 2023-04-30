@@ -8,7 +8,7 @@ namespace IMO2007N2
 variables {F : Type*} [field F] [fintype F]
 
 private lemma not_is_square_ne_zero {a : F} (h : ¬is_square a) : a ≠ 0 :=
-  by rintros rfl; exact h (is_square_zero F)
+  λ h0, h $ cast (congr_arg is_square h0.symm) (is_square_zero F)
 
 private lemma is_square_or_mul [decidable_eq F] (a b : F) :
   is_square a ∨ is_square b ∨ is_square (a * b) :=
