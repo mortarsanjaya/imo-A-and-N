@@ -67,7 +67,7 @@ begin
 end
 
 private lemma card_divisors_prime {p : ℕ} (hp : p.prime) : p.divisors.card = 2 :=
-  by rw [nat.prime.divisors hp, card_doubleton hp.ne_one.symm]
+  (congr_arg card hp.divisors).trans $ card_doubleton hp.ne_one.symm
 
 
 
