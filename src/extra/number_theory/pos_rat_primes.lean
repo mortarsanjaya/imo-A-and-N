@@ -1,4 +1,4 @@
-import algebra.order.positive.field number_theory.padics.padic_val data.nat.factorization.basic
+import algebra.order.positive.field data.nat.factorization.basic
 
 /-!
 # Correspondence between `ℚ+` and `nat.primes → ℤ`
@@ -15,10 +15,9 @@ namespace IMOSL
 namespace extra
 
 def pos_rat_factor_hom : additive {x : ℚ // 0 < x} →+ nat.primes → ℤ :=
-{ to_fun := λ q, (λ p, padic_val_rat p q.1),
-  map_zero' := funext (λ p, padic_val_rat.one),
-  map_add' := λ q r, funext (λ p, by haveI : fact (p : ℕ).prime := ⟨p.2⟩;
-    exact padic_val_rat.mul (ne_of_gt q.2) (ne_of_gt r.2)) }
+{ to_fun := λ q p, padic_val_rat p q.1,
+  map_zero' := funext $ λ p, padic_val_rat.one,
+  map_add' := λ q r, funext $ λ p, @padic_val_rat.mul p ⟨p.2⟩ _ _ (ne_of_gt q.2) (ne_of_gt r.2) }
 
 namespace pos_rat_factor_hom
 
@@ -35,8 +34,9 @@ begin
   rintros ⟨q, h⟩ h0,
   suffices : q = 1,
     simp_rw this; refl,
-  simp_rw [function.funext_iff, pi.zero_apply, apply] at h0,
-  replace h0 : ∀ p : ℕ, p.prime → padic_val_rat p q = 0 := λ p hp, h0 ⟨p, hp⟩,
+  simp_rw [function.funext_iff, apply] at h0,
+  replace h0 : ∀ p : ℕ, p.prime → padic_val_rat p q = 0 :=
+    λ p hp, h0 ⟨p, hp⟩,
   
   ---- Now prove that `ν_p(q) = 0` for all `p` prime iff `q = 1`, assuming `q > 0`
   rcases q with ⟨n, d, h1, h2⟩,
