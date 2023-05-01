@@ -13,7 +13,7 @@ def friendly (a : ℤ) := ∃ m n : ℤ, 0 < m ∧ 0 < n ∧ (m ^ 2 + n) * (n ^ 
 
 
 private lemma friendly_1mod4 {k : ℤ} (h : 0 < k) : friendly (4 * k + 1) :=
-  ⟨2 * k + 1, k, add_pos (mul_pos two_pos h) one_pos, h, by ring⟩
+  ⟨2 * k + 1, k, add_pos (mul_pos two_pos h) int.one_pos, h, by ring⟩
 
 
 
@@ -22,18 +22,16 @@ theorem final_solution_part1 (n : ℕ) :
   n ≤ fintype.card {a : fin (4 * n + 1) // friendly (a + 1)} :=
 begin
   let f : fin n → {a : fin (4 * n + 1) // friendly (a + 1)} :=
-    λ (j : fin n), ⟨⟨4 * (j + 1), _⟩, _⟩,
-  rotate,
-  { rw [nat.lt_succ_iff, mul_le_mul_left, nat.succ_le_iff],
-    exacts [j.is_lt, zero_lt_four] },
-  { simp; apply friendly_1mod4,
-    rw [← nat.cast_one, ← nat.cast_add, nat.cast_pos]; exact (j : ℕ).succ_pos },
-  suffices : injective f,
-    convert fintype.card_le_of_injective f this; rw fintype.card_fin n,
-  intros x y h,
-  simp only [f, fin.mk_eq_mk] at h,
-  rwa [mul_eq_mul_left_iff, add_left_inj, ← fin.ext_iff, or_iff_left] at h,
-  exact four_ne_zero
+    λ (j : fin n), ⟨⟨4 * (j + 1),
+      nat.lt_succ_of_le (mul_le_mul_of_nonneg_left j.is_lt zero_le_four)⟩,
+      by rw [coe_coe, fin.coe_mk, nat.cast_mul];
+        exact friendly_1mod4 (nat.cast_pos.mpr (j : ℕ).succ_pos)⟩,
+  refine le_of_eq_of_le (fintype.card_fin n).symm
+    (fintype.card_le_of_injective f $ λ x y, _),
+  intros h,
+  simp_rw [f] at h,
+  rwa [fin.mk_eq_mk, mul_eq_mul_left_iff, add_left_inj, ← fin.ext_iff] at h,
+  exact h.elim id (λ h0, absurd h0 four_ne_zero)
 end
 
 /- Final solution for part 2 -/
