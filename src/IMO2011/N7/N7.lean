@@ -1,7 +1,6 @@
 import
   number_theory.padics.padic_integers
   data.nat.choose.dvd
-  data.zmod.basic 
   field_theory.finite.basic
 
 /-! # IMO 2011 N7 -/
@@ -19,7 +18,7 @@ noncomputable def S (a : ℚ_[p]) := (Ico 1 p).sum (λ i, a ^ i / i)
 
 private lemma padic_norm_int_eq_one_iff_not_dvd (k : ℤ) : ‖(k : ℚ_[p])‖ = 1 ↔ ¬(p : ℤ) ∣ k :=
   by rw ← padic_norm_e.norm_int_lt_one_iff_dvd;
-    exact (has_le.le.not_lt_iff_eq (padic_norm_e.norm_int_le_one k)).symm
+    exact (has_le.le.not_lt_iff_eq $ padic_norm_e.norm_int_le_one k).symm
 
 private lemma padic_binom_norm {k : ℕ} (h : 0 < k) (h0 : k < p) :
   ‖(p : ℚ_[p]) / k + (-1) ^ k * p.choose k‖ ≤ p ^ (-2 : ℤ) :=
@@ -48,15 +47,15 @@ begin
   exact mul_dvd_mul_right ((fact.out p.prime).dvd_choose_self (ne_of_gt k.succ_pos) h0) p
 end
 
-private lemma ultra_norm_add_le {t : ℝ} {a b : ℚ_[p]} (h : ‖a‖ ≤ t) (h0 : ‖b‖ ≤ t) :
-  ‖a + b‖ ≤ t :=
+private lemma ultra_norm_add_le {t : ℝ} {a b : ℚ_[p]}
+  (h : ‖a‖ ≤ t) (h0 : ‖b‖ ≤ t) : ‖a + b‖ ≤ t :=
   le_trans (padic_norm_e.nonarchimedean _ _) (max_le h h0)
 
 private lemma ultra_norm_sum_le {ι : Type*} [decidable_eq ι] {f : ι → ℚ_[p]} {s : finset ι}
   {t : ℝ} (h : 0 ≤ t) (h0 : ∀ i : ι, i ∈ s → ‖f i‖ ≤ t) : ‖s.sum f‖ ≤ t :=
 begin
   induction s using finset.induction with j s h1 h2,
-  rw [sum_empty, norm_zero]; exact h,
+  exact le_of_eq_of_le norm_zero h,
   simp_rw [mem_insert, forall_eq_or_imp] at h0,
   rw sum_insert h1; exact ultra_norm_add_le h0.1 (h2 h0.2)
 end
