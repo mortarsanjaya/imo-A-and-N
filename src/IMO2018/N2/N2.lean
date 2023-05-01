@@ -9,8 +9,8 @@ open finset
 
 private lemma add_modeq_mul_add_one {n a b : ℤ} (h : a ≡ 1 [ZMOD n]) (h0 : b ≡ 1 [ZMOD n]) :
   a + b ≡ a * b + 1 [ZMOD n ^ 2] :=
-  by { rw [int.modeq_iff_dvd, sq, add_comm, ← sub_sub_sub_eq, ← one_sub_mul, ← mul_one_sub],
-    exact mul_dvd_mul h.dvd h0.dvd }
+  by rw [int.modeq_iff_dvd, sq, add_comm, ← sub_sub_sub_eq, ← one_sub_mul, ← mul_one_sub];
+    exact mul_dvd_mul h.dvd h0.dvd
 
 
 variables {ι : Type*} [decidable_eq ι] {s : finset ι}
@@ -18,7 +18,8 @@ variables {ι : Type*} [decidable_eq ι] {s : finset ι}
 private lemma prod_one_modeq_one_mod {n : ℤ} {f : ι → ℤ} (h : ∀ i ∈ s, f i ≡ 1 [ZMOD n]) :
   s.prod f ≡ 1 [ZMOD n] :=
 begin
-  induction s using finset.induction with i s h0 h1, refl,
+  induction s using finset.induction with i s h0 h1,
+  refl,
   rw [prod_insert h0, ← int.mul_one 1],
   exact (h i $ mem_insert_self i s).mul (h1 $ λ j h2, h j $ mem_insert_of_mem h2)
 end
