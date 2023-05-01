@@ -6,12 +6,11 @@ namespace IMOSL
 namespace IMO2013N1
 
 /-- Final solution -/
-theorem final_solution (f : ℕ+ → ℕ+) : (∀ m n : ℕ+, m ^ 2 + f n ∣ m * f m + n) ↔ f = (λ n, n) :=
+theorem final_solution (f : ℕ+ → ℕ+) :
+  (∀ m n : ℕ+, m * m + f n ∣ m * f m + n) ↔ f = id :=
 begin
-  simp only [pow_succ, pow_zero, mul_one],
-  symmetry; split,
-  rintros rfl m n; exact dvd_refl _,
-  intros h; funext n; apply le_antisymm,
+  symmetry; refine ⟨λ h m n, _, λ h, funext (λ n, le_antisymm _ _)⟩,
+  rw h; exact dvd_refl _,
 
   ---- `f(n) ≤ n`
   { replace h := h (f n) n,
@@ -21,8 +20,8 @@ begin
     exact pnat.le_of_dvd h },
 
   ---- `f(n) ≥ n`
-  { rcases eq_or_ne n 1 with rfl | h0,
-    exact (f 1).one_le,
+  { rcases eq_or_ne n 1 with h | h0,
+    exact le_of_eq_of_le h (f n).one_le,
     replace h := pnat.le_of_dvd (h n n),
     generalize_hyp : f n = m at h ⊢; clear f,
     replace h0 := pnat.exists_eq_succ_of_ne_one h0,
