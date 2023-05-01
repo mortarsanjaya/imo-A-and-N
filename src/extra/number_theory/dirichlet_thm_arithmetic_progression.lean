@@ -22,11 +22,8 @@ theorem exists_infinite_primes_mod_eq (n : ℕ) : ∃ p : ℕ, n < p ∧ p.prime
   sorry
 
 theorem not_bdd_above_set_of_primes_mod_eq : ¬bdd_above {p : ℕ | p.prime ∧ p % d = a} :=
-begin
-  rw not_bdd_above_iff; intros n,
-  rcases exists_infinite_primes_mod_eq h h0 n with ⟨p, h1, h2⟩,
-  exact ⟨p, h2, h1⟩
-end
+  not_bdd_above_iff.mpr $ λ n, exists.elim (exists_infinite_primes_mod_eq h h0 n)
+    (λ p h1, ⟨p, h1.2, h1.1⟩)
 
 theorem infinite_set_of_primes_mod_eq : {p : ℕ | p.prime ∧ p % d = a}.infinite :=
   set.infinite_of_not_bdd_above (not_bdd_above_set_of_primes_mod_eq h h0)
