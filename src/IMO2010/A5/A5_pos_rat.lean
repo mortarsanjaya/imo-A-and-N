@@ -7,8 +7,8 @@ namespace IMO2010A5
 
 /-- Final solution, original (`ℚ+`) version -/
 theorem final_solution_original : ∀ f : {q : ℚ // 0 < q} → {q : ℚ // 0 < q},
-  (∀ x y : {q : ℚ // 0 < q}, f (f x ^ 2 * y) = x ^ 3 * f (x * y)) ↔ f = has_inv.inv :=
-  final_solution_additive extra.pos_rat_factor_hom.inj
+  (∀ x y, f (f x ^ 2 * y) = x ^ 3 * f (x * y)) ↔ f = has_inv.inv :=
+  final_solution extra.pos_rat_factor_hom.inj
 
 end IMO2010A5
 end IMOSL

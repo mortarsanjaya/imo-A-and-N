@@ -7,17 +7,17 @@ namespace IMO2010A5
 
 open function
 
-def good' {G : Type*} [add_monoid G] (f : G → G) :=
+def good {G : Type*} [add_monoid G] (f : G → G) :=
   ∀ x y : G, f (2 • f x + y) = 3 • x + f (x + y)
 
 
 
-private lemma neg_is_good' {G : Type*} [add_comm_group G] : good' (has_neg.neg : G → G) :=
+private lemma neg_is_good {G : Type*} [add_comm_group G] : good (has_neg.neg : G → G) :=
   λ x y, by rw [eq_add_neg_iff_add_eq, add_comm, ← sub_eq_add_neg,
     add_sub_add_right_eq_sub, smul_neg, sub_neg_eq_add, eq_comm, succ_nsmul]
 
-private lemma good'_iff {G : Type*} [add_comm_group G] [no_zero_smul_divisors ℕ G] (f : G → G) :
-  good' f ↔ ∃ φ : G →+ G, f = φ ∧ ∀ x : G, 2 • φ (φ x) = 3 • x + φ x :=
+private lemma good_iff {G : Type*} [add_comm_group G] [no_zero_smul_divisors ℕ G] (f : G → G) :
+  good f ↔ ∃ φ : G →+ G, f = φ ∧ ∀ x : G, 2 • φ (φ x) = 3 • x + φ x :=
 begin
   ---- First, solve the `←` direction.
   symmetry; refine ⟨λ h x y, _, λ h, _⟩,
@@ -53,13 +53,13 @@ end
 
 
 
-/-- Final solution, additive version -/
-theorem final_solution_additive {G : Type*} [add_comm_group G]
+/-- Final solution -/
+theorem final_solution {G : Type*} [add_comm_group G]
   {S : Type*} {ρ : G →+ S → ℤ} (h : injective ρ) :
-  ∀ f : G → G, good' f ↔ f = has_neg.neg :=
+  ∀ f : G → G, good f ↔ f = has_neg.neg :=
 begin
   ---- A characterization of zeroes in `G` using `ρ`
-  refine λ f, ⟨λ h0, _, λ h0, by subst h0; exact neg_is_good'⟩,
+  refine λ f, ⟨λ h0, _, λ h0, by subst h0; exact neg_is_good⟩,
   simp_rw [injective_iff_map_eq_zero', funext_iff, pi.zero_apply] at h,
 
   ---- Set up `no_zero_smul_divisors ℕ G` instance
@@ -71,7 +71,7 @@ begin
   end⟩,
 
   ---- Setup for the final step of induction
-  rw good'_iff at h0; rcases h0 with ⟨φ, rfl, h0⟩,
+  rw good_iff at h0; rcases h0 with ⟨φ, rfl, h0⟩,
   obtain ⟨γ, rfl⟩ : ∃ γ : G →+ G, γ - add_monoid_hom.id G = φ :=
     ⟨φ + add_monoid_hom.id G, add_sub_cancel _ _⟩,
   simp_rw [add_monoid_hom.sub_apply, add_monoid_hom.id_apply, map_sub, nsmul_sub] at h0,
