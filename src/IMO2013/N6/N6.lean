@@ -11,17 +11,12 @@ def fn_eq (f : ℚ → ℤ) := ∀ (x : ℚ) (a : ℤ) (b : ℕ+), f ((x + a) / 
 
 
 
-section extra
-
-variables {α : Type*} [linear_ordered_ring α] [floor_ring α]
-
-lemma floor_eq_floor_iff (x y : α) : ⌊x⌋ = ⌊y⌋ ↔ (∀ k : ℤ, ↑k ≤ x ↔ ↑k ≤ y) :=
-  ⟨λ h k, by rw [← int.le_floor, h, int.le_floor],
-   λ h, le_antisymm (int.le_floor.mpr ((h _).mp (int.floor_le x)))
-                    (int.le_floor.mpr ((h _).mpr (int.floor_le y)))⟩
-
-end extra
-
+lemma floor_eq_floor_iff {α : Type*} [linear_ordered_ring α] [floor_ring α] (x y : α) :
+  ⌊x⌋ = ⌊y⌋ ↔ (∀ k : ℤ, ↑k ≤ x ↔ ↑k ≤ y) :=
+  ⟨λ h k, int.le_floor.symm.trans $ (iff_of_eq $ congr_arg (has_le.le k) h).trans int.le_floor,
+   λ h, le_antisymm (int.le_floor.mpr $ (h _).mp $ int.floor_le x)
+      (int.le_floor.mpr $ (h _).mpr $ int.floor_le y)⟩
+      
 
 
 section results
@@ -29,10 +24,10 @@ section results
 variables {f : ℚ → ℤ} (feq : fn_eq f)
 include feq
 
-private lemma lem1 (h : f 0 = f 1) : ∃ C : ℤ, f = const ℚ C :=
+private lemma lem1 (h : f 0 = f 1) : ∃ C : ℤ, f = λ _, C :=
 begin
   suffices : ∀ (n : ℕ) (a : ℤ) (b : ℕ+), f (a / b) = f ((a + n) / b),
-  { use f 0; ext x; rw const_apply,
+  { refine ⟨f 0, funext (λ x, _)⟩,
     induction x using rat.num_denom_cases_on with a b h0 h1,
     lift b to ℕ+ using h0,
     rw [← rat.coe_int_div_eq_mk, ← coe_coe, ← coe_coe],
@@ -45,6 +40,7 @@ begin
       lift (-a) to ℕ using h0 with x h0,
       replace h1 := this x a b,
       rw [h1, ← int.cast_coe_nat, h0, int.cast_neg, add_neg_self, zero_div] } },
+
   intros n; induction n with n n_ih; intros a b,
   rw [nat.cast_zero, add_zero],
   have h1 := feq 0 a b,
