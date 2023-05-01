@@ -1,30 +1,24 @@
-import extra.number_theory.pos_rat_primes
+import algebra.module.basic
 
 /-! # IMO 2018 A1 -/
 
 namespace IMOSL
 namespace IMO2018A1
 
-def good' (n : ℤ) {G : Type*} [add_group G] (f : G → G) :=
-  ∀ x y : G, f (n • (x + f y)) = n • f x + f y
+open function
 
-def good (n : ℤ) {G : Type*} [group G] (f : G → G) :=
-  ∀ x y : G, f ((x * f y) ^ n) = f x ^ n * f y
-
-
-
-/-- Final solution, additive version -/
-theorem final_solution_additive {n : ℤ} (h : 1 < |n|) {G : Type*} [add_group G]
-  {S : Type*} {ρ : G →+ S → ℤ} (h0 : function.injective ρ) :
-  ∀ f : G → G, good' n f ↔ f = 0 :=
+/-- Final solution -/
+theorem final_solution {n : ℤ} (h : 1 < |n|)
+  {G : Type*} [add_group G] {S : Type*} {ρ : G →+ S → ℤ} (h0 : injective ρ) :
+  ∀ f : G → G, (∀ x y : G, f (n • (x + f y)) = n • f x + f y) ↔ f = 0 :=
 begin
   ---- First, remove the `←` direction
   intros f; symmetry; refine ⟨λ h1 x y, _, λ h1, _⟩,
   subst h1; simp_rw [pi.zero_apply, smul_zero, add_zero],
 
   ---- Initial setup
-  simp_rw [injective_iff_map_eq_zero', function.funext_iff, pi.zero_apply] at h0,
-  simp_rw [function.funext_iff, pi.zero_apply, ← h0],
+  simp_rw [injective_iff_map_eq_zero', funext_iff, pi.zero_apply] at h0,
+  simp_rw [funext_iff, pi.zero_apply, ← h0],
   haveI _inst_2 : no_zero_smul_divisors ℤ G :=
   ⟨λ k x h2, begin
       rw [← h0, or_iff_not_imp_left]; intros h3 s,
@@ -62,21 +56,6 @@ begin
   rw [← h1, map_zsmul, pi.smul_apply, smul_eq_mul, pow_succ],
   exact mul_dvd_mul_left n (h0 (f x))
 end
-
-
-
-/-- Final solution, multiplicative version -/
-theorem final_solution_multiplicative {n : ℤ} (h : 1 < |n|) {G : Type*} [group G]
-  {S : Type*} {ρ : additive G →+ S → ℤ} (h0 : function.injective ρ) :
-  ∀ f : G → G, good n f ↔ f = 1 :=
-  final_solution_additive h h0
-
-
-
-/-- Final solution, `ℚ+` version -/
-theorem final_solution_rat {n : ℤ} (h : 1 < |n|) :
-  ∀ f : {q : ℚ // 0 < q} → {q : ℚ // 0 < q}, good n f ↔ f = λ _, 1 :=
-  final_solution_multiplicative h extra.pos_rat_factor_hom.inj
 
 end IMO2018A1
 end IMOSL
