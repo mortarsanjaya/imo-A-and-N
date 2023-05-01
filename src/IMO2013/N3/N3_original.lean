@@ -18,17 +18,18 @@ lemma max_prime_divisor_one : max_prime_divisor 1 = 1 :=
 
 lemma max_prime_divisor_prime (p : ℕ+) (h : p.prime) : max_prime_divisor p = p :=
 begin
-  unfold pnat.prime at h; unfold max_prime_divisor,
+  rw pnat.prime at h,
   let q : nat.primes := ⟨(p : ℕ), h⟩,
-  have h0 : p = ↑q := by ext1; rw nat.primes.coe_pnat_nat; refl,
-  rw [h0, factor_multiset_of_prime q, prime_multiset.coe_nat_of_prime,
+  change p with ↑q,
+  rw [max_prime_divisor, factor_multiset_of_prime q, prime_multiset.coe_nat_of_prime,
       multiset.fold_singleton, nat.primes.coe_pnat_nat, subtype.coe_mk],
-  exact max_eq_left (le_of_lt (nat.prime.one_lt h))
+  exact max_eq_left h.pos
 end
 
 lemma max_prime_divisor_mul (a b : ℕ+) :
   max_prime_divisor (a * b) = max (max_prime_divisor a) (max_prime_divisor b) :=
-  by unfold max_prime_divisor; rw [factor_multiset_mul, ← prime_multiset.coe_coe_nat_monoid_hom,
+  by rw [max_prime_divisor, max_prime_divisor, max_prime_divisor,
+    factor_multiset_mul, ← prime_multiset.coe_coe_nat_monoid_hom,
     add_monoid_hom.map_add, ← multiset.fold_add max, max_self]
 
 end pnat
