@@ -5,53 +5,35 @@ import analysis.mean_inequalities data.multiset.fintype
 namespace IMOSL
 namespace IMO2014C2
 
-open multiset
-open_locale nnreal
-
 def good {α : Type*} [has_add α] (S T : multiset α) :=
-  ∃ (R : multiset α) (a b : α), S = R + {a, b} ∧ T = R + replicate 2 (a + b)
+  ∃ (R : multiset α) (a b : α), S = R + {a, b} ∧ T = R + multiset.replicate 2 (a + b)
 
 
-
-section extra_lemmas
 
 section cons_last
 
 variable {α : Type*} 
 
 /-- Wrapper for the last element of a cons list `a :: l`, guaranteed to be non-empty. -/
-private def cons_last (a : α) (l : list α) : α := (list.cons a l).last (list.cons_ne_nil a l)
+private def cons_last (a : α) (l : list α) : α :=
+  (list.cons a l).last (list.cons_ne_nil a l)
 
-private lemma cons_last_nil (a : α) : cons_last a list.nil = a :=
-  by rw [cons_last, list.last_singleton]
+private lemma cons_last_nil (a : α) : cons_last a list.nil = a := rfl
 
-private lemma cons_last_cons (a b : α) (l : list α) : cons_last a (b :: l) = cons_last b l :=
-  by rw [cons_last, list.last, cons_last]; refl
+private lemma cons_last_cons (a b : α) (l : list α) :
+  cons_last a (list.cons b l) = cons_last b l :=
+  list.last_cons (l.cons_ne_nil b)
 
 private lemma cons_last_ne_nil (a : α) {l : list α} (h : l ≠ list.nil) :
-  cons_last a l = l.last h :=
-  by rw [cons_last, list.last_cons]
+  cons_last a l = l.last h := list.last_cons h
 
 end cons_last
 
 
-private lemma multiset_AM_GM (S : multiset ℝ≥0) : S.prod ≤ (S.sum / S.card) ^ S.card :=
-begin
-  rcases eq_or_ne S 0 with rfl | h,
-  rw [card_zero, pow_zero, prod_zero],
-  rw [ne.def, ← card_eq_zero] at h,
-  rw [sum_eq_sum_coe, ← inv_mul_eq_div, finset.mul_sum],
-  refine le_of_eq_of_le _
-    (pow_le_pow_of_le_left (zero_le _) (nnreal.geom_mean_le_arith_mean_weighted _ _ _ _) _),
-  simp_rw [← finset.prod_pow, nonneg.coe_inv, nnreal.coe_nat_cast,
-           nnreal.rpow_nat_inv_pow_nat _ h, ← prod_eq_prod_coe],
-  rw [finset.sum_const, finset.card_univ, card_coe, nsmul_eq_mul],
-  apply mul_inv_cancel; rwa nat.cast_ne_zero
-end
-
-end extra_lemmas
 
 
+
+open multiset
 
 private lemma good_card_eq {α : Type*} [has_add α] {S T : multiset α} (h : good S T) :
   T.card = S.card :=
@@ -68,6 +50,25 @@ begin
   rw [cons_last_cons, h0 h.2, good_card_eq h.1]
 end
 
+
+
+open_locale nnreal
+
+private lemma multiset_AM_GM (S : multiset ℝ≥0) : S.prod ≤ (S.sum / S.card) ^ S.card :=
+begin
+  rcases eq_or_ne S 0 with rfl | h,
+  exact le_refl 1,
+  rw [ne.def, ← card_eq_zero] at h,
+  rw [sum_eq_sum_coe, ← inv_mul_eq_div, finset.mul_sum],
+  refine le_of_eq_of_le _
+    (pow_le_pow_of_le_left (zero_le _) (nnreal.geom_mean_le_arith_mean_weighted _ _ _ _) _),
+  rw [← finset.prod_pow, nonneg.coe_inv, nnreal.coe_nat_cast],
+  exact (prod_eq_prod_coe S).trans (finset.prod_congr rfl $ λ x _,
+    (nnreal.rpow_nat_inv_pow_nat x h).symm),
+  rw [finset.sum_const, finset.card_univ, card_coe, nsmul_eq_mul],
+  apply mul_inv_cancel; rwa nat.cast_ne_zero
+end
+
 private lemma good_prod_le {S T : multiset ℝ≥0} (h : good S T) : 4 * S.prod ≤ T.prod :=
 begin
   rcases h with ⟨R, a, b, rfl, rfl⟩,
@@ -79,8 +80,8 @@ begin
   exact sq_nonneg (a - b)
 end
 
-private lemma good_chain_le_prod
-    {S : multiset ℝ≥0} {C : list (multiset ℝ≥0)} (h : list.chain good S C) :
+private lemma good_chain_le_prod {S : multiset ℝ≥0}
+    {C : list (multiset ℝ≥0)} (h : list.chain good S C) :
   4 ^ C.length * S.prod ≤ (cons_last S C).prod :=
 begin
   revert S h; induction C with T C h0,
@@ -91,8 +92,8 @@ begin
 end
 
 /-- A generalized form of the final solution -/
-private lemma good_chain_le_sum
-    {S : multiset ℝ≥0} {C : list (multiset ℝ≥0)} (h : list.chain good S C) :
+private lemma good_chain_le_sum {S : multiset ℝ≥0}
+    {C : list (multiset ℝ≥0)} (h : list.chain good S C) :
   4 ^ C.length * S.prod ≤ ((cons_last S C).sum / S.card) ^ S.card :=
   by rw ← good_chain_card_eq h; exact le_trans (good_chain_le_prod h) (multiset_AM_GM _)
 
