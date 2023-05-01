@@ -11,17 +11,13 @@ def good_pair (m : ℤ) : ℤ × ℤ := (m ^ 3 + 2 * m ^ 2 - m - 1, m ^ 3 + m ^ 
 
 
 
-section extra
-
 private lemma mul2_add1_sq (m : ℤ) : (2 * m + 1) ^ 2 = 4 * (m ^ 2 + m) + 1 :=
-  by rw [add_sq, mul_one, one_pow, mul_pow, ← mul_assoc, sq, ← mul_add, two_mul, ← bit0]
-
-end extra
+  by ring
 
 
 
 private lemma good_swap {x y : ℤ} (h : good x y) : good y x :=
-  by unfold good at h ⊢; rw [abs_sub_comm, ← h, sub_add_comm, mul_comm x y]
+  by rw good at h; rw [good, abs_sub_comm, ← h, sub_add_comm, mul_comm x y]
 
 private lemma good_y_le_x {x y : ℤ} (h : good x y) (h0 : y ≤ x) : ∃ m : ℤ, (x, y) = good_pair m :=
 begin
