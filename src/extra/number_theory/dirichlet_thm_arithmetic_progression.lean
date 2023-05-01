@@ -18,8 +18,7 @@ namespace extra
 variables {d a : ℕ} (h : a < d) (h0 : a.coprime d)
 include h h0
 
-theorem exists_infinite_primes_mod_eq (n : ℕ) : ∃ p : ℕ, n < p ∧ p.prime ∧ p % d = a :=
-  sorry
+axiom exists_infinite_primes_mod_eq (n : ℕ) : ∃ p : ℕ, n < p ∧ p.prime ∧ p % d = a
 
 theorem not_bdd_above_set_of_primes_mod_eq : ¬bdd_above {p : ℕ | p.prime ∧ p % d = a} :=
   not_bdd_above_iff.mpr $ λ n, exists.elim (exists_infinite_primes_mod_eq h h0 n)
