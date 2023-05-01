@@ -216,7 +216,7 @@ The rest of the results are put into `N5_general.lean`.
 Note that only the construction of the wide map from Theorem 2.4 as an additive map is put into `legendre_stack_map.lean`.
 The proof of it being wide is still in `N5_general.lean`.
 Furthermore, a concrete construction requires Dirichlet's theorem on arithmetic progressions, which has not been implemented in Lean at the time of writing.
-We will state the theorem as an axiom
+We will state the theorem as an axiom.
 
 We also need some extra code to define $p$-regular maps.
 The main issue is that, for any positive integer $n = p^k t$, we want to represent $t$ in $(\Z/p\Z)^*$.
