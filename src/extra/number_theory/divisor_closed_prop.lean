@@ -78,15 +78,12 @@ lemma dc_at_one {n : ℕ} (h0 : n ≠ 0) (h1 : P n) : P 1 :=
 /-- An if-and-only-if criterion for a divisor-closed predicate to be `p`-strong; `p ≠ 0`. -/
 theorem dc_not_strong_iff {p : ℕ} (h0 : p ≠ 0) :
   ¬strong p P ↔ (∃ c : ℕ, ∀ k : ℕ, P (p ^ k) ↔ k < c) :=
-begin
-  rw [strong, not_forall],
-  refine ⟨λ h1, ⟨nat.find h1, (λ k, ⟨λ h2, _, λ h2, not_not.mp (nat.find_min h1 h2)⟩)⟩, λ h1, _⟩,
-  rw ← not_le; intros h3,
-  exact nat.find_spec h1 (h _ (pow_ne_zero k h0) h2 _ (pow_dvd_pow _ h3)),
-  cases h1 with c h1,
-  refine ⟨c, _⟩; rw h1,
-  exact lt_irrefl c
-end
+  not_forall.trans
+  ⟨λ h1, ⟨nat.find h1, λ k,
+    ⟨λ h2, lt_of_not_le $ λ h3, nat.find_spec h1 $
+      h _ (pow_ne_zero k h0) h2 _ (pow_dvd_pow _ h3),
+    λ h2, not_not.mp $ nat.find_min h1 h2⟩⟩,
+  λ h1, exists.elim h1 $ λ c h2, ⟨c, λ h3, (lt_irrefl c).elim $ (h2 c).mp h3⟩⟩
 
 /-- Using choice, given a predicate `P` that is not `p`-strong for any `p` prime, construct a
   map `x : nat.primes → ℕ` such that `P(p^k) → k < x_p` for any `k : ℕ` and `p` prime. -/
@@ -100,7 +97,7 @@ begin
   cases h1 with x h1,
   refine ⟨(λ p, dite p.prime (λ hp : p.prime, x ⟨p, hp⟩) (λ _, 0)), (λ p h2, _), (λ p hp k, _)⟩,
   rw [ne.def, dite_eq_right_iff, not_forall] at h2,
-  cases h2 with h2 h3; exact h2,
+  cases h2 with h2 _; exact h2,
   rw [dif_pos hp, ← h1, subtype.coe_mk]
 end
 
@@ -110,8 +107,8 @@ This is just a weak version of `dc_not_strong_aoc_map_iff`. -/
 theorem dc_not_strong_aoc_map (h0 : ∀ p : ℕ, p.prime → ¬strong p P) :
   ∃ x : ℕ → ℕ, (∀ p : ℕ, x p ≠ 0 → p.prime) ∧
     ∀ (p : ℕ) (hp : p.prime) (k : ℕ), P (p ^ k) → k ≤ x p :=
-  by rcases dc_not_strong_aoc_map_iff h h0 with ⟨x, h1, h2⟩;
-    exact ⟨x, h1, λ p hp k h3, le_of_lt ((h2 p hp k).mp h3)⟩
+  exists.elim (dc_not_strong_aoc_map_iff h h0) $
+    λ x h1, ⟨x, h1.1, λ p hp k h2, le_of_lt $ (h1.2 p hp k).mp h2⟩
 
 /-- Using choice, given a predicate `P` that is not `p`-strong for any `p` prime, under the
   condition `P(1)`, construct a map `x : nat.primes → ℕ` such that `P(p^k) ↔ k ≤ x_p` for any
@@ -122,7 +119,7 @@ theorem dc_not_strong_aoc_map_iff' (h0 : ∀ p : ℕ, p.prime → ¬strong p P) 
 begin
   rcases dc_not_strong_aoc_map_iff h h0 with ⟨x, h2, h3⟩,
   refine ⟨λ p, x p - 1, λ p h4, h2 p (λ h5, _), λ p hp k, _⟩,
-  rw [h5, zero_tsub] at h4; exact h4 rfl,
+  rw h5 at h4; exact h4 rfl,
   rw [h3 p hp, ← nat.lt_succ_iff, nat.succ_eq_add_one, nat.sub_add_cancel],
   rwa [nat.succ_le_iff, ← h3 p hp, pow_zero]
 end
@@ -178,11 +175,8 @@ end
   `P` is either wide or `p`-strong for some `p` prime. -/
 theorem dc_infinite_iff_wide_or_strong :
   (set_of P).infinite ↔ wide P ∨ ∃ p : ℕ, p.prime ∧ strong p P :=
-begin
-  refine ⟨dc_wide_or_strong_of_infinite h, λ h0, _⟩,
-  rcases h0 with h0 | ⟨p, hp, h0⟩,
-  exacts [infinite_pred_of_wide h0, infinite_pred_of_strong hp.two_le h0]
-end
+  ⟨dc_wide_or_strong_of_infinite h, λ h0, h0.elim infinite_pred_of_wide $
+    λ h1, exists.elim h1 $ λ p h2, infinite_pred_of_strong h2.1.two_le h2.2⟩
 
 end results
 
