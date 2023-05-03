@@ -44,31 +44,27 @@ end strict_mono
 section prop_lemmas
 
 private lemma count_true : nat.count (λ _, true) = id :=
-begin
- ext n; induction n with n n_ih,
- rw [nat.count_zero, id.def],
- rw [nat.count_succ, n_ih, if_true, id.def, id.def]
-end
+  funext (λ n, match n with
+    | 0 := rfl
+    | (n+1) := (nat.count_succ _ n).trans $ 
+        congr_arg2 has_add.add (by exact _match n) (if_true 1 0)
+  end)
 
 private lemma nth_true : nat.nth (λ _, true) = id :=
-begin
-  ext n; have h := nat.nth_count (λ _, true) (trivial : (λ _, true) n),
-  rwa count_true at h
-end
+  funext (λ n, by have h := nat.nth_count (λ _, true) (trivial : (λ _, true) n);
+    rwa count_true at h)
 
 variables {p q : ℕ → Prop} [decidable_pred p] [decidable_pred q]
 
 private lemma count_prop_inj (h : ∀ n : ℕ, nat.count p n = nat.count q n) : p = q :=
-  by ext n; rw [← @nat.count_succ_eq_succ_count_iff p, h, h, nat.count_succ_eq_succ_count_iff]
+  funext (λ n, by rw [← @nat.count_succ_eq_succ_count_iff p, h,
+    h, nat.count_succ_eq_succ_count_iff])
 
 private lemma nth_prop_inj (hp : (set_of p).infinite) (hq : (set_of q).infinite) :
   nat.nth p = nat.nth q ↔ p = q :=
-begin
-  symmetry; split,
-  intros h; rw h,
-  intros h; refine count_prop_inj (λ n, _),
-  exact galois_connection.l_unique (nat.count_nth_gc _ hp) (nat.count_nth_gc _ hq) (λ b, by rw h)
-end
+  ⟨λ h, count_prop_inj $ λ n, galois_connection.l_unique
+    (nat.count_nth_gc _ hp) (nat.count_nth_gc _ hq) (congr_fun h),
+  congr_arg nat.nth⟩
 
 end prop_lemmas
 
@@ -79,34 +75,24 @@ section finset_lemmas
 variables (X Y : finset ℕ)
 
 private lemma nat_finset_infinite_compl : {n : ℕ | n ∉ X}.infinite :=
-begin
-  have h := set.finite.infinite_compl ((X : set ℕ).to_finite),
-  rwa set.compl_def at h
-end
+  by have h := (X : set ℕ).to_finite.infinite_compl; rwa set.compl_def at h
 
 private lemma range_nth_notin_eq_compl : set.range (nth_notin X) = Xᶜ :=
 begin
   ext n; rw [set.mem_range, set.mem_compl_iff, mem_coe],
-  refine ⟨_, (λ h, ⟨nat.count (λ n, n ∉ X) n, _⟩)⟩,
+  refine ⟨_, λ h, ⟨nat.count (λ n, n ∉ X) n, nat.nth_count (λ n, n ∉ X) h⟩⟩,
   rintros ⟨y, rfl⟩,
-  exact nat.nth_mem_of_infinite (λ n, n ∉ X) (nat_finset_infinite_compl X) y,
-  exact nat.nth_count (λ (n : ℕ), n ∉ X) h
+  exact nat.nth_mem_of_infinite (λ n, n ∉ X) (nat_finset_infinite_compl X) y
 end
 
 private lemma range_nth_notin_eq_univ_diff : set.range (nth_notin X) = set.univ \ X :=
-  by rw [range_nth_notin_eq_compl, set.compl_eq_univ_diff]
+  (range_nth_notin_eq_compl X).trans (set.compl_eq_univ_diff ↑X)
 
 private lemma nth_notin_inj : nth_notin X = nth_notin Y ↔ X = Y :=
-begin
-  unfold nth_notin,
-  rw nth_prop_inj (nat_finset_infinite_compl X) (nat_finset_infinite_compl Y),
-  symmetry; split,
-  intros h; rw h,
-  intros h; ext n,
-  replace h := congr_fun h n,
-  simp only [eq_iff_iff] at h,
-  rwa [← not_iff_not, ← mem_coe, set.not_not_mem, ← mem_coe, set.not_not_mem] at h
-end
+  by rw [nth_notin, nth_notin,
+    nth_prop_inj (nat_finset_infinite_compl X) (nat_finset_infinite_compl Y)];
+  exact ⟨λ h, ext $ λ n, not_iff_not.mp $ eq_iff_iff.mp $ congr_fun h n,
+    λ h, funext $ λ n, congr_arg not $ congr_arg (has_mem.mem n) h⟩
 
 private lemma nth_notin_strict_mono : strict_mono (nth_notin X) :=
   nat.nth_strict_mono _ (nat_finset_infinite_compl X)
@@ -115,7 +101,7 @@ private lemma nth_notin_fn_inj : injective (nth_notin X) :=
   strict_mono.injective (nth_notin_strict_mono X)
 
 private lemma nth_notin_empty : nth_notin ∅ = id :=
-  by simp [nth_notin, nth_true]
+  (congr_arg nat.nth $ funext $ λ n, eq_true_iff.mpr (not_mem_empty n : n ∉ ∅)).trans nth_true
 
 private lemma count_notin_large {n : ℕ} (h : X.sup id < n) :
   nat.count (λ x, x ∉ X) (n + X.card) = n :=
@@ -124,13 +110,14 @@ begin
   rw [card_range, card_union_eq, ← nat.count_eq_card_filter_range,
       ← nat.count_eq_card_filter_range, nat.count_eq_card_fintype] at h0,
   work_on_goal 2 { rw disjoint_iff_inter_eq_empty, exact filter_inter_filter_neg_eq _ _ _ },
-  rw [← add_left_inj X.card, add_comm]; convert h0 using 2; clear h0,
+  rw [← add_left_inj X.card, add_comm],
+  revert h0; refine eq.trans (congr_arg2 has_add.add _ rfl),
   suffices : ∀ k : ℕ, k ∈ X ↔ (k < n + X.card ∧ k ∈ X),
-    rw eq_comm; convert fintype.subtype_card X this, -- Why doesn't it work with `exact`???
-  simp only [iff_and_self]; intros k h0,
-  refine lt_of_le_of_lt (le_sup h0) (lt_trans h _),
+    refine (fintype.subtype_card X this).symm.trans _,
+    convert rfl using 2,
+  refine λ k, iff_and_self.mpr (λ h0, lt_of_le_of_lt (le_sup h0) (lt_trans h _)),
   rw [lt_add_iff_pos_right, pos_iff_ne_zero, ne.def, card_eq_zero],
-  rintros rfl; exact h0
+  exact ne_empty_of_mem h0
 end
 
 private lemma nth_notin_large {n : ℕ} (h : X.sup id < n) : nth_notin X n = n + X.card :=
@@ -233,12 +220,12 @@ end cup_pow_lemmas
 
 
 
+set_option profiler true
+set_option profiler.threshold 0.01
+
 /- Final solution -/
 theorem final_solution (X Y : finset ℕ) (h : X ** Y = Y ** X) : X ^^ Y.card = Y ^^ X.card :=
-begin
-  refine cup_mul_comm_card_eq _ (cup_pow_comm h _ _),
-  rw [cup_pow_card, cup_pow_card, mul_comm]
-end
+  cup_mul_comm_card_eq (by rw [cup_pow_card, cup_pow_card, mul_comm]) (cup_pow_comm h _ _)
 
 end IMO2017C7
 end IMOSL
