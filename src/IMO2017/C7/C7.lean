@@ -220,9 +220,6 @@ end cup_pow_lemmas
 
 
 
-set_option profiler true
-set_option profiler.threshold 0.01
-
 /- Final solution -/
 theorem final_solution (X Y : finset ℕ) (h : X ** Y = Y ** X) : X ^^ Y.card = Y ^^ X.card :=
   cup_mul_comm_card_eq (by rw [cup_pow_card, cup_pow_card, mul_comm]) (cup_pow_comm h _ _)
