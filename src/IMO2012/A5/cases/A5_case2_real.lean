@@ -8,7 +8,7 @@ namespace IMOSL
 namespace IMO2012A5
 
 /-- The respective solution for this case. -/
-theorem case2_answer {S : Type*} [comm_ring S] [is_domain S] :
+theorem case2_answer {S : Type*} [comm_ring S] :
   good (λ x : S, x ^ 2 - 1) :=
   λ x y, by rw [sub_sub_sub_cancel_right, sq_sub_sq, add_add_add_comm,
     add_comm 1 y, ← mul_add_one, ← add_one_mul, ← sub_sub_sub_eq, ← mul_sub_one,
