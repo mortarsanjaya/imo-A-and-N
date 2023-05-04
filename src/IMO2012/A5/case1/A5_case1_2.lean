@@ -1,4 +1,4 @@
-import IMO2012.A5.cases.A5_case1_lemmas data.real.basic
+import IMO2012.A5.case1.A5_case1_lemmas data.real.basic
 
 /-! # IMO 2012 A5, Case 1.2: `f(-1) = -1 ≠ 2` -/
 

@@ -1,7 +1,7 @@
 import
-  IMO2012.A5.cases.A5_case1_1
-  IMO2012.A5.cases.A5_case1_2
-  IMO2012.A5.cases.A5_case2_real
+  IMO2012.A5.case1.A5_case1_1
+  IMO2012.A5.case1.A5_case1_2
+  IMO2012.A5.case2.A5_case2_real
 
 namespace IMOSL
 namespace IMO2012A5
