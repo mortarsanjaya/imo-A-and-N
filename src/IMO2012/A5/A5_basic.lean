@@ -12,8 +12,6 @@ def good {R S : Type*} [ring R] [ring S] (f : R → S) :=
 
 
 
-section general
-
 lemma zero_is_good {R S : Type*} [ring R] [ring S] : good (λ _ : R, (0 : S)) :=
   λ _ _, (sub_self 0).trans (mul_zero 0).symm
 
@@ -22,7 +20,11 @@ lemma good_map_comp_hom {R R0 S : Type*} [ring R] [ring R0] [ring S]
   λ x y, (congr_arg2 has_sub.sub (congr_arg f $ by rw [φ.map_add, φ.map_mul, φ.map_one])
     (congr_arg f $ φ.map_add x y)).trans (h (φ x) (φ y))
 
-variables {R S : Type*} [ring R] [ring S] {f : R → S} (h : good f)
+variables {R S : Type*} [ring R] [ring S]
+
+section
+
+variables {f : R → S} (h : good f)
 include h
 
 lemma map_comm_of_comm {x y : R} (h0 : commute x y) : commute (f x) (f y) :=
@@ -34,13 +36,13 @@ lemma map_neg_sub_map1 (x : R) : f (1 - x) - f (x - 1) = f x * f (-1) :=
 lemma map_neg_sub_map2 (x : R) : f (-x) - f x = f (x + 1) * f (-1) :=
   by rw [← map_neg_sub_map1 h, add_sub_cancel, ← sub_sub, sub_sub_cancel_left]
 
-end general
+end
 
 
 
 section domain
 
-variables {R S : Type*} [ring R] [ring S] [is_domain S] {f : R → S} (h : good f)
+variables [is_domain S] {f : R → S} (h : good f)
 include h
 
 lemma good_map_one : f 1 = 0 :=
