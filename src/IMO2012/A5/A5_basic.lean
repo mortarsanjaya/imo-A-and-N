@@ -22,7 +22,7 @@ lemma good_map_comp_hom {R R0 S : Type*} [ring R] [ring R0] [ring S]
 
 variables {R S : Type*} [ring R] [ring S]
 
-section
+section non_domain
 
 variables {f : R → S} (h : good f)
 include h
@@ -36,9 +36,7 @@ lemma map_neg_sub_map1 (x : R) : f (1 - x) - f (x - 1) = f x * f (-1) :=
 lemma map_neg_sub_map2 (x : R) : f (-x) - f x = f (x + 1) * f (-1) :=
   by rw [← map_neg_sub_map1 h, add_sub_cancel, ← sub_sub, sub_sub_cancel_left]
 
-end
-
-
+end non_domain
 
 section domain
 
