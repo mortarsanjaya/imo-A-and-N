@@ -325,7 +325,7 @@ lemma cast_mul : ∀ x y : 𝔽₃, ((x * y : 𝔽₃) : R) = x * y
 | 𝔽₃2 𝔽₃1 := (mul_one (-1)).symm
 | 𝔽₃2 𝔽₃2 := eq.symm $ (neg_mul_neg _ _).trans (mul_one 1)
 
-variables [nontrivial R] (h : (3 : R) = 0)
+variable (h : (3 : R) = 0)
 include h
 
 lemma cast_add : ∀ x y : 𝔽₃, ((x + y : 𝔽₃) : R) = x + y
@@ -342,28 +342,36 @@ lemma cast_add : ∀ x y : 𝔽₃, ((x + y : 𝔽₃) : R) = x + y
 def cast_hom : 𝔽₃ →+* R :=
   ⟨cast, cast_one, cast_mul, cast_zero, cast_add h⟩
 
+variable (h0 : (1 : R) ≠ 0)
+include h0
+
 lemma cast_hom_eq_zero_imp : ∀ x : 𝔽₃, cast_hom h x = 0 → x = 0
 | 𝔽₃0 := λ _, rfl
-| 𝔽₃1 := λ h0, absurd h0 (ne_zero.one R).out
-| 𝔽₃2 := λ h0, absurd (neg_eq_zero.mp h0) (ne_zero.one R).out
+| 𝔽₃1 := λ h1, absurd h1 h0
+| 𝔽₃2 := λ h1, absurd (neg_eq_zero.mp h1) h0
 
 lemma cast_hom_injective : function.injective (cast_hom h) :=
-  (injective_iff_map_eq_zero $ 𝔽₃.cast_hom h).mpr (cast_hom_eq_zero_imp h)
+  (injective_iff_map_eq_zero $ 𝔽₃.cast_hom h).mpr (cast_hom_eq_zero_imp h h0)
 
 end ring
 
 
 section ring_equiv
 
-variables {R : Type*} [ring R] [nontrivial R] [fintype R] (h : fintype.card R = 3)
+variables {R : Type*} [ring R] [fintype R] (h : fintype.card R = 3)
 include h
 
 lemma three_eq_zero_of_card : (3 : R) = 0 :=
   by rw [← char_p.cast_card_eq_zero R, h, nat.cast_bit1, nat.cast_one]
 
+lemma one_ne_zero_of_card : (1 : R) ≠ 0 :=
+  by haveI : nontrivial R := fintype.one_lt_card_iff_nontrivial.mp
+    (lt_of_lt_of_eq (nat.succ_lt_succ $ nat.succ_pos 1) h.symm);
+  exact (ne_zero.one R).out
+
 lemma cast_hom_bijective : function.bijective (cast_hom $ three_eq_zero_of_card h) :=
   (fintype.bijective_iff_injective_and_card _).mpr
-    ⟨cast_hom_injective _, 𝔽₃.card_eq.trans h.symm⟩
+    ⟨cast_hom_injective _ (one_ne_zero_of_card h), 𝔽₃.card_eq.trans h.symm⟩
 
 noncomputable def ring_equiv : 𝔽₃ →+* R :=
   ring_equiv.of_bijective _ (cast_hom_bijective h)
