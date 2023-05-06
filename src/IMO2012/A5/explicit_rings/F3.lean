@@ -325,54 +325,50 @@ lemma cast_mul : ∀ x y : 𝔽₃, ((x * y : 𝔽₃) : R) = x * y
 | 𝔽₃2 𝔽₃1 := (mul_one (-1)).symm
 | 𝔽₃2 𝔽₃2 := eq.symm $ (neg_mul_neg _ _).trans (mul_one 1)
 
-variables [char_p R 3]
-
-private lemma char_p_three_eq_zero : (3 : R) = 0 :=
-  (congr_arg bit1 nat.cast_one).symm.trans $
-    (nat.cast_bit1 1).symm.trans (char_p.cast_eq_zero R 3)
+variables [nontrivial R] (h : (3 : R) = 0)
+include h
 
 lemma cast_add : ∀ x y : 𝔽₃, ((x + y : 𝔽₃) : R) = x + y
 | 𝔽₃0 𝔽₃0 := (zero_add 0).symm
 | 𝔽₃0 𝔽₃1 := (zero_add 1).symm
 | 𝔽₃0 𝔽₃2 := (zero_add (-1)).symm
 | 𝔽₃1 𝔽₃0 := (add_zero 1).symm
-| 𝔽₃1 𝔽₃1 := eq.symm (eq_neg_of_add_eq_zero_left char_p_three_eq_zero)
+| 𝔽₃1 𝔽₃1 := eq.symm (eq_neg_of_add_eq_zero_left h)
 | 𝔽₃1 𝔽₃2 := (add_neg_self 1).symm
 | 𝔽₃2 𝔽₃0 := (add_zero (-1)).symm
 | 𝔽₃2 𝔽₃1 := (neg_add_self 1).symm
-| 𝔽₃2 𝔽₃2 := eq_add_neg_of_add_eq (eq_neg_of_add_eq_zero_left char_p_three_eq_zero)
+| 𝔽₃2 𝔽₃2 := eq_add_neg_of_add_eq (eq_neg_of_add_eq_zero_left h)
+
+def cast_hom : 𝔽₃ →+* R :=
+  ⟨cast, cast_one, cast_mul, cast_zero, cast_add h⟩
+
+lemma cast_hom_eq_zero_imp : ∀ x : 𝔽₃, cast_hom h x = 0 → x = 0
+| 𝔽₃0 := λ _, rfl
+| 𝔽₃1 := λ h0, absurd h0 (ne_zero.one R).out
+| 𝔽₃2 := λ h0, absurd (neg_eq_zero.mp h0) (ne_zero.one R).out
+
+lemma cast_hom_injective : function.injective (cast_hom h) :=
+  (injective_iff_map_eq_zero $ 𝔽₃.cast_hom h).mpr (cast_hom_eq_zero_imp h)
 
 end ring
 
 
-section ring_hom
+section ring_equiv
 
-variables (R : Type*) [ring R] [char_p R 3]
+variables {R : Type*} [ring R] [nontrivial R] [fintype R] (h : fintype.card R = 3)
+include h
 
-def cast_hom : 𝔽₃ →+* R :=
-  ⟨cast, cast_one, cast_mul, cast_zero, cast_add⟩
+lemma three_eq_zero_of_card : (3 : R) = 0 :=
+  by rw [← char_p.cast_card_eq_zero R, h, nat.cast_bit1, nat.cast_one]
 
-/-- This lemma's current proof is slightly inefficient(?) It takes about 75-80ms -/
-lemma cast_hom_injective : function.injective (cast_hom R) :=
-  (injective_iff_map_eq_zero $ 𝔽₃.cast_hom R).mpr $
-  λ x, let h : (1 : R) ≠ 0 := by haveI : nontrivial R :=
-    char_p.nontrivial_of_char_ne_one (nat.succ_ne_succ.mpr $ nat.succ_ne_zero 1);
-    exact ne_zero.ne 1 in
-  match x with
-  | 𝔽₃0 := λ _, rfl
-  | 𝔽₃1 := λ h0, absurd h0 h
-  | 𝔽₃2 := λ h0, absurd (neg_eq_zero.mp h0) h
-  end
-
-lemma cast_hom_bijective [fintype R] (h : fintype.card R = 3) :
-  function.bijective (cast_hom R) :=
+lemma cast_hom_bijective : function.bijective (cast_hom $ three_eq_zero_of_card h) :=
   (fintype.bijective_iff_injective_and_card _).mpr
-    ⟨cast_hom_injective R, 𝔽₃.card_eq.trans h.symm⟩
+    ⟨cast_hom_injective _, 𝔽₃.card_eq.trans h.symm⟩
 
-noncomputable def ring_equiv [fintype R] (h : fintype.card R = 3) : 𝔽₃ →+* R :=
-  ring_equiv.of_bijective _ (cast_hom_bijective R h)
+noncomputable def ring_equiv : 𝔽₃ →+* R :=
+  ring_equiv.of_bijective _ (cast_hom_bijective h)
 
-end ring_hom
+end ring_equiv
 
 end cast
 
