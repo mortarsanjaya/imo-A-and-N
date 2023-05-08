@@ -373,7 +373,7 @@ lemma cast_hom_bijective : function.bijective (cast_hom $ three_eq_zero_of_card 
   (fintype.bijective_iff_injective_and_card _).mpr
     ⟨cast_hom_injective _ (one_ne_zero_of_card h), 𝔽₃.card_eq.trans h.symm⟩
 
-noncomputable def ring_equiv : 𝔽₃ →+* R :=
+noncomputable def ring_equiv : 𝔽₃ ≃+* R :=
   ring_equiv.of_bijective _ (cast_hom_bijective h)
 
 end ring_equiv
