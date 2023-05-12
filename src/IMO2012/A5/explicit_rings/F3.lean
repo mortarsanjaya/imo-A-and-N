@@ -1,11 +1,10 @@
-import algebra.char_p.basic
+import algebra.field.defs algebra.hom.ring
 
 /-!
 # Explicit construction of 𝔽₃
 
 In this file, we explicitly construct the field of 3 elements.
-Every ring with 3 elements is isomorphic to `𝔽₃`; we will also define the isomorphism.
-The implementation for this isomorphism is mostly copied from `data.zmod.basic`.
+We prove just the necessary properties for the purpose of the main problem.
 -/
 
 namespace IMOSL
@@ -81,17 +80,6 @@ instance : decidable_eq 𝔽₃
 | 𝔽₃2 𝔽₃0 := is_false (λ h, 𝔽₃.no_confusion h)
 | 𝔽₃2 𝔽₃1 := is_false (λ h, 𝔽₃.no_confusion h)
 | 𝔽₃2 𝔽₃2 := is_true rfl
-
-instance : fintype 𝔽₃ :=
-{ elems := {𝔽₃0, 𝔽₃1, 𝔽₃2},
-  complete := λ x, match x with
-    | 𝔽₃0 := finset.mem_insert_self 𝔽₃0 {𝔽₃1, 𝔽₃2}
-    | 𝔽₃1 := finset.mem_insert_of_mem $ finset.mem_insert_self 𝔽₃1 {𝔽₃2}
-    | 𝔽₃2 := finset.mem_insert_of_mem $ finset.mem_insert_of_mem $
-               finset.mem_singleton_self 𝔽₃2
-  end }
-
-protected lemma card_eq : fintype.card 𝔽₃ = 3 := rfl
 
 instance : nontrivial 𝔽₃ :=
 { exists_pair_ne := ⟨𝔽₃0, 𝔽₃1, λ h, 𝔽₃.no_confusion h⟩ }
@@ -280,15 +268,7 @@ instance : field 𝔽₃ :=
   .. 𝔽₃.add_comm_group,
   .. 𝔽₃.comm_group_with_zero }
 
-
-
 lemma three_eq_zero : (3 : 𝔽₃) = 0 := rfl
-
-lemma ring_char_eq_three : ring_char 𝔽₃ = 3 :=
-  char_p.ring_char_of_prime_eq_zero nat.prime_three three_eq_zero
-
-instance char_p : char_p 𝔽₃ 3 :=
-  ring_char.of_eq ring_char_eq_three
 
 
 
@@ -354,29 +334,6 @@ lemma cast_hom_injective : function.injective (cast_hom h) :=
   (injective_iff_map_eq_zero $ 𝔽₃.cast_hom h).mpr (cast_hom_eq_zero_imp h h0)
 
 end ring
-
-
-section ring_equiv
-
-variables {R : Type*} [ring R] [fintype R] (h : fintype.card R = 3)
-include h
-
-lemma three_eq_zero_of_card : (3 : R) = 0 :=
-  by rw [← char_p.cast_card_eq_zero R, h, nat.cast_bit1, nat.cast_one]
-
-lemma one_ne_zero_of_card : (1 : R) ≠ 0 :=
-  by haveI : nontrivial R := fintype.one_lt_card_iff_nontrivial.mp
-    (lt_of_lt_of_eq (nat.succ_lt_succ $ nat.succ_pos 1) h.symm);
-  exact (ne_zero.one R).out
-
-lemma cast_hom_bijective : function.bijective (cast_hom $ three_eq_zero_of_card h) :=
-  (fintype.bijective_iff_injective_and_card _).mpr
-    ⟨cast_hom_injective _ (one_ne_zero_of_card h), 𝔽₃.card_eq.trans h.symm⟩
-
-noncomputable def ring_equiv : 𝔽₃ ≃+* R :=
-  ring_equiv.of_bijective _ (cast_hom_bijective h)
-
-end ring_equiv
 
 end cast
 
