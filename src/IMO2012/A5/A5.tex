@@ -2,6 +2,7 @@
 
 \usepackage{amsmath, amsfonts, amssymb, amsthm}
 \usepackage{hyperref}
+\usepackage{float}
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{5pt}
@@ -25,9 +26,11 @@
 
 
 
-\subsection*{Problem}
 
-Let $R$ be a ring and $S$ be an integral domain.
+
+\section*{Problem}
+
+Let $R$ be a commutative ring and $S$ be a division ring.
 Find all functions $f : R \to S$ such that, for any $x, y \in R$,
 \[ f(xy + 1) - f(x + y) = f(x) f(y). \tag{*}\label{2012a5-eq0} \]
 
@@ -37,52 +40,103 @@ Find all functions $f : R \to S$ such that, for any $x, y \in R$,
 
 
 
-\subsection*{Answer}
-
-For $R = \R$, there are three classes of functions:
-\begin{itemize}
-    \item   $x \mapsto 0$,
-    \item   $x \mapsto \phi(x) - 1$, where $\phi : \R \to S$ is some ring homomorphism,
-    \item   $x \mapsto \phi(x)^2 - 1$, where $\phi : \R \to S$ is some ring homomorphism.
-\end{itemize}
-
-In general, the following nine classes of functions also satisfy~\eqref{2012a5-eq0}.
-It is unknown yet, but believed, that these are all the functions satisfying~\eqref{2012a5-eq0}.
-The first class is $x \mapsto 0$; the rest comes from composing the respective functions with a ring homomorphism from $R$.
-\begin{itemize}
-    \item   $S \to S$: $x \mapsto x - 1$.
-    \item   $\F_3 \to S$: $[0, 1, 2] \mapsto [-1, 0, 1]$.
-    \item   $S \to S$; $x \mapsto x^2 - 1$.
-    \item   $\F_2 \to S$; $[0, 1] \mapsto [-1, 0]$.
-    \item   $\F_3 \to S$; $[0, 1, 2] \mapsto [-1, 0, 0]$.
-    \item   $\F_4 \to S$; $[0, 1, X, X + 1] \mapsto [-1, 0, \phi, \psi]$.
-            Here, $\phi$ and $\psi$ are some elements of $S$ such that $\phi + \psi = 1$ and $\phi \psi = -1$.
-    \item   $\F_2[X]/\langle X^2 \rangle$; $[0, 1, X, X + 1] \mapsto [-1, 0, 1, 0]$.
-    \item   $\Z/4\Z$; $[0, 1, 2, 3] \mapsto [-1, 0, 1, 0]$.
-\end{itemize}
 
 
+\section*{Answer}
 
-\subsection*{Solution}
+The solutions can be described via the following nine classes of functions.
+For the $8^{\text{th}}$ class, $\phi, \psi \in S$ satisfies $\phi + \psi = 1$ and $\phi \psi = -1$.
+The map into the intermediate ring is necessarily a ring homomorphism in this context.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|}
+    \hline
+    No. & Intermediate ring & Map to $S$ \\ \hline
+    1 & $0$ & $0 \mapsto 0$ \\ \hline
+    2 & $S$ & $x \mapsto x - 1$ \\ \hline
+    3 & $\F_3$ & $[0, 1, 2] \mapsto [-1, 0, 1]$ \\ \hline
+    4 & $S$ & $x \mapsto x^2 - 1$ \\ \hline
+    5 & $\F_3$ & $[0, 1, 2] \mapsto [-1, 0, 0]$ \\ \hline
+    6 & $\Z/4\Z$ & $[0, 1, 2, 3] \mapsto [-1, 0, 1, 0]$ \\ \hline
+    7 & $\F_2$ & $[0, 1] \mapsto [-1, 0]$ \\ \hline
+    8 & $\F_4$ & $[0, 1, X, X + 1] \mapsto [-1, 0, \phi, \psi]$ \\ \hline
+    9 & $\F_2[X]/\langle X^2 \rangle$ & $[0, 1, X, X + 1] \mapsto [-1, 0, 1, 0]$ \\ \hline
+\end{tabular}
+\end{table}
+
+
+
+
+
+\section*{Solution}
 
 Through this solution, we assume that $R$ is an arbitrary ring, except when specified.
 We also assume that $S$ is a domain, though not necessarily commutative in most cases.
 
 We start with some small observations.
-Clearly, if $x$ and $y$ commute, then $f(x)$ and $f(y)$ commute.
-Next, plugging $x = y = 1$ into~\eqref{2012a5-eq0} yields $f(1) = 0$.
+Plugging $x = y = 1$ into~\eqref{2012a5-eq0} yields $f(1) = 0$.
 Now plugging $y = 0$ into~\eqref{2012a5-eq0} yields $-f(x) = f(x) f(0)$ for all $x \in R$.
 This means that either $f \equiv 0$ or $f(0) = -1$.
-From now on, we assume the latter.
+From now on, we assume that $f(0) = -1$.
 
 Plugging $y = -1$ into~\eqref{2012a5-eq0} yields $f(1 - x) - f(x - 1) = f(x) f(-1)$ for all $x \in R$.
 This also implies $f(-x) - f(x) = f(x + 1) f(-1)$ for all $x \in R$.
-At this point, we split into two cases: $f(-1) \neq 0$ and $f(-1) = 0$.
+In particular, the case $f(-1) = 0$ yields that $f$ is even.
+
+Before we split into cases, we prove some lemmas.
+As the solution classes involve homomorphisms into explicit rings, we want to take quotients.
+The idea of the lemmas is that we can pass on to the quotients of $R$.
+For convenience, from now on we assume that $R$ is commutative and that $S$ is a domain.
+
+\begin{lemma}\label{2012a5-1}
+For any $c \in R$, we have $f(c + x) = -f(c) f(x)$ for all $x \in R$ if and only if $f(cx + 1) = 0$ for all $x \in R$.
+The set $J$ of such $c$ forms an ideal of $R$.
+\end{lemma}
+\begin{proof}
+The first part is clear since $f(cx + 1) - f(c + x) = f(c) f(x)$.
+For the second part, closure under addition is easy to prove from the equation $f(c + x) = -f(c) f(x)$.
+Meanwhile, closure under multiplication in $R$ follows from the equation $f(cx + 1) = 0$.
+Finally, $f(1) = 0$ yields that $0 \in J$.
+\end{proof}
+
+\begin{lemma}\label{2012a5-2}
+Let $I = \{c \in R : \forall x \in R, f(c + x) = f(x)\}$ and $J = \{c \in R : \forall x \in R, f(cx + 1) = 0\}$.
+Then $c \in I$ if and only if $c \in J$ and $f(c) = -1$.
+The set $I$ is an ideal of $R$.
+\end{lemma}
+\begin{proof}
+If $c \in I$, then $f(c) = f(0) = -1$, and $c \in J$ holds by the previous lemma.
+The converse is also easy to check.
+Now we prove that $I$ is an ideal of $R$.
+It is easily a subgroup of $R$, so we just need to prove closure under multiplication over $R$.
+
+Let $c \in I$ and $x, y \in R$.
+Since $f(c + z) = f(z)$ for all $z \in R$,~\eqref{2012a5-eq0} yields $f(x(c + y) + 1) = f(xy + 1)$ for all $y \in R$.
+Since $J$ is an ideal containing $I$, we have $cy \in J$.
+That means we have $-f(cx) f(xy + 1) = f(xy + 1)$ for all $x, y \in R$.
+Fixing $x$, this implies either $f(cx) = -1$ or $f(xy + 1) = 0$ for all $y \in R$.
+Note that $cx \in J$ since $c \in I \subseteq J$.
+Thus, we get either $cx \in I$ or $x \in J$.
+That is, if $x \notin J$, then $cx \in I$.
+
+Finally, take an arbitrary $c \in I$ and $x \in R$.
+If $x \notin J$, then $cx \in I$ as we've seen above.
+If $x \in J$, then $x - 1, 1 \notin J$, so $c(x - 1), c \in I$ and thus $cx \in I$.
+\end{proof}
+
+For any $a, b \in R$ such that $a - b \in I$, it is clear that $f(a) = f(b)$.
+Thus, we get an induced map $g : R/I \to S$ such that $f = g \circ \phi$, where $\phi : R \to R/I$ is the quotient map.
+Since $\phi$ is surjective, one can check that $g$ satisfies~\eqref{2012a5-eq0} as well.
+Thus, from now on, we can WLOG assume that $I = \{0\}$.
+
+We now split into two cases: $f(-1) \neq 0$ and $f(-1) = 0$.
 The above equation is only saying that $f$ is even if $f(-1) = 0$.
 We start with the former case.
 
 
-\subsubsection*{Case 1: $f(-1) \neq 0$}
+
+\subsection*{Case 1: $f(-1) \neq 0$}
 
 The equation $f(-x) - f(x) = f(x + 1) f(-1)$ now easily yields
 \[ f(1 - x) = -f(1 + x). \tag{1.1}\label{2012a5-eq1-1} \]
@@ -124,74 +178,60 @@ Plugging $x = y = 2$ into~\eqref{2012a5-eq0} yields $C^3 - 2C - (C^2 - 1) = 1$, 
 This proves the claim, since $C = -f(-1) \neq 0$.
 \end{proof}
 
-\begin{itemize}
 
-    \item
-    Subcase 1.1: $f(-1) = -2 \neq 0$.
-    In particular $\rchar(S) \neq 2$.
+\subsubsection*{Subcase 1.1: $f(-1) = -2 \neq 0$}
 
-    The corresponding solution is the map $S \to S$, $x \mapsto x - 1$.
-    That is, we claim that $f + 1 : R \to S$ is a ring homomorphism.
+In particular $\rchar(S) \neq 2$.
+
+The corresponding class of solutions is class 2.
+We claim that $f + 1 : R \to S$ is a ring homomorphism.
     
-    Combining~\eqref{2012a5-eq1-4} and~\eqref{2012a5-eq1-5} yields $f(x - 1) - f(x + 1) = -2$ for all $x \in R$.
-    Using~\eqref{2012a5-eq1-1} and replacing $x$ with $x + 1$, we can rewrite this as $f(x) + f(-x) = -2$ for all $x \in R$.
-    On the other hand, we have $f(x) - f(-x) = 2 f(x + 1)$ for all $x \in R$.
-    Adding the two equations yields $2 f(x) = 2 (f(x + 1) - 1)$ for all $x \in R$.
-    Since $\rchar(S) \neq 2$, this yields $f(x + 1) = f(x) + 1$ for all $x \in R$.
+Combining~\eqref{2012a5-eq1-4} and~\eqref{2012a5-eq1-5} yields $f(x - 1) - f(x + 1) = -2$ for all $x \in R$.
+Using~\eqref{2012a5-eq1-1} and replacing $x$ with $x + 1$, we can rewrite this as $f(x) + f(-x) = -2$ for all $x \in R$.
+On the other hand, we have $f(x) - f(-x) = 2 f(x + 1)$ for all $x \in R$.
+Adding the two equations yields $2 f(x) = 2 (f(x + 1) - 1)$ for all $x \in R$.
+Since $\rchar(S) \neq 2$, this yields $f(x + 1) = f(x) + 1$ for all $x \in R$.
 
-    Assuming that $f + 1$ is additive, it is easy to show that $f + 1$ is multiplicative.
-    Indeed, the original equality yields
-    \[ f(xy) + 1 = f(x) f(y) + f(x) + f(y) + 1 = (f(x) + 1)(f(y) + 1). \]
-    It remains to show that $f + 1$ is additive, i.e., $f(x + y) = f(x) + f(y) + 1$ for all $x, y \in R$.
-    We go back to~\eqref{2012a5-eq1-3} and use the equality $f(x) + f(-x) = -2$, giving us:
-    \[ 2 f(x + y + 1) = (f(x) + 2) (f(y) + 2) - f(x) f(y) = 2 (f(x) + f(y) + 2). \]
-    Again, $\rchar(S) \neq 2$, so $f(x + y) + 1 = f(x + y + 1) = f(x) + f(y) + 2$.
-    We are done.
-
-
-    \item
-    Subcase 1.2: $f(-1) = 1 \neq -2$.
-    In particular, $\rchar(S) \neq 3$.
-
-    The corresponding solution is the map $q : \F_3 \to S$, $[0, 1, 2] \mapsto [-1, 0, 1]$.
-    That is, we claim that there is a ring homomorphism $\phi : R \to \F_3$ such that $f = q \circ \phi$.
-
-    This time,~\eqref{2012a5-eq1-2} and~\eqref{2012a5-eq1-1} yields $f(x - 1) + f(x) + f(x + 1) = 0$ for all $x \in R$.
-    In particular, $f$ is $3$-periodic.
-    Then~\ref{2012a5-eq1-4} yields that, if $f(x) \neq 0$, then $f(x + 1) - f(x - 1) = -1$.
-    If $f(x), f(x - 1), f(x + 1)$ are all non-zero, then we have $f(x) - f(x + 1) = f(x + 1) - f(x - 1) = f(x - 1) - f(x) = -1$.
-    Adding all three equalities yield $0 = -3$ in $S$; a contradiction since $\rchar(S) \neq 3$.
-    As a result, one of the three expressions equal zero; the other two are determined by~\ref{2012a5-eq1-5}.
-    In particular, $(-1, 0, 1)$ is a cyclic permutation of $(f(x - 1), f(x), f(x + 1))$ for any $x \in R$.
-    
-    Given $c \in R$ with $f(c + 1) = 0$, we have $f(1 - c) = 0$ by~\eqref{2012a5-eq1-1}.
-    Then~\eqref{2012a5-eq1-5} yields $f(c) = f(-c) = -1$.
-    So~\eqref{2012a5-eq1-3} and~\eqref{2012a5-eq1-2} yields $-f(c + y + 1) = -f(c + 1)$.
-    Replacing $y$ with $y - 1$ yields $f(c + y) = f(y)$ for all $y \in R$.
-    Now plugging $x = c$ into~\eqref{2012a5-eq0} yields $f(cy + 1) = f(c + y) - f(y) = 0$ for all $y \in R$.
-    Similarly, plugging $y = c$ instead yields $f(xc + 1) = 0$ for all $x \in R$.
-
-    Now, consider the set $I = \{x \in R : f(x + 1) = 0\}$.
-    From the previous paragraph, it can be easily seen that $I$ is a double-sided ideal of $R$.
-    Also, $I$ is precisely the set of periods of $f$; $f(c + 1) = 0$ if and only if $f(c + y) = f(y)$ for all $y \in R$.
-    Thus there is an induced map $\tilde{f} : R/I \to S$ such that $f = \tilde{f} \circ \phi$, where $\phi : R \to R/I$ is the canonical map.
-    The map $\tilde{f}$ has the property that $\tilde{f}(x + 1) = 0 \iff x = 0$.
-
-    For each $x \in R$, recall that $f(x + c) = 0$ for some $c \in \{-1, 0, 1\}$.
-    That means $x$ reduces to either $-1$, $0$, or $1$ in $R/I$, which implies that $|R/I| \leq 3$.
-    Since $f$ is non-constant, we have $|R/I| = 3$, so $R/I$ is isomorphic to $\F_3$.
-    By recalling that $f(-1) = 1$, $f(0) = -1$, and $f(1) = 0$, we get that $\tilde{f} = q$, as desired.
-
-    \textit{Note:
-        For now, we implement all the results before setting up the ideal $I$.
-        For the case $R = \R$, there is a more immediate contradiction.
-        Indeed, $f(3x + 1) = 0$ for all $x \in \R$.
-        But plugging $x = -1/3$ yields $-1 = f(0) = 0$; a contradiction.}
-
-\end{itemize}
+Assuming that $f + 1$ is additive, it is easy to show that $f + 1$ is multiplicative.
+Indeed, the original equality yields
+\[ f(xy) + 1 = f(x) f(y) + f(x) + f(y) + 1 = (f(x) + 1)(f(y) + 1). \]
+It remains to show that $f + 1$ is additive, i.e., $f(x + y) = f(x) + f(y) + 1$ for all $x, y \in R$.
+We go back to~\eqref{2012a5-eq1-3} and use the equality $f(x) + f(-x) = -2$, giving us:
+\[ 2 f(x + y + 1) = (f(x) + 2) (f(y) + 2) - f(x) f(y) = 2 (f(x) + f(y) + 2). \]
+Again, $\rchar(S) \neq 2$, so $f(x + y) + 1 = f(x + y + 1) = f(x) + f(y) + 2$.
+We are done.
 
 
-\subsubsection*{Case 2: $f(-1) = 0$ (Not generalized)}
+\subsubsection*{Subcase 1.2: $f(-1) = 1 \neq -2$}
+
+In particular, $\rchar(S) \neq 3$.
+
+The corresponding class of solutions is class 3.
+Using Lemma~\ref{2012a5-2}, we can assume that $I = 0$.
+Then it suffices to show that $R \cong \F_3$, and $f : \F_3 \to S$ is defined by the corresponding map.
+We already know that $f(-1) = 1$, $f(0) = -1$, and $f(1) = 0$.
+So, it now suffices to show that $R \cong \F_3$.
+
+First, we prove that $f(c + 1) = 0$ implies $c = 0$.
+We have $f(1 - c) = 0$ by~\eqref{2012a5-eq1-1}.
+Then~\eqref{2012a5-eq1-5} yields $f(c) = f(-c) = -1$.
+Plugging $(x, y) \to (c, x - 1)$ yields $f(c + x) = f(x)$ for all $x \in R$.
+Since $I = 0$, this implies $c = 0$, as desired.
+
+The equation~\eqref{2012a5-eq1-2} and~\eqref{2012a5-eq1-1} yields $f(x - 1) + f(x) + f(x + 1) = 0$ for all $x \in R$.
+In particular, this implies that $3 \in I$, thus $R$ either has characteristic $3$ or is trivial.
+The latter is impossible since $f(0) = -1 \neq 0 = f(1)$.
+To show that $R \cong \F_3$, it remains to show that $R = \{-1, 0, 1\}$.
+
+Fix some $x \in R$, and suppose that $x \notin \{-1, 0, 1\}$.
+Then $f(x - 1), f(x), f(x + 1)$ are all non-zero.
+By~\eqref{2012a5-eq1-5}, $f(x - 1) - f(x + 1) = f(x + 1) - f(x) = f(x) - f(x - 1) = 1$.
+Adding all three yields $3 = 0$ in $S$, which is impossible by the subcase assumption, $1 \neq -2 \in S$.
+We are done with this subcase.
+
+
+
+\subsection*{Case 2: $f(-1) = 0$ (Not generalized)}
 
 \textit{Note: For now, we just work with the case $R = \R$.}
 
@@ -215,6 +255,20 @@ Going back to~\eqref{2012a5-eq0}, for all $x, y \in \R$, we have
 Note that $g(1) = f(1) = 0$.
 Thus rearranging gives $g(x^2 y^2) + 1 = (g(x^2) + 1)(g(y^2) + 1)$ for all $x, y \in \R$.
 Replacing with square roots prove that $g + 1$ is multiplicative.
+
+
+
+
+
+\section*{Implementation details}
+
+At the time of writing, \texttt{mathlib} does not have the notion of two-sided ideal.
+Thus, we only solve for the case where $R$ is commutative, with the ideal quotient API available.
+
+The file \texttt{A5\_basic} contains the definition of~\eqref{2012a5-eq0} and basic results.
+The file \texttt{A5\_period\_quot} contains the construction of the ideal $I$ of periods and the corresponding lift of $f$.
+The file \texttt{A5\_main\_real} is just the final solution file for the case $R = \R$.
+The rest are split up according to the subcases.
 
 
 
