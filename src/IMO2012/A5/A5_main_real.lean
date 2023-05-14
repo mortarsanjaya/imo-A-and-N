@@ -19,8 +19,8 @@ theorem final_solution_real {S : Type*} [comm_ring S] [is_domain S] {f : ℝ →
     (λ h0, or.inl $ eq_zero_of_map_zero_ne_neg_one h h0)
     (λ h0, or.inr $ (ne_or_eq (f $ -1) 0).elim
       (λ h1, or.inl $ (eq_or_ne (f $ -1) $ -2).elim
-        (case1_1_sol h h0 h1)
-        (λ h2, false.rec _ $ is_empty.exists_iff.mp $ case1_2_sol h h0 h1 h2))
+        (case1_1_sol h h1)
+        (λ h2, false.rec _ $ is_empty.exists_iff.mp $ case1_2_sol h h1 h2))
       (λ h1, or.inr $ case2_sol h h0 h1)),
   λ h, begin
     rcases h with rfl | ⟨φ, rfl⟩ | ⟨φ, rfl⟩,
