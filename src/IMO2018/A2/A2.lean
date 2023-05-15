@@ -1,5 +1,4 @@
 import
-  data.real.basic
   extra.periodic.big_operators
   data.nat.periodic
   data.nat.prime
@@ -14,7 +13,9 @@ namespace IMO2018A2
 open finset function extra
 open_locale classical
 
-def good (a : ℕ → ℝ) := ∀ i : ℕ, a i * a (i + 1) + 1 = a (i + 2)
+variables {R : Type*} [linear_ordered_comm_ring R]
+
+def good (a : ℕ → R) := ∀ i : ℕ, a i * a (i + 1) + 1 = a (i + 2)
 
 
 
@@ -40,7 +41,7 @@ lemma periodic_shift {α M : Type*} [add_comm_monoid M] {f : M → α} {c : M}
     (h : periodic f c) (d : M) : periodic (λ m, f (m + d)) c :=
   λ m, by simp only []; rw [add_right_comm, h]
 
-lemma sq_add_one_ne_self (x : ℝ) : x * x + 1 ≠ x :=
+lemma sq_add_one_ne_self (x : R) : x * x + 1 ≠ x :=
 begin
   intros h,
   apply not_lt.mpr (sq_nonneg (2 * x - 1)),
@@ -54,7 +55,7 @@ end extra
 
 
 /-- A good periodic function must be 3-periodic. -/
-private lemma periodic_to_periodic3 {a : ℕ → ℝ} (h : good a)
+private lemma periodic_to_periodic3 {a : ℕ → R} (h : good a)
   {n : ℕ} (h0 : 0 < n) (h1 : periodic a n) : periodic a 3 :=
 begin
   have h2 : (range n).sum (λ i, 2 * a (i + 2) ^ 2 + (a (i + 3) - a i) ^ 2) =
@@ -62,7 +63,7 @@ begin
   begin
     apply congr_arg; funext i,
     rw [add_comm, sub_sq', ← add_sub_right_comm, add_sub_assoc, add_right_inj,
-        mul_assoc, ← mul_sub, mul_right_inj' (two_ne_zero : (2 : ℝ) ≠ 0),
+        mul_assoc, ← mul_sub, mul_right_inj' (two_ne_zero : (2 : R) ≠ 0),
         sub_eq_sub_iff_sub_eq_sub, ← sub_one_mul, mul_comm, sq, ← sub_one_mul],
     dsimp only [good] at h,
     conv at h { find (_ = _) { rw ← eq_sub_iff_add_eq } },
@@ -83,9 +84,9 @@ end
 
 
 /-- One example of a good function. -/
-def good_ex (i : ℕ) : ℝ := ite (i % 3 = 0) 2 (-1)
+def good_ex (i : ℕ) : R := ite (i % 3 = 0) 2 (-1)
 
-private lemma good_ex_good : good good_ex :=
+private lemma good_ex_good : good (good_ex : ℕ → R)  :=
 begin
   intros i; dsimp only [good_ex],
   rw [← nat.mod_add_mod, ← nat.mod_add_mod i],
@@ -97,17 +98,17 @@ begin
     rw hp; norm_num }
 end
 
-private lemma good_shift {a : ℕ → ℝ} (h : good a) (k : ℕ) : good (λ i, a (i + k)) :=
+private lemma good_shift {a : ℕ → R} (h : good a) (k : ℕ) : good (λ i, a (i + k)) :=
   λ i, by simp only []; rw [add_right_comm, h, add_right_comm]
 
 
 
 /-- Solution of the underlying equation for a good 3-periodic function. -/
-private lemma good_solution {a b c : ℝ}
+private lemma good_solution {a b c : R}
     (h : a * b + 1 = c) (h0 : b * c + 1 = a) (h1 : c * a + 1 = b) :
   (a, b, c) = (2, -1, -1) ∨ (a, b, c) = (-1, 2, -1) ∨ (a, b, c) = (-1, -1, 2) :=
 begin
-  have h2 : ∀ x y z : ℝ, x * y + 1 = z → y * z + 1 = x → y = -1 ∨ x = z :=
+  have h2 : ∀ x y z : R, x * y + 1 = z → y * z + 1 = x → y = -1 ∨ x = z :=
   begin
     intros x y z h h0,
     replace h0 := congr_arg2 (λ x y, x - y) h h0; simp only [] at h0,
@@ -124,7 +125,7 @@ begin
 end
 
 /-- Characterization of all good 3-periodic functions. -/
-private lemma good_period3_iff (a : ℕ → ℝ) : (good a ∧ periodic a 3) ↔
+private lemma good_period3_iff (a : ℕ → R) : (good a ∧ periodic a 3) ↔
   a = good_ex ∨ a = (λ i, good_ex (i + 1)) ∨ a = λ i, good_ex (i + 2) :=
 begin
   split,
@@ -156,7 +157,7 @@ begin
         rw fin.ext_iff at hp,
         simp [p] at hp,
         rw hp; assumption } } },
-  { have h : periodic good_ex 3 := λ i, by simp only [good_ex, nat.add_mod_right],
+  { have h : periodic good_ex 3 := λ i, if_congr (by rw i.add_mod_right 3) rfl rfl,
     rintros (rfl | rfl | rfl); split,
     exacts [good_ex_good, h, good_shift good_ex_good 1, periodic_shift h 1,
             good_shift good_ex_good 2, periodic_shift h 2] }
@@ -165,7 +166,7 @@ end
 
 
 /-- Final solution, extra version -/
-theorem final_solution_extra {n : ℕ} (h : 0 < n) {a : ℕ → ℝ} (h0 : periodic a n) :
+theorem final_solution_extra {n : ℕ} (h : 0 < n) {a : ℕ → R} (h0 : periodic a n) :
   good a ↔ a = good_ex ∨ a = (λ i, good_ex (i + 1)) ∨ a = λ i, good_ex (i + 2) :=
 begin
   rw ← good_period3_iff a,
@@ -175,7 +176,7 @@ end
 
 /-- Final solution, extra version, case 3 ∤ n -/
 theorem final_solution_extra_not3dvd {n : ℕ} (h : 0 < n) (h0 : ¬ 3 ∣ n)
-  {a : ℕ → ℝ} (h1 : periodic a n) : ¬good a :=
+  {a : ℕ → R} (h1 : periodic a n) : ¬good a :=
 begin
   replace h0 := (or_iff_left h0).mp (nat.coprime_or_dvd_of_prime nat.prime_three n),
   rw nat.coprime_comm at h0,
@@ -194,7 +195,7 @@ begin
 end
 
 /-- Final solution, original version -/
-theorem final_solution (n : ℕ) (h : 0 < n) : (∃ a : ℕ → ℝ, good a ∧ periodic a n) ↔ 3 ∣ n :=
+theorem final_solution (n : ℕ) (h : 0 < n) : (∃ a : ℕ → R, good a ∧ periodic a n) ↔ 3 ∣ n :=
 begin
   split,
   { rintros ⟨a, h0, h1⟩,
