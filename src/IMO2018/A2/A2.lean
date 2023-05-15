@@ -11,7 +11,6 @@ namespace IMOSL
 namespace IMO2018A2
 
 open finset function extra
-open_locale classical
 
 variables {R : Type*} [linear_ordered_comm_ring R]
 
