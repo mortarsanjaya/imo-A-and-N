@@ -23,9 +23,6 @@ private lemma npow_not_inj_of_finite3 : ∃ n k : ℕ, 0 < k ∧ x ^ (n + k) = x
 
 end finite_npow
 
-set_option profiler true
-set_option profiler.threshold 0.05
-
 
 section monoid_npow
 
@@ -74,7 +71,8 @@ end
 theorem final_solution {S : Type*} [fintype S] [decidable_eq S]
   {f : function.End S} (h : ∀ g : S → S, f * g * f = g * f * g → g = f) :
   set.range (f ∘ f) = set.range f :=
-  (set.range_comp_subset_range f f).antisymm $ begin
+  (set.range_comp_subset_range f f).antisymm $
+  begin
     replace h := final_solution_monoid h,
     rcases h with ⟨m, h, h0⟩,
     nth_rewrite 0 ← h0,
