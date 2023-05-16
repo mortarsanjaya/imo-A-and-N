@@ -104,13 +104,13 @@ end
 /-- General framework for the proof. -/
 private lemma sol_of_good_map_zero_eq_one_imp_inj
   (h : ∀ {f : R → R}, good f → f 0 = 1 → injective f) (f : R → R) :
-  good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ (f = λ x, -(1 - x))) :=
-  ⟨λ h0, or_iff_not_imp_left.mpr $ λ h1, or.elim (good_map_zero h0 h1)
+  good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ f = λ x, -(1 - x)) :=
+  ⟨λ h0, or_iff_not_imp_left.mpr $ λ h1, (good_map_zero h0 h1).elim
     (λ h2, or.inl $ good_eq_of_inj h0 h2 $ h h0 h2)
     (λ h2, or.inr $ let h3 := neg_eq_iff_eq_neg.mpr h2, h4 := good_neg h0 in
       neg_eq_iff_eq_neg.mp $ good_eq_of_inj h4 h3 $ h h4 h3),
-  λ h0, or.elim h0 (λ h1, cast (congr_arg good h1.symm) good_zero) $
-    λ h1, or.elim h1 (λ h2, cast (congr_arg good h2.symm) good_one_sub)
+  λ h0, h0.elim (λ h1, cast (congr_arg good h1.symm) good_zero) $
+    λ h1, h1.elim (λ h2, cast (congr_arg good h2.symm) good_one_sub)
       (λ h2, cast (congr_arg good h2.symm) (good_neg good_one_sub))⟩
 
 end division_ring
@@ -125,7 +125,7 @@ end basic_results
 
 /-- Final solution, `char(R) ≠ 2` -/
 theorem final_solution_char_ne_two {R : Type*} [division_ring R] (Rchar : ring_char R ≠ 2) :
-  ∀ f : R → R, good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ (f = λ x, -(1 - x))) :=
+  ∀ f : R → R, good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ f = λ x, -(1 - x)) :=
 begin
   apply sol_of_good_map_zero_eq_one_imp_inj,
   
@@ -157,7 +157,7 @@ end
 
 /-- Final solution, `F` is a field, `char(F) = 2` -/
 theorem final_solution_field_char_two {F : Type*} [field F] [char_p F 2] :
-  ∀ f : F → F, good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ (f = λ x, -(1 - x))) :=
+  ∀ f : F → F, good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ f = λ x, -(1 - x)) :=
 begin
   apply sol_of_good_map_zero_eq_one_imp_inj,
   intros f h h0 a b h1,
@@ -219,8 +219,8 @@ end
 /-- Final solution, `F` is a field -/
 theorem final_solution_field {F : Type*} [field F] :
   ∀ f : F → F, good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ (f = λ x, -(1 - x))) :=
-  or.elim (ne_or_eq  (ring_char F) 2) final_solution_char_ne_two
-    (λ h, by haveI : char_p F 2 := ring_char.of_eq h; exact final_solution_field_char_two)
+  (ne_or_eq (ring_char F) 2).elim final_solution_char_ne_two $
+    λ h, by haveI : char_p F 2 := ring_char.of_eq h; exact final_solution_field_char_two
 
 end IMO2017A6
 end IMOSL
