@@ -38,16 +38,13 @@ end
 
 lemma periodic_shift {α M : Type*} [add_comm_monoid M] {f : M → α} {c : M}
     (h : periodic f c) (d : M) : periodic (λ m, f (m + d)) c :=
-  λ m, by simp only []; rw [add_right_comm, h]
+  λ m, (congr_arg f $ add_right_comm m c d).trans $ h (m + d)
 
 lemma sq_add_one_ne_self (x : R) : x * x + 1 ≠ x :=
-begin
-  intros h,
-  apply not_lt.mpr (sq_nonneg (2 * x - 1)),
-  rw ← eq_sub_iff_add_eq at h,
-  rw [sub_sq, mul_pow, sq, sq, h, mul_one, one_pow, mul_sub_one, mul_assoc, sub_sub_cancel_left],
-  norm_num
-end
+  λ h, not_lt.mpr (sq_nonneg (2 * x - 1)) $
+    by rw [sub_sq, mul_pow, sq, sq, eq_sub_iff_add_eq.mpr h, mul_one,
+      one_pow, mul_sub_one, mul_assoc, sub_sub_cancel_left];
+    norm_num
 
 end extra
 
@@ -60,24 +57,24 @@ begin
   have h2 : (range n).sum (λ i, 2 * a (i + 2) ^ 2 + (a (i + 3) - a i) ^ 2) =
     (range n).sum (λ i, a (i + 3) ^ 2 + a i ^ 2 + 2 * (a (i + 2) - a i)) :=
   begin
-    apply congr_arg; funext i,
+    refine sum_congr rfl (λ i _, _),
     rw [add_comm, sub_sq', ← add_sub_right_comm, add_sub_assoc, add_right_inj,
         mul_assoc, ← mul_sub, mul_right_inj' (two_ne_zero : (2 : R) ≠ 0),
         sub_eq_sub_iff_sub_eq_sub, ← sub_one_mul, mul_comm, sq, ← sub_one_mul],
-    dsimp only [good] at h,
+    rw good at h,
     conv at h { find (_ = _) { rw ← eq_sub_iff_add_eq } },
     rw [← h, mul_assoc, bit0, ← add_assoc, h]
   end,
   repeat { rw sum_add_distrib at h2 },
   rw [← mul_sum, ← mul_sum] at h2,
   repeat { rw periodic_sum_const (periodic.comp h1 (λ x, x ^ 2)) at h2 },
-  dsimp only [comp] at h2,
+  rw comp at h2,
   rw [← two_mul, add_right_inj, sum_sub_distrib, periodic_sum_const h1, sub_self, mul_zero] at h2,
   intros i,
   replace h2 := sum_nonneg_eq_zero (λ i, sq_nonneg (a (i + 3) - a i)) h2 (i.mod_lt h0),
   rwa [pow_eq_zero_iff, periodic.map_mod_nat h1, ← periodic.map_mod_nat h1,
        nat.mod_add_mod, periodic.map_mod_nat h1, sub_eq_zero] at h2,
-  exact two_pos
+  exact nat.succ_pos 1
 end
 
 
@@ -85,7 +82,7 @@ end
 /-- One example of a good function. -/
 def good_ex (i : ℕ) : R := ite (i % 3 = 0) 2 (-1)
 
-private lemma good_ex_good : good (good_ex : ℕ → R)  :=
+private lemma good_ex_good : good (good_ex : ℕ → R) :=
 begin
   intros i; dsimp only [good_ex],
   rw [← nat.mod_add_mod, ← nat.mod_add_mod i],
