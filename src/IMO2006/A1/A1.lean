@@ -7,9 +7,6 @@ namespace IMO2006A1
 
 open function
 
-
-
-
 private lemma int_seq_eventually_constant_of_mono_bdd_above
   {a : ℕ → ℤ} (h : monotone a) {c : ℤ} (h0 : ∀ n : ℕ, a n ≤ c) :
   ∃ (d : ℤ) (_ : d ≤ c) (N : ℕ), ∀ n : ℕ, N ≤ n → a n = d :=
@@ -33,39 +30,40 @@ end
 
 
 
-section basic_results
+
+
+
 
 variables {R : Type*} [linear_ordered_ring R] [floor_ring R]
 
 def f (r : R) := (⌊r⌋ : R) * int.fract r
 
 private lemma f_nonneg_of_nonneg {r : R} (h : 0 ≤ r) : 0 ≤ f r :=
-  mul_nonneg (int.cast_nonneg.mpr $ int.le_floor.mpr $ le_of_eq_of_le int.cast_zero h)
-    (int.fract_nonneg r)
+  mul_nonneg (int.cast_nonneg.mpr $ int.floor_nonneg.mpr h) (int.fract_nonneg r)
 
 private lemma f_iterate_nonneg {r : R} (h : 0 ≤ r) : ∀ n : ℕ, 0 ≤ (f^[n] r)
 | 0 := h
-| (n+1) := by rw iterate_succ'; exact f_nonneg_of_nonneg (f_iterate_nonneg n)
+| (n+1) := le_of_le_of_eq (f_nonneg_of_nonneg $ f_iterate_nonneg n) $
+    (comp_app f _ r).symm.trans $ congr_fun (iterate_succ' f n).symm r
 
 private lemma f_floor_eq_zero {r : R} (h : ⌊r⌋ = 0) : f r = 0 :=
-  by rw [f, h, int.cast_zero, zero_mul]
+  mul_eq_zero_of_left (int.cast_eq_zero.mpr h) (int.fract r)
 
 private lemma f_floor_lt_floor_of_ge_one {r : R} (h : 1 ≤ r) : ⌊f r⌋ < ⌊r⌋ :=
-  by rw [int.floor_lt, f, ← sub_pos, ← mul_one_sub];
-    exact mul_pos (int.cast_pos.mpr $ int.floor_pos.mpr h) (sub_pos.mpr $ int.fract_lt_one r)
-
+  int.floor_lt.mpr $ mul_lt_of_lt_one_right
+    (int.cast_pos.mpr $ int.floor_pos.mpr h) (int.fract_lt_one r)
 
 private lemma f_nonpos_of_nonpos {r : R} (h : r ≤ 0) : f r ≤ 0 :=
   mul_nonpos_of_nonpos_of_nonneg (le_trans (int.floor_le r) h) (int.fract_nonneg r)
 
 private lemma f_iterate_nonpos {r : R} (h : r ≤ 0) : ∀ n : ℕ, f^[n] r ≤ 0
 | 0 := h
-| (n+1) := by rw iterate_succ'; exact f_nonpos_of_nonpos (f_iterate_nonpos n)
+| (n+1) := le_of_eq_of_le (congr_fun (iterate_succ' f n) r)
+    (f_nonpos_of_nonpos $ f_iterate_nonpos n)
 
 private lemma f_floor_ge_of_nonpos {r : R} (h : r ≤ 0) : ⌊r⌋ ≤ ⌊f r⌋ :=
-  by rw [int.le_floor, f, ← sub_nonpos, ← mul_one_sub];
-    exact mul_nonpos_of_nonpos_of_nonneg (int.cast_nonpos.mpr $ int.floor_nonpos h)
-      (sub_nonneg.mpr $ le_of_lt $ int.fract_lt_one r)
+  int.le_floor.mpr $ le_mul_of_le_one_right
+    (int.cast_nonpos.mpr $ int.floor_nonpos h) (le_of_lt $ int.fract_lt_one r)
 
 private lemma f_Ioo_neg_one_zero {r : R} (h : -1 < r) (h0 : r < 0) : f r = -1 - r :=
 begin
@@ -148,7 +146,6 @@ begin
   exact nat.lt_pow_self h n
 end
 
-end basic_results
 
 
 
@@ -157,8 +154,8 @@ end basic_results
 
 
 /-- Final solution, case `x ≥ 0` -/
-theorem final_solution_x_nonneg {R : Type*} [linear_ordered_ring R] [floor_ring R]
-  {x : R} (h : 0 ≤ x) : ∀ n : ℕ, ⌊x⌋ < n → (f^[n]) x = 0 :=
+theorem final_solution_x_nonneg {x : R} (h : 0 ≤ x) :
+  ∀ n : ℕ, ⌊x⌋ < n → (f^[n]) x = 0 :=
 begin
   ---- Start with casting `⌊x⌋` to `K : ℕ`
   lift ⌊x⌋ to ℕ using by rwa [int.le_floor, int.cast_zero] with K h0,
@@ -195,8 +192,7 @@ end
 
 
 /-- Final solution, case `x ≤ 0` -/
-theorem final_solution_x_nonpos {R : Type*} [linear_ordered_ring R] [floor_ring R] [archimedean R]
-  {x : R} (h : x ≤ 0) :
+theorem final_solution_x_nonpos [archimedean R] {x : R} (h : x ≤ 0) :
   (∃ N k : ℕ, (k + 1 : R) * (f^[N] x) = -k ^ 2) ∨ (∃ N : ℕ, -1 < (f^[N]) x ∧ (f^[N]) x < 0) :=
 begin
   ---- First obtain some `N` such that `(⌊f^n(x)⌋)_{n ≥ 0}` stabilizes
@@ -240,7 +236,7 @@ end
 
 
 /-- Final solution -/
-theorem final_solution {R : Type*} [linear_ordered_ring R] [floor_ring R] [archimedean R] (x : R) :
+theorem final_solution [archimedean R] (x : R) :
   ∃ N : ℕ, ∀ n : ℕ, N ≤ n → (f^[n + 2]) x = (f^[n]) x :=
 begin
   cases le_total 0 x with h h,
