@@ -41,9 +41,9 @@ private lemma set_coe_image_sub {R : Type*} [ring R] [decidable_eq R] (S T : fin
 begin
   ext x; simp only [mem_image, mem_sub]; split,
   rintros ⟨a, ⟨x, y, h, h0, rfl⟩, rfl⟩;
-    exact ⟨x, y, ⟨x, h, rfl⟩, ⟨y, h0, rfl⟩, by rw int.cast_sub⟩,
+    exact ⟨x, y, ⟨x, h, rfl⟩, ⟨y, h0, rfl⟩, (int.cast_sub x y).symm⟩,
   rintros ⟨x, y, ⟨x, h, rfl⟩, ⟨y, h0, rfl⟩, rfl⟩;
-    exact ⟨x - y, ⟨x, y, h, h0, rfl⟩, by rw int.cast_sub⟩
+    exact ⟨x - y, ⟨x, y, h, h0, rfl⟩, int.cast_sub x y⟩
 end
 
 private lemma card_image_coe {R : Type*} [ring R] [decidable_eq R] [char_zero R] (T : finset ℤ) :
@@ -54,31 +54,34 @@ private lemma mem_diff_doubleton_mul {R : Type*} [ring R] [decidable_eq R]
   {x u v : R} (h : u ∈ ({0, x, -x} : finset R)) (h0 : v ∈ ({0, x, -x} : finset R)) :
   u * v ∈ ({0, x ^ 2, -x ^ 2} : finset R) :=
 begin
-  simp_rw [mem_insert, mem_singleton] at h h0 ⊢,
+  rw [mem_insert, mem_insert, mem_singleton] at h h0 ⊢,
   rcases h with rfl | h,
-  left; rw zero_mul,
+  exact or.inl (zero_mul v),
   rcases h0 with rfl | h0,
-  left; rw mul_zero,
-  rcases h with rfl | rfl; rcases h0 with rfl | rfl,
-  right; left; rw ← sq,
-  right; right; rw [mul_neg, ← sq],
-  right; right; rw [neg_mul, ← sq],
-  right; left; rw [neg_mul_neg, ← sq]
+  exact or.inl (mul_zero u),
+  right; rcases h with rfl | rfl; rcases h0 with rfl | rfl,
+  exact or.inl (sq v).symm,
+  exact or.inr ((mul_neg u u).trans $ congr_arg has_neg.neg (sq u).symm),
+  exact or.inr ((neg_mul v v).trans $ congr_arg has_neg.neg (sq v).symm),
+  exact or.inl ((neg_mul_neg x x).trans $ (sq x).symm)
 end
 
 
 variables {G : Type*} [add_group G] [decidable_eq G]
 
 private lemma self_diff_singleton {T : finset G} (h : T.card = 1) : T - T = {0} :=
-  by rw card_eq_one at h; rcases h with ⟨a, rfl⟩; rw [singleton_sub_singleton, sub_self]
+  exists.elim (card_eq_one.mp h) $ λ a h0, by rw [h0, singleton_sub_singleton, sub_self]
 
 private lemma self_diff_doubleton {T : finset G} (h : T.card = 2) :
   ∃ g : G, T - T = {0, g, -g} :=
 begin
   rw card_eq_two at h,
-  rcases h with ⟨a, b, -, rfl⟩; use a - b,
-  simp_rw [neg_sub, insert_eq, union_sub, sub_union, singleton_sub_singleton, sub_self],
-  rw [union_assoc, union_comm,← union_assoc, union_right_idem, union_comm]
+  rcases h with ⟨a, b, -, rfl⟩,
+  refine ⟨a - b, _⟩,
+  rw [neg_sub, insert_eq, union_sub, sub_union, sub_union, singleton_sub_singleton,
+      singleton_sub_singleton, singleton_sub_singleton, singleton_sub_singleton,
+      sub_self, sub_self, union_assoc, union_comm, ← union_assoc, union_right_idem,
+      union_comm, insert_eq, insert_eq]
 end
 
 end extra_lemmas
@@ -92,8 +95,8 @@ section sq_add_diff_num
 variables {R : Type*} [ring R] {T : finset R} {x : R}
 
 private lemma zero_is_sq_add_diff_num (h : T.nonempty) : sq_add_diff_num T 0 :=
-  by cases h with x h; exact ⟨x, x, x, x, h, h, h, h, (sub_self (x ^ 2 + x ^ 2)).symm⟩
-
+  exists.elim h $ λ x h0, ⟨x, x, x, x, h0, h0, h0, h0, (sub_self (x ^ 2 + x ^ 2)).symm⟩
+  
 private lemma neg_is_sq_add_diff_num (h : sq_add_diff_num T x) :
   sq_add_diff_num T (-x) :=
   by rcases h with ⟨a, b, c, d, ha, hb, hc, hd, rfl⟩;
@@ -101,7 +104,7 @@ private lemma neg_is_sq_add_diff_num (h : sq_add_diff_num T x) :
 
 private lemma sq_is_sq_add_diff_num (h : x ∈ T) (h0 : (0 : R) ∈ T) :
   sq_add_diff_num T (x ^ 2) :=
-  ⟨x, 0, 0, 0, h, h0, h0, h0, by rw [sq (0 : R), zero_mul, add_zero, add_zero, sub_zero]⟩
+  ⟨x, 0, 0, 0, h, h0, h0, h0, by rw [add_sub_add_right_eq_sub, sq (0 : R), zero_mul, sub_zero]⟩
 
 private lemma two_mul_sq_is_sq_add_diff_num (h : x ∈ T) (h0 : (0 : R) ∈ T) :
   sq_add_diff_num T (2 * x ^ 2) :=
@@ -118,7 +121,8 @@ begin
   rcases hc with ⟨y, hy, rfl⟩,
   rcases hd with ⟨z, hz, rfl⟩,
   refine ⟨w ^ 2 + x ^ 2 - (y ^ 2 + z ^ 2), _⟩,
-  simp_rw [int.cast_sub, int.cast_add, int.cast_pow]
+  rw [int.cast_sub, int.cast_add, int.cast_add],
+  iterate 4 { rw int.cast_pow }
 end
 
 private lemma cast_is_sq_add_diff_num_imp [decidable_eq R] [char_zero R]
@@ -131,7 +135,8 @@ begin
   rcases hb with ⟨x, hx, rfl⟩,
   rcases hc with ⟨y, hy, rfl⟩,
   rcases hd with ⟨z, hz, rfl⟩,
-  simp_rw [← int.cast_pow, ← int.cast_add, ← int.cast_sub, int.cast_inj] at h,
+  iterate 4 { rw ← int.cast_pow at h },
+  rw [← int.cast_add, ← int.cast_add, ← int.cast_sub, int.cast_inj] at h,
   exact ⟨w, x, y, z, hw, hx, hy, hz, h⟩
 end
 
@@ -166,9 +171,10 @@ begin
   generalize_hyp : u * v = y at h ⊢; clear h0 u v,
   have h0 : sq_add_diff_num ({0, x, -x} : finset R) (x ^ 2) :=
     sq_is_sq_add_diff_num (mem_insert_of_mem (mem_insert_self x _)) (mem_insert_self 0 _),
-  simp_rw [mem_insert, mem_singleton] at h,
+  rw [mem_insert, mem_insert, mem_singleton] at h,
   rcases h with rfl | rfl | rfl,
-  exacts [zero_is_sq_add_diff_num (insert_nonempty 0 {x, -x}), h0, neg_is_sq_add_diff_num h0]
+  exacts [zero_is_sq_add_diff_num (insert_nonempty 0 {x, -x}),
+    h0, neg_is_sq_add_diff_num h0]
 end
 
 private lemma good_two_self_diff_doubleton [decidable_eq R] (x : R) :
@@ -179,7 +185,7 @@ begin
   generalize_hyp : u * v = y at h ⊢; clear h0 u v,
   have h0 : sq_add_diff_num ({0, x, -x} : finset R) (2 * x ^ 2) :=
     two_mul_sq_is_sq_add_diff_num (mem_insert_of_mem (mem_insert_self x _)) (mem_insert_self 0 _),
-  simp_rw [mem_insert, mem_singleton] at h,
+  rw [mem_insert, mem_insert, mem_singleton] at h,
   rcases h with rfl | rfl | rfl,
   rw mul_zero; exact zero_is_sq_add_diff_num (insert_nonempty 0 {x, -x}),
   exact h0,
@@ -204,7 +210,8 @@ begin
   replace h0 : (1 : R) ∈ image coe T :=
     by rw ← int.cast_one; exact mem_image_of_mem coe h0,
   replace h := h _ _ h0 h0,
-  rw [mul_one, mul_one] at h; exact is_sq_add_diff_num_imp_eq_int_cast h
+  rw [mul_one, mul_one] at h,
+  exact is_sq_add_diff_num_imp_eq_int_cast h
 end
 
 private lemma good_cast_cast_imp_good [decidable_eq R] [char_zero R]
@@ -213,7 +220,8 @@ private lemma good_cast_cast_imp_good [decidable_eq R] [char_zero R]
 begin
   intros u v h0 h1,
   replace h := h u v (mem_image_of_mem coe h0) (mem_image_of_mem coe h1),
-  simp_rw ← int.cast_mul at h; exact cast_is_sq_add_diff_num_imp h
+  rw [← int.cast_mul, ← int.cast_mul] at h,
+  exact cast_is_sq_add_diff_num_imp h
 end
 
 private lemma good_int_bound {n : ℤ} {T : finset ℤ} (h : good n T) (h0 : ∃ k : ℤ, k ≠ 0 ∧ k ∈ T) :
@@ -252,10 +260,11 @@ begin
   clear ha hb hc hd h0 h1 h2 h3 a b c d k T,
 
   ---- Finishing
-  simp_rw [mem_insert, mem_singleton],
-  rw [← abs_eq, ← or_assoc (n = 1), ← abs_eq, ← abs_nonpos_iff, ← int.lt_add_one_iff, zero_add,
-      ← or_assoc, ← le_iff_lt_or_eq, ← int.lt_add_one_iff, ← bit0, ← le_iff_lt_or_eq],
-  exacts [h, zero_le_one, zero_le_two]
+  iterate 4 { rw mem_insert },
+  rwa [mem_singleton, ← abs_eq, ← or_assoc (n = 1), ← abs_eq (le_of_lt int.zero_lt_one),
+       ← abs_nonpos_iff, ← int.lt_add_one_iff, zero_add, ← or_assoc,
+       ← le_iff_lt_or_eq, ← int.lt_add_one_iff, ← bit0, ← le_iff_lt_or_eq],
+  exact zero_le_two
 end
 
 private lemma not_good_one {T : finset ℤ}
@@ -312,7 +321,8 @@ begin
 
   ---- Finishing
   revert h; rw imp_false,
-  rcases h0 with rfl | rfl | rfl; rcases h1 with rfl | rfl | rfl; norm_num
+  rcases h0 with rfl | rfl | rfl; rcases h1 with rfl | rfl | rfl,
+  all_goals { norm_num }
 end
 
 end good
@@ -356,9 +366,13 @@ begin
   replace h0 := good_int_bound (good_cast_cast_imp_good h0) ⟨1, one_ne_zero, h1⟩,
 
   ---- Finishing
-  convert mem_image_of_mem (coe : ℤ → R) h0; clear h h0 h1 n T,
-  simp_rw [image_insert, image_singleton, int.cast_neg],
-  rw [int.cast_zero, int.cast_one, int.cast_two]
+  revert h0,
+  suffices : ({0, 1, -1, 2, -2} : finset R) = image coe ({0, 1, -1, 2, -2} : finset ℤ),
+    rw this; exact mem_image_of_mem (coe : ℤ → R),
+  clear h h1 n T,
+  iterate 4 { rw image_insert },
+  rw [image_singleton, int.cast_neg, int.cast_neg,
+      int.cast_zero, int.cast_one, int.cast_two]
 end
 
 private lemma excellent_ge_three_imp [char_zero R] {k : ℕ} (h : 3 ≤ k) :
@@ -368,7 +382,9 @@ begin
   suffices h0 : ¬excellent k (1 : R),
   { intros q h1,
     replace h := excellent_ge_two_imp (le_trans (nat.le_succ 2) h) h1,
-    simp_rw [mem_insert, mem_singleton] at h ⊢,
+    rw [mem_insert, mem_insert, mem_singleton],
+    iterate 4 { rw mem_insert at h },
+    rw mem_singleton at h,
     rcases h with rfl | rfl | rfl | rfl | rfl,
     left; refl,
     exfalso; exact h0 h1,
@@ -414,7 +430,7 @@ begin
     intros c h0; rw [mem_insert, mem_image] at h0,
     rcases h0 with rfl | ⟨a, -, rfl⟩,
     left; refl,
-    right; use a
+    right; exact ⟨a, rfl⟩
   end,
 
   rintros x ⟨a, b, h2, h3, rfl⟩,
@@ -458,14 +474,13 @@ begin
   ---- Reduce to showing that `1, 2 : R` are `2`-excellent
   rsuffices ⟨h0, h1⟩ : excellent 2 (1 : R) ∧ excellent 2 (2 : R),
   { intros q; refine ⟨excellent_ge_two_imp (le_refl 2), λ h, _⟩,
-    simp_rw [mem_insert, mem_singleton] at h,
+    rw [mem_insert, mem_insert, mem_insert, mem_insert, mem_singleton] at h,
     rcases h with rfl | rfl | rfl | rfl | rfl,
     exacts [excellent_any_zero R 2, h0, excellent_any_neg 2 h0, h1, excellent_any_neg 2 h1] },
   
   ---- Now show that both `1, 2 : R` are `2`-excellent
   refine ⟨λ T h, _, λ T h, _⟩;
-    replace h := self_diff_doubleton h;
-    cases h with x h; rw h,
+    obtain ⟨x, h0⟩ := self_diff_doubleton h; rw h0,
   exacts [good_one_self_diff_doubleton x, good_two_self_diff_doubleton x]
 end
 
@@ -478,7 +493,7 @@ theorem final_solution_k_ge_3 {k : ℕ} (h : 3 ≤ k)
 begin
   have h0 : excellent k (2 : R) := λ T _, good_two_self_diff T,
   refine λ q, ⟨excellent_ge_three_imp h, λ h1, _⟩,
-  simp_rw [mem_insert, mem_singleton] at h1,
+  rw [mem_insert, mem_insert, mem_singleton] at h1,
   rcases h1 with rfl | rfl | rfl,
   exacts [excellent_any_zero R k, h0, excellent_any_neg k h0]
 end
