@@ -13,17 +13,18 @@ private lemma npow_not_inj_of_finite : ∃ a b : ℕ, a ≠ b ∧ x ^ a = x ^ b 
   finite.exists_ne_map_eq_of_infinite (λ n : ℕ, x ^ n)
 
 private lemma npow_not_inj_of_finite2 : ∃ a b : ℕ, a < b ∧ x ^ a = x ^ b :=
-  by rcases npow_not_inj_of_finite x with ⟨a, b, h, h0⟩;
-    exact (lt_or_gt_of_ne h).elim (λ h, ⟨a, b, h, h0⟩) (λ h, ⟨b, a, h, h0.symm⟩)
+  exists.elim (npow_not_inj_of_finite x) $ λ a h, exists.elim h $ λ b h0,
+    (lt_or_gt_of_ne h0.1).elim (λ h1, ⟨a, b, h1, h0.2⟩) (λ h1, ⟨b, a, h1, h0.2.symm⟩)
 
 private lemma npow_not_inj_of_finite3 : ∃ n k : ℕ, 0 < k ∧ x ^ (n + k) = x ^ n :=
-begin
-  rcases npow_not_inj_of_finite2 x with ⟨a, b, h, h0⟩,
-  rw lt_iff_exists_add at h; rcases h with ⟨k, h, rfl⟩,
-  exact ⟨a, k, h, h0.symm⟩
-end
+  exists.elim (npow_not_inj_of_finite2 x) $ λ a h, exists.elim h $ λ b h0,
+    ⟨a, b - a, nat.sub_pos_of_lt h0.1,
+      (congr_arg (has_pow.pow x) $ nat.add_sub_of_le $ le_of_lt h0.1).trans h0.2.symm⟩
 
 end finite_npow
+
+set_option profiler true
+set_option profiler.threshold 0.05
 
 
 section monoid_npow
@@ -32,7 +33,7 @@ variables {M : Type*} [monoid M] {x : M} {n k : ℕ} (h : x ^ (n + k) = x ^ n)
 include h
 
 private lemma npow_mul_add_eq_of_npow_add_eq : ∀ t : ℕ, x ^ (n + t * k) = x ^ n
-| 0 := congr_arg (λ c, x ^ c) $ (congr_arg (has_add.add n) (zero_mul k)).trans $ add_zero n
+| 0 := congr_arg (has_pow.pow x) $ (congr_arg (has_add.add n) (zero_mul k)).trans $ add_zero n
 | (t+1) := by rw [add_one_mul, ← add_assoc, pow_add, npow_mul_add_eq_of_npow_add_eq, ← pow_add, h]
 
 private lemma npow_add_eq_of_npow_add_eq_of_le {n0 : ℕ} (h0 : n ≤ n0) : x ^ (n0 + k) = x ^ n0 :=
