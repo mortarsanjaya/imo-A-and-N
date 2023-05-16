@@ -35,14 +35,15 @@ private lemma good_neg : good (-f) :=
 
 private lemma good_special_equality {x y : R} (h0 : x * y = 1) :
   f (f (x + 1) * f (y + 1)) = 0 :=
-  add_left_eq_self.mp $ (h _ _).trans $
-    by rw [add_one_mul, mul_add_one, h0, add_comm 1 x]
+  add_left_eq_self.mp $ (h _ _).trans $ congr_arg f $ (add_one_mul x _).trans $
+    congr_arg (+ (y + 1)) $ (mul_add_one x y).trans $ (congr_arg (+ x) h0).trans $
+    add_comm 1 x
 
 private lemma good_map_map_zero_sq : f (f 0 ^ 2) = 0 :=
-  by replace h := h 0 0; rwa [add_zero, mul_zero, add_left_eq_self, ← sq] at h
+  (congr_arg f $ sq $ f 0).trans $ add_left_eq_self.mp $ (h 0 0).trans $
+    congr_arg f $ (mul_zero 0).trans (add_zero 0).symm
 
-private lemma good_eq_of_inj (h0 : f 0 = 1) (h1 : injective f) :
-  f = has_sub.sub 1 :=
+private lemma good_eq_of_inj (h0 : f 0 = 1) (h1 : injective f) : f = has_sub.sub 1 :=
 begin
   -- Reduce to `f(f(x)) + f(x) = 1` for all `x : R`
   suffices h2 : ∀ x : R, f (f x) + f x = 1,
@@ -87,14 +88,14 @@ private lemma good_map_zero (h0 : f ≠ 0) : f 0 = 1 ∨ f 0 = -1 :=
   sq_eq_one_iff.mp (good_map_zero_sq h h0)
 
 private lemma good_map_one : f 1 = 0 :=
-  or.elim (eq_or_ne f 0) (λ h0, congr_fun h0 1) $
-    λ h0, (congr_arg f $ good_map_zero_sq h h0).symm.trans (good_map_map_zero_sq h)
+  (eq_or_ne f 0).elim (λ h0, congr_fun h0 1) $ λ h0,
+    (congr_arg f $ good_map_zero_sq h h0).symm.trans (good_map_map_zero_sq h)
 
 private lemma good_shift (h0 : f 0 = 1) (x : R) : f (x + 1) + 1 = f x :=
   by have h1 := h x 1; rwa [good_map_one h, mul_zero, h1, mul_one, add_comm, h0] at h1
 
 private lemma good_map_eq_zero_iff (h0 : f 0 = 1) (c : R) : f c = 0 ↔ c = 1 :=
-  ⟨good_map_eq_zero h (λ h1, absurd ((congr_fun h1 0).symm.trans h0) zero_ne_one),
+  ⟨good_map_eq_zero h $ λ h1, absurd ((congr_fun h1 0).symm.trans h0) zero_ne_one,
     λ h1, (congr_arg f h1).trans (good_map_one h)⟩
 
 end
