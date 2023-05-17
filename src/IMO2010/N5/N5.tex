@@ -1,0 +1,86 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+
+\newtheorem*{claim}{Claim}
+
+\title{IMO 2010 N5 (P3)}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\section*{Problem}
+
+Fix some $c \in \N$.
+Find all functions $f : \N \to \N$ such that $(f(n) + m + c)(f(m) + n + c)$ is a square for all $m, n \in \N$.
+
+
+
+\section*{Answer}
+
+$n \mapsto n + k$ for some $k \in \N$.
+
+
+
+\section*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2010SL.pdf}
+
+This solution is a copy of the official solution.
+Obviously, functions given in the answer section works.
+Thus it remains to prove that no other functions satisfy the problem condition.
+The main claim is as follows.
+
+\begin{claim}
+Let $p$ be a prime and $x, y \in \N$.
+If $f(x) \equiv f(y) \pmod{p}$, then $x \equiv y \pmod{p}$.
+\end{claim}
+\begin{proof}
+The main idea is to find a positive integer $n$ such that $\nu_p(n + f(x) + c)$ and $\nu_p(n + f(y) + c)$ are both odd.
+This suffices, since then $p$ has to divide $f(n) + x + c$ and $f(n) + y + c$, and thus $x \equiv y \pmod{p}$.
+
+First suppose that $f(x) \equiv f(y) \pmod{p^2}$.
+Choose a positive integer $N > f(x) + c$ such that $\nu_p(N) = 1$.
+Write $n = N - (f(x) + c) > 0$.
+Then $\nu_p(n + f(x) + c) = \nu_p(n + f(y) + c) = 1$.
+The latter holds since $f(x) \equiv f(y) \pmod{p^2}$.
+
+Now suppose that $f(x) \not\equiv f(y) \pmod{p^2}$.
+This time, we choose $N > f(x) + c$ such that $\nu_p(N) = 3$.
+Now, writing $n = N - (f(x) + c)$, we have $\nu_p(n + f(x) + c) = 3$ and $\nu_p(n + f(y) + c) = 1$.
+The latter holds since $f(x) \not\equiv f(y) \pmod{p^2}$ but $f(x) \equiv f(y) \pmod{p}$.
+\end{proof}
+
+Due to the above claim, $f$ is injective.
+Indeed, if $f(x) \neq f(y)$, then $f(x) \not\equiv f(y) \pmod{p}$ for some large $p$.
+The claim then implies $x \not\equiv y \pmod{p}$ and thus $x \neq y$.
+
+The claim also implies that $f(x + 1) = f(x) \pm 1$ for all $x \in \N$.
+Indeed, it implies $f(x + 1) \not\equiv f(x) \pmod{p}$ for any $x \in \N$ and $p$ prime.
+This is a contradiction for some choice of $p$ if $f(x + 1) \neq f(x) \pm 1$.
+
+Furthermore, by injectivity of $f$, one can show that either $f(x + 1) = f(x) + 1$ for all $x \in \N$ or $f(x + 1) = f(x) - 1$ for all $x \in \N$.
+The latter is a clear contradiction, so the former holds.
+This means that $f(n) = n + f(0)$ for all $n \in \N$, as desired.
+
+
+
+\section*{Extra notes}
+
+The above version of the problem with $c = 2$ is actually equivalent to the original problem.
+Indeed, then $f$ satisfies the above condition if and only if the map $n \mapsto f(n - 1) + 1$ satisfies the original condition.
+
+
+
+\end{document}
