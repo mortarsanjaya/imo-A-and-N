@@ -5,8 +5,6 @@ import algebra.char_p.two
 namespace IMOSL
 namespace IMO2009A7
 
-open function
-
 def good {R : Type*} [ring R] (f : R → R) :=
   ∀ x y : R, f (x * f (x + y)) = f (f x * y) + x ^ 2
 
@@ -34,7 +32,7 @@ end
 private lemma good_self_mul_map (x : R) : f (x * f x) = x ^ 2 :=
   by have h0 := h x 0; rwa [add_zero, mul_zero, good_map_zero h, zero_add] at h0
 
-private lemma good_inj : injective f :=
+private lemma good_inj : function.injective f :=
 begin
   suffices : ∀ x : R, f x = 0 ↔ x = 0,
   { intros x y h0,
