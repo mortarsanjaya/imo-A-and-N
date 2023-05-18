@@ -9,18 +9,16 @@ open function
 
 section extra_lemmas
 
-private lemma exists_sup_fn_fin (f : ℕ → ℕ) (c : ℕ) : ∃ K : ℕ, ∀ n : ℕ, n < c → f n ≤ K :=
-begin
-  induction c with c h,
-  exact ⟨0, λ n h, by exfalso; exact nat.not_lt_zero n h⟩,
-  cases h with K h,
-  refine ⟨max K (f c), λ n h0, _⟩,
-  rw [nat.lt_succ_iff, le_iff_eq_or_lt] at h0,
-  rcases h0 with rfl | h0,
-  exacts [le_max_right K (f n), le_trans (h n h0) (le_max_left K (f c))]
-end
+private lemma exists_sup_fn_fin (f : ℕ → ℕ) :
+  ∀ c : ℕ, ∃ K : ℕ, ∀ n : ℕ, n < c → f n ≤ K
+| 0 := ⟨0, λ n h, absurd h n.not_lt_zero⟩
+| (c+1) := exists.elim (exists_sup_fn_fin c) $ λ K h, ⟨max K (f c),
+    λ n h0, (eq_or_lt_of_le $ nat.le_of_lt_succ h0).elim
+      (λ h1, le_max_of_le_right $ le_of_eq $ congr_arg f h1)
+      (λ h1, (h n h1).trans $ le_max_left K $ f c)⟩
 
-private lemma pnat_to_nat_prop {P : ℕ+ → Prop} : (∀ n : ℕ+, P n) ↔ (∀ n : ℕ, P n.succ_pnat) :=
+private lemma pnat_to_nat_prop {P : ℕ+ → Prop} :
+  (∀ n : ℕ+, P n) ↔ (∀ n : ℕ, P n.succ_pnat) :=
   ⟨λ h n, h n.succ_pnat, λ h n, by rw ← pnat.succ_pnat_nat_pred n; exact h _⟩
 
 private lemma pnat_to_nat_prop2 {P : ℕ+ → ℕ+ → Prop} :
