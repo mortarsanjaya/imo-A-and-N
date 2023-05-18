@@ -30,19 +30,13 @@ private lemma lem5 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a b : ℕ
   (ha : ∀ k : ℕ, k ∈ set.range f ↔ a ≤ k) (hb : ∀ k : ℕ, k ∈ set.range g ↔ b ≤ k) : a = b :=
 begin
   obtain ⟨x, h2⟩ : ∃ x : ℕ, f a = f x + 1 :=
-  begin
-    have h2 := lem4 h0 ha,
-    rw [nat.succ_eq_add_one, le_iff_exists_add] at h2,
-    cases h2 with c h2,
-    obtain ⟨x, h3⟩ : a + c ∈ set.range f := (ha (a + c)).mpr le_self_add,
-    exact ⟨x, by rw [h2, h3, add_right_comm]⟩
-  end,
-
+    exists.elim (le_iff_exists_add.mp $ lem4 h0 ha)
+      (λ c h2, exists.elim ((ha $ a + c).mpr le_self_add) $
+        λ x h3, ⟨x, h2.trans $ (add_right_comm a 1 c).trans $ congr_arg (+ 1) h3.symm⟩),
   obtain ⟨c, h3⟩ := (ha a).mpr (le_refl a),
-  obtain ⟨d, h4⟩ := (ha $ g x).mpr (le_trans h1 $ (hb $ g x).mp ⟨x, rfl⟩),
+  obtain ⟨d, h4⟩ := (ha $ g x).mpr (h1.trans $ (hb $ g x).mp ⟨x, rfl⟩),
   rw [← nat.succ_eq_add_one, ← h, ← h3, ← h4, lem3 h h0, h0, h0, nat.succ_inj', lem3 h0 h] at h2,
-  refine le_antisymm h1 _,
-  rw [← h3, h2, h4, ← hb]; exact ⟨x, rfl⟩
+  exact le_antisymm h1 ((hb a).mp ⟨x, h4.symm.trans $ h2.symm.trans h3⟩)
 end
 
 private lemma lem6 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a b : ℕ}
@@ -52,7 +46,8 @@ private lemma lem6 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a b : ℕ
 private lemma lem7 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a : ℕ}
   (ha : ∀ k : ℕ, k ∈ set.range f ↔ a ≤ k) (ha' : ∀ k : ℕ, k ∈ set.range g ↔ a ≤ k) :
   f a = a.succ :=
-  (eq_or_lt_of_le $ lem4 h0 ha).elim eq.symm (λ h1, begin
+  (eq_or_lt_of_le $ lem4 h0 ha).elim eq.symm $
+  λ h1, begin
     rw ← nat.succ_le_iff at h1,
     obtain ⟨x, h2⟩ : ∃ x : ℕ, f a = f x + 1 + 1 :=
     begin
@@ -64,14 +59,14 @@ private lemma lem7 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a : ℕ}
 
     rw [← nat.succ_eq_add_one, ← nat.succ_eq_add_one, ← h, ← h] at h2,
     obtain ⟨c, h3⟩ := (ha a).mpr (le_refl a),
-    obtain ⟨d, h4⟩ := (ha (g (g x))).mpr (by rw ← ha'; use (g x)),
+    obtain ⟨d, h4⟩ := (ha (g (g x))).mpr ((ha' _).mp ⟨(g x), rfl⟩),
     rw [← h3, ← h4, lem3 h h0, h0, h0, nat.succ_inj', lem3 h0 h] at h2,
     obtain ⟨e, h5⟩ := (ha $ g x).mpr ((ha' $ g x).mp ⟨x, rfl⟩),
-    rw [h3, h4, ← h5, h0, eq_comm] at h2,
-    replace h2 := le_of_le_of_eq (nat.succ_le_succ_iff.mpr $ (ha' $ g e).mp ⟨e, rfl⟩) h2,
+    replace h2 := le_of_le_of_eq (nat.succ_le_succ_iff.mpr $ (ha' $ g e).mp ⟨e, rfl⟩)
+      (h3.symm.trans $ h2.trans $ h4.trans $ (congr_arg g h5.symm).trans $ h0 e).symm,
     rw [nat.succ_eq_add_one, add_le_iff_nonpos_right, ← not_lt] at h2,
     exact absurd nat.one_pos h2
-  end)
+  end
 
 
 
@@ -82,8 +77,8 @@ begin
   cases lem1 h0 with b h2,
   have h3 := lem6 h h0 h1 h2; subst h3,
   suffices : ∀ n : ℕ, a ≤ n → (f n = n.succ ∧ g n = n.succ),
-    ext n; rw [← nat.succ_inj', ← h, (this (g n) (by rw ← h2; use n)).left],
-  intros n; apply nat.le_induction; clear n,
+    ext n; rw [← nat.succ_inj', ← h, (this (g n) $ (h2 _).mp ⟨n, rfl⟩).left],
+  apply nat.le_induction,
   exact ⟨lem7 h h0 h1 h2, lem7 h0 h h2 h1⟩,
   rintros n h3 ⟨h4, h5⟩; split,
   rw [← nat.succ_eq_add_one, ← h5, h, h4, h5],
