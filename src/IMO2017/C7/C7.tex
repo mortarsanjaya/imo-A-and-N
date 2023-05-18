@@ -1,0 +1,85 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+
+\newtheorem{lemma}{Lemma}
+
+\title{IMO 2017 C7}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\section*{Problem}
+
+Let $S$ denote the set of finite subsets of $\N$.
+For any $X \in S$ and $k \in \N$, denote by $f_X(k)$ the $k^{\text{th}}$ smallest natural number not in $X$, indexed from $0$.
+That is, $f_X(0)$ is the smallest natural number not in $X$.
+For any finite sets $X, Y \in S$, denote $XY = X \cup f_X(Y)$.
+Also, for $k \geq 0$, define $X^k$ recursively by $X^0 = \emptyset$ and $X^{k + 1} = XX^k$.
+
+Let $A, B \in S$ such that $AB = BA$.
+Prove that $A^{|B|} = B^{|A|}$.
+
+
+
+\section*{Solution}
+
+Official solution: \url{http://www.imo-official.org/problems/IMO2017SL.pdf}
+
+We follow Solution 1; we view finite subsets of $\N$ as a function via the map $X \mapsto f_X$.
+This allows us to borrow an idea from abstract algebra.
+Lemma 2 has an alternative proof using the property of the functions $f_X$.
+We will use this proof instead of one given in Solution 1.
+
+It is easy to verify that the map $X \mapsto f_X$ is injective on $S$.
+The range of $f_X$ is just $X^c$, and a strictly increasing function from $\N$ to itself is determined by its range.
+Thus, the following lemma implies that multiplication on $S$ is associative.
+In fact, it makes $S$ a monoid, as one can easily check that $\emptyset X = X \emptyset = X$ for any $X \in S$.
+
+\begin{lemma}\label{2017c7-1}
+For any $X, Y \in S$, we have $f_{XY} = f_X \circ f_Y$.
+\end{lemma}
+\begin{proof}
+it suffices to show that $f_{XY}(\N) = f_X(f_Y(\N))$, or equivalently, $(XY)^c = f_X(Y^c)$.
+Indeed,
+\[ f_X(Y^c) = f_X(\N) \setminus f_X(Y) = \N \setminus (X \cup f_X(Y)) = (XY)^c. \]
+\end{proof}
+
+In particular, the definition of power of an element of $S$ given in the problem statement is just the monoid power on $S$.
+Furthermore, $X \mapsto f_X$ is a monoid homomorphism; the multiplication on $\N^\N$ is defined by composition.
+
+Given $A, B \in S$ with $AB = BA$, it is clear that $A^{|B|} B^{|A|} = B^{|A|} A^{|B|}$.
+The definition of multiplication yields $|XY| = |X| + |Y|$ for any $X, Y \in S$.
+Then one can check that $|A^{|B|}| = |A||B| = |B^{|A|}|$.
+Thus, it suffices to show that for any $X, Y \in S$, if $XY = YX$ and $|X| = |Y|$, then $X = Y$.
+It follows from the following lemma by working over strictly increasing functions on $\N$.
+
+\begin{lemma}\label{2017c7-2}
+Let $f, g : \N \to \N$ strictly increasing.
+Suppose that $fg = gf$ and $f(n) = g(n)$ for every $n$ large enough.
+Then $f = g$.
+\end{lemma}
+\begin{proof}
+It suffices to show that for any $N \geq 0$, if $f(n) = g(n)$ for all $n > N$, then $f(N) = g(N)$.
+The lemma would then follow by downwards induction.
+
+Now fix some such $N$.
+Since $f$ and $g$ are strictly increasing, we have $f(N), g(N) \geq N$.
+If $f(N) > N$, induction hypothesis yields $f(g(N)) = g(f(N)) = f(f(N))$.
+By injectivity, we get $f(N) = g(N)$.
+Similarly, we get $f(N) = g(N)$ if $g(N) > N$.
+Otherwise, we have $f(N) = g(N) = N$.
+\end{proof}
+
+\end{document}
