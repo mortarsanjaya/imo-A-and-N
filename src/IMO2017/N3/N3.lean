@@ -1,6 +1,4 @@
 import
-  data.nat.prime
-  algebra.big_operators.intervals
   extra.periodic.big_operators
   ring_theory.int.basic
 
@@ -25,30 +23,23 @@ variables {M : Type*} [add_comm_monoid M]
 private def dvd_seq (n : ℕ) (c : M) (i : ℕ) := ite (n ∣ i.succ) c 0
 
 private lemma dvd_seq_dvd (n : ℕ) (c : M) {i : ℕ} (h : n ∣ i.succ) : dvd_seq n c i = c :=
-  by rw [dvd_seq, if_pos h]
+  if_pos h
 
 private lemma dvd_seq_not_dvd (n : ℕ) (c : M) {i : ℕ} (h : ¬n ∣ i.succ) : dvd_seq n c i = 0 :=
-  by rw [dvd_seq, if_neg h]
+  if_neg h
 
 private lemma dvd_seq_add_self (n : ℕ) (c : M) (i : ℕ) : dvd_seq n c (i + n) = dvd_seq n c i :=
-begin
-  unfold dvd_seq; congr' 1,
-  rw [nat.succ_eq_add_one, add_right_comm, nat.dvd_add_self_right]
-end
+  if_congr (by rw [← nat.succ_add, nat.dvd_add_self_right]) rfl rfl
 
 private lemma dvd_seq_mod_self (n : ℕ) (c : M) (i : ℕ) : dvd_seq n c (i % n) = dvd_seq n c i :=
-begin
-  unfold dvd_seq; congr' 1,
-  rw [nat.succ_eq_add_one, nat.dvd_iff_mod_eq_zero, nat.mod_add_mod, nat.dvd_iff_mod_eq_zero]
-end
+  if_congr (by rw [nat.succ_eq_add_one, nat.dvd_iff_mod_eq_zero,
+    nat.mod_add_mod, nat.dvd_iff_mod_eq_zero]) rfl rfl
 
-private lemma dvd_seq_sum (n : ℕ) (c : M) (k : ℕ) :
-  (range k).sum (dvd_seq n c) = (k / n) • c :=
-begin
-  induction k with k k_ih,
-  rw [sum_range_zero, nat.zero_div, zero_smul],
-  rw [sum_range_succ, k_ih, dvd_seq, nat.succ_div, add_smul, ite_smul, one_smul, zero_smul]
-end
+private lemma dvd_seq_sum (n : ℕ) (c : M) :
+  ∀ k : ℕ, (range k).sum (dvd_seq n c) = (k / n) • c
+| 0 := (sum_range_zero _).trans (smul_eq_zero_of_left n.zero_div c).symm
+| (k+1) := by rw [sum_range_succ, dvd_seq_sum, dvd_seq,
+    nat.succ_div, add_smul, ite_smul, one_smul, zero_smul]
 
 end dvd_indicator
 
