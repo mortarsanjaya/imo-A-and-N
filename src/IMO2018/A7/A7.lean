@@ -21,10 +21,11 @@ private lemma classical_cauchy_schwarz {α : Type*} (S : finset α) (a b : α �
   S.sum (λ i, sqrt (a i * b i)) ^ 2 ≤ S.sum a * S.sum b :=
 begin
   rw [← le_sqrt_iff, sqrt_eq_rpow, mul_rpow],
-  convert nnreal.inner_le_Lp_mul_Lq
-    S (λ i, sqrt (a i)) (λ i, sqrt (b i)) ⟨one_lt_two, add_halves' 1⟩,
-  funext i; rw sqrt_mul,
-  all_goals { funext i; rw [← nat.cast_two, rpow_nat_cast, sq_sqrt] }
+  conv_lhs { congr, skip, funext, rw sqrt_mul },
+  refine le_of_le_of_eq (nnreal.inner_le_Lp_mul_Lq S (λ i, sqrt (a i)) (λ i, sqrt (b i))
+    ⟨one_lt_two, add_halves' 1⟩) (congr_arg2 has_mul.mul _ _),
+  all_goals { conv_lhs { congr, congr, skip, funext,
+    rw [← nat.cast_two, rpow_nat_cast, sq_sqrt] } }
 end
 
 private lemma lem1 {q : ℝ≥0} (hq : 0 < q) (x c : ℝ≥0) :
@@ -46,7 +47,8 @@ begin
   have X : (3 : ℝ) ≠ 0 := three_ne_zero,
   rw [← rpow_eq_rpow_iff X, inv_eq_one_div, rpow_self_rpow_inv X,
       div_rpow, rpow_self_rpow_inv X, ← div_div],
-  congr; rcases eq_or_ne a 0 with rfl | ha,
+  refine congr_arg (/ b) _,
+  rcases eq_or_ne a 0 with rfl | ha,
   rw [sq, zero_mul, div_zero],
   rw [eq_div_iff ha, ← pow_succ', ← rpow_nat_cast, ← bit1, nat.cast_bit1, nat.cast_one]
 end
@@ -63,7 +65,8 @@ include hn hq ht hr
   
 private lemma holder_target (h : periodic a n) : target_sum q a n ≤ n • (t ^ 2 * r) ^ (3⁻¹ : ℝ) :=
 begin
-  have X : (3 / 2 : ℝ).is_conjugate_exponent 3 := by rw real.is_conjugate_exponent_iff; norm_num,
+  have X : (3 / 2 : ℝ).is_conjugate_exponent 3 :=
+    by rw real.is_conjugate_exponent_iff; norm_num,
   unfold target_sum; convert nnreal.inner_le_Lp_mul_Lq (range n)
     (λ i, a i ^ (3⁻¹ : ℝ)) (λ i, (a (i + 1) + q)⁻¹ ^ (3⁻¹ : ℝ)) X,
   funext; rw [div_eq_mul_inv, mul_rpow],
@@ -88,11 +91,13 @@ begin
   rw [← mul_le_mul_left (pow_pos hn 2), mul_add, ← mul_pow, ← nsmul_eq_mul],
   have X : ∀ i : ℕ, a i + q ≠ 0 := λ i, ne_of_gt (add_pos_of_nonneg_of_pos ((zero_le (a i))) hq),
   suffices : (n • t) ^ 2 ≤ (range n).sum (λ i, a i / (a i + q)) * (n * (p + q)),
-  { convert add_le_add_right this _,
-    rw [← mul_assoc, ← mul_assoc, ← add_mul]; congr' 1,
-    rw [mul_comm, sq, mul_assoc, ← mul_add]; congr' 1,
+  { refine le_of_le_of_eq (add_le_add_right this _) _,
+    rw [← mul_assoc, ← mul_assoc, ← add_mul],
+    refine congr_arg2 has_mul.mul _ rfl,
+    rw [mul_comm, sq, mul_assoc, ← mul_add],
+    refine congr_arg2 has_mul.mul rfl _,
     rw [mul_left_comm, ← nsmul_eq_mul, ← hr, mul_sum, ← sum_add_distrib],
-    conv_rhs { congr, skip, funext, rw [← div_eq_mul_inv, ← add_div, div_self (X x)] },
+    conv_lhs { congr, skip, funext, rw [← div_eq_mul_inv, ← add_div, div_self (X x)] },
     rw [sum_const, nsmul_one, card_range] },
   rw ← ht; convert classical_cauchy_schwarz (range n) (λ i, a i / (a i + q)) (λ i, a i + q),
   funext i; rw div_mul_cancel _ (X i),
