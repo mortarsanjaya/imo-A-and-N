@@ -26,7 +26,9 @@ begin
   rw [nat.cast_one, nat.cast_zero, zero_div, add_zero] at h0,
   refine le_trans _ (add_le_add_right h0 _),
   rw [div_add' _ _ _ (ne_of_gt (h 1)), le_div_iff (h 1), ← sq],
-  convert two_mul_le_add_sq 1 (a 1); norm_num,
+  nth_rewrite 2 ← one_pow 2,
+  refine le_trans _ (two_mul_le_add_sq _ _),
+  rw mul_one,
 
   intros n h1 h2,
   rw [sum_range_succ, nat.cast_succ],
