@@ -1,6 +1,4 @@
-import
-  analysis.mean_inequalities
-  analysis.special_functions.pow
+import analysis.mean_inequalities
 
 /-! # IMO 2020 A4 (P2), Generalized Version -/
 
@@ -8,8 +6,6 @@ namespace IMOSL
 namespace IMO2020A4
 
 open real finset
-
-section extra
 
 theorem sq_sum_lt_sum_sq {n : ℕ} (h : 2 ≤ n) {x : fin n → ℝ} (h0 : ∀ k : fin n, 0 < x k) :
   univ.sum (λ i, x i ^ 2) < univ.sum x ^ 2 :=
@@ -27,7 +23,7 @@ begin
     exact lt_of_lt_of_le two_pos hn }
 end
 
-end extra
+
 
 
 
@@ -95,13 +91,13 @@ theorem final_solution_original {a b c d : ℝ} (h : 0 < d) (h0 : d ≤ c) (h1 :
   (h3 : a + b + c + d = 1) : (a + 2 * b + 3 * c + 4 * d) * (a ^ a * b ^ b * c ^ c * d ^ d) < 1 :=
 begin
   let x : fin 3 → ℝ := ![b, c, d],
-  have ha : 0 < a := by linarith only [h, h0, h1, h2],
+  have ha : 0 < a := lt_of_lt_of_le h (h0.trans $ h1.trans h2),
   have h4 : ∀ k : fin 3, 0 < x k :=
     λ k, by fin_cases k; simp [x]; linarith only [h, h0, h1],
   have h5 : ∀ k : fin 3, x k ≤ a :=
     λ k, by fin_cases k; simp [x]; linarith only [h0, h1, h2],
   have h6 : a + univ.sum (λ (k : fin 3), x k) = 1 :=
-    by rw [fin.sum_univ_three, ← add_assoc, ← add_assoc, ← h3]; simp [x],
+    by rw [fin.sum_univ_three, ← add_assoc, ← add_assoc, ← h3]; refl,
   refine lt_of_le_of_lt _ (final_solution (by norm_num) ha h4 h5 h6),
   rw [fin.prod_univ_three, mul_assoc (a ^ a), mul_assoc]; simp [x],
   refine mul_le_mul_of_nonneg_right _ _,
