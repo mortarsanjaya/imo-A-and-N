@@ -54,6 +54,9 @@ lemma map_neg_sub_map2 (x : R) : f (-x) - f x = f (x + 1) * f (-1) :=
     ((sub_add_cancel' 1 x).symm.trans $ congr_arg (has_sub.sub 1) (add_comm 1 x))).trans $
   map_neg_sub_map1 h $ x + 1
 
+lemma map_mul_two_add_one (x : R) : f (x * 2 + 1) = f x * f 2 + f (x + 2) :=
+  eq_add_of_sub_eq (h x 2)
+
 end non_domain
 
 
