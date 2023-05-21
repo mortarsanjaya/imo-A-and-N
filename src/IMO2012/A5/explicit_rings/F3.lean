@@ -1,10 +1,11 @@
-import algebra.field.defs algebra.hom.ring
+import algebra.hom.ring
 
 /-!
 # Explicit construction of 𝔽₃
 
 In this file, we explicitly construct the field of 3 elements.
 We prove just the necessary properties for the purpose of the main problem.
+We won't even prove that it is a field or a decidable type; just a ring.
 -/
 
 namespace IMOSL
@@ -65,24 +66,6 @@ instance : has_add 𝔽₃ := ⟨𝔽₃.add⟩
 instance : has_sub 𝔽₃ := ⟨𝔽₃.sub⟩
 instance : has_neg 𝔽₃ := ⟨𝔽₃.neg⟩
 instance : has_mul 𝔽₃ := ⟨𝔽₃.mul⟩
-instance : has_div 𝔽₃ := ⟨𝔽₃.mul⟩
-instance : has_inv 𝔽₃ := ⟨id⟩
-
-
-
-instance : decidable_eq 𝔽₃
-| 𝔽₃0 𝔽₃0 := is_true rfl
-| 𝔽₃0 𝔽₃1 := is_false (λ h, 𝔽₃.no_confusion h)
-| 𝔽₃0 𝔽₃2 := is_false (λ h, 𝔽₃.no_confusion h)
-| 𝔽₃1 𝔽₃0 := is_false (λ h, 𝔽₃.no_confusion h)
-| 𝔽₃1 𝔽₃1 := is_true rfl
-| 𝔽₃1 𝔽₃2 := is_false (λ h, 𝔽₃.no_confusion h)
-| 𝔽₃2 𝔽₃0 := is_false (λ h, 𝔽₃.no_confusion h)
-| 𝔽₃2 𝔽₃1 := is_false (λ h, 𝔽₃.no_confusion h)
-| 𝔽₃2 𝔽₃2 := is_true rfl
-
-instance : nontrivial 𝔽₃ :=
-{ exists_pair_ne := ⟨𝔽₃0, 𝔽₃1, λ h, 𝔽₃.no_confusion h⟩ }
 
 
 
@@ -199,33 +182,13 @@ protected lemma mul_one : ∀ x : 𝔽₃, x * 1 = x
 protected lemma one_mul (x : 𝔽₃) : 1 * x = x :=
   (𝔽₃.mul_comm 1 x).trans (𝔽₃.mul_one x)
 
-protected lemma mul_zero : ∀ x : 𝔽₃, x * 0 = 0
-| 𝔽₃0 := rfl
-| 𝔽₃1 := rfl
-| 𝔽₃2 := rfl
-
-protected lemma zero_mul (x : 𝔽₃) : 0 * x = 0 :=
-  (𝔽₃.mul_comm 0 x).trans (𝔽₃.mul_zero x)
-
-protected lemma mul_inv_cancel : ∀ x : 𝔽₃, x ≠ 0 → x * x⁻¹ = 1
-| 𝔽₃0 := absurd rfl
-| 𝔽₃1 := λ _, rfl
-| 𝔽₃2 := λ _, rfl
-
-instance : comm_group_with_zero 𝔽₃ :=
+instance : comm_monoid 𝔽₃ :=
 { mul_comm := 𝔽₃.mul_comm,
   mul_assoc := 𝔽₃.mul_assoc,
   one_mul := 𝔽₃.one_mul,
   mul_one := 𝔽₃.mul_one,
-  mul_zero := 𝔽₃.mul_zero,
-  zero_mul := 𝔽₃.zero_mul,
-  inv_zero := rfl,
-  mul_inv_cancel := 𝔽₃.mul_inv_cancel,
-  .. 𝔽₃.has_zero,
   .. 𝔽₃.has_mul,
-  .. 𝔽₃.has_one,
-  .. 𝔽₃.has_inv,
-  .. 𝔽₃.nontrivial }
+  .. 𝔽₃.has_one }
 
 
 
@@ -262,13 +225,11 @@ protected lemma add_mul (x y z : 𝔽₃) : (x + y) * z = x * z + y * z :=
   (𝔽₃.mul_comm _ z).trans $ (𝔽₃.mul_add z x y).trans $
     congr_arg2 𝔽₃.add (𝔽₃.mul_comm z x) (𝔽₃.mul_comm z y)
 
-instance : field 𝔽₃ :=
+instance : ring 𝔽₃ :=
 { left_distrib := 𝔽₃.mul_add,
   right_distrib := 𝔽₃.add_mul,
   .. 𝔽₃.add_comm_group,
-  .. 𝔽₃.comm_group_with_zero }
-
-lemma three_eq_zero : (3 : 𝔽₃) = 0 := rfl
+  .. 𝔽₃.comm_monoid }
 
 
 
@@ -309,13 +270,10 @@ variable (h : (3 : R) = 0)
 include h
 
 lemma cast_add : ∀ x y : 𝔽₃, ((x + y : 𝔽₃) : R) = x + y
-| 𝔽₃0 𝔽₃0 := (zero_add 0).symm
-| 𝔽₃0 𝔽₃1 := (zero_add 1).symm
-| 𝔽₃0 𝔽₃2 := (zero_add (-1)).symm
-| 𝔽₃1 𝔽₃0 := (add_zero 1).symm
+| 𝔽₃0 x := (congr_arg cast x.zero_add).trans (zero_add ↑x).symm
+| x 𝔽₃0 := (congr_arg cast x.add_zero).trans (add_zero ↑x).symm
 | 𝔽₃1 𝔽₃1 := eq.symm (eq_neg_of_add_eq_zero_left h)
 | 𝔽₃1 𝔽₃2 := (add_neg_self 1).symm
-| 𝔽₃2 𝔽₃0 := (add_zero (-1)).symm
 | 𝔽₃2 𝔽₃1 := (neg_add_self 1).symm
 | 𝔽₃2 𝔽₃2 := eq_add_neg_of_add_eq (eq_neg_of_add_eq_zero_left h)
 
