@@ -10,7 +10,7 @@ instance : is_empty (ℝ →+* 𝔽₃) :=
   ⟨λ φ, begin
     have h0 := congr_arg φ (mul_inv_cancel (three_ne_zero : (3 : ℝ) ≠ 0)),
     rw [φ.map_mul, φ.map_bit1, φ.map_one] at h0,
-    exact (one_ne_zero : (1 : 𝔽₃) ≠ 0) (h0.symm.trans (zero_mul _))
+    exact 𝔽₃.no_confusion h0
   end⟩
 
 theorem final_solution_real {S : Type*} [comm_ring S] [is_domain S] {f : ℝ → S} :

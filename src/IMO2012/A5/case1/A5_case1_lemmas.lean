@@ -5,18 +5,18 @@ import IMO2012.A5.A5_basic algebra.ring.commute
 namespace IMOSL
 namespace IMO2012A5
 
-variables {R S : Type*} [ring R] [ring S] [is_domain S] {f : R → S} (h : good f)
-include h
+variables {R S : Type*} [ring R] [ring S]
 
 /-- While this lemma does not depend on `f(-1) ≠ 0`, it is useless in the case `f(-1) = 0`. -/
-lemma case1_map_add_main_equality (x y : R) :
+lemma case1_map_add_main_equality {f : R → S} (h : good f) (x y : R) :
   -f (x + y + 1) * f (-1) = f (-x) * f (-y) - f x * f y :=
   by rw [← h, ← h, neg_mul_neg, sub_sub_sub_cancel_left,
     ← neg_add, ← neg_sub, map_neg_sub_map2 h, neg_mul]
 
 
-variables (h0 : f (-1) ≠ 0)
-include h0
+
+variables [is_domain S] {f : R → S} (h : good f) (h0 : f (-1) ≠ 0)
+include h h0
 
 lemma case1_map_neg_add_one (x : R) : f (-x + 1) = -f (x + 1) :=
   by rw [← mul_left_inj' h0, ← map_neg_sub_map2 h,
@@ -38,14 +38,14 @@ lemma case1_map_two : f 2 = 1 :=
   by rw [bit0, ← neg_inj, ← case1_map_neg_add_one h h0, neg_add_self];
     exact case1_map_zero h h0
 
-lemma case1_map_two_mul_add_one (x : R) : f (2 * x + 1) = f x - f (-x) :=
-  by rw [case1_map_neg h h0, sub_neg_eq_add, add_comm x,
-    ← sub_eq_iff_eq_add, h, case1_map_two h h0, one_mul]
+lemma case1_map_two_mul_add_one (x : R) : f (x * 2 + 1) = f x - f (-x) :=
+  by rw [map_mul_two_add_one h, case1_map_two h h0,
+    mul_one, case1_map_neg h h0, sub_neg_eq_add]
 
 lemma case1_map_ne_zero_imp {x : R} (h1 : f x ≠ 0) : f (x - 1) - f (x + 1) = f (-1) :=
   by have h2 := case1_map_add_main_equality h (x - 1) (x - 1);
-  rwa [(map_comm_of_comm h (commute.refl (x - 1)).neg_left).mul_self_sub_mul_self_eq',
-    ← two_mul, case1_map_two_mul_add_one h h0, neg_sub, map_neg_sub_map2 h,
+  rwa [(map_comm_of_comm h (commute.refl $ x - 1).neg_left).mul_self_sub_mul_self_eq',
+    ← mul_two, case1_map_two_mul_add_one h h0, neg_sub, map_neg_sub_map2 h,
     sub_add_cancel, mul_right_inj' (mul_ne_zero h1 h0), neg_sub', sub_neg_eq_add,
     case1_map_neg_add_one h h0, add_comm, ← sub_eq_add_neg, eq_comm] at h2
 
@@ -56,15 +56,15 @@ begin
   rw [h1, zero_mul, sub_eq_zero, sub_eq_add_neg, add_comm] at h2,
   rw [← h2, case1_map_neg_add_one h h0, neg_inj, and_self],
   have h3 := case1_map_two_mul_add_one h h0 (x - 1),
-  rw [mul_sub_one, bit0, ← sub_sub, sub_add_cancel,
+  rw [sub_one_mul, bit0, ← sub_sub, sub_add_cancel,
       neg_sub', sub_neg_eq_add, h2, sub_self] at h3,
   replace h2 := case1_map_add_main_equality h (x - 1) x,
   rw [h1, mul_zero, sub_zero, ← add_sub_right_comm, neg_mul,
-      ← map_neg_sub_map2 h, ← two_mul, bit0, h3, sub_zero, neg_sub',
+      ← map_neg_sub_map2 h, ← mul_two, bit0, h3, sub_zero, neg_sub',
       sub_neg_eq_add, neg_sub', sub_neg_eq_add, ← bit0] at h2,
   replace h3 := case1_map_two_mul_add_one h h0 (-x),
   rw [neg_neg, map_neg_sub_map2 h] at h3,
-  rw [← mul_neg, h3, case1_map_neg_add_one h h0, neg_mul, neg_inj,
+  rw [← neg_mul, h3, case1_map_neg_add_one h h0, neg_mul, neg_inj,
       mul_eq_mul_left_iff, ← mul_eq_mul_right_iff] at h2,
   replace h3 := case1_map_add_main_equality h x (-(x + 1)),
   rwa [h1, zero_mul, sub_zero, neg_neg, add_right_comm,
