@@ -130,13 +130,45 @@ Thus, we get an induced map $g : R/I \to S$ such that $f = g \circ \phi$, where 
 Since $\phi$ is surjective, one can check that $g$ satisfies~\eqref{2012a5-eq0} as well.
 Thus, from now on, we can WLOG assume that $I = \{0\}$.
 
+The following lemma is only going to be useful in Case 2.
+However, we put it here since it will be used in two subcases.
+The lemma says that we have a very strong structure on $R$ if $I \subsetneq J$.
+
+\begin{lemma}\label{2012a5-3}
+Let $I$ and $J$ as in Lemma~\ref{2012a5-2}.
+Suppose that $I \subsetneq J$, and fix some $c \in J \setminus I$.
+Then for any $x \in R$, $x$ is congruent to $0$, $1$, $c$, or $c + 1$ modulo $I$.
+\end{lemma}
+\begin{proof}
+First note that $[J : I] = 2$.
+One can check manually that if $c, d \in J \setminus I$, then $c - d \in I$.
+In particular, every element of $J$ is congruent to $0$ or $c$ modulo $I$.
+It suffices to show that for any $x \in R$, either $x \in J$ or $x - 1 \in J$.
+The main claim is that, if $x \notin J$, then $xc \notin I$.
+
+First suppose that the claim holds.
+Then given $x \notin J$, since $c \in J \setminus I$, we have $xc \in J \setminus I$.
+This implies $(x - 1) c = xc - c \in I$.
+The claim again implies that $x - 1 \in J$, as desired.
+
+We now prove the claim.
+Since $c \in I \setminus J$, we have $f(c) = 1$ and for all $y \in R$,
+\[ f(x(c + y) + 1) = f(x + c + y) + f(x) f(c + y) = -(f(x + y) + f(x) f(y)) = -f(xy + 1). \]
+On the other hand, since $J$ is an ideal, we have $xc \in J$.
+In particular, $f(x(c + y) + 1) = f(xc + xy + 1) = -f(xc) f(xy + 1)$.
+For $x \notin J$, we can pick $y \in R$ such that $f(xy + 1) \neq 0$.
+Cancelling out $f(xy + 1)$ yields $f(xc) = 1$.
+Note that $1 \neq -1$ in $S$ in our case; otherwise $c \in I$ as $f(c) = 1 = -1$.
+This implies $xc \in J \setminus I$, as desired.
+\end{proof}
+
 We now split into two cases: $f(-1) \neq 0$ and $f(-1) = 0$.
 The above equation is only saying that $f$ is even if $f(-1) = 0$.
 We start with the former case.
 
 
 
-\subsection*{Case 1: $f(-1) \neq 0$}
+\subsection*{Case 1: $f(-1) \neq 0$.}
 
 The equation $f(-x) - f(x) = f(x + 1) f(-1)$ now easily yields
 \[ f(1 - x) = -f(1 + x). \tag{1.1}\label{2012a5-eq1-1} \]
@@ -179,7 +211,7 @@ This proves the claim, since $C = -f(-1) \neq 0$.
 \end{proof}
 
 
-\subsubsection*{Subcase 1.1: $f(-1) = -2 \neq 0$}
+\subsubsection*{Subcase 1.1: $f(-1) = -2 \neq 0$.}
 
 In particular $\rchar(S) \neq 2$.
 
@@ -202,7 +234,7 @@ Again, $\rchar(S) \neq 2$, so $f(x + y) + 1 = f(x + y + 1) = f(x) + f(y) + 2$.
 We are done.
 
 
-\subsubsection*{Subcase 1.2: $f(-1) = 1 \neq -2$}
+\subsubsection*{Subcase 1.2: $f(-1) = 1 \neq -2$.}
 
 In particular, $\rchar(S) \neq 3$.
 
@@ -231,44 +263,94 @@ We are done with this subcase.
 
 
 
-\subsection*{Case 2: $f(-1) = 0$ (Not generalized)}
+\newpage
 
-\textit{Note: For now, we just work with the case $R = \R$.}
+\subsection*{Case 2: $f(-1) = 0$.}
 
-Let us assume that $R = \R$ for this case.
-Then the only corresponding solution is $x \mapsto \phi(x)^2 - 1$.
+Recall that~\eqref{2012a5-eq0} with $y = -1$ implies that $f$ is even.
+We derive some general equalities and compute $f(2)$.
+Replacing $y$ with $-y$ now gives us
+\[ f(xy - 1) - f(x - y) = f(x) f(y). \tag{2.1}\label{2012a5-eq2-1} \]
 
-By the equation $f(x) - f(-x) = -f(x + 1) f(-1)$, this time, we get that $f$ is even.
-In particular we have $f(xy + 1) - f(x + y) = f(1 - xy) - f(x - y)$ for all $x, y \in \R$.
-Rearranging gives us $f(xy + 1) - f(xy - 1) = f(x + y) - f(x - y)$.
-In particular, for any $a, b \in \R$, solving for $x + y = a$ and $x - y = b$ gives us
-\[ f\left(\frac{a^2 - b^2}{4} + 1\right) - f\left(\frac{a^2 - b^2}{4} - 1\right) = f(a) - f(b). \]
-It follows that $f(a) - f(b) = f(c) - f(d)$ for any $a, b, c, d \in \R$ such that $a^2 - b^2 = c^2 - d^2$.
-In particular, since $f(0) = -1$, we have $f(\sqrt{u + v}) = f(\sqrt{u}) + f(\sqrt{v}) + 1$ for all $u, v \geq 0$.
+Plugging $y = 2$ into~\eqref{2012a5-eq0} gives us $f(2x + 1) = f(x) f(2) + f(x + 2)$.
+This also means $f(2x + 1) = f(2(-x - 1) + 1) = f(-x - 1) f(2) + f(-x + 1) = f(x + 1) f(2) + f(x - 1)$.
+In particular, this gives us
+\[ f(x + 2) = (f(x + 1) - f(x)) f(2) + f(x - 1). \tag{2.2}\label{2012a5-eq2-2} \]
 
-Now define $g : \R_{\geq 0} \to R$ by $g(x) = f(\sqrt{x})$ for all $x \geq 0$.
-Since $f$ is even, we have $f(x) = g(x^2)$ for all $x \in \R$.
-The previous paragraph implies that $g + 1$ is additive.
-It remains to show that it is multiplicative.
-Going back to~\eqref{2012a5-eq0}, for all $x, y \in \R$, we have
-\[ g(x^2) g(y^2) = g(1 + 2xy + x^2 y^2) - g(x^2 + 2xy + y^2) = g(1) + g(x^2 y^2) - g(x^2) - g(y^2). \]
-Note that $g(1) = f(1) = 0$.
-Thus rearranging gives $g(x^2 y^2) + 1 = (g(x^2) + 1)(g(y^2) + 1)$ for all $x, y \in \R$.
-Replacing with square roots prove that $g + 1$ is multiplicative.
+Another useful identity can be obtained as follows.
+Notice that for any $x \in R$, $x(x + 1) - 1 = (x - 1)(x + 2) + 1 = x^2 + x - 1$.
+Thus combining~\eqref{2012a5-eq2-1} and~\eqref{2012a5-eq0} gives us
+\[ f(x - 1) f(x + 2) + f(2x + 1) = f(x) f(x + 1) + f(-1) = f(x) f(x + 1), \]
+\[ f(x) f(x + 1) - f(x - 1) f(x + 2) = f(x) f(2) + f(x + 2). \tag{2.3}\label{2012a5-eq2-3} \]
+
+\begin{claim}
+We have $f(2) \in \{-1, 0, 1, 3\}$.
+\end{claim}
+\begin{proof}
+Recall that $f(0) = -1$ and $f(-1) = f(1) = 0$.
+For convenience, let $M = f(2)$.
+Plugging $x = y = 2$ into~\eqref{2012a5-eq2-1} gives us $f(3) = M^2 - 1$.
+Using~\eqref{2012a5-eq2-2} with $x = 2$ and $x = 3$ respectively gives us
+\[ f(4) = (f(3) - M) M, \quad f(5) = (f(4) - f(3) + 1) M. \]
+On the other hand,~\eqref{2012a5-eq0} gives us $f(5) = f(4) + M^2$.
+So we have $(f(4) - f(3) + 1) M = f(4) + M^2 = (f(3) - M) M + M^2 = f(3) M$.
+
+Now suppose that $M \neq 0$.
+Since $S$ is a domain, we can cancel $M$ out and get $f(4) + 1 = 2 f(3)$.
+On the other hand, $f(4) + 1 = f(3) M - M^2 + 1 = f(3) M - f(3) = f(3) (M - 1)$.
+So that means $f(3) (M - 3) = 0$, which implies either $M = 3$ or $f(3) = 0$.
+The latter yields $M = \pm 1$ since $f(3) = M^2 - 1$.
+We are done.
+\end{proof}
+
+
+\subsection*{Subcase 2.1: $f(2) = 0 \neq 3$.}
+
+In particular, $\rchar(S) \neq 3$.
+
+The corresponding class of solutions is class 5.
+Since we already know the value of $f(0)$, $f(1)$, and $f(-1)$, it suffices to show that $R/I \cong \F_3$.
+
+...
 
 
 
+\subsection*{Subcase 2.2: $f(2) = 1 \neq 3$.}
+
+In particular, $\rchar(S) \neq 2$.
+
+The corresponding class of solutions is class 6.
+We will use Lemma~\ref{2012a5-3} to conclude that $R/I \cong \Z/4\Z$.
+This suffices, as we have computed $f(0)$, $f(1)$, $f(2)$, and $f(-1)$ before.
+By the lemma, it suffices to prove that $f(2) \in J$.
+That is, $f(2x + 1) = 0$ for all $x \in R$.
+
+Since $f(2) = 1$,~\eqref{2012a5-eq2-2} implies $f(x + 2) + f(x) = f(x + 1) + f(x - 1)$ for all $x \in R$.
+From here, it is easy to see that $4 \in I$, i.e., $f(x + 4) = f(x)$ for all $x \in R$.
+Now notice that $f(2x + 1) = f(x + 2) + f(x) = f(x + 1) + f(x - 1) = f(2x - 1)$ for all $x \in R$.
+Thus we get $f(4x + 1) = f(2x + 1) + f(2x - 1) = 2 f(2x + 1)$.
+But since $4 \in I$, we have $f(4x + 1) = 0$.
+Since $\rchar(S) \neq 2$, this implies $f(2x + 1) = 0$, as desired.
+
+
+\subsection*{Subcase 2.3: $f(2) = -1 \neq 3$.}
+
+...
+
+
+\subsection*{Subcase 2.4: $f(2) = 3$ and $\rchar(S) \neq 2$.}
+
+...
+
+
+\subsection*{Subcase 2.5: $f(2) = 3$ and $\rchar(S) = 2$.}
+
+That is, 
 
 
 \section*{Implementation details}
 
-At the time of writing, \texttt{mathlib} does not have the notion of two-sided ideal.
-Thus, we only solve for the case where $R$ is commutative, with the ideal quotient API available.
-
-The file \texttt{A5\_basic} contains the definition of~\eqref{2012a5-eq0} and basic results.
-The file \texttt{A5\_period\_quot} contains the construction of the ideal $I$ of periods and the corresponding lift of $f$.
-The file \texttt{A5\_main\_real} is just the final solution file for the case $R = \R$.
-The rest are split up according to the subcases.
+...
 
 
 
