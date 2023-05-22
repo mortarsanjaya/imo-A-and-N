@@ -78,6 +78,7 @@ section comm_ring
 variables [comm_ring R] [ring S] [is_domain S] {f : R → S} (h : good f)
 include h 
 
+/-- The ideal of quasi-periods -/
 def quasi_period_ideal : ideal R :=
 { carrier := {c | ∀ x, f (c * x + 1) = 0},
   add_mem' := λ a b, quasi_period_add h,
@@ -85,7 +86,7 @@ def quasi_period_ideal : ideal R :=
   smul_mem' := λ a b h1 x, (congr_arg (λ x, f (x + 1)) $
     by rw [smul_eq_mul, mul_comm a b, mul_assoc]).trans (h1 $ a * x) }
 
-def mem_quasi_period_ideal_iff {c : R} :
+lemma mem_quasi_period_ideal_iff {c : R} :
   c ∈ quasi_period_ideal h ↔ ∀ x, f (c + x) = -f c * f x :=
   (quasi_period_iff h).symm
 
@@ -114,6 +115,7 @@ begin
        neg_eq_iff_eq_neg, mul_comm, ← h1] at h3,
 end
 
+/-- The ideal of periods -/
 def period_ideal : ideal R :=
 { carrier := {c | ∀ x, f (c + x) = f x},
   add_mem' := λ a b h1 h2 x, (congr_arg f $ add_assoc a b x).trans $
@@ -143,6 +145,67 @@ lemma zero_of_periodic_period_lift : ∀ c : R ⧸ period_ideal h,
   (∀ x, period_lift h (c + x) = period_lift h x) → c = 0 :=
   quot.ind $ by intros c h0;
     exact ideal.quotient.eq_zero_iff_mem.mpr (λ y, h0 $ quot.mk _ y)
+
+
+
+/-! Extra structure given a non-period, quasi-period element -/
+
+section quasi_period
+
+variables {c : R} (h0 : f 0 = -1) (h1 : c ∈ quasi_period_ideal h) (h2 : c ∉ period_ideal h)
+include h0 h1 h2
+
+lemma map_nonperiod_quasi_period : f c = 1 :=
+  let h3 := (quasi_period_iff h).mpr h1 in (map_quasi_period h h0 h3).elim id $
+    λ h4, absurd (by intros x; rw [h3, h4, neg_neg, one_mul]) h2
+
+lemma map_quasi_period_add (x : R) : f (c + x) = -f x :=
+  by rw [(quasi_period_iff h).mpr h1, map_nonperiod_quasi_period h h0 h1 h2, neg_one_mul]
+
+lemma is_period_or_eq_quasi_nonperiod {d : R} (h3 : d ∈ quasi_period_ideal h) :
+  d ∈ period_ideal h ∨ d - c ∈ period_ideal h :=
+  or_iff_not_imp_left.mpr $ λ h4 x, by rw [← neg_inj, ← map_quasi_period_add h h0 h1 h2,
+    ← add_assoc, add_sub_cancel'_right, map_quasi_period_add h h0 h3 h4]
+
+lemma mul_nonquasi_period_is_nonperiod {x : R} (h3 : x ∉ quasi_period_ideal h) :
+  x * c ∉ period_ideal h :=
+begin
+  replace h3 : ∃ y : R, f (x * y + 1) ≠ 0 := not_forall.mp h3,
+  cases h3 with y h3,
+  intros h4; replace h4 := h4 (x * y + 1),
+  have h5 : ∀ x : R, f (c + x) = -f x := λ x, by rw [(quasi_period_iff h).mpr h1,
+    map_nonperiod_quasi_period h h0 h1 h2, neg_one_mul],
+  rw [← add_assoc, ← mul_add, eq_add_of_sub_eq (h x _), h5, add_left_comm, h5,
+      mul_neg, ← neg_add, ← eq_add_of_sub_eq (h x y), neg_eq_iff_add_eq_zero,
+      ← two_mul, mul_eq_zero, or_iff_left h3] at h4,
+  refine h2 (λ z, _),
+  rw [h5, ← neg_one_mul, neg_eq_of_add_eq_zero_right h4, one_mul]
+end
+
+lemma equiv_mod_quasi_period_ideal (x : R) :
+  x ∈ quasi_period_ideal h ∨ x - 1 ∈ quasi_period_ideal h :=
+  let h3 : ∀ y : R, y * c ∈ period_ideal h → y ∈ quasi_period_ideal h :=
+    λ y, (not_imp_not.mp $ mul_nonquasi_period_is_nonperiod h h0 h1 h2) in
+  or.imp (h3 x) (h3 (x - 1)) $ by rw sub_one_mul;
+    exact is_period_or_eq_quasi_nonperiod h h0 h1 h2 (ideal.mul_mem_left _ x h1)
+
+lemma equiv_mod_period_ideal (x : R) : (x ∈ period_ideal h ∨ x - c ∈ period_ideal h) ∨
+  x - 1 ∈ period_ideal h ∨ x - (c + 1) ∈ period_ideal h :=
+  let h3 : ∀ x : R, x ∈ quasi_period_ideal h →
+    (x ∈ period_ideal h ∨ x - c ∈ period_ideal h) :=
+      λ x, is_period_or_eq_quasi_nonperiod h h0 h1 h2 in
+  by rw [add_comm, ← sub_sub];
+    exact or.imp (h3 x) (h3 (x - 1)) (equiv_mod_quasi_period_ideal h h0 h1 h2 x)
+
+end quasi_period
+
+
+lemma cases_of_nonperiod_quasi_period (h0 : ∀ c, (∀ x, f (c + x) = f x) → c = 0)
+  {c : R} (h1 : f 0 = -1) (h2 : c ∈ quasi_period_ideal h) (h3 : c ≠ 0) (x : R) :
+  (x = 0 ∨ x = c) ∨ x = 1 ∨ x = c + 1 :=
+  (equiv_mod_period_ideal h h1 h2 (mt (h0 c) h3) x).imp
+    (λ h4, h4.imp (h0 x) (λ h5, eq_of_sub_eq_zero $ h0 _ h5))
+    (λ h4, h4.imp (λ h5, eq_of_sub_eq_zero $ h0 _ h5) (λ h5, eq_of_sub_eq_zero $ h0 _ h5))
 
 end comm_ring
 
