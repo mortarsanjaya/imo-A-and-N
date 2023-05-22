@@ -15,12 +15,9 @@ def 𝔽₃_map1 (R : Type*) [ring R] : 𝔽₃ → R
 
 /-- The respective solution for the subcase. -/
 theorem case1_2_answer (R : Type*) [ring R] : good (𝔽₃_map1 R)
-| 𝔽₃.𝔽₃0 𝔽₃.𝔽₃0 := (zero_sub (-1)).trans (mul_neg_one (-1)).symm
-| 𝔽₃.𝔽₃0 𝔽₃.𝔽₃1 := (sub_self 0).trans (mul_zero (-1)).symm 
-| 𝔽₃.𝔽₃0 𝔽₃.𝔽₃2 := (zero_sub 1).trans (neg_one_mul 1).symm
-| 𝔽₃.𝔽₃1 𝔽₃.𝔽₃0 := (sub_self 0).trans (zero_mul (-1)).symm
-| 𝔽₃.𝔽₃1 𝔽₃.𝔽₃1 := (sub_self 1).trans (zero_mul 0).symm
-| 𝔽₃.𝔽₃1 𝔽₃.𝔽₃2 := (sub_self (-1)).trans (zero_mul 1).symm
+| 𝔽₃.𝔽₃0 x := (zero_sub _).trans (neg_one_mul _).symm
+| 𝔽₃.𝔽₃1 x := (sub_eq_zero_of_eq $ congr_arg (𝔽₃_map1 R) $
+    add_comm _ _).trans (zero_mul _).symm
 | 𝔽₃.𝔽₃2 𝔽₃.𝔽₃0 := (zero_sub 1).trans (mul_neg_one 1).symm
 | 𝔽₃.𝔽₃2 𝔽₃.𝔽₃1 := (sub_self (-1)).trans (mul_zero 1).symm 
 | 𝔽₃.𝔽₃2 𝔽₃.𝔽₃2 := (sub_zero 1).trans (mul_one 1).symm
