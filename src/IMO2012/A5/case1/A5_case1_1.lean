@@ -5,15 +5,8 @@ import IMO2012.A5.case1.A5_case1_lemmas
 namespace IMOSL
 namespace IMO2012A5
 
-variables {R S : Type*} [ring R] [ring S]
-
-/-- The respective solution for the subcase. -/
-theorem case1_1_answer : good (λ x : R, x - 1) :=
-  λ x y, by rw [sub_sub_sub_cancel_right, ← sub_sub_sub_eq, ← mul_sub_one, ← sub_one_mul]
-
-
-
-variables [is_domain S] {f : R → S} (h : good f) (h0 : f (-1) ≠ 0) (h1 : f (-1) = -2)
+variables {R S : Type*} [ring R] [ring S] [is_domain S]
+  {f : R → S} (h : good f) (h0 : f (-1) ≠ 0) (h1 : f (-1) = -2)
 include h h0 h1
 
 private lemma case1_1_lem1 (x : R) : f (x - 1) - f (x + 1) = -2 :=
