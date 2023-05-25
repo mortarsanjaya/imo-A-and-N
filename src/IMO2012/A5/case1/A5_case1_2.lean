@@ -35,16 +35,11 @@ include h h0 h1
 private lemma case1_2_lem1 : f (-1) = 1 :=
   (case1_map_neg_one_values h h0).resolve_left h1
 
-private lemma case1_2_lem2 : (1 : R) ≠ 0 :=
-  mt (congr_arg f) $ ne_of_eq_of_ne (good_map_one h) $
-    ne_of_ne_of_eq (neg_ne_zero.mpr one_ne_zero).symm (case1_map_zero h h0).symm
-
-
 
 variable (h2 : ∀ c, (∀ x, f (c + x) = f x) → c = 0)
 include h2
 
-private lemma case1_2_lem3 {c : R} (h3 : f (c + 1) = 0) : c = 0 :=
+private lemma case1_2_lem2 {c : R} (h3 : f (c + 1) = 0) : c = 0 :=
   h2 c $ λ x,
 begin
   have h4 := (case1_map_eq_zero_imp h h0 h3).2,
@@ -57,24 +52,24 @@ begin
        ← add_sub_right_comm, sub_add_cancel, add_comm] at h5
 end
 
-private lemma case1_2_lem4 {c : R} : f (c + 1) = 0 ↔ c = 0 :=
-  ⟨case1_2_lem3 h h0 h1 h2, λ h3, by rw [h3, zero_add]; exact good_map_one h⟩
+private lemma case1_2_lem3 {c : R} : f (c + 1) = 0 ↔ c = 0 :=
+  ⟨case1_2_lem2 h h0 h1 h2, λ h3, by rw [h3, zero_add]; exact good_map_one h⟩
 
-private lemma case1_2_lem5 : (3 : R) = 0 :=
-  case1_2_lem3 h h0 h1 h2 $ by rw [bit1, add_assoc, ← bit0, case1_map_add_two h h0,
+private lemma case1_2_lem4 : (3 : R) = 0 :=
+  case1_2_lem2 h h0 h1 h2 $ by rw [bit1, add_assoc, ← bit0, case1_map_add_two h h0,
     add_comm, case1_map_add_two h h0, case1_2_lem1 h h0 h1, good_map_one h,
     sub_zero, mul_neg_one, mul_neg_one, neg_neg]; exact sub_self (f 2)
 
-private lemma case1_2_lem6 (x : R) : x = 0 ∨ x = 1 ∨ x = -1 :=
+private lemma case1_2_lem5 (x : R) : x = 0 ∨ x = 1 ∨ x = -1 :=
 begin
   by_contra' h3; rcases h3 with ⟨h3, h4, h5⟩,
-  rw [← sub_eq_zero, ← case1_2_lem4 h h0 h1 h2] at h3 h4 h5,
+  rw [← sub_eq_zero, ← case1_2_lem3 h h0 h1 h2] at h3 h4 h5,
   rw sub_zero at h3; replace h3 := case1_map_ne_zero_imp h h0 h3,
   rw sub_add_cancel at h4; replace h4 := case1_map_ne_zero_imp h h0 h4,
   rw sub_neg_eq_add at h5; replace h5 := case1_map_ne_zero_imp h h0 h5,
   rw add_sub_cancel at h5,
   rw [add_sub_cancel, ← add_sub_cancel (x + 1 + 1) 1] at h3,
-  rw [add_assoc x, add_assoc, ← bit0, ← bit1, case1_2_lem5 h h0 h1 h2, add_zero] at h3 h5,
+  rw [add_assoc x, add_assoc, ← bit0, ← bit1, case1_2_lem4 h h0 h1 h2, add_zero] at h3 h5,
   replace h2 := congr_arg2 has_add.add (congr_arg2 has_add.add h3 h4) h5,
   rw [sub_add_sub_cancel, sub_add_sub_cancel, sub_self, ← two_mul, ← add_one_mul] at h2,
   revert h2; refine (mul_ne_zero _ h0).symm,
@@ -85,12 +80,12 @@ end
 
 
 private def case1_2_𝔽₃_hom : 𝔽₃ →+* R :=
-  𝔽₃.cast_hom (case1_2_lem5 h h0 h1 h2)
+  𝔽₃.cast_hom (case1_2_lem4 h h0 h1 h2)
 
 private lemma case1_2_𝔽₃_hom_bijective :
   function.bijective (case1_2_𝔽₃_hom h h0 h1 h2) :=
-  ⟨𝔽₃.cast_hom_injective _ (case1_2_lem2 h h0 h1),
-  λ x, (case1_2_lem6 h h0 h1 h2 x).elim (λ h3, ⟨𝔽₃.𝔽₃0, h3.symm⟩) $
+  ⟨𝔽₃.cast_hom_injective _ (one_ne_zero_of_map_zero h $ case1_map_zero h h0),
+  λ x, (case1_2_lem5 h h0 h1 h2 x).elim (λ h3, ⟨𝔽₃.𝔽₃0, h3.symm⟩) $
     λ h3, h3.elim (λ h4, ⟨𝔽₃.𝔽₃1, h4.symm⟩) (λ h4, ⟨𝔽₃.𝔽₃2, h4.symm⟩)⟩
 
 private noncomputable def case1_2_𝔽₃_equiv : 𝔽₃ ≃+* R :=

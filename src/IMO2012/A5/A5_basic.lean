@@ -77,6 +77,10 @@ lemma eq_zero_of_map_zero_ne_neg_one (h0 : f 0 ≠ -1) : f = λ _, 0 :=
   funext $ λ x, by have h1 := h x 0; rwa [mul_zero, zero_add, good_map_one h, zero_sub,
     add_zero, ← mul_neg_one, mul_eq_mul_left_iff, or_iff_right h0.symm] at h1
 
+lemma one_ne_zero_of_map_zero (h0 : f 0 = -1) : (1 : R) ≠ 0 :=
+  mt (congr_arg f) $ ne_of_eq_of_ne (good_map_one h) $
+    ne_of_ne_of_eq (neg_ne_zero.mpr one_ne_zero).symm h0.symm
+
 end domain
 
 end IMO2012A5
