@@ -3,7 +3,7 @@ import
   IMO2012.A5.A5_period_quot
   IMO2012.A5.explicit_rings.Z4
 
-/-! # IMO 2012 A5, Case 2.2: `f(2) = 1 ≠ 3` -/
+/-! # IMO 2012 A5, Case 2.2: `f(2) = 1 ≠ -1` -/
 
 namespace IMOSL
 namespace IMO2012A5
@@ -60,7 +60,7 @@ private lemma case2_2_lem4 : (4 : R) = 0 :=
     ← add_assoc, add_comm, case2_2_lem2 h h0 h1, bit0, ← add_assoc,
     add_sub_cancel, add_assoc, ← bit0, case2_2_lem2 h h0 h1, add_sub_cancel]
 
-variable (h3 : f 2 ≠ 3)
+variable (h3 : f 2 ≠ -1)
 include h3
 
 private lemma case2_2_lem5 (x : R) : f (2 * x + 1) = 0 :=
@@ -70,7 +70,7 @@ begin
       bit0, ← sub_sub, sub_add_cancel, sub_one_mul, ← sub_sub, ← bit0,
       sub_add_cancel, mul_assoc, two_mul, ← bit0, case2_2_lem4 h h0 h1 h2,
       mul_zero, zero_sub, h1, ← two_mul, zero_eq_mul, mul_two, ← two_mul] at h4,
-  exact h4.resolve_left (mt add_left_eq_self.mpr $ ne_of_ne_of_eq h3.symm h0)
+  exact h4.resolve_left (mt add_eq_zero_iff_eq_neg.mp $ ne_of_eq_of_ne h0.symm h3)
 end
 
 private lemma case2_2_lem6 : f 0 = -1 :=
@@ -78,8 +78,7 @@ private lemma case2_2_lem6 : f 0 = -1 :=
     congr_fun (eq_zero_of_map_zero_ne_neg_one h h4) 2
 
 private lemma case2_2_lem7 : (2 : R) ≠ 0 :=
-  λ h5, h3 $ by rw [h0, bit1, self_eq_add_left, bit0,
-    add_eq_zero_iff_neg_eq, ← case2_2_lem6 h h0 h1 h2 h3, ← h0, h5]
+  λ h5, h3 $ (congr_arg f h5).trans $ case2_2_lem6 h h0 h1 h2 h3
 
 end noncomm_ring
 
@@ -94,7 +93,7 @@ include h h0 h1 h2
 private def case2_2_ℤ₄_hom : ℤ₄ →+* R :=
   ℤ₄.cast_hom (case2_2_lem4 h h1 h0 h2)
 
-variable (h3 : f 2 ≠ 3)
+variable (h3 : f 2 ≠ -1)
 include h3
 
 private lemma case2_2_lem8 (x : R) : (x = 0 ∨ x = 2) ∨ (x = 1 ∨ x = -1) :=
@@ -132,7 +131,7 @@ end comm_ring
 section solution
 
 variables {R S : Type*} [comm_ring R] [ring S] [is_domain S]
-  {f : R → S} (h : good f) (h0 : f (-1) = 0) (h1 : f 2 = 1) (h2 : f 2 ≠ 3)
+  {f : R → S} (h : good f) (h0 : f (-1) = 0) (h1 : f 2 = 1) (h2 : f 2 ≠ -1)
 include h h0 h1 h2
 
 private lemma case2_2_lift_decomp :
