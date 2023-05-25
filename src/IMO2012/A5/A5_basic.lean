@@ -18,7 +18,7 @@ lemma zero_is_good {R S : Type*} [ring R] [ring S] : good (λ _ : R, (0 : S)) :=
 
 /-- The map `x ↦ x - 1` is always good.
   We put this here since we have two subcases leading to this map. -/
-lemma case1_1_answer {R : Type*} [ring R] : good (λ x : R, x - 1) :=
+lemma sub_one_is_good {R : Type*} [ring R] : good (λ x : R, x - 1) :=
   λ x y, by rw [sub_sub_sub_cancel_right, ← sub_sub_sub_eq, ← mul_sub_one, ← sub_one_mul]
 
 section hom
