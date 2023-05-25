@@ -263,8 +263,6 @@ We are done with this subcase.
 
 
 
-\newpage
-
 \subsection*{Case 2: $f(-1) = 0$.}
 
 Recall that~\eqref{2012a5-eq0} with $y = -1$ implies that $f$ is even.
@@ -310,12 +308,53 @@ In particular, $\rchar(S) \neq 3$.
 
 The corresponding class of solutions is class 5.
 Since we already know the value of $f(0)$, $f(1)$, and $f(-1)$, it suffices to show that $R/I \cong \F_3$.
+WLOG let $I = 0$.
 
-...
+Since $f(2) = 0$,~\eqref{2012a5-eq2-2} yields $3 = 0$ in $R$.
+Now~\eqref{2012a5-eq2-3} yields $f(x) f(x + 1) = f(x - 1)^2 + f(x - 1)$ for all $x \in R$.
+Similarly, we have $f(x) f(x - 1) = f(x + 1)^2 + f(x + 1)$ and $f(x + 1) f(x - 1) = f(x)^2 + f(x)$.
+Note that, since $x$, $x - 1$, and $x + 1$ pairwise commute, so are $f(x)$, $f(x - 1)$, and $f(x + 1)$.
+Thus subtracting gives us $f(x) (f(x + 1) - f(x - 1)) = (f(x + 1) + f(x - 1) + 1)(f(x - 1) - f(x + 1))$.
+This means either $f(x + 1) = f(x - 1)$ or $f(x) + f(x + 1) + f(x - 1) = -1$.
+
+To proceed further, we need some rather tricky steps.
+The first step is the following claim.
+
+\begin{claim}
+Given $c \in R$ such that $f(c + 1) = f(c - 1) = 0$, we have $c = 0$.
+\end{claim}
+\begin{proof}
+It suffices to show that $f(c + y) = f(y)$ for all $y \in R$.
+By~\eqref{2012a5-eq0} and $f(c + 1) = f(c - 1) = 0$, we have $f(y(c + 1) + (c - 1)) = f(y(c - 1) + (c + 1)) = f(y(c^2 - 1) + 1)$.
+We can rewrite the equation as $f((y + 1)(c + 1) + 1) = f((y + 1)(c - 1) - 1)$.
+By~\eqref{2012a5-eq0} and~\eqref{2012a5-eq2-1}, we get $f(y + c + 2) = f(y - c + 2)$ for any $y \in R$.
+The claim follows by replacing $y$ with $y - 2 + 2c$.
+\end{proof}
+
+In particular, we can now show that $f(x) + f(x + 1) + f(x - 1) = -1$ always holds.
+Indeed, if not, then we have $f(x) = f(x + 1) = f(x - 1)$.
+Then $f(x) f(x + 1) = f(x - 1)^2 + f(x - 1)$ forces the common value to be zero.
+The above claim now gives a contradiction.
+
+Next we show that $f(x) \in \{0, -1\}$ for all $x \in R$.
+We will use the equality $f(x + 1) f(x - 1) = f(x)^2 + f(x)$.
+By~\eqref{2012a5-eq0} and~\eqref{2012a5-eq2-1},
+\[ f(x^2) = f(x + 1) f(x - 1) + f(2x) = f(x)^2 + f(x) + f(x) = f(x)^2 + 2 f(x), \]
+\[ f(x^2 + 1) = f(x)^2 + f(2x) = f(x)^2 + f(x), \quad f(x^2 - 1) = f(x)^2 - 1. \]
+Summing all three equalities yield $-1 = f(x^2) + f(x^2 + 1) + f(x^2 - 1) = 3 f(x)^2 + 3 f(x) - 1$.
+That is, $3 f(x) (f(x) + 1) = 0$.
+Since $3 \neq 0$ in $S$, we get $f(x) \in \{0, -1\}$.
+
+We now show that $R = \{-1, 0, 1\}$.
+This is easy to see if two of $f(x)$, $f(x + 1)$, and $f(x - 1)$ equals zero.
+So now suppose otherwise, that at most one of them equals zero.
+If exactly one of the three expressions is equal to zero, then $-1 = f(x) + f(x + 1) + f(x - 1) = -2$.
+If none of them equals zero, then $f(x) = f(x + 1) = f(x - 1) = -1$, contradicting $f(x) f(x + 1) = f(x - 1)^2 + f(x - 1)$.
+Thus every element of $R$ is either $-1$, $0$, and $1$.
+Since $1 \neq 0$ in $R$ (due to $f(1) \neq f(0)$), this shows that $R \cong \Z/3\Z$, as desired.
 
 
-
-\subsection*{Subcase 2.2: $f(2) = 1 \neq 3$.}
+\subsection*{Subcase 2.2: $f(2) = 1 \neq -1$.}
 
 In particular, $\rchar(S) \neq 2$.
 
@@ -333,19 +372,15 @@ But since $4 \in I$, we have $f(4x + 1) = 0$.
 Since $\rchar(S) \neq 2$, this implies $f(2x + 1) = 0$, as desired.
 
 
-\subsection*{Subcase 2.3: $f(2) = -1 \neq 3$.}
+\subsection*{Subcase 2.3: $f(2) = 3 \neq 1$.}
 
 ...
 
 
-\subsection*{Subcase 2.4: $f(2) = 3$ and $\rchar(S) \neq 2$.}
+\subsection*{Subcase 2.4: $f(2) = -1$.}
 
 ...
 
-
-\subsection*{Subcase 2.5: $f(2) = 3$ and $\rchar(S) = 2$.}
-
-That is, 
 
 
 \section*{Implementation details}
