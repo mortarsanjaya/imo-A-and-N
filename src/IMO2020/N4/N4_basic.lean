@@ -11,8 +11,6 @@ open finset function
 
 section extra_lemmas
 
-/-- Note: This lemma should really be put into mathlib, if it does not exist.
-  I cannot find a similar version in mathlib. -/
 lemma not_dvd_of_coprime {p : ℕ} (h : p ≠ 1) {x : ℕ} (h0 : x.coprime p) : ¬p ∣ x :=
 begin
   rintros ⟨d, rfl⟩,
