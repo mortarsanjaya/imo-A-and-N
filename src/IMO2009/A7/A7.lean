@@ -90,7 +90,7 @@ begin
     cases sq_eq_one_iff.mp (good_map_one_sq h) with h0 h0,
     left; exact this f h h0,
     right; rw [← pi.neg_def, eq_neg_iff_add_eq_zero, ← neg_eq_iff_add_eq_zero],
-    exact this (-f) (good_neg h) (by simp_rw [pi.neg_def, h0, neg_neg]),
+    exact this (-f) (good_neg h) (neg_eq_iff_eq_neg.mpr h0),
     rcases h with rfl | rfl,
     exacts [good_id, good_neg good_id] },
   
@@ -119,12 +119,10 @@ end
 
 
 /-- Final solution, case 2: `char(R) = 2` -/
-theorem final_solution_char_eq_two {R : Type*} [ring R] [is_domain R] [char_p R 2] :
-  ∀ f : R → R, good f ↔ f = λ x, x :=
+theorem final_solution_char_eq_two {R : Type*} [ring R] [is_domain R] [char_p R 2]
+  (f : R → R) : good f ↔ f = λ x, x :=
 begin
-  ---- Reduce to the claim: if `f(c) = d + 1` and `f(d) = c + 1`, then `c = d` or `c = d + 1`
-  intros f; symmetry; refine ⟨λ h, _, λ h, _⟩, 
-  subst h; exact good_id,
+  refine ⟨λ h, _, λ h, cast (congr_arg good h).symm good_id⟩,
   have h0 := good_map_one_sq h,
   rw [sq_eq_one_iff, char_two.neg_eq, or_self] at h0,
   suffices : ∀ c d : R, f c = d + 1 → f d = c + 1 → (c = d ∨ c = d + 1),
@@ -164,8 +162,6 @@ begin
   rwa [h1, add_one_mul, mul_add_one, add_left_inj, eq_comm] at h0
 end
 
-
-
 /-- Final solution -/
 theorem final_solution {R : Type*} [ring R] [is_domain R] :
   ∀ f : R → R, good f ↔ f = (λ x, x) ∨ f = (λ x, -x) :=
@@ -173,8 +169,8 @@ begin
   cases ne_or_eq (ring_char R) 2 with h h,
   exact final_solution_char_ne_two h,
   haveI : char_p R 2 := ring_char.of_eq h,
-  simp_rw [char_two.neg_eq, or_self],
-  exact final_solution_char_eq_two
+  rw char_two.neg_eq',
+  exact λ f, (final_solution_char_eq_two f).trans (or_self _).symm
 end
 
 end IMO2009A7
