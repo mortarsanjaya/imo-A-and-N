@@ -379,7 +379,54 @@ Since $\rchar(S) \neq 2$, this implies $f(2x + 1) = 0$, as desired.
 
 \subsection*{Subcase 2.4: $f(2) = -1$.}
 
+Now~\eqref{2012a5-eq2-2} reads as $f(x + 2) + f(x + 1) = f(x) + f(x - 1)$.
+Meanwhile~\eqref{2012a5-eq2-3} reads as $f(x) f(x + 1) - f(x - 1) f(x + 2) = f(x + 2) - f(x)$, or
+\[ (f(x) + f(x - 1)) f(x + 1) - f(x - 1) (f(x) + f(x - 1)) = f(x - 1) - f(x + 1). \]
+However, $x$, $x + 1$, and $x - 1$ pairwise commute.
+Thus the left hand side becomes $(f(x) + f(x - 1)) (f(x + 1) - f(x - 1))$.
+Since $S$ is a domain, this implies that for any $x \in R$, either $f(x - 1) = f(x + 1)$ or $f(x) + f(x - 1) = -1$ holds.
+
+Consider the same statement but with $-x$ replacing $x$.
+Since $f$ is even, we have either $f(x - 1) = f(x + 1)$ or $f(x) + f(x - 1) = f(x) + f(x + 1) = -1$.
+But the latter also implies $f(x - 1) = f(x + 1)$; the former always holds for any $x \in R$.
+This implies that $2 = 0$ in $R/I$.
+
+Now, from~\eqref{2012a5-eq0}, we get $f(x^2 + 1) = f(x)^2 - 1$ and $f(x^2 + x + 1) = f(x) f(x + 1)$ directly.
+We use these equations for our main claim.
+
+\textit{Note: In our implementation, we assume that $S$ is commutative starting from this claim.}
+
+\begin{claim}
+For any $x \in R$, we have $f(x)^2 + f(x + 1)^2 = 1$ or $f(x) + f(x + 1) = 1$.
+\end{claim}
+\begin{proof}
+We first prove that for any $x \in R$, the claim holds except for the possibility of $f(x + 1) = f(x)$.
+Consider that for any $x \in R$,
+\[ f(x^2) f(x + 1) + f(x^2 + x + 1) = f(x^2 (x + 1) + 1) = f(x^2 + x) f(x) + f(x^2), \]
+\[ (f(x + 1)^2 - 1) (f(x + 1) - 1) + f(x) f(x + 1) = f(x^2 + x) f(x). \]
+If we denote $a = f(x + 1)$ and $b = f(x)$, this gives $(a^2 - 1)(a - 1) + ab = f(x^2 + x) b$.
+Replacing $x$ with $x + 1$ gives us $(b^2 - 1)(b - 1) + ba = f(x^2 + x) a$.
+Note that $a$, $b$, and $f(x^2 + x)$ pairwise commute.
+Thus, we have $a((a^2 - 1)(a - 1) + ab) = b((b^2 - 1)(b - 1) + ba)$.
+Since $a$ and $b$ commute, the equation simplifies to $(a - b)(a^2 + b^2 - 1)(a + b - 1) = 0$.
+This yields $a = b$, $a^2 + b^2 = 1$, or $a + b = 1$, as desired.
+
+Now suppose that $a = b$.
+We now have $a^3 - a + 1 = (a^2 - 1)(a - 1) + a^2 = f(x^2 + x) a$.
+We also have $f(x^4 + x^2 + 1) = f(x^2) f(x^2 + 1) = f(x^2 + x)^2 - 1$.
+This equation is equivalent to $(a^2 - 1)^2 = f(x^2 + x)^2 - 1$.
+Then we have $(a^3 - a)^2 = (a^3 - a + 1)^2 - a^2$, which is equivalent to $(1 - 2a)(a^2 - 1) = 0$.
+So, either $a + b = 2a = 1$ or $a^2 = 1$.
+
+Finally, suppose for the sake of contradiction that $a = b$ and $a^2 = 1$.
+Then that means $f(x^2) = f(x^2 + 1) = a^2 - 1 = 0$.
+Using $f(x^2)$ and $f(x^2 + 1)$ in place of $a = f(x + 1)$ and $b = f(x)$ yields a contradiction.
+This proves the claim.
+\end{proof}
+
 ...
+
+
 
 
 
