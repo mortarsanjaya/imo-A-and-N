@@ -30,15 +30,9 @@
 
 \section*{Problem}
 
-Let $R$ be a commutative ring and $S$ be a division ring.
+Let $R$ be a commutative ring and $S$ be a field.
 Find all functions $f : R \to S$ such that, for any $x, y \in R$,
 \[ f(xy + 1) - f(x + y) = f(x) f(y). \tag{*}\label{2012a5-eq0} \]
-
-\textit{
-    Note: In the solution below, we will only completely solve the problem for the case $R = \R$.
-    We will present some cases in generality; the rest will be done with the assumption $R = \R$.}
-
-
 
 
 
@@ -393,8 +387,7 @@ This implies that $2 = 0$ in $R/I$.
 
 Now, from~\eqref{2012a5-eq0}, we get $f(x^2 + 1) = f(x)^2 - 1$ and $f(x^2 + x + 1) = f(x) f(x + 1)$ directly.
 We use these equations for our main claim.
-
-\textit{Note: In our implementation, we assume that $S$ is commutative starting from this claim.}
+From now on, we assume that $S$ is commutative, although it is unnecessary for the claim.
 
 \begin{claim}
 For any $x \in R$, we have $f(x)^2 + f(x + 1)^2 = 1$ or $f(x) + f(x + 1) = 1$.
@@ -424,7 +417,35 @@ Using $f(x^2)$ and $f(x^2 + 1)$ in place of $a = f(x + 1)$ and $b = f(x)$ yields
 This proves the claim.
 \end{proof}
 
-...
+The claim yields a relatively fast solution when $\rchar(S) = 2$.
+We will separate this case from the other case, $\rchar(S) \neq 2$.
+
+\begin{itemize}
+
+    \item
+    $\rchar(S) = 2$.
+
+    The corresponding solution is of class 2.
+    That is, we claim that $f + 1 : R \to S$ is a ring homomorphism.
+    
+    The claim now yields $f(x + 1) = f(x) + 1$ for all $x \in R$.
+    In particular,~\eqref{2012a5-eq0} yields $f(xy) = f(x) f(y) + f(x + y) + 1$ for all $x, y \in R$.
+    As in Subcase 1.1, it suffices to prove that $f(x + y) = f(x) + f(y) + 1$ for all $x, y \in R$.
+
+    Consider the expression $f(xy (y + 1) (x + 1) + 1)$.
+    We can write it in two different ways using~\eqref{2012a5-eq0}:
+    \[ f(xy) f((y + 1)(x + 1)) + f(xy + yx + x + y + 1) = f(x(y + 1)) f(y(x + 1)) + f(xy + yx + x + y). \]
+    While $xy + yx \neq 0$, the additional term still cancels out.
+    That is, we get $f(xy) f((y + 1)(x + 1)) + 1 = f(x(y + 1)) f(y(x + 1))$.
+
+    Now, for convenience, set $a = f(x)$, $b = f(y)$, and $c = f(x + y)$.
+    Then using $f(xy) = f(x) f(y) + f(x + y) + 1$, we get
+    \[ (ab + c)((a + 1)(b + 1) + c) + 1 = (a(b + 1) + (c + 1))((a + 1)b + (c + 1)). \]
+    After some algebraic manipulation, this simplifies to $c = a + b + 1$.
+    We are done.
+
+\end{itemize}
+
 
 
 

@@ -122,16 +122,9 @@ end noncomm_ring
 
 
 
-/-! The results below assumes that `S` is an integral domain.
-  However, it is actually possible to prove the results without `S` being commutative.
-  TODO:
-    Generalize to the non-commutative case, if feasible.
-    I expect that only the first lemma needs to be modified, but we'll see.
-    After generalization is done, the solution section should also be modified. -/
 section comm_ring
 
-set_option profiler true
-set_option profiler.threshold 0.2
+section general
 
 variables {R S : Type*} [ring R] [comm_ring S] [is_domain S]
 
@@ -197,22 +190,80 @@ begin
   exact absurd h3 zero_ne_one
 end
 
-end comm_ring
+end general
 
 
 
+section char_S_eq_two
 
+variables {R S : Type*} [ring R] [comm_ring S] [is_domain S]
 
+private lemma case2_4_1_lem1 (a b c : S) :
+  (a * (b + 1) + c) * (b * (a + 1) + c) - 1 -
+    (a * b + c + 1) * ((b + 1) * (a + 1) + (c + 1)) =
+  c - (a + b + 1) - 2 * (a * b + 2 * c + 1) :=
+  by ring
 
-section solution
-
-variables {R S : Type*} [comm_ring R] [comm_ring S] [is_domain S]
-  {f : R → S} (h : good f) (h0 : f (-1) = 0) (h1 : f 2 = -1) (h2 : f 2 ≠ 3)
+variables (h : (2 : R) = 0) (h0 : (2 : S) = 0) {f : R → S} (h1 : good f) (h2 : f 0 = -1)
 include h h0 h1 h2
+
+private lemma case2_4_1_lem3 (x : R) : f (x + 1) = f x + 1 :=
+begin
+  rw [← add_left_inj (f x), add_right_comm, ← two_mul, h0, zero_mul, zero_add],
+  refine (case2_4_lem6 h1 h h2 x).elim (λ h3, _) id,
+  have h4 := add_mul_self_eq (f (x + 1)) (f x),
+  rwa [h0, zero_mul, zero_mul, add_zero, h3, mul_self_eq_one_iff,
+      neg_eq_of_add_eq_zero_right h0, or_self] at h4
+end
+
+private lemma case2_4_1_lem4 (x y : R) : f (x * y) = f x * f y + f (x + y) + 1 :=
+  by rw [← eq_add_of_sub_eq (h1 x y), case2_4_1_lem3 h h0 h1 h2,
+    add_assoc, ← bit0, h0, add_zero]
+
+private lemma case2_4_1_lem5 (x y : R) : f (x * (y + 1)) = f x * (f y + 1) + f (x + y) :=
+  by rw [case2_4_1_lem4 h h0 h1 h2, case2_4_1_lem3 h h0 h1 h2, add_assoc, add_right_inj,
+    ← add_assoc, case2_4_1_lem3 h h0 h1 h2, add_assoc, ← bit0, h0, add_zero]
+
+private lemma case2_4_1_lem6 (x y : R) : f (x + y) = f x + f y + 1 :=
+begin
+  have h3 := h1 (x * y) ((y + 1) * (x + 1)),
+  conv_lhs at h3 { congr,
+    rw [← mul_assoc, mul_assoc x, mul_add_one y, ← add_one_mul,
+        ← mul_assoc, mul_assoc, eq_add_of_sub_eq (h1 _ _)],
+    congr, skip, congr,
+    rw [mul_add_one, mul_add_one, add_add_add_comm], skip,
+    rw [mul_add_one, add_one_mul, add_assoc, ← add_assoc (x * y),
+        ← add_assoc x, ← add_assoc, case2_4_1_lem3 h h0 h1 h2] },
+  rw [← sub_sub, add_sub_cancel] at h3,
+  iterate 3 { rw case2_4_1_lem5 h h0 h1 h2 at h3 },
+  rw [case2_4_1_lem3 h h0 h1 h2, add_right_comm, add_comm y x, case2_4_1_lem4 h h0 h1 h2,
+      case2_4_1_lem3 h h0 h1 h2, ← sub_eq_zero, case2_4_1_lem1, h0, zero_mul, sub_zero] at h3,
+  exact eq_of_sub_eq_zero h3
+end
+
+private lemma case2_4_1_lem7 (x y : R) : f (x * y) + 1 = (f x + 1) * (f y + 1) :=
+  by rw [case2_4_1_lem4 h h0 h1 h2, add_assoc, ← bit0, h0, add_zero,
+    case2_4_1_lem6 h h0 h1 h2, add_assoc, ← add_assoc, ← mul_add_one, ← add_one_mul]
+
+theorem case2_4_1_sol : ∃ φ : R →+* S, f = λ x, φ x - 1 :=
+  ⟨⟨λ x, f x + 1,
+      add_left_eq_self.mpr (good_map_one h1),
+      case2_4_1_lem7 h h0 h1 h2,
+      add_eq_zero_iff_eq_neg.mpr h2,
+      λ x y, by rw [case2_4_1_lem6 h h0 h1 h2, add_add_add_comm, add_assoc]⟩,
+    funext (λ x, by rw [ring_hom.coe_mk, add_sub_cancel])⟩
+
+end char_S_eq_two
+
+
+
+section char_S_ne_two
 
 /- Nothing yet -/
 
-end solution
+end char_S_ne_two
+
+end comm_ring
 
 end IMO2012A5
 end IMOSL
