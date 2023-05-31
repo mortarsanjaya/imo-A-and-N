@@ -1,5 +1,5 @@
 import
-  IMO2012.A5.case2.A5_case2_lemmas
+  IMO2012.A5.case2.A5_case2_general
   IMO2012.A5.A5_period_quot
   IMO2012.A5.explicit_rings.Z4
 
@@ -60,6 +60,11 @@ private lemma case2_2_lem4 : (4 : R) = 0 :=
     ← add_assoc, add_comm, case2_2_lem2 h h0 h1, bit0, ← add_assoc,
     add_sub_cancel, add_assoc, ← bit0, case2_2_lem2 h h0 h1, add_sub_cancel]
 
+private def case2_2_ℤ₄_hom : ℤ₄ →+* R :=
+  ℤ₄.cast_hom (case2_2_lem4 h h0 h1 h2)
+
+
+
 variable (h3 : f 2 ≠ -1)
 include h3
 
@@ -87,14 +92,8 @@ end noncomm_ring
 section comm_ring
 
 variables {R S : Type*} [comm_ring R] [ring S] [is_domain S] {f : R → S} (h : good f)
-  (h0 : f (-1) = 0) (h1 : f 2 = 1) (h2 : ∀ c, (∀ x, f (c + x) = f x) → c = 0)
-include h h0 h1 h2
-
-private def case2_2_ℤ₄_hom : ℤ₄ →+* R :=
-  ℤ₄.cast_hom (case2_2_lem4 h h1 h0 h2)
-
-variable (h3 : f 2 ≠ -1)
-include h3
+  (h0 : f (-1) = 0) (h1 : f 2 = 1) (h2 : ∀ c, (∀ x, f (c + x) = f x) → c = 0) (h3 : f 2 ≠ -1)
+include h h0 h1 h2 h3
 
 private lemma case2_2_lem8 (x : R) : (x = 0 ∨ x = 2) ∨ (x = 1 ∨ x = -1) :=
   (cases_of_nonperiod_quasi_period h h2 (case2_2_lem6 h h1 h0 h2 h3)
@@ -103,8 +102,7 @@ private lemma case2_2_lem8 (x : R) : (x = 0 ∨ x = 2) ∨ (x = 1 ∨ x = -1) :=
     exact case2_2_lem4 h h1 h0 h2
 
 private lemma case2_2_ℤ₄_hom_bijective :
-  function.bijective (case2_2_ℤ₄_hom h h0 h1 h2) :=
-  let h4 := case2_2_lem7 h h1 h0 h2 h3 in
+  function.bijective (case2_2_ℤ₄_hom h h1 h0 h2) :=
   ⟨ℤ₄.cast_hom_injective _ (case2_2_lem7 h h1 h0 h2 h3),
   λ x, (case2_2_lem8 h h0 h1 h2 h3 x).elim
     (λ h5, h5.elim (λ h6, ⟨ℤ₄.ℤ₄0, h6.symm⟩) (λ h6, ⟨ℤ₄.ℤ₄2, h6.symm⟩))
@@ -121,8 +119,9 @@ private lemma case2_2_quotient_sol' :
 | ℤ₄.ℤ₄3 := h0
 
 private lemma case2_2_quotient_sol : f = ℤ₄_map S ∘ (case2_2_ℤ₄_equiv h h0 h1 h2 h3).symm :=
-  funext $ λ x, (congr_arg f ((case2_2_ℤ₄_equiv h h0 h1 h2 h3).apply_symm_apply x).symm).trans $
-    case2_2_quotient_sol' h h0 h1 h2 h3 $ (case2_2_ℤ₄_equiv h h0 h1 h2 h3).symm x
+  let φ := case2_2_ℤ₄_equiv h h0 h1 h2 h3 in
+  funext $ λ x, (congr_arg f (φ.apply_symm_apply x).symm).trans $
+    case2_2_quotient_sol' h h0 h1 h2 h3 $ φ.symm x
 
 end comm_ring
 
@@ -139,11 +138,10 @@ private lemma case2_2_lift_decomp :
   ⟨_, case2_2_quotient_sol (period_lift_is_good h) h0 h1 (zero_of_periodic_period_lift h) h2⟩
 
 theorem case2_2_sol : ∃ φ : R →+* ℤ₄, function.surjective φ ∧ f = ℤ₄_map S ∘ φ :=
-  exists.elim (case2_2_lift_decomp h h0 h1 h2) $ λ ψ h2,
-    ⟨ψ.to_ring_hom.comp $ ideal.quotient.mk (period_ideal h),
-    (equiv_like.surjective ψ).comp (ideal.quotient.mk $ period_ideal h).is_surjective,
-    (period_lift_comp_quotient_eq_f h).symm.trans $
-      congr_arg (λ u, u ∘ ideal.quotient.mk (period_ideal h)) h2⟩
+  exists.elim (case2_2_lift_decomp h h0 h1 h2) $
+    λ ψ h3, let π := ideal.quotient.mk (period_ideal h) in
+    ⟨ψ.to_ring_hom.comp π, (equiv_like.surjective ψ).comp π.is_surjective,
+      (period_lift_comp_quotient_eq_f h).symm.trans $ congr_arg (∘ π) h3⟩
 
 end solution
 

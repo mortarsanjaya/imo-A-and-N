@@ -66,7 +66,7 @@ The map into the intermediate ring is necessarily a ring homomorphism in this co
 \section*{Solution}
 
 Through this solution, we assume that $R$ is an arbitrary ring, except when specified.
-We also assume that $S$ is a domain, though not necessarily commutative in most cases.
+We also assume that $S$ is a domain, though not necessarily commutative.
 
 We start with some small observations.
 Plugging $x = y = 1$ into~\eqref{2012a5-eq0} yields $f(1) = 0$.
@@ -355,7 +355,7 @@ In particular, $\rchar(S) \neq 2$.
 The corresponding class of solutions is class 6.
 We will use Lemma~\ref{2012a5-3} to conclude that $R/I \cong \Z/4\Z$.
 This suffices, as we have computed $f(0)$, $f(1)$, $f(2)$, and $f(-1)$ before.
-By the lemma, it suffices to prove that $f(2) \in J$.
+By the lemma, it suffices to prove that $2 \in J$.
 That is, $f(2x + 1) = 0$ for all $x \in R$.
 
 Since $f(2) = 1$,~\eqref{2012a5-eq2-2} implies $f(x + 2) + f(x) = f(x + 1) + f(x - 1)$ for all $x \in R$.
@@ -444,6 +444,24 @@ We will separate this case from the other case, $\rchar(S) \neq 2$.
     After some algebraic manipulation, this simplifies to $c = a + b + 1$.
     We are done.
 
+    
+    \item
+    $\rchar(S) \neq 2$.
+
+    The corresponding solutions are of class 7, 8, and 9.
+    This sub-subcase will be quite bashy.
+
+    \begin{claim}
+    For any $x \in R$, either $f(x) \in \{\pm 1, 0\}$ or $f(x) + f(x + 1) = 1$ and $f(x) f(x + 1) = -1$.
+    In the former case, we also have $f(x) = \pm 1$ if and only if $f(x + 1) = 0$.
+    \end{claim}
+    \begin{proof}
+    Recall that $f(x^2 + 1) = f(x)^2 - 1$ for any $x \in R$.
+    ...
+
+    \end{proof}
+
+
 \end{itemize}
 
 
@@ -453,7 +471,8 @@ We will separate this case from the other case, $\rchar(S) \neq 2$.
 
 \section*{Implementation details}
 
-...
+Our solution to Subcase 2.4 assumes that $S$ is commutative.
+In the other cases, we do not need the commutative condition on $S$.
 
 
 

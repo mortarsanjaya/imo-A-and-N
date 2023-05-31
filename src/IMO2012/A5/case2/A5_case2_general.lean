@@ -1,14 +1,13 @@
-import IMO2012.A5.A5_basic algebra.group_power.ring
+import IMO2012.A5.A5_basic
 
-/-! # IMO 2012 A5, Case 2: `f(-1) = 0` -/
+/-! # IMO 2012 A5, General Lemmas for Case 2: `f(-1) = 0`
+
+Note: the lemmas are not used for Subcase 2.4 except for obtaining `2 = 0` in `R`. -/
 
 namespace IMOSL
 namespace IMO2012A5
 
-section non_domain
-
-variables {R S : Type*} [ring R] [ring S]
-  {f : R → S} (h : good f) (h0 : f (-1) = 0)
+variables {R S : Type*} [ring R] [ring S] {f : R → S} (h : good f) (h0 : f (-1) = 0)
 include h h0
 
 lemma case2_map_is_even (x : R) : f (-x) = f x :=
@@ -30,31 +29,6 @@ lemma case2_special_identity (x : R) :
     sub_zero, ← h, bit0, ← add_assoc, sub_add_add_cancel, ← add_assoc, ← mul_two,
     ← sub_add, bit0, add_left_eq_self, sub_eq_zero, mul_add_one (x - 1), add_assoc,
     sub_add_cancel, sub_one_mul, sub_add_comm, sub_add_cancel', neg_add_eq_sub]
-
-variables (h1 : f 0 = -1)
-include h1
-
-lemma case2_map_sq_sub_one (x : R) : f (x * x - 1) = f x * f x - 1 :=
-  by rw [← case2_good_alt h h0, sub_self, h1, sub_neg_eq_add, add_sub_cancel]
-
-end non_domain
-
-
-
-lemma case2_map_two_values {R S : Type*} [ring R] [ring S] [is_domain S]
-  {f : R → S} (h : good f) (h0 : f (-1) = 0) (h1 : f 0 = -1) :
-  (f 2 = 3 ∨ (f 2 = 1 ∨ f 2 = -1)) ∨ f 2 = 0 :=
-begin
-  replace h1 := case2_map_sq_sub_one h h0 h1 2,
-  rw [two_mul, bit0, ← add_assoc, add_sub_cancel, ← bit0] at h1,
-  have h2 := case2_good_alt h h0 3 2,
-  rwa [bit1, add_sub_cancel', good_map_one h, sub_zero, add_one_mul, bit0, ← add_assoc,
-    add_sub_cancel, ← bit0, two_mul, add_right_comm, case2_map_add_two_eq h h0, add_assoc,
-    add_sub_cancel, ← add_one_mul, mul_eq_mul_right_iff, ← bit0, ← add_sub_right_comm,
-    sub_eq_iff_eq_add, case2_map_add_two_eq h h0, bit0, add_sub_cancel, good_map_one h,
-    add_zero, ← bit0, sub_mul, sub_add, ← h1, ← mul_two, sub_eq_iff_eq_add,
-    ← mul_add_one, mul_eq_mul_left_iff, h1, sub_eq_zero, mul_self_eq_one_iff] at h2
-end
 
 end IMO2012A5
 end IMOSL
