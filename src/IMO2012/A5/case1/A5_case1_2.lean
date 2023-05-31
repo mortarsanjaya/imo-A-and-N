@@ -118,11 +118,10 @@ private lemma case1_2_lift_decomp :
   ⟨_, case1_2_quotient_sol (period_lift_is_good h) h0 h1 (zero_of_periodic_period_lift h)⟩
 
 theorem case1_2_sol : ∃ φ : R →+* 𝔽₃, function.surjective φ ∧ f = 𝔽₃_map1 S ∘ φ :=
-  exists.elim (case1_2_lift_decomp h h0 h1) $ λ ψ h2,
-    ⟨ψ.to_ring_hom.comp $ ideal.quotient.mk (period_ideal h),
-    (equiv_like.surjective ψ).comp (ideal.quotient.mk $ period_ideal h).is_surjective,
-    (period_lift_comp_quotient_eq_f h).symm.trans $
-      congr_arg (λ u, u ∘ ideal.quotient.mk (period_ideal h)) h2⟩
+  exists.elim (case1_2_lift_decomp h h0 h1) $
+    λ ψ h2, let π := ideal.quotient.mk (period_ideal h) in
+    ⟨ψ.to_ring_hom.comp π, ψ.surjective.comp π.is_surjective,
+      (period_lift_comp_quotient_eq_f h).symm.trans $ congr_arg (∘ π) h2⟩
 
 end solution
 
