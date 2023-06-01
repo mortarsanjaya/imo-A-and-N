@@ -385,9 +385,10 @@ Since $f$ is even, we have either $f(x - 1) = f(x + 1)$ or $f(x) + f(x - 1) = f(
 But the latter also implies $f(x - 1) = f(x + 1)$; the former always holds for any $x \in R$.
 This implies that $2 = 0$ in $R/I$.
 
+
 Now, from~\eqref{2012a5-eq0}, we get $f(x^2 + 1) = f(x)^2 - 1$ and $f(x^2 + x + 1) = f(x) f(x + 1)$ directly.
 We use these equations for our main claim.
-From now on, we assume that $S$ is commutative, although it is unnecessary for the claim.
+From now on, we assume that $S$ is commutative, although it is unnecessary for at least the claim.
 
 \begin{claim}
 For any $x \in R$, we have $f(x)^2 + f(x + 1)^2 = 1$ or $f(x) + f(x + 1) = 1$.
@@ -434,7 +435,8 @@ We will separate this case from the other case, $\rchar(S) \neq 2$.
 
     Consider the expression $f(xy (y + 1) (x + 1) + 1)$.
     We can write it in two different ways using~\eqref{2012a5-eq0}:
-    \[ f(xy) f((y + 1)(x + 1)) + f(xy + yx + x + y + 1) = f(x(y + 1)) f(y(x + 1)) + f(xy + yx + x + y). \]
+    \[ f(xy) f((y + 1)(x + 1)) + f(xy + yx + x + y + 1), \]
+    \[ f(x(y + 1)) f(y(x + 1)) + f(xy + yx + x + y). \]
     While $xy + yx \neq 0$, the additional term still cancels out.
     That is, we get $f(xy) f((y + 1)(x + 1)) + 1 = f(x(y + 1)) f(y(x + 1))$.
 
@@ -452,15 +454,107 @@ We will separate this case from the other case, $\rchar(S) \neq 2$.
     This sub-subcase will be quite bashy.
 
     \begin{claim}
-    For any $x \in R$, either $f(x) \in \{\pm 1, 0\}$ or $f(x) + f(x + 1) = 1$ and $f(x) f(x + 1) = -1$.
+    For any $x \in R$, either $f(x) \in \{\pm 1, 0\}$, or $f(x) + f(x + 1) = 1$ and $f(x) f(x + 1) = -1$.
     In the former case, we also have $f(x) = \pm 1$ if and only if $f(x + 1) = 0$.
     \end{claim}
     \begin{proof}
     Recall that $f(x^2 + 1) = f(x)^2 - 1$ for any $x \in R$.
-    ...
+    Using this equality twice, we get $f(x^4) = f(x)^2 (f(x)^2 - 2) = f(x)^4 - 2 f(x)^2$.
+    Recall as well that $f(x^2 + x + 1) = f(x) f(x + 1)$ for any $x \in R$.
+    Furthermore, $f(x)$ and $f(x + 1)$ commutes since $x$ and $x + 1$ are.
+    Now we apply this equality to the equality $f(x^8 + x^4 + 1) = f(x^4) f(x^4 + 1)$.
+    Letting $a = f(x)$ and $b = f(x + 1)$, we get
+    \[ (ab)^2 ((ab)^2 - 2) = a^2 (a^2 - 2) b^2 (b^2 - 2) = (ab)^2 (a^2 - 2) (b^2 - 2). \]
+    So, we have either $f(x^2 + x + 1) = ab = 0$ or $(ab)^2 - 2 = (a^2 - 2)(b^2 - 2)$.
+    The latter is equivalent to $2(a^2 + b^2) = 6$, or $a^2 + b^2 = 3$ since $\rchar(S) \neq 2$.
 
+    By a previous claim, we always have either $a^2 + b^2 = 1$ or $a + b = 1$.
+    Since $3 \neq 1$ in $S$, $a^2 + b^2 = 3$ yields $a + b = 1$ and thus $ab = ba = -1$.
+    Meanwhile $ab = 0$ yields $a^2 + b^2 = 1$ even when $a + b = 1$.
+    In this case, one of $f(x)$ or $f(x + 1)$ equals $\pm 1$ and the other one equals $0$.
+    Finally, when $a + b = 1$ and $ab = -1$, we necessarily have $a \notin \{\pm 1, 0\}$ by direct bashing.
     \end{proof}
 
+    \begin{claim}
+    Given $f(x) + f(y) = 0$ for some $x, y \in R$, we have $f(x) \in \{\pm 1, 0\}$.
+    \end{claim}
+    \begin{proof}
+    Suppose not; so that $f(x) + f(x + 1) = 1$ and $f(x) f(x + 1) = -1$.
+    The latter can be rewritten as $f(x) (1 - f(x)) = -1$.
+    Similarly, $f(y) \notin \{\pm 1, 0\}$, so $f(y) (1 - f(y)) = -1$.
+    But $f(y) = -f(x)$, so this means $f(x) (1 + f(x)) = 1$.
+    Adding the two equations yield $2 f(x) = 0$, so $f(x) = 0$.
+    This contradicts the assumption that $f(x) \notin \{\pm 1, 0\}$.
+    \end{proof}
+
+    \hrulefill
+
+    We start with the case where $f$ attains $1$.
+    In this case, given $c \in R$ with $f(c) = 1$, we prove that $c \in J$.
+    It is easy to proceed with Lemma~\ref{2012a5-3} afterwards and prove that $f$ is of class 9.
+    The first step is to prove that $c^3 = 0$ (assuming $I = 0$).
+    The second step is to reduce the exponent to just $2$; $c^2 = 0$, which is a very short step.
+    The third step is to prove that $c \in J$.
+
+    For the first step, since $f(c) = 1$, we have $f(cy + 1) = f(c + y) + f(y)$.
+    Changing $y$ with $c + y$, we get $f(cy + 1) = f(c^2 + cy + 1)$ for all $y \in R$.
+    Direct computation yields $f(c + 1) = 0$, so we have $f(c^2) = -1$.
+    Thus the previous equation actually implies $f(c^2 (cy + 1) + 1) = 0$ via~\eqref{2012a5-eq0}.
+    Again, use the previous equation; since $c^2 (cy + 1) = c^2 + c^3 y$, we get $f(c^3 y + 1) = 0$ for all $y \in R$.
+    Doing computations again give $f(c^3) = -1$.
+    For example, $f(c^3) = f(c + 1) f(c^2 + c + 1) + f(c^2)$ with $f(c + 1) = 0$ and $f(c^2) = -1$.
+    This implies $c^3 \in I$, thus $c^3 = 0$, as desired.
+
+    The second step is quite short.
+    For any $y \in R$, we have $f(c^2 y + 1) = f(c^2 + y) - f(y)$.
+    Similar to the first step, this gives us $f(c^2 (c^2 + y) + 1) = -f(c^2 y + 1)$.
+    But $c^4 = 0$ since $c^3 = 0$, so this actually gives us $f(c^2 y + 1) = -f(c^2 y + 1)$.
+    Thus $f(c^2 y + 1) = 0$ for all $y \in R$.
+    Since $f(c^2) = -1$, this implies $c^2 \in I$, so $c^2 = 0$.
+
+    Finally, we show that $f(cy + 1) = 0$ for all $y \in R$.
+    Note that $0 = f(c(cy + 1) + 1) = f(cy + 1) + f(c(y + 1) + 1)$ for any $y \in R$.
+    The first equality holds since $c^2 = 0$ and $f(c + 1) = 0$.
+    But the second claim above implies that $f(cy + 1) \in \{\pm 1, 0\}$.
+    Either one of $f(cy + 1)$ or $f(c(y + 1) + 1)$ equals $-1$, or both equals $0$.
+    Thus it suffices to show that $f(cy + 1) \neq 1$ for any $y \in R$.
+ 
+    Suppose for the sake of contradiction that $f(cy + 1) = 1$ for some $y \in R$.
+    By the previous step, we have $cycy + 1 = (cy + 1)^2 = 0$.
+    Then $c = c^2 ycy + c = c(cycy + 1) = 0$; a contradiction!
+    Thus $c \in J$, and $c \neq 0$ since $f(c) = 1 \neq -1$.
+
+    \hrulefill
+
+    Now suppose that $f$ never attains $1$.
+    The second claim then implies that, if $f(x) + f(y) = 0$, then $f(x) = f(y) = 0$.
+    In particular, it is now easy to see that if $f(c) = -1$, then $c = 0$.
+    Indeed, note that $f(cy + 1) = f(c + y) - f(y)$ and $f(c(c + y) + 1) = f(y) - f(c + y)$.
+    Thus $f(cy + 1) + f(c(c + y) + 1) = 0$, which implies $f(cy + 1) = 0$ by the second claim.
+    Since $f(c) = -1$, this implies $f(c + y) = f(y)$ for all $y \in R$, so $c \in I = (0)$.
+
+    Recall from the first claim that $f(c) = 0$ implies $f(c + 1) = \pm 1$.
+    If $f$ never attains $1$, then $f(c + 1) = -1$, and the above claim implies that $c = 1$.
+    Thus, if the case $f(x) + f(x + 1) = 1$, $f(x) f(x + 1) = -1$ never happens, we already get $R \cong \F_2$.
+    In the remaining case, we claim that $R \cong \F_4$.
+    The induced map is easy to compute.
+
+    Recall that $f(c) = -1$ implies $c = 0$ and $f(c + 1)$ implies $c = 1$.
+    Thus, for any $x \in R \setminus \{0, 1\}$, we have $f(x) + f(x + 1) = 1$ and $f(x^2 + x + 1) = f(x) f(x + 1) = -1$.
+    In particular, $x^2 + x + 1 = 0$.
+
+    Now fix one such $x$, say $c$.
+    We show that $x + c \in \{0, 1\}$ if $x \notin \{0, 1\}$.
+    Suppose not; then $x^2 + x + 1 = 0$ and also $(x + c)^2 + (x + c) + 1 = 0$.
+    Since $c^2 + c + 1 = 0$, expanding the latter equality yields $xc + cx = 1$.
+    Now this yields $x = x(xc + cx) = (xc + cx)x$, so $x^2 c + xcx = cx^2 + xcx$.
+    Since $x^2 = x + 1$, this gives us $(x + 1)c = c(x + 1)$, which cancels out to $xc = cx$.
+    But then $1 = xc + cx = 0$; a contradiction.
+
+    As a result, $R \subseteq \{0, 1, c, c + 1\}$.
+    Since $c^2 + c + 1 = 0$, this means $c \neq 0, 1$, and also this implies $R \cong \F_4$.
+    If we denote $f(c) = \alpha$, then $f(c + 1) = 1 - \alpha$ and $\alpha(1 - \alpha) = -1$.
+    Now the description of the induced map $\F_4 \to S$ is easy.
 
 \end{itemize}
 

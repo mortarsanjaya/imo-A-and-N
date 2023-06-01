@@ -291,7 +291,7 @@ def cast'_hom : 𝔽₄ →+* R :=
 variables (h1 : (1 : R) ≠ 0)
 include h1
 
-lemma cast_hom_eq_zero_imp : ∀ x : 𝔽₄, cast'_hom h h0 x = 0 → x = 0
+lemma cast'_hom_eq_zero_imp : ∀ x : 𝔽₄, cast'_hom h h0 x = 0 → x = 0
 | O := λ _, rfl
 | I := λ h2, absurd h2 h1
 | X := λ h2, absurd (h0.symm.trans $ (mul_add_one r r).symm.trans $
@@ -299,8 +299,8 @@ lemma cast_hom_eq_zero_imp : ∀ x : 𝔽₄, cast'_hom h h0 x = 0 → x = 0
 | Y := λ h2, absurd (h0.symm.trans $ (mul_add_one r r).symm.trans $
     mul_eq_zero_of_right r h2) h1
 
-lemma cast_hom_injective : function.injective (cast'_hom h h0) :=
-  (injective_iff_map_eq_zero $ cast'_hom h h0).mpr (cast_hom_eq_zero_imp h h0 h1)
+lemma cast'_hom_injective : function.injective (cast'_hom h h0) :=
+  (injective_iff_map_eq_zero $ cast'_hom h h0).mpr (cast'_hom_eq_zero_imp h h0 h1)
 
 end ring
 
