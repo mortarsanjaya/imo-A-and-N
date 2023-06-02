@@ -1,5 +1,5 @@
 import IMO2012.A5.A5_basic
-  IMO2012.A5.extra.nnreal_odd_ext
+  IMO2012.A5.reals.nnreal_odd_ext
   extra.real_prop.real_quadratic_sol
 
 /-! # IMO 2012 A5, Case 2: `f(-1) = 0` (exclusive on `ℝ`) -/
@@ -8,7 +8,7 @@ namespace IMOSL
 namespace IMO2012A5
 
 /-- The respective solution for this case. -/
-theorem case2_answer {S : Type*} [comm_ring S] :
+theorem case2_real_answer {S : Type*} [comm_ring S] :
   good (λ x : S, x ^ 2 - 1) :=
   λ x y, by rw [sub_sub_sub_cancel_right, sq_sub_sq, add_add_add_comm,
     add_comm 1 y, ← mul_add_one, ← add_one_mul, ← sub_sub_sub_eq, ← mul_sub_one,
@@ -72,7 +72,7 @@ private lemma case2_lem9 : ∃ φ : ℝ≥0 →+* S, f = λ x : ℝ, φ (x.nnabs
     funext (λ x, by rw [ring_hom.coe_mk, add_sub_cancel,
       nnreal.sqrt_sq, real.coe_nnabs, case2_lem2 h h0 h1])⟩
 
-theorem case2_sol : ∃ φ : ℝ →+* S, f = λ x, φ x ^ 2 - 1 :=
+theorem case2_real_sol : ∃ φ : ℝ →+* S, f = λ x, φ x ^ 2 - 1 :=
 begin
   rcases case2_lem9 h h0 h1 with ⟨φ, rfl⟩,
   refine ⟨(φ : ℝ →+* S), funext (λ x, _)⟩,

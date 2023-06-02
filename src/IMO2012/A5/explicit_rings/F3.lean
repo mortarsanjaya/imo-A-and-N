@@ -218,7 +218,7 @@ lemma cast_hom_eq_zero_imp : ∀ x : 𝔽₃, cast_hom h x = 0 → x = 0
 | 𝔽₃2 := λ h1, absurd (neg_eq_zero.mp h1) h0
 
 lemma cast_hom_injective : function.injective (cast_hom h) :=
-  (injective_iff_map_eq_zero $ 𝔽₃.cast_hom h).mpr (cast_hom_eq_zero_imp h h0)
+  (injective_iff_map_eq_zero $ cast_hom h).mpr (cast_hom_eq_zero_imp h h0)
 
 end ring
 

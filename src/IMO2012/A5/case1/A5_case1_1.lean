@@ -1,33 +1,26 @@
 import IMO2012.A5.case1.A5_case1_lemmas
 
-/-! # IMO 2012 A5, Case 1.1: `f(-1) = 2 ≠ 0` -/
+/-! # IMO 2012 A5, Subcase 1.1: `f(-1) = 2 ≠ 0` -/
 
 namespace IMOSL
 namespace IMO2012A5
 
-variables {R S : Type*} [ring R] [ring S]
-
-/-- The respective solution for the subcase. -/
-theorem case1_1_answer : good (λ x : R, x - 1) :=
-  λ x y, by rw [sub_sub_sub_cancel_right, ← sub_sub_sub_eq, ← mul_sub_one, ← sub_one_mul]
-
-
-
-variables [is_domain S] {f : R → S} (h : good f) (h0 : f (-1) ≠ 0) (h1 : f (-1) = -2)
+variables {R S : Type*} [ring R] [ring S] [is_domain S]
+  {f : R → S} (h : good f) (h0 : f (-1) ≠ 0) (h1 : f (-1) = -2)
 include h h0 h1
 
 private lemma case1_1_lem1 (x : R) : f (x - 1) - f (x + 1) = -2 :=
   (eq_or_ne (f x) 0).elim
-  (λ h2, let h3 := case1_map_eq_zero_imp h h0 h2 in by rw [h3.1, h3.2, ← neg_add', bit0])
-  (λ h2, (case1_map_ne_zero_imp h h0 h2).trans h1)
+    (λ h2, let h3 := case1_map_eq_zero_imp h h0 h2 in by rw [h3.1, h3.2, ← neg_add', bit0])
+    (λ h2, (case1_map_ne_zero_imp h h0 h2).trans h1)
 
 private lemma case1_1_lem2 (x : R) : f (-x) = -(f x + 2) :=
   by rw [case1_map_neg h h0, neg_add_rev, ← case1_1_lem1 h h0 h1 (x + 1),
     add_sub_cancel, ← sub_eq_add_neg, sub_sub_cancel_left, bit0, add_assoc]
 
 private lemma case1_1_lem3 (x : R) : f (x + 1) = f x + 1 :=
-  by have h2 := map_neg_sub_map2 h x; rwa [case1_1_lem2 h h0 h1, ← neg_add',
-    add_right_comm, ← mul_two, ← add_one_mul, ← mul_neg, ← h1, mul_left_inj' h0, eq_comm] at h2
+  by have h2 := map_neg_sub_map2 h x; rwa [case1_1_lem2 h h0 h1, ← neg_add', add_right_comm,
+    ← mul_two, ← add_one_mul, ← mul_neg, ← h1, mul_left_inj' h0, eq_comm] at h2
 
 private lemma case1_1_lem4 (x y : R) : f (x + y) = f x + f y + 1 :=
   let h3 := case1_1_lem2 h h0 h1 in

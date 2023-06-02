@@ -16,6 +16,10 @@ def good {R S : Type*} [ring R] [ring S] (f : R → S) :=
 lemma zero_is_good {R S : Type*} [ring R] [ring S] : good (λ _ : R, (0 : S)) :=
   λ _ _, (sub_self 0).trans (mul_zero 0).symm
 
+/-- The map `x ↦ x - 1` is always good.
+  We put this here since we have two subcases leading to this map. -/
+lemma sub_one_is_good {R : Type*} [ring R] : good (λ x : R, x - 1) :=
+  λ x y, by rw [sub_sub_sub_cancel_right, ← sub_sub_sub_eq, ← mul_sub_one, ← sub_one_mul]
 
 section hom
 
@@ -72,6 +76,10 @@ lemma good_map_one : f 1 = 0 :=
 lemma eq_zero_of_map_zero_ne_neg_one (h0 : f 0 ≠ -1) : f = λ _, 0 :=
   funext $ λ x, by have h1 := h x 0; rwa [mul_zero, zero_add, good_map_one h, zero_sub,
     add_zero, ← mul_neg_one, mul_eq_mul_left_iff, or_iff_right h0.symm] at h1
+
+lemma one_ne_zero_of_map_zero (h0 : f 0 = -1) : (1 : R) ≠ 0 :=
+  mt (congr_arg f) $ ne_of_eq_of_ne (good_map_one h) $
+    ne_of_ne_of_eq (neg_ne_zero.mpr one_ne_zero).symm h0.symm
 
 end domain
 

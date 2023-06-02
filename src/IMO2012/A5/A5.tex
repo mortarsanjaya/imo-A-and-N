@@ -30,15 +30,9 @@
 
 \section*{Problem}
 
-Let $R$ be a commutative ring and $S$ be a division ring.
+Let $R$ be a commutative ring and $S$ be a field.
 Find all functions $f : R \to S$ such that, for any $x, y \in R$,
 \[ f(xy + 1) - f(x + y) = f(x) f(y). \tag{*}\label{2012a5-eq0} \]
-
-\textit{
-    Note: In the solution below, we will only completely solve the problem for the case $R = \R$.
-    We will present some cases in generality; the rest will be done with the assumption $R = \R$.}
-
-
 
 
 
@@ -72,7 +66,7 @@ The map into the intermediate ring is necessarily a ring homomorphism in this co
 \section*{Solution}
 
 Through this solution, we assume that $R$ is an arbitrary ring, except when specified.
-We also assume that $S$ is a domain, though not necessarily commutative in most cases.
+We also assume that $S$ is a domain, though not necessarily commutative.
 
 We start with some small observations.
 Plugging $x = y = 1$ into~\eqref{2012a5-eq0} yields $f(1) = 0$.
@@ -130,13 +124,45 @@ Thus, we get an induced map $g : R/I \to S$ such that $f = g \circ \phi$, where 
 Since $\phi$ is surjective, one can check that $g$ satisfies~\eqref{2012a5-eq0} as well.
 Thus, from now on, we can WLOG assume that $I = \{0\}$.
 
+The following lemma is only going to be useful in Case 2.
+However, we put it here since it will be used in two subcases.
+The lemma says that we have a very strong structure on $R$ if $I \subsetneq J$.
+
+\begin{lemma}\label{2012a5-3}
+Let $I$ and $J$ as in Lemma~\ref{2012a5-2}.
+Suppose that $I \subsetneq J$, and fix some $c \in J \setminus I$.
+Then for any $x \in R$, $x$ is congruent to $0$, $1$, $c$, or $c + 1$ modulo $I$.
+\end{lemma}
+\begin{proof}
+First note that $[J : I] = 2$.
+One can check manually that if $c, d \in J \setminus I$, then $c - d \in I$.
+In particular, every element of $J$ is congruent to $0$ or $c$ modulo $I$.
+It suffices to show that for any $x \in R$, either $x \in J$ or $x - 1 \in J$.
+The main claim is that, if $x \notin J$, then $xc \notin I$.
+
+First suppose that the claim holds.
+Then given $x \notin J$, since $c \in J \setminus I$, we have $xc \in J \setminus I$.
+This implies $(x - 1) c = xc - c \in I$.
+The claim again implies that $x - 1 \in J$, as desired.
+
+We now prove the claim.
+Since $c \in I \setminus J$, we have $f(c) = 1$ and for all $y \in R$,
+\[ f(x(c + y) + 1) = f(x + c + y) + f(x) f(c + y) = -(f(x + y) + f(x) f(y)) = -f(xy + 1). \]
+On the other hand, since $J$ is an ideal, we have $xc \in J$.
+In particular, $f(x(c + y) + 1) = f(xc + xy + 1) = -f(xc) f(xy + 1)$.
+For $x \notin J$, we can pick $y \in R$ such that $f(xy + 1) \neq 0$.
+Cancelling out $f(xy + 1)$ yields $f(xc) = 1$.
+Note that $1 \neq -1$ in $S$ in our case; otherwise $c \in I$ as $f(c) = 1 = -1$.
+This implies $xc \in J \setminus I$, as desired.
+\end{proof}
+
 We now split into two cases: $f(-1) \neq 0$ and $f(-1) = 0$.
 The above equation is only saying that $f$ is even if $f(-1) = 0$.
 We start with the former case.
 
 
 
-\subsection*{Case 1: $f(-1) \neq 0$}
+\subsection*{Case 1: $f(-1) \neq 0$.}
 
 The equation $f(-x) - f(x) = f(x + 1) f(-1)$ now easily yields
 \[ f(1 - x) = -f(1 + x). \tag{1.1}\label{2012a5-eq1-1} \]
@@ -179,7 +205,7 @@ This proves the claim, since $C = -f(-1) \neq 0$.
 \end{proof}
 
 
-\subsubsection*{Subcase 1.1: $f(-1) = -2 \neq 0$}
+\subsubsection*{Subcase 1.1: $f(-1) = -2 \neq 0$.}
 
 In particular $\rchar(S) \neq 2$.
 
@@ -202,7 +228,7 @@ Again, $\rchar(S) \neq 2$, so $f(x + y) + 1 = f(x + y + 1) = f(x) + f(y) + 2$.
 We are done.
 
 
-\subsubsection*{Subcase 1.2: $f(-1) = 1 \neq -2$}
+\subsubsection*{Subcase 1.2: $f(-1) = 1 \neq -2$.}
 
 In particular, $\rchar(S) \neq 3$.
 
@@ -231,30 +257,307 @@ We are done with this subcase.
 
 
 
-\subsection*{Case 2: $f(-1) = 0$ (Not generalized)}
+\subsection*{Case 2: $f(-1) = 0$.}
 
-\textit{Note: For now, we just work with the case $R = \R$.}
+Recall that~\eqref{2012a5-eq0} with $y = -1$ implies that $f$ is even.
+We derive some general equalities and compute $f(2)$.
+Replacing $y$ with $-y$ now gives us
+\[ f(xy - 1) - f(x - y) = f(x) f(y). \tag{2.1}\label{2012a5-eq2-1} \]
 
-Let us assume that $R = \R$ for this case.
-Then the only corresponding solution is $x \mapsto \phi(x)^2 - 1$.
+Plugging $y = 2$ into~\eqref{2012a5-eq0} gives us $f(2x + 1) = f(x) f(2) + f(x + 2)$.
+This also means $f(2x + 1) = f(2(-x - 1) + 1) = f(-x - 1) f(2) + f(-x + 1) = f(x + 1) f(2) + f(x - 1)$.
+In particular, this gives us
+\[ f(x + 2) = (f(x + 1) - f(x)) f(2) + f(x - 1). \tag{2.2}\label{2012a5-eq2-2} \]
 
-By the equation $f(x) - f(-x) = -f(x + 1) f(-1)$, this time, we get that $f$ is even.
-In particular we have $f(xy + 1) - f(x + y) = f(1 - xy) - f(x - y)$ for all $x, y \in \R$.
-Rearranging gives us $f(xy + 1) - f(xy - 1) = f(x + y) - f(x - y)$.
-In particular, for any $a, b \in \R$, solving for $x + y = a$ and $x - y = b$ gives us
-\[ f\left(\frac{a^2 - b^2}{4} + 1\right) - f\left(\frac{a^2 - b^2}{4} - 1\right) = f(a) - f(b). \]
-It follows that $f(a) - f(b) = f(c) - f(d)$ for any $a, b, c, d \in \R$ such that $a^2 - b^2 = c^2 - d^2$.
-In particular, since $f(0) = -1$, we have $f(\sqrt{u + v}) = f(\sqrt{u}) + f(\sqrt{v}) + 1$ for all $u, v \geq 0$.
+Another useful identity can be obtained as follows.
+Notice that for any $x \in R$, $x(x + 1) - 1 = (x - 1)(x + 2) + 1 = x^2 + x - 1$.
+Thus combining~\eqref{2012a5-eq2-1} and~\eqref{2012a5-eq0} gives us
+\[ f(x - 1) f(x + 2) + f(2x + 1) = f(x) f(x + 1) + f(-1) = f(x) f(x + 1), \]
+\[ f(x) f(x + 1) - f(x - 1) f(x + 2) = f(x) f(2) + f(x + 2). \tag{2.3}\label{2012a5-eq2-3} \]
 
-Now define $g : \R_{\geq 0} \to R$ by $g(x) = f(\sqrt{x})$ for all $x \geq 0$.
-Since $f$ is even, we have $f(x) = g(x^2)$ for all $x \in \R$.
-The previous paragraph implies that $g + 1$ is additive.
-It remains to show that it is multiplicative.
-Going back to~\eqref{2012a5-eq0}, for all $x, y \in \R$, we have
-\[ g(x^2) g(y^2) = g(1 + 2xy + x^2 y^2) - g(x^2 + 2xy + y^2) = g(1) + g(x^2 y^2) - g(x^2) - g(y^2). \]
-Note that $g(1) = f(1) = 0$.
-Thus rearranging gives $g(x^2 y^2) + 1 = (g(x^2) + 1)(g(y^2) + 1)$ for all $x, y \in \R$.
-Replacing with square roots prove that $g + 1$ is multiplicative.
+\begin{claim}
+We have $f(2) \in \{-1, 0, 1, 3\}$.
+\end{claim}
+\begin{proof}
+Recall that $f(0) = -1$ and $f(-1) = f(1) = 0$.
+For convenience, let $M = f(2)$.
+Plugging $x = y = 2$ into~\eqref{2012a5-eq2-1} gives us $f(3) = M^2 - 1$.
+Using~\eqref{2012a5-eq2-2} with $x = 2$ and $x = 3$ respectively gives us
+\[ f(4) = (f(3) - M) M, \quad f(5) = (f(4) - f(3) + 1) M. \]
+On the other hand,~\eqref{2012a5-eq0} gives us $f(5) = f(4) + M^2$.
+So we have $(f(4) - f(3) + 1) M = f(4) + M^2 = (f(3) - M) M + M^2 = f(3) M$.
+
+Now suppose that $M \neq 0$.
+Since $S$ is a domain, we can cancel $M$ out and get $f(4) + 1 = 2 f(3)$.
+On the other hand, $f(4) + 1 = f(3) M - M^2 + 1 = f(3) M - f(3) = f(3) (M - 1)$.
+So that means $f(3) (M - 3) = 0$, which implies either $M = 3$ or $f(3) = 0$.
+The latter yields $M = \pm 1$ since $f(3) = M^2 - 1$.
+We are done.
+\end{proof}
+
+
+\subsection*{Subcase 2.1: $f(2) = 0 \neq 3$.}
+
+In particular, $\rchar(S) \neq 3$.
+
+The corresponding class of solutions is class 5.
+Since we already know the value of $f(0)$, $f(1)$, and $f(-1)$, it suffices to show that $R/I \cong \F_3$.
+WLOG let $I = 0$.
+
+Since $f(2) = 0$,~\eqref{2012a5-eq2-2} yields $3 = 0$ in $R$.
+Now~\eqref{2012a5-eq2-3} yields $f(x) f(x + 1) = f(x - 1)^2 + f(x - 1)$ for all $x \in R$.
+Similarly, we have $f(x) f(x - 1) = f(x + 1)^2 + f(x + 1)$ and $f(x + 1) f(x - 1) = f(x)^2 + f(x)$.
+Note that, since $x$, $x - 1$, and $x + 1$ pairwise commute, so are $f(x)$, $f(x - 1)$, and $f(x + 1)$.
+Thus subtracting gives us $f(x) (f(x + 1) - f(x - 1)) = (f(x + 1) + f(x - 1) + 1)(f(x - 1) - f(x + 1))$.
+This means either $f(x + 1) = f(x - 1)$ or $f(x) + f(x + 1) + f(x - 1) = -1$.
+
+To proceed further, we need some rather tricky steps.
+The first step is the following claim.
+
+\begin{claim}
+Given $c \in R$ such that $f(c + 1) = f(c - 1) = 0$, we have $c = 0$.
+\end{claim}
+\begin{proof}
+It suffices to show that $f(c + y) = f(y)$ for all $y \in R$.
+By~\eqref{2012a5-eq0} and $f(c + 1) = f(c - 1) = 0$, we have $f(y(c + 1) + (c - 1)) = f(y(c - 1) + (c + 1)) = f(y(c^2 - 1) + 1)$.
+We can rewrite the equation as $f((y + 1)(c + 1) + 1) = f((y + 1)(c - 1) - 1)$.
+By~\eqref{2012a5-eq0} and~\eqref{2012a5-eq2-1}, we get $f(y + c + 2) = f(y - c + 2)$ for any $y \in R$.
+The claim follows by replacing $y$ with $y - 2 + 2c$.
+\end{proof}
+
+In particular, we can now show that $f(x) + f(x + 1) + f(x - 1) = -1$ always holds.
+Indeed, if not, then we have $f(x) = f(x + 1) = f(x - 1)$.
+Then $f(x) f(x + 1) = f(x - 1)^2 + f(x - 1)$ forces the common value to be zero.
+The above claim now gives a contradiction.
+
+Next we show that $f(x) \in \{0, -1\}$ for all $x \in R$.
+We will use the equality $f(x + 1) f(x - 1) = f(x)^2 + f(x)$.
+By~\eqref{2012a5-eq0} and~\eqref{2012a5-eq2-1},
+\[ f(x^2) = f(x + 1) f(x - 1) + f(2x) = f(x)^2 + f(x) + f(x) = f(x)^2 + 2 f(x), \]
+\[ f(x^2 + 1) = f(x)^2 + f(2x) = f(x)^2 + f(x), \quad f(x^2 - 1) = f(x)^2 - 1. \]
+Summing all three equalities yield $-1 = f(x^2) + f(x^2 + 1) + f(x^2 - 1) = 3 f(x)^2 + 3 f(x) - 1$.
+That is, $3 f(x) (f(x) + 1) = 0$.
+Since $3 \neq 0$ in $S$, we get $f(x) \in \{0, -1\}$.
+
+We now show that $R = \{-1, 0, 1\}$.
+This is easy to see if two of $f(x)$, $f(x + 1)$, and $f(x - 1)$ equals zero.
+So now suppose otherwise, that at most one of them equals zero.
+If exactly one of the three expressions is equal to zero, then $-1 = f(x) + f(x + 1) + f(x - 1) = -2$.
+If none of them equals zero, then $f(x) = f(x + 1) = f(x - 1) = -1$, contradicting $f(x) f(x + 1) = f(x - 1)^2 + f(x - 1)$.
+Thus every element of $R$ is either $-1$, $0$, and $1$.
+Since $1 \neq 0$ in $R$ (due to $f(1) \neq f(0)$), this shows that $R \cong \Z/3\Z$, as desired.
+
+
+\subsection*{Subcase 2.2: $f(2) = 1 \neq -1$.}
+
+In particular, $\rchar(S) \neq 2$.
+
+The corresponding class of solutions is class 6.
+We will use Lemma~\ref{2012a5-3} to conclude that $R/I \cong \Z/4\Z$.
+This suffices, as we have computed $f(0)$, $f(1)$, $f(2)$, and $f(-1)$ before.
+By the lemma, it suffices to prove that $2 \in J$.
+That is, $f(2x + 1) = 0$ for all $x \in R$.
+
+Since $f(2) = 1$,~\eqref{2012a5-eq2-2} implies $f(x + 2) + f(x) = f(x + 1) + f(x - 1)$ for all $x \in R$.
+From here, it is easy to see that $4 \in I$, i.e., $f(x + 4) = f(x)$ for all $x \in R$.
+Now notice that $f(2x + 1) = f(x + 2) + f(x) = f(x + 1) + f(x - 1) = f(2x - 1)$ for all $x \in R$.
+Thus we get $f(4x + 1) = f(2x + 1) + f(2x - 1) = 2 f(2x + 1)$.
+But since $4 \in I$, we have $f(4x + 1) = 0$.
+Since $\rchar(S) \neq 2$, this implies $f(2x + 1) = 0$, as desired.
+
+
+\subsection*{Subcase 2.3: $f(2) = 3 \neq 1$.}
+
+...
+
+
+\subsection*{Subcase 2.4: $f(2) = -1$.}
+
+Now~\eqref{2012a5-eq2-2} reads as $f(x + 2) + f(x + 1) = f(x) + f(x - 1)$.
+Meanwhile~\eqref{2012a5-eq2-3} reads as $f(x) f(x + 1) - f(x - 1) f(x + 2) = f(x + 2) - f(x)$, or
+\[ (f(x) + f(x - 1)) f(x + 1) - f(x - 1) (f(x) + f(x - 1)) = f(x - 1) - f(x + 1). \]
+However, $x$, $x + 1$, and $x - 1$ pairwise commute.
+Thus the left hand side becomes $(f(x) + f(x - 1)) (f(x + 1) - f(x - 1))$.
+Since $S$ is a domain, this implies that for any $x \in R$, either $f(x - 1) = f(x + 1)$ or $f(x) + f(x - 1) = -1$ holds.
+
+Consider the same statement but with $-x$ replacing $x$.
+Since $f$ is even, we have either $f(x - 1) = f(x + 1)$ or $f(x) + f(x - 1) = f(x) + f(x + 1) = -1$.
+But the latter also implies $f(x - 1) = f(x + 1)$; the former always holds for any $x \in R$.
+This implies that $2 = 0$ in $R/I$.
+
+
+Now, from~\eqref{2012a5-eq0}, we get $f(x^2 + 1) = f(x)^2 - 1$ and $f(x^2 + x + 1) = f(x) f(x + 1)$ directly.
+We use these equations for our main claim.
+From now on, we assume that $S$ is commutative, although it is unnecessary for at least the claim.
+
+\begin{claim}
+For any $x \in R$, we have $f(x)^2 + f(x + 1)^2 = 1$ or $f(x) + f(x + 1) = 1$.
+\end{claim}
+\begin{proof}
+We first prove that for any $x \in R$, the claim holds except for the possibility of $f(x + 1) = f(x)$.
+Consider that for any $x \in R$,
+\[ f(x^2) f(x + 1) + f(x^2 + x + 1) = f(x^2 (x + 1) + 1) = f(x^2 + x) f(x) + f(x^2), \]
+\[ (f(x + 1)^2 - 1) (f(x + 1) - 1) + f(x) f(x + 1) = f(x^2 + x) f(x). \]
+If we denote $a = f(x + 1)$ and $b = f(x)$, this gives $(a^2 - 1)(a - 1) + ab = f(x^2 + x) b$.
+Replacing $x$ with $x + 1$ gives us $(b^2 - 1)(b - 1) + ba = f(x^2 + x) a$.
+Note that $a$, $b$, and $f(x^2 + x)$ pairwise commute.
+Thus, we have $a((a^2 - 1)(a - 1) + ab) = b((b^2 - 1)(b - 1) + ba)$.
+Since $a$ and $b$ commute, the equation simplifies to $(a - b)(a^2 + b^2 - 1)(a + b - 1) = 0$.
+This yields $a = b$, $a^2 + b^2 = 1$, or $a + b = 1$, as desired.
+
+Now suppose that $a = b$.
+We now have $a^3 - a + 1 = (a^2 - 1)(a - 1) + a^2 = f(x^2 + x) a$.
+We also have $f(x^4 + x^2 + 1) = f(x^2) f(x^2 + 1) = f(x^2 + x)^2 - 1$.
+This equation is equivalent to $(a^2 - 1)^2 = f(x^2 + x)^2 - 1$.
+Then we have $(a^3 - a)^2 = (a^3 - a + 1)^2 - a^2$, which is equivalent to $(1 - 2a)(a^2 - 1) = 0$.
+So, either $a + b = 2a = 1$ or $a^2 = 1$.
+
+Finally, suppose for the sake of contradiction that $a = b$ and $a^2 = 1$.
+Then that means $f(x^2) = f(x^2 + 1) = a^2 - 1 = 0$.
+Using $f(x^2)$ and $f(x^2 + 1)$ in place of $a = f(x + 1)$ and $b = f(x)$ yields a contradiction.
+This proves the claim.
+\end{proof}
+
+The claim yields a relatively fast solution when $\rchar(S) = 2$.
+We will separate this case from the other case, $\rchar(S) \neq 2$.
+
+\begin{itemize}
+
+    \item
+    $\rchar(S) = 2$.
+
+    The corresponding solution is of class 2.
+    That is, we claim that $f + 1 : R \to S$ is a ring homomorphism.
+    
+    The claim now yields $f(x + 1) = f(x) + 1$ for all $x \in R$.
+    In particular,~\eqref{2012a5-eq0} yields $f(xy) = f(x) f(y) + f(x + y) + 1$ for all $x, y \in R$.
+    As in Subcase 1.1, it suffices to prove that $f(x + y) = f(x) + f(y) + 1$ for all $x, y \in R$.
+
+    Consider the expression $f(xy (y + 1) (x + 1) + 1)$.
+    We can write it in two different ways using~\eqref{2012a5-eq0}:
+    \[ f(xy) f((y + 1)(x + 1)) + f(xy + yx + x + y + 1), \]
+    \[ f(x(y + 1)) f(y(x + 1)) + f(xy + yx + x + y). \]
+    While $xy + yx \neq 0$, the additional term still cancels out.
+    That is, we get $f(xy) f((y + 1)(x + 1)) + 1 = f(x(y + 1)) f(y(x + 1))$.
+
+    Now, for convenience, set $a = f(x)$, $b = f(y)$, and $c = f(x + y)$.
+    Then using $f(xy) = f(x) f(y) + f(x + y) + 1$, we get
+    \[ (ab + c)((a + 1)(b + 1) + c) + 1 = (a(b + 1) + (c + 1))((a + 1)b + (c + 1)). \]
+    After some algebraic manipulation, this simplifies to $c = a + b + 1$.
+    We are done.
+
+    
+    \item
+    $\rchar(S) \neq 2$.
+
+    The corresponding solutions are of class 7, 8, and 9.
+    This sub-subcase will be quite bashy.
+
+    \begin{claim}
+    For any $x \in R$, either $f(x) \in \{\pm 1, 0\}$, or $f(x) + f(x + 1) = 1$ and $f(x) f(x + 1) = -1$.
+    In the former case, we also have $f(x) = \pm 1$ if and only if $f(x + 1) = 0$.
+    \end{claim}
+    \begin{proof}
+    Recall that $f(x^2 + 1) = f(x)^2 - 1$ for any $x \in R$.
+    Using this equality twice, we get $f(x^4) = f(x)^2 (f(x)^2 - 2) = f(x)^4 - 2 f(x)^2$.
+    Recall as well that $f(x^2 + x + 1) = f(x) f(x + 1)$ for any $x \in R$.
+    Furthermore, $f(x)$ and $f(x + 1)$ commutes since $x$ and $x + 1$ are.
+    Now we apply this equality to the equality $f(x^8 + x^4 + 1) = f(x^4) f(x^4 + 1)$.
+    Letting $a = f(x)$ and $b = f(x + 1)$, we get
+    \[ (ab)^2 ((ab)^2 - 2) = a^2 (a^2 - 2) b^2 (b^2 - 2) = (ab)^2 (a^2 - 2) (b^2 - 2). \]
+    So, we have either $f(x^2 + x + 1) = ab = 0$ or $(ab)^2 - 2 = (a^2 - 2)(b^2 - 2)$.
+    The latter is equivalent to $2(a^2 + b^2) = 6$, or $a^2 + b^2 = 3$ since $\rchar(S) \neq 2$.
+
+    By a previous claim, we always have either $a^2 + b^2 = 1$ or $a + b = 1$.
+    Since $3 \neq 1$ in $S$, $a^2 + b^2 = 3$ yields $a + b = 1$ and thus $ab = ba = -1$.
+    Meanwhile $ab = 0$ yields $a^2 + b^2 = 1$ even when $a + b = 1$.
+    In this case, one of $f(x)$ or $f(x + 1)$ equals $\pm 1$ and the other one equals $0$.
+    Finally, when $a + b = 1$ and $ab = -1$, we necessarily have $a \notin \{\pm 1, 0\}$ by direct bashing.
+    \end{proof}
+
+    \begin{claim}
+    Given $f(x) + f(y) = 0$ for some $x, y \in R$, we have $f(x) \in \{\pm 1, 0\}$.
+    \end{claim}
+    \begin{proof}
+    Suppose not; so that $f(x) + f(x + 1) = 1$ and $f(x) f(x + 1) = -1$.
+    The latter can be rewritten as $f(x) (1 - f(x)) = -1$.
+    Similarly, $f(y) \notin \{\pm 1, 0\}$, so $f(y) (1 - f(y)) = -1$.
+    But $f(y) = -f(x)$, so this means $f(x) (1 + f(x)) = 1$.
+    Adding the two equations yield $2 f(x) = 0$, so $f(x) = 0$.
+    This contradicts the assumption that $f(x) \notin \{\pm 1, 0\}$.
+    \end{proof}
+
+    \hrulefill
+
+    We start with the case where $f$ attains $1$.
+    In this case, given $c \in R$ with $f(c) = 1$, we prove that $c \in J$.
+    It is easy to proceed with Lemma~\ref{2012a5-3} afterwards and prove that $f$ is of class 9.
+    The first step is to prove that $c^3 = 0$ (assuming $I = 0$).
+    The second step is to reduce the exponent to just $2$; $c^2 = 0$, which is a very short step.
+    The third step is to prove that $c \in J$.
+
+    For the first step, since $f(c) = 1$, we have $f(cy + 1) = f(c + y) + f(y)$.
+    Changing $y$ with $c + y$, we get $f(cy + 1) = f(c^2 + cy + 1)$ for all $y \in R$.
+    Direct computation yields $f(c + 1) = 0$, so we have $f(c^2) = -1$.
+    Thus the previous equation actually implies $f(c^2 (cy + 1) + 1) = 0$ via~\eqref{2012a5-eq0}.
+    Again, use the previous equation; since $c^2 (cy + 1) = c^2 + c^3 y$, we get $f(c^3 y + 1) = 0$ for all $y \in R$.
+    Doing computations again give $f(c^3) = -1$.
+    For example, $f(c^3) = f(c + 1) f(c^2 + c + 1) + f(c^2)$ with $f(c + 1) = 0$ and $f(c^2) = -1$.
+    This implies $c^3 \in I$, thus $c^3 = 0$, as desired.
+
+    The second step is quite short.
+    For any $y \in R$, we have $f(c^2 y + 1) = f(c^2 + y) - f(y)$.
+    Similar to the first step, this gives us $f(c^2 (c^2 + y) + 1) = -f(c^2 y + 1)$.
+    But $c^4 = 0$ since $c^3 = 0$, so this actually gives us $f(c^2 y + 1) = -f(c^2 y + 1)$.
+    Thus $f(c^2 y + 1) = 0$ for all $y \in R$.
+    Since $f(c^2) = -1$, this implies $c^2 \in I$, so $c^2 = 0$.
+
+    Finally, we show that $f(cy + 1) = 0$ for all $y \in R$.
+    Note that $0 = f(c(cy + 1) + 1) = f(cy + 1) + f(c(y + 1) + 1)$ for any $y \in R$.
+    The first equality holds since $c^2 = 0$ and $f(c + 1) = 0$.
+    But the second claim above implies that $f(cy + 1) \in \{\pm 1, 0\}$.
+    Either one of $f(cy + 1)$ or $f(c(y + 1) + 1)$ equals $-1$, or both equals $0$.
+    Thus it suffices to show that $f(cy + 1) \neq 1$ for any $y \in R$.
+ 
+    Suppose for the sake of contradiction that $f(cy + 1) = 1$ for some $y \in R$.
+    By the previous step, we have $cycy + 1 = (cy + 1)^2 = 0$.
+    Then $c = c^2 ycy + c = c(cycy + 1) = 0$; a contradiction!
+    Thus $c \in J$, and $c \neq 0$ since $f(c) = 1 \neq -1$.
+
+    \hrulefill
+
+    Now suppose that $f$ never attains $1$.
+    The second claim then implies that, if $f(x) + f(y) = 0$, then $f(x) = f(y) = 0$.
+    In particular, it is now easy to see that if $f(c) = -1$, then $c = 0$.
+    Indeed, note that $f(cy + 1) = f(c + y) - f(y)$ and $f(c(c + y) + 1) = f(y) - f(c + y)$.
+    Thus $f(cy + 1) + f(c(c + y) + 1) = 0$, which implies $f(cy + 1) = 0$ by the second claim.
+    Since $f(c) = -1$, this implies $f(c + y) = f(y)$ for all $y \in R$, so $c \in I = (0)$.
+
+    Recall from the first claim that $f(c) = 0$ implies $f(c + 1) = \pm 1$.
+    If $f$ never attains $1$, then $f(c + 1) = -1$, and the above claim implies that $c = 1$.
+    Thus, if the case $f(x) + f(x + 1) = 1$, $f(x) f(x + 1) = -1$ never happens, we already get $R \cong \F_2$.
+    In the remaining case, we claim that $R \cong \F_4$.
+    The induced map is easy to compute.
+
+    Recall that $f(c) = -1$ implies $c = 0$ and $f(c + 1)$ implies $c = 1$.
+    Thus, for any $x \in R \setminus \{0, 1\}$, we have $f(x) + f(x + 1) = 1$ and $f(x^2 + x + 1) = f(x) f(x + 1) = -1$.
+    In particular, $x^2 + x + 1 = 0$.
+
+    Now fix one such $x$, say $c$.
+    We show that $x + c \in \{0, 1\}$ if $x \notin \{0, 1\}$.
+    Suppose not; then $x^2 + x + 1 = 0$ and also $(x + c)^2 + (x + c) + 1 = 0$.
+    Since $c^2 + c + 1 = 0$, expanding the latter equality yields $xc + cx = 1$.
+    Now this yields $x = x(xc + cx) = (xc + cx)x$, so $x^2 c + xcx = cx^2 + xcx$.
+    Since $x^2 = x + 1$, this gives us $(x + 1)c = c(x + 1)$, which cancels out to $xc = cx$.
+    But then $1 = xc + cx = 0$; a contradiction.
+
+    As a result, $R \subseteq \{0, 1, c, c + 1\}$.
+    Since $c^2 + c + 1 = 0$, this means $c \neq 0, 1$, and also this implies $R \cong \F_4$.
+    If we denote $f(c) = \alpha$, then $f(c + 1) = 1 - \alpha$ and $\alpha(1 - \alpha) = -1$.
+    Now the description of the induced map $\F_4 \to S$ is easy.
+
+\end{itemize}
+
 
 
 
@@ -262,13 +565,8 @@ Replacing with square roots prove that $g + 1$ is multiplicative.
 
 \section*{Implementation details}
 
-At the time of writing, \texttt{mathlib} does not have the notion of two-sided ideal.
-Thus, we only solve for the case where $R$ is commutative, with the ideal quotient API available.
-
-The file \texttt{A5\_basic} contains the definition of~\eqref{2012a5-eq0} and basic results.
-The file \texttt{A5\_period\_quot} contains the construction of the ideal $I$ of periods and the corresponding lift of $f$.
-The file \texttt{A5\_main\_real} is just the final solution file for the case $R = \R$.
-The rest are split up according to the subcases.
+Our solution to Subcase 2.4 assumes that $S$ is commutative.
+In the other cases, we do not need the commutative condition on $S$.
 
 
 
