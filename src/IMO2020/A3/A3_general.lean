@@ -1,6 +1,6 @@
 import algebra.order.field.basic
 
-/-! # IMO 2020 A3, General Version (Lower Bound only) -/
+/-! # IMO 2020 A3, General Version (Lower Bound and Restricted Equality) -/
 
 namespace IMOSL
 namespace IMO2020A3
