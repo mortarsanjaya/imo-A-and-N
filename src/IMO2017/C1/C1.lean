@@ -78,12 +78,12 @@ theorem final_solution {ι : Type*} {I : finset ι} {Q : ι → (ℕ × ℕ) × 
   ∃ (i : ι) (h : i ∈ I), (odd (Q i).2.1 ∧ odd (Q i).2.2) ∧ even ((Q i).1.1 + (Q i).1.2) :=
 begin
   let f := λ p : ℕ × ℕ, ite (even (p.1 + p.2)) 1 (-1 : ℤ),
-  simp_rw ← rectangle_sum_pos_iff,
   replace h0 : 0 < (lattice_rectangle ((0, 0), m, n)).sum f :=
     rectangle_sum_pos_iff.mpr ⟨h0, even_zero⟩,
   replace h1 : 0 < I.sum (λ i, (lattice_rectangle $ Q i).sum f) :=
     lt_of_lt_of_eq h0 ((sum_congr h1 $ λ p _, rfl).trans (sum_disj_Union I _ h)),
-  exact exists_lt_of_sum_lt (lt_of_eq_of_lt sum_const_zero h1)
+  rcases exists_lt_of_sum_lt (lt_of_eq_of_lt sum_const_zero h1) with ⟨i, h2, h3⟩,
+  exact ⟨i, h2, rectangle_sum_pos_iff.mp h3⟩
 end
 
 end IMO2017C1
