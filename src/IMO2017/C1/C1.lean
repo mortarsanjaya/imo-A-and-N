@@ -70,6 +70,7 @@ end
 
 
 
+/-- Final solution -/
 theorem final_solution {ι : Type*} {I : finset ι} {Q : ι → (ℕ × ℕ) × (ℕ × ℕ)}
   (h : (I : set ι).pairwise_disjoint (lattice_rectangle ∘ Q))
   {m n : ℕ} (h0 : odd m ∧ odd n)
