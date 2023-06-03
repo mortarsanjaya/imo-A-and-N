@@ -1,4 +1,4 @@
-import algebra.order.field.basic algebra.order.floor
+import algebra.order.floor
 
 /-! # IMO 2010 A1 (P1) -/
 
@@ -9,8 +9,8 @@ variables {F : Type*} [linear_ordered_field F] [floor_ring F]
 
 /-- For any `r : F` with `1 < r`, we have `⌊r⁻¹⌋ = 0`. -/
 lemma inv_floor_eq_zero {r : F} (h : 1 < r) : ⌊r⁻¹⌋ = 0 :=
-  by rw [int.floor_eq_iff, int.cast_zero, zero_add, inv_nonneg];
-    exact ⟨le_of_lt (lt_trans zero_lt_one h), inv_lt_one h⟩
+  int.floor_eq_zero_iff.mpr
+    ⟨inv_nonneg.mpr $ le_of_lt $ lt_trans zero_lt_one h, inv_lt_one h⟩
 
 
 
@@ -20,9 +20,8 @@ theorem final_solution {R : Type*} [linear_ordered_ring R] [floor_ring R] (f : F
 begin
   ---- `→` direction
   symmetry; refine ⟨λ h x y, _, λ h, ⟨f 0, _⟩⟩,
-  rcases h with ⟨C, h | rfl, rfl⟩,
-  rw [h, int.cast_one, mul_one],
-  rw zero_mul,
+  rcases h with ⟨C, h, rfl⟩,
+  rwa [eq_comm, mul_right_eq_self₀, int.cast_eq_one],
 
   ---- `←` direction; the case `⌊f(0)⌋ = 1` is easier
   have h0 := h 0 0,
