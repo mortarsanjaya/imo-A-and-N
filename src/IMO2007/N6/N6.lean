@@ -32,15 +32,15 @@ begin
     replace h1 := ((X a).pow 2).symm.trans (h1.trans ((X b).mul_right _)),
     rw [int.modeq_iff_dvd, sq, ← mul_sub, sub_neg_eq_add, neg_one_mul, dvd_neg] at h1,
     cases h1 with c h1,
-    use c; rw [eq_sub_iff_add_eq, h1]
+    exact ⟨c, eq_sub_of_add_eq h1⟩
   end,
 
   ---- It suffices to show that `0 < c` and `c < (a : ℤ)`
   suffices h2 : c < a ∧ 0 < c,
   { lift c to ℕ using le_of_lt h2.2,
     rw [int.coe_nat_pos, int.coe_nat_lt] at h2,
-    refine ⟨c, h2.2, h2.1, bad_symm _⟩,
-    use t * b - 1; rw [sq (a : ℤ), ← mul_assoc, ht, h1, mul_comm] },
+    refine ⟨c, h2.2, h2.1, bad_symm ⟨t * b - 1, _⟩⟩,
+    rw [sq (a : ℤ), ← mul_assoc, ht, h1, mul_comm] },
   
   ---- We do not need `n`; we just use `t` instead.
   replace ht : 1 < t :=
@@ -61,9 +61,9 @@ begin
   begin
     intros x,
     rw [h3, mul_zero, int.lt_iff_add_one_le, sub_add_cancel, le_iff_eq_or_lt],
-    refine or_iff_right (λ h4, _),
+    refine or_iff_right (λ h4, ne_of_gt ht _),
     rw [eq_comm, sub_eq_zero] at h4,
-    exact ne_of_gt ht (int.eq_one_of_mul_eq_one_right (le_of_lt h2) h4)
+    exact int.eq_one_of_mul_eq_one_right (le_of_lt h2) h4
   end,
 
   ---- Rearranging and final step
@@ -80,16 +80,9 @@ begin
 end
 
 private lemma nat_pred_descent {P : ℕ → Prop} [decidable_pred P]
-    (h : ∀ k : ℕ, P k → ∃ m : ℕ, m < k ∧ P m) :
-  ∀ k : ℕ, ¬P k :=
-begin
-  by_contra' h0,
-  replace h := h (nat.find h0) (nat.find_spec h0),
-  rcases h with ⟨m, h, h1⟩,
-  exact nat.find_min h0 h h1
-end
-
-
+  (h : ∀ k : ℕ, P k → ∃ m : ℕ, m < k ∧ P m) : ∀ k : ℕ, ¬P k :=
+  forall_not_of_not_exists $ λ h0, exists.elim (h (nat.find h0) (nat.find_spec h0)) $
+    λ m h1, nat.find_min h0 h1.1 h1.2
 
 
 
@@ -103,17 +96,12 @@ theorem final_solution {n : ℤ} (hn : 1 < n) :
 begin
   let P : ℕ → Prop := λ k, (0 < k ∧ ∃ m : ℕ, k < m ∧ n * k * m - 1 ∣ (n * k ^ 2 - 1) ^ 2),
   have h : ∀ k : ℕ, P k → ∃ m : ℕ, m < k ∧ P m :=
-  begin
-    intros k h,
-    replace h := bad_exists_descent hn h,
-    rcases h with ⟨c, h, h0, h1⟩,
-    exact ⟨c, h0, h, k, h0, h1⟩
-  end,
-
+    λ k h, exists.elim (bad_exists_descent hn h)
+      (λ c h0, ⟨c, h0.2.1, h0.1, k, h0.2.1, h0.2.2⟩),
   replace h := nat_pred_descent h,
-  dsimp only [P] at h,
   intros a b ha hb h0; by_contra' h1,
-  exact (lt_or_gt_of_ne h1).elim (λ h1, h a ⟨ha, b, h1, h0⟩) (λ h1, h b ⟨hb, a, h1, bad_symm h0⟩)
+  exact (lt_or_gt_of_ne h1).elim (λ h1, h a ⟨ha, b, h1, h0⟩)
+    (λ h1, h b ⟨hb, a, h1, bad_symm h0⟩)
 end
 
 end IMO2007N6
