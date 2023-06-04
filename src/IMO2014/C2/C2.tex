@@ -22,7 +22,8 @@
 
 \subsection*{Problem}
 
-Let $m$ be a positive integer, and let $S$ be the multiset consisting of $2^m$ copies of $1$.
+Let $R$ be a totally ordered commutative ring.
+Let $m$ be a positive integer, and let $S$ be the multiset consisting of $2^m$ copies of $1 \in R$.
 Consider the following operation: take some two elements of $S$, say $a$ and $b$, and replace them with two copies of $a + b$.
 Prove that, after $m 2^{m - 1}$ such operations, the sum of all elements of $S$ (including multiplicity) is at least $4^m$.
 
@@ -41,7 +42,7 @@ The main result is as follows.
 \begin{claim}
 Let $S$ be a multiset of positive integers with at least two elements.
 Let $T$ be a multiset obtained by replacing two elements $a, b \in S$ with two occurrences of $a + b$.
-Then $\pi_T \geq \pi_S$.
+Then $\pi_T \geq 4 \pi_S$.
 \end{claim}
 \begin{proof}
 This follows immediately from AM-GM: $(a + b)^2 \geq 4ab$.
@@ -49,17 +50,9 @@ This follows immediately from AM-GM: $(a + b)^2 \geq 4ab$.
 
 Initially, we have $\pi_S = 1$.
 By the claim, if $T$ denotes the multiset obtained after $m 2^{m - 1}$ operations, $\pi_T \geq 4^{m 2^{m - 1}} = 2^{m 2^m}$.
-By AM-GM, $\sigma_T \geq |T| \pi_T^{1/2^m}$.
-But $|T| = 2^m$ and $\pi_T \geq 4^{m 2^m}$, so $\sigma_T \geq 2^m \cdot 2^m = 4^m$.
-
-
-
-\subsection*{Implementation details}
-
-We will use \texttt{nnreal}, i.e., the non-negative reals, to represent the elements of the multiset to be considered.
-To implement the operations, define a relation between two multisets as needed in the claim.
-We say that the pair $(S, T)$ of multisets of non-negative real numbers \emph{good} if there exists a multiset $R$ and $a, b \in \R_{\geq 0}$ such that $S = R + \{a, b\}$ and $T = R + \{a + b, a + b\}$.
-This is equivalent to saying that there exists a valid operation from $S$ to $T$.
+By AM-GM, $\sigma_T^{2^m} \geq |T|^{2^m} \pi_T$.
+But $|T| = 2^m$ and $\pi_T \geq 2^{m 2^m}$, so $\sigma_T^{2^m} \geq 2^{m 2^m} \cdot 2^{m 2^m} = 4^{m 2^m}$.
+Cancelling out the $2^m$-th power yields $\sigma_T \geq 4^m$, as desired.
 
 
 
