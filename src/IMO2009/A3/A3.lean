@@ -39,8 +39,6 @@ end extra_lemmas
 
 
 
-
-
 /-- Final solution, `nat` version -/
 theorem final_solution_nat (f : ℕ → ℕ) :
   ((∀ x y : ℕ, f (y + f x) ≤ f y + x)
@@ -51,7 +49,7 @@ begin
   ---- First, the easier direction: `←`
   symmetry; split,
   { rintros rfl,
-    refine ⟨λ x y, by rw add_comm, λ x y, _, λ x y, _⟩,
+    refine ⟨λ x y, le_refl (y + x), λ x y, _, λ x y, _⟩,
     rw ← add_assoc; exact le_add_self,
     rw add_assoc; exact le_self_add },
 
