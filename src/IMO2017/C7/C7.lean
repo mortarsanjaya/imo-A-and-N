@@ -236,8 +236,7 @@ end ℕset
 
 
 /-- Final solution (alias of `commute_pow_card_eq`) -/
-theorem final_solution {X Y : ℕset} (h : X * Y = Y * X) : X ^ Y.card = Y ^ X.card :=
-  ℕset.commute_pow_card_eq h
+alias ℕset.commute_pow_card_eq ← final_solution
 
 end IMO2017C7
 end IMOSL
