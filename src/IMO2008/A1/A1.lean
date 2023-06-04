@@ -1,13 +1,16 @@
-import algebra.order.positive.ring algebra.group_power.order data.nat.basic tactic.by_contra
+import algebra.order.positive.ring algebra.group_power.order tactic.by_contra
 
 /-! # IMO 2008 A1 (P4), Ring Version -/
 
 namespace IMOSL
 namespace IMO2008A1
 
+set_option profiler true
+set_option profiler.threshold 0.05
+
 lemma positive_pow_eq_pow {R : Type*} [linear_ordered_ring R]
   {n : ℕ} (h : 0 < n) {a b : {x : R // 0 < x}} : a ^ n = b ^ n ↔ a = b :=
-  by simp_rw [← subtype.coe_inj, positive.coe_pow];
+  by rw [← subtype.coe_inj, positive.coe_pow, ← subtype.coe_inj, positive.coe_pow];
     exact pow_left_inj (le_of_lt a.2) (le_of_lt b.2) h
 
 
