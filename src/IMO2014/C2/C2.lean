@@ -66,6 +66,7 @@ end multiset_lemmas
 
 variables {R : Type*} [linear_ordered_comm_ring R]
 
+/-- This takes between 0.5s and 0.7s... but I don't think it can be improved either. -/
 lemma multiset_AM_GM : ∀ {S : multiset R},
   (∀ x : R, x ∈ S → 0 ≤ x) → (S.card : R) ^ S.card * S.prod ≤ S.sum ^ S.card :=
 suffices ∀ (n : ℕ) {S : multiset R}, S.card = n →
