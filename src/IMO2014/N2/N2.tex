@@ -1,0 +1,56 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\title{IMO 2014 N2}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Find all pairs $(x, y)$ of integers such that
+\[ 7 (x^2 + y^2) - 13 xy = (|x - y| + 1)^3. \tag{*}\label{2014n2-eq0} \]
+
+
+
+\subsection*{Answer}
+
+$(x, y) = (A(m), B(m))$ and $(x, y) = (B(m), A(m))$ for some integer $m$.
+Here $A(m) = m^3 + 2m^2 - m - 1$ and $B(m) = m^3 + m^2 - 2m - 1$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2014SL.pdf}
+
+We present a copy of the official solution.
+
+First note that $7 (x^2 + y^2) - 13 xy = 7 (x - y)^2 + xy$.
+To verify that the pairs given as answers satisfy~\eqref{2014n2-eq0}, first we check that $A(m) - B(m) = m(m + 1)$.
+Then the equality reduces to $7(m^2 + m)^2 + 13(m^3 + 2m^2 - m - 1)(m^3 + m^2 - 2m - 1) = (m^2 + m + 1)^3$.
+This can be done, for example, by brute force.
+
+For the converse, WLOG let $x \geq y$, and write $x - y = n$.
+Then~\eqref{2014n2-eq0} becomes $7n^2 + ny + y^2 = (n + 1)^3$.
+By brute force, one checks that $4(ny + y^2) + n^2 = (2y + n)^2$ and $4((n + 1)^3 - 7n^2) + n^2 = (n - 2)^2 (4n + 1)$.
+As a result, we have $(2n + y)^2 = (n - 2)^2 (4n + 1)$.
+In particular, if $n \neq 2$, then $(2n + y) = (n - 2) k$ for some integer $k$ with $k^2 = 4n + 1$.
+Otherwise, $n = 2$ yields $y = -1 = B(1)$ and $x = 1 = A(1)$.
+
+Now, since $k^2 = 4n + 1$, we can write $k = 2m + 1$ and $n = m^2 + m$ for some integer $m$.
+Finally, $2n + y = (n - 2) k$ yields $y = (n - 2) k + 2n = B(m)$ and $x = n + y = A(m)$.
+
+
+
+\end{document}
