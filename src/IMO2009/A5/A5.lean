@@ -5,6 +5,7 @@ import algebra.order.field.basic tactic.by_contra
 namespace IMOSL
 namespace IMO2009A5
 
+/-- Final solution -/
 theorem final_solution {F : Type*} [linear_ordered_field F] (f : F → F) :
   ∃ x y : F, y * f x + x < f (x - f y) :=
 begin
