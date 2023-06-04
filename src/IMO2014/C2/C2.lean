@@ -10,20 +10,9 @@ def good {α : Type*} [has_add α] (S T : multiset α) :=
 
 
 
-section cons_last
-
-variable {α : Type*} 
-
 /-- Wrapper for the last element of a cons list `a :: l`, guaranteed to be non-empty. -/
-private def cons_last (a : α) (l : list α) : α :=
+private def cons_last {α : Type*} (a : α) (l : list α) : α :=
   (list.cons a l).last (list.cons_ne_nil a l)
-
-private lemma cons_last_nil (a : α) : cons_last a list.nil = a := rfl
-
-private lemma cons_last_cons (a b : α) (l : list α) :
-  cons_last a (b :: l) = cons_last b l := rfl
-
-end cons_last
 
 
 
@@ -53,10 +42,9 @@ private lemma good_card_eq {S T : multiset α} (h : good S T) : T.card = S.card 
 
 private lemma good_chain_card_eq : ∀ {C : list (multiset α)} {S : multiset α},
   list.chain good S C → (cons_last S C).card = S.card
-| list.nil := λ S _, congr_arg card (cons_last_nil S)
+| list.nil := λ S _, congr_arg card rfl
 | (T :: C) := λ S h, let h0 := list.chain_cons.mp h in
-    (congr_arg card $ cons_last_cons S T C).trans $
-      (good_chain_card_eq h0.2).trans $ good_card_eq h0.1
+    (good_chain_card_eq h0.2).trans $ good_card_eq h0.1
 
 end multiset_lemmas
 
@@ -115,7 +103,7 @@ extra.AM_GM_induction
     rw [← h2, eq_replicate_card.mpr h, h0, prod_replicate, zero_pow n.succ_pos, mul_zero]
   end)
 
-private lemma good_nonneg {S T : multiset R} (h : good S T)
+lemma good_nonneg {S T : multiset R} (h : good S T)
   (h0 : ∀ x : R, x ∈ S → 0 ≤ x) (x : R) (h1 : x ∈ T) : 0 ≤ x :=
 begin
   rcases h with ⟨U, a, b, rfl, rfl⟩,
@@ -125,13 +113,13 @@ begin
   exact add_nonneg (h0 a $ mem_cons_self a {b}) (h0 b $ mem_cons_of_mem $ mem_singleton_self b)
 end
 
-private lemma good_chain_nonneg : ∀ {C : list (multiset R)} {S : multiset R},
+lemma good_chain_nonneg : ∀ {C : list (multiset R)} {S : multiset R},
   (∀ x : R, x ∈ S → 0 ≤ x) → list.chain good S C → ∀ x : R, x ∈ cons_last S C → 0 ≤ x
 | list.nil := λ S h _, h
 | (T :: C) := λ S h h0, let h1 := list.chain_cons.mp h0 in
     good_chain_nonneg (good_nonneg h1.1 h) h1.2
 
-private lemma good_prod_le {S T : multiset R} (h : good S T)
+lemma good_prod_le {S T : multiset R} (h : good S T)
   (h0 : ∀ x : R, x ∈ S → 0 ≤ x) : (2 * 2) * S.prod ≤ T.prod :=
 begin
   rcases h with ⟨U, a, b, rfl, rfl⟩,
@@ -141,7 +129,7 @@ begin
   exact two_mul_le_add_sq a b
 end
 
-private lemma good_chain_prod_le : ∀ {C : list (multiset R)} {S : multiset R},
+lemma good_chain_prod_le : ∀ {C : list (multiset R)} {S : multiset R},
   (∀ x : R, x ∈ S → 0 ≤ x) → list.chain good S C →
   (2 * 2) ^ C.length * S.prod ≤ (cons_last S C).prod
 | list.nil := λ S _ _, le_of_eq $ (congr_arg (* S.prod) (pow_zero _)).trans $ one_mul S.prod
@@ -150,7 +138,7 @@ private lemma good_chain_prod_le : ∀ {C : list (multiset R)} {S : multiset R},
       pow_nonneg (mul_self_nonneg _) _).trans (good_chain_prod_le (good_nonneg h0.1 h) h0.2)
 
 /-- A generalized form of the final solution -/
-private lemma good_chain_le_sum {C : list (multiset R)} {S : multiset R}
+lemma good_chain_le_sum {C : list (multiset R)} {S : multiset R}
   (h : list.chain good S C) (h0 : ∀ x : R, x ∈ S → 0 ≤ x) :
   (S.card : R) ^ S.card * ((2 * 2) ^ C.length * S.prod) ≤ (cons_last S C).sum ^ S.card :=
   (mul_le_mul_of_nonneg_left (good_chain_prod_le h0 h) $ pow_nonneg S.card.cast_nonneg _).trans $
