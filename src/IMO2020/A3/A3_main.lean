@@ -1,4 +1,4 @@
-import IMO2020.A3.A3_lb data.real.sqrt
+import IMO2020.A3.A3_general data.real.sqrt
 
 /-! # IMO 2020 A3 -/
 
