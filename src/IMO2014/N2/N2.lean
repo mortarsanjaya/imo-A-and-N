@@ -11,11 +11,23 @@ def good (x y : ℤ) := 7 * (x ^ 2 + y ^ 2) - 13 * (x * y) = (|x - y| + 1) ^ 3
 
 
 
+/-! ## Identities -/
+lemma identity1 (m n : ℤ) : (2 * m + n) ^ 2 = 4 * ((m + n) * m) + n ^ 2 :=
+  by ring
+
+lemma identity2 (m n : ℤ) :
+  7 * (m ^ 2 + n ^ 2) - 13 * (m * n) = (n + (m - n)) * n + 7 * (m - n) ^ 2 :=
+  by ring
+
+lemma identity3 (n : ℤ) :
+  4 * ((n + 1) ^ 3 - 7 * n ^ 2) + n ^ 2 = (n - 2) ^ 2 * (4 * n + 1) :=
+  by ring
+
+
+
+/-! ## Start of the solution -/
 def A (m : ℤ) := m ^ 3 + 2 * m ^ 2 - m - 1
 def B (m : ℤ) := m ^ 3 + m ^ 2 - 2 * m - 1
-
-lemma mul2_add1_sq (m : ℤ) : (2 * m + 1) ^ 2 = 4 * (m ^ 2 + m) + 1 :=
-  by ring
 
 lemma A_sub_B (m : ℤ) : A m - B m = (m + 1) * m :=
   by rw [A, B]; ring
@@ -32,36 +44,39 @@ lemma good_swap {x y : ℤ} (h : good x y) : good y x :=
 
 lemma good_le_imp {x y : ℤ} (h : good x y) (h0 : y ≤ x) : ∃ m : ℤ, x = A m ∧ y = B m :=
 begin
-  obtain ⟨n, rfl⟩ : ∃ n : ℤ, x = n + y := ⟨x - y, by rw sub_add_cancel⟩,
-  rw le_add_iff_nonneg_left at h0,
-  rw [good, add_sub_cancel, abs_eq_self.mpr h0, ← add_left_inj (-7 * n ^ 2)] at h; ring_nf at h,
-  replace h : (2 * y + n) ^ 2 = (n - 2) ^ 2 * (4 * n + 1) :=
-    by convert (congr_arg (λ c, 4 * c + n ^ 2) h); ring,
-  obtain ⟨c, h1⟩ : n - 2 ∣ 2 * y + n :=
-    by rw ← int.pow_dvd_pow_iff two_pos; exact ⟨4 * n + 1, h⟩,
+  ---- Rearrange to get `(2y + n)^2 = (n - 2)^2 (4n + 1)`, where `n = x - y`
+  rw ← sub_nonneg at h0,
+  rw [good, abs_eq_self.mpr h0, identity2, ← eq_sub_iff_add_eq] at h,
+  replace h := congr_arg (has_mul.mul 4) h,
+  rw [← add_left_inj ((x - y) ^ 2), ← identity1, identity3] at h,
+
+  ---- `(n - 2)^2 = 0` or `k^2 = 4n + 1` for some `k : ℤ`
+  obtain ⟨k, h1⟩ : (x - y) - 2 ∣ 2 * y + (x - y) :=
+    (int.pow_dvd_pow_iff $ nat.succ_pos 1).mp ⟨4 * (x - y) + 1, h⟩,
   rw [h1, mul_pow, mul_eq_mul_left_iff, or_comm] at h,
+  have X : 0 < (2 : ℤ) := int.bit0_pos int.one_pos, -- Several steps use this Prop
   cases h with h h,
-  { replace h := pow_eq_zero h,
-    rw sub_eq_zero at h; subst h,
-    rw [sub_self, zero_mul, ← mul_add_one, mul_eq_zero] at h1,
-    cases h1 with h1,
-    exfalso; exact two_ne_zero h1,
-    rw add_eq_zero_iff_eq_neg at h1; subst h1,
-    use 1; unfold A B; norm_num },
-  { obtain ⟨m, rfl⟩ : ∃ m : ℤ, c = 2 * m + 1 :=
+
+  ---- Case 1: `n - 2 = 0`
+  { replace h := sub_eq_zero.mp (pow_eq_zero h),
+    rw [h, sub_self, zero_mul, ← mul_add_one, mul_eq_zero,
+        add_eq_zero_iff_eq_neg, or_iff_right (ne_of_gt X)] at h1,
+    rw [h1, sub_neg_eq_add, bit0, add_left_inj] at h,
+    exact ⟨1, by rw [A, h]; norm_num, by rw [B, h1]; norm_num⟩ },
+
+  ---- Case 2: `k^2 = 4n + 1` for some `k : ℤ`
+  { obtain ⟨m, rfl⟩ : ∃ m : ℤ, k = 2 * m + 1 :=
     begin
-      use c / 2; convert (int.div_add_mod c 2).symm,
+      use k / 2; convert (int.div_add_mod k 2).symm,
       rw [eq_comm, ← int.not_even_iff, ← int.even_pow' two_ne_zero, h, ← int.odd_iff_not_even],
-      use 2 * n; rw [← mul_assoc, two_mul, ← bit0]
+      use 2 * (x - y); rw [← mul_assoc, two_mul, ← bit0]
     end,
-    rw [mul2_add1_sq, add_left_inj, mul_eq_mul_left_iff, or_comm] at h,
-    rcases h with h | rfl,
-    exfalso; exact four_ne_zero h,
+    rw [identity1, one_pow, add_left_inj, mul_eq_mul_left_iff,
+        or_iff_left (ne_of_gt $ int.bit0_pos X)] at h,
     rw [← eq_sub_iff_add_eq, mul_add_one, add_sub_assoc, sub_sub_cancel_left,
-        ← sub_eq_add_neg, mul_left_comm, ← mul_sub_one, mul_eq_mul_left_iff, or_comm] at h1,
-    cases h1 with h1,
-    exfalso; exact two_ne_zero h1,
-    use m; rw [A, B, h1],
+        ← sub_eq_add_neg, mul_left_comm, ← mul_sub_one, mul_eq_mul_left_iff,
+        or_iff_left (ne_of_gt X), ← h] at h1,
+    use m; rw [A, B, ← sub_add_cancel x y, ← h, h1],
     split; ring }
 end
 
