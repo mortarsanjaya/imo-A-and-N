@@ -28,11 +28,9 @@ lemma sum_ite_neg_one_one_alt_range (a : ℕ) :
 lemma sum_ite_neg_one_one_alt_Ico (a b n : ℕ) :
   (Ico a (a + n)).sum (λ x, ite (even (b + x)) (1 : ℤ) (-1)) =
     ite (even n) 0 (ite (even (b + a)) 1 (-1)) :=
-begin
-  rw [sum_Ico_eq_sum_range, nat.add_sub_cancel_left],
-  simp_rw ← add_assoc, 
-  exact sum_ite_neg_one_one_alt_range (b + a) n
-end
+  by rw [sum_Ico_eq_sum_range, nat.add_sub_cancel_left, ← sum_ite_neg_one_one_alt_range];
+    exact sum_congr rfl (λ x _, if_congr
+      (iff_of_eq $ congr_arg even (add_assoc b a x).symm) rfl rfl)
 
 lemma rectangle_sign_alt_sum (q : (ℕ × ℕ) × (ℕ × ℕ)) :
   (lattice_rectangle q).sum (λ p, ite (even (p.1 + p.2)) 1 (-1 : ℤ)) =
