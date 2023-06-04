@@ -1,4 +1,4 @@
-import data.int.modeq tactic.by_contra tactic.wlog
+import data.int.modeq tactic.by_contra
 
 /-! # IMO 2007 N6 (P5) -/
 
