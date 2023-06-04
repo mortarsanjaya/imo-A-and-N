@@ -54,7 +54,7 @@ begin
   obtain ⟨k, h1⟩ : (x - y) - 2 ∣ 2 * y + (x - y) :=
     (int.pow_dvd_pow_iff $ nat.succ_pos 1).mp ⟨4 * (x - y) + 1, h⟩,
   rw [h1, mul_pow, mul_eq_mul_left_iff, or_comm] at h,
-  have X : 0 < (2 : ℤ) := int.bit0_pos int.one_pos, -- Several steps use this Prop
+  have X : (0 : ℤ) < 2 := int.bit0_pos int.one_pos, -- Several steps use this Prop
   cases h with h h,
 
   ---- Case 1: `n - 2 = 0`
@@ -62,37 +62,34 @@ begin
     rw [h, sub_self, zero_mul, ← mul_add_one, mul_eq_zero,
         add_eq_zero_iff_eq_neg, or_iff_right (ne_of_gt X)] at h1,
     rw [h1, sub_neg_eq_add, bit0, add_left_inj] at h,
-    exact ⟨1, by rw [A, h]; norm_num, by rw [B, h1]; norm_num⟩ },
+    refine ⟨1, _, _⟩,
+    rw [A, h]; norm_num,
+    rw [B, h1]; norm_num },
 
   ---- Case 2: `k^2 = 4n + 1` for some `k : ℤ`
-  { obtain ⟨m, rfl⟩ : ∃ m : ℤ, k = 2 * m + 1 :=
-    begin
-      use k / 2; convert (int.div_add_mod k 2).symm,
-      rw [eq_comm, ← int.not_even_iff, ← int.even_pow' two_ne_zero, h, ← int.odd_iff_not_even],
-      use 2 * (x - y); rw [← mul_assoc, two_mul, ← bit0]
-    end,
+  { obtain ⟨m, rfl⟩ : ∃ m : ℤ, 2 * m + 1 = k :=
+      ⟨k / 2, int.two_mul_div_two_add_one_of_odd $ by rw [int.odd_iff_not_even,
+        ← int.even_pow' two_ne_zero, h, ← int.odd_iff_not_even];
+          exact ⟨(2 : ℤ) * (x - y), congr_arg (+ (1 : ℤ)) (mul_assoc 2 2 (x - y))⟩⟩,
     rw [identity1, one_pow, add_left_inj, mul_eq_mul_left_iff,
         or_iff_left (ne_of_gt $ int.bit0_pos X)] at h,
     rw [← eq_sub_iff_add_eq, mul_add_one, add_sub_assoc, sub_sub_cancel_left,
         ← sub_eq_add_neg, mul_left_comm, ← mul_sub_one, mul_eq_mul_left_iff,
         or_iff_left (ne_of_gt X), ← h] at h1,
-    use m; rw [A, B, ← sub_add_cancel x y, ← h, h1],
-    split; ring }
+    refine ⟨m, _, _⟩,
+    rw [← sub_add_cancel x y, ← h, h1, A]; ring,
+    rw [h1, B]; ring }
 end
 
 /-- Final solution -/
 theorem final_solution (x y : ℤ) :
   good x y ↔ ((∃ m : ℤ, x = A m ∧ y = B m) ∨ (∃ m : ℤ, y = A m ∧ x = B m)) :=
-begin
-  split,
-  { intros h,
-    cases le_total y x with h0 h0,
-    left; exact good_le_imp h h0,
-    right; exact good_le_imp (good_swap h) h0 },
-  { rintros (⟨m, rfl, rfl⟩ | ⟨m, rfl, rfl⟩),
-    exact good_A_B m,
-    exact good_swap (good_A_B m) }
-end
+  ⟨λ h, (le_total y x).imp (good_le_imp h) (good_le_imp $ good_swap h),
+  λ h, h.elim
+    (λ h0, exists.elim h0 $ λ m h1,
+      cast (congr_arg2 good h1.1.symm h1.2.symm) $ good_A_B m)
+    (λ h0, exists.elim h0 $ λ m h1,
+      cast (congr_arg2 good h1.2.symm h1.1.symm) $ good_swap $ good_A_B m)⟩
 
 end IMO2014N2
 end IMOSL
