@@ -152,7 +152,15 @@ Indeed, take $S = \{0, X, Y\}$, so that $S - S = \{0, \pm X, \pm Y, \pm (X - Y)\
 It is impossible to represent $2XY$ as $a^2 + b^2 - c^2 - d^2$ for some $a, b, c, d \in S - S$.
 The $XY$ and $YX$ coefficient of $a^2$ are the same for all $a \in S - S$, but this is false for $2XY$.
 
-At the time of writing, I do not know if there exists a non-commutative ring $R$ such that $2 \in R$ is $k$-excellent for some $k \geq 3$.
+
+
+\subsection*{Implementation details}
+
+The cases $k = 0$, $k = 1$, $k = 2$, and $k \geq 3$ differ in solutions.
+Thus we split the problem into $5$ files (for now).
+The definitions and small lemmas are put in \texttt{A2\_basic.lean}.
+The (short) solution for the case $k = 0$ are in \texttt{A2\_k\_eq\_0.lean}.
+The other cases also have their corresponding files, which the "obvious" name.
 
 
 
