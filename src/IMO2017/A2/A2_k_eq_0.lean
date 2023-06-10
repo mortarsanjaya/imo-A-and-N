@@ -12,8 +12,8 @@ lemma good_any_empty (q : R) : good q ∅ :=
 
 /-- Final solution, `k = 0` -/
 theorem final_solution_k_eq_0 (q : R) : excellent 0 q :=
-  λ T h, by rw [finset.card_eq_zero.mp h, finset.sub_empty];
-    exact good_any_empty q
+  λ T h, cast (congr_arg _ $ eq.symm $ (congr_arg _ $ finset.card_eq_zero.mp h).trans $
+    finset.sub_empty ∅) (good_any_empty q)
 
 end IMO2017A2
 end IMOSL

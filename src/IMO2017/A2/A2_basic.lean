@@ -38,8 +38,10 @@ lemma excellent_any_zero [decidable_eq R] (k : ℕ) : excellent k (0 : R) :=
 
 lemma neg_is_sq_add_diff {T : finset R} {x : R}
   (h : is_sq_add_diff T x) : is_sq_add_diff T (-x) :=
-  by rcases h with ⟨a, b, c, d, ha, hb, hc, hd, rfl⟩;
-    exact ⟨c, d, a, b, hc, hd, ha, hb, neg_sub (a ^ 2 + b ^ 2) (c ^ 2 + d ^ 2)⟩
+  exists.elim h $ λ a h, exists.elim h $ λ b h,
+    exists.elim h $ λ c h, exists.elim h $ λ d h,
+      ⟨c, d, a, b, h.2.2.1, h.2.2.2.1, h.1, h.2.1,
+        neg_eq_iff_eq_neg.mpr $ h.2.2.2.2.trans (neg_sub _ _).symm⟩
 
 lemma good_neg_of_good {q : R} {T : finset R} (h : good q T) : good (-q) T :=
   λ u v h0 h1, cast (congr_arg _ (neg_mul _ _).symm) $ neg_is_sq_add_diff (h u v h0 h1)

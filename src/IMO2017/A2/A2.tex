@@ -23,20 +23,20 @@
 
 
 
-\subsection*{Problem}
+\subsection*{Introduction}
 
-Let $R$ be a commutative ring of characteristic zero.
-Given $q \in R$, we say that a finite set $S \subseteq R$ is \emph{$q$-good} if for any $u, v \in S$, there exists $a, b, c, d \in S$ such that $quv = a^2 + b^2 - c^2 - d^2$.
-Given $k \geq 0$, we say that $q \in R$ is \emph{$k$-excellent} if for any finite set $S \subseteq R$ of size $k$, the set $S - S := \{s - t : s, t \in S\}$ is $q$-good.
-Find all $k$-excellent elements of $R$.
-
-
-\subsection*{Answer}
+Let $R$ be a ring.
+Given $q \in R$, we say that a finite set $T \subseteq R$ is \emph{$q$-good} if for any $u, v \in T$, there exists $a, b, c, d \in T$ such that $quv = a^2 + b^2 - c^2 - d^2$.
+Given $k \geq 0$, we say that $q \in R$ is \emph{$k$-excellent} if for any finite set $T \subseteq R$ of size $k$, the set $T - T := \{s - t : s, t \in T\}$ is $q$-good.
+We are interested in finding all $k$-excellent elements of $R$ with some restrictions on $R$ and $k$.
+The main results are as follows.
 
 \begin{itemize}
-    \item If $k = 0$ or $k = 1$, any element of $R$ is $k$-excellent.
-    \item If $k = 2$, then the set of $k$-excellent elements is $\{-2, -1, 0, 1, 2\}$.
-    \item If $k \geq 3$, then the set of $k$-excellent elements is $\{-2, 0, 2\}$.
+    \item   If $k = 0$ or $k = 1$, any element of $R$ is $k$-excellent.
+    \item   If $k = 2$, then the set of $k$-excellent elements is $\{0, \pm 1, \pm 2\}$.
+    \item   If $k \geq 3$ and $\rchar(R) = 0$, then the set of $k$-excellent elements is either $\{0\}$ or $\{0, \pm 2\}$.
+            If $R$ is commutative, then this set is exactly $\{0, \pm 2\}$.
+            Conversely, if $R$ is a domain and the set is $\{0, \pm 2\}$, then $R$ has to be commutative.
 \end{itemize}
 
 
@@ -45,81 +45,88 @@ Find all $k$-excellent elements of $R$.
 
 Official solution: \url{http://www.imo-official.org/problems/IMO2017SL.pdf}
 
-We follow Solution 1 of the official solution for the case $k \geq 3$.
-For the case $k \geq 2$, the solution we present will involve reduction to the case where $R = \Z$.
-
-First, the case $k = 0$ and $k = 1$ are obvious.
-We have $\emptyset - \emptyset = \emptyset$, and $S - S = \{0\}$ if $|S| = 1$.
-Obviously, $\emptyset$ and $\{0\}$ are $q$-good regardless of the choice of $q \in R$.
+The cases $k = 0$ and $k = 1$ are trivial.
+The case $k = 2$ involves a simple bash compared to the case $k \geq 3$.
+For the case $k \geq 3$ with $\rchar(R) = 0$, we follow Solution 1 of the official solution.
+In particular, we will actually reduce the problem to the case where $R = \Z$.
 
 It is clear that if $q \in R$ is $k$-excellent, then $-q$ is also $k$-excellent.
 It is also clear that $0$ is always $k$-excellent; any set is $0$-good.
-In a less obvious way, $1$ is $2$-excellent and $2$ is $k$-excellent for any $k \geq 0$.
-These are what we prove next.
+We can now solve for the case $k = 2$.
 
 \begin{lemma}\label{2017a2-1}
-Over any ring $R$, $1$ and $2$ are $2$-excellent.
+Over any (nontrivial) ring $R$, $q \in R$ is $2$-excellent if and only if $q \in \{0, \pm 1, \pm 2\}$.
 \end{lemma}
 \begin{proof}
-For any $S \subseteq R$ of size $2$, there exists $x \in R$ (non-zero) such that $S - S = \{-x, 0, x\}$.
-Now, for any $x \in R$, $T = \{-x, 0, x\}$ is $1$-good and $2$-good.
-Indeed, for any $u, v \in T$, we have $uv \in \{-x^2, 0, x^2\}$.
-All of $-2x^2$, $-x^2$, $0$, $x^2$, and $2x^2$ can be expressed as $a^2 + b^2 - c^2 - d^2$ for some $a, b, c, d \in T$.
-This shows that $1$ and $2$ are $2$-excellent.
+For the backwards direction, it suffices to prove that $1, 2 \in R$ are $2$-excellent.
+For any $T \subseteq R$ of size $2$, there exists $x \in R$ such that $T - T = \{0, \pm x\}$.
+So, it remains to prove that $S = \{0, \pm x\}$ is $1$-good and $2$-good for any $x \in R$.
+Indeed, the set of elements of form $a^2 + b^2 - c^2 - d^2$ with $a, b, c, d \in S$ is $\{0, \pm x^2, \pm 2x^2\}$.
+On the other hand, for any $u, v \in \{0, \pm x\}$, we have $uv \in \{0, \pm x^2\}$.
+It is now immediate that $S$ is $1$-good and $2$-good.
+
+Conversely, suppose that $q$ is $2$-excellent.
+Consider $T = \{0, 1\}$, with $T - T = \{0, \pm 1\}$.
+Since we assume that $R$ is nontrivial, $0 \neq 1$ in $R$, so $|\{0, 1\}| = 2$.
+Since $q$ is $2$-excellent, this means that $\{0, \pm 1\}$ is $q$-good.
+In particular, $q = a^2 + b^2 - c^2 - d^2$ for some $a, b, c, d \in \{0, \pm 1\}$.
+The rest is standard bashing.
 \end{proof}
+
+Now we solve the case $k \geq 3$, under the assumption that $\rchar(R) = 0$.
+If $R$ is commutative, then the following identity implies that $2 \in R$ is $k$-excellent:
+\[ 2(w - x)(y - z) = (w - z)^2 + (x - y)^2 - (w - y)^2 - (x - z)^2. \]
+We show later on that the converse necessarily holds if $R$ has no zero divisors.
+But now, we first show that $k$-excellent elements are either $0$ or $\pm 2$.
+This means that if $R$ is commutative, then the set of $k$-excellent elements is precisely $\{0, \pm 2\}$.
 
 \begin{lemma}\label{2017a2-2}
-For any $k \geq 0$, over a commutative ring $R$, $2$ is $k$-excellent.
-\end{lemma}
-\begin{proof}
-It suffices to prove that $S - S$ is $2$-good for any finite set $S \subseteq R$.
-Indeed, take any $u, v \in S - S$, and express them as $u = w - x$, $v = y - z$ for some $w, x, y, z \in S$.
-The lemma follows from the equation
-\[ 2(w - x)(y - z) = (w - z)^2 + (x - y)^2 - (w - y)^2 - (x - z)^2. \]
-\end{proof}
-
-We now focus on proving that there are no other $k$-excellent elements of $R$.
-It turns out that they must be integers, and they are $k$-excellent over $\Z$.
-We prove these two results next.
-
-\begin{lemma}\label{2017a2-3}
-Let $R$ be a ring and $k \geq 3$.
+Let $R$ be a ring of characteristic zero, and let $k \geq 3$.
 Then a $k$-excellent element of $R$ must be an integer.
+
+More formally, let $\iota : \Z \to R$ be the unique, injective ring homomorphism.
+Then a $k$-excellent element of $R$ must be of form $\iota(n)$, where $n$ is a $k$-excellent integer.
 \end{lemma}
 \begin{proof}
+Fix some $k$-excellent $q \in R$.
 Take a finite set $S$ of size $k$ consisting only of integers, such that $1 \in S - S$.
 For example, $S = \{0, 1, 2, \ldots, k - 1\}$ works.
 All we need is that $S - S$ consists only of integers and it contains $1$.
-Indeed, by assumption, $S - S$ is $q$-good.
-Since $1 \in S - S$, we get $q = a^2 + b^2 - c^2 - d^2$ for some $a, b, c, d \in S - S$.
-In particular, $q$ has to be an integer.
+
+Since $\iota$ is injective, $\iota(S)$ also has size $k$.
+By assumption, $\iota(S) - \iota(S)$ is $q$-good.
+Since $1 \in S - S$, we get $q = a^2 + b^2 - c^2 - d^2$ for some $a, b, c, d \in \iota(S) - \iota(S)$.
+That is, $q = \iota(a^2 + b^2 - c^2 - d^2)$ for some $a, b, c, d \in S - S$.
 \end{proof}
 
-\begin{lemma}\label{2017a2-4}
-Let $R$ be a ring with characteristic zero and $k \geq 3$.
-Let $n \in \Z$ such that $n$ is $k$-excellent over $R$.
+\begin{lemma}\label{2017a2-3}
+Let $R$ be a ring of characteristic zero, and let $k \geq 3$.
+Let $n$ be an integer, and suppose that the image of $n$ in $R$ is $k$-excellent.
 Then $n$ is $k$-excellent over $\Z$.
 \end{lemma}
 \begin{proof}
-It suffices to show that for any finite subset $S \subseteq \Z$, if $S$ is $n$-good over $R$, then $S$ is also $n$-good over $\Z$.
-The lemma follows since $S - S$ is $n$-good over $R$ whenever $|S| = k$.
-
-Let $S \subseteq \Z$ be $n$-good over $R$.
-For any $u, v \in S$, there exists $a, b, c, d \in S$ such that $nuv = a^2 + b^2 - c^2 - d^2$ over $R$.
-But $R$ has characteristic zero, so this equation must also hold over $\Z$.
-This proves that $S$ is $n$-good over $\Z$.
+Again, let $\iota : \Z \to R$ be the natural embedding.
+Let $T \subseteq \Z$ be a finite set of size $k$.
+Then $\iota(T) \subseteq R$ is finite of size $k$ as well.
+So, by assumption, $\iota(T - T) = \iota(T) - \iota(T)$ is $\iota(n)$-good.
+ 
+Now we prove that $T - T$ is $n$-good.
+For any $u, v \in T - T$, by the previous paragraph, we can write $\iota(nuv) = a^2 + b^2 - c^2 - d^2$ for some $a, b, c, d \in \iota(T - T)$.
+This means we can also write $\iota(nuv) = \iota(a^2 + b^2 - c^2 - d^2)$ for some $a, b, c, d \in T - T$.
+Since $\iota$ is injective, this implies $nuv = a^2 + b^2 - c^2 - d^2$.
+This proves that $T - T$ is $n$-good.
 \end{proof}
 
-It remains to work over $\Z$.
-We show that for any $k \geq 2$, any $k$-excellent integers have absolute value at most $2$.
-We also show that for any $k \geq 3$, $1$ is not $k$-excellent.
+We now work exclusively in $\Z$ to show that $k$-excellent elements over $R$ are either $0$ or $\pm 2$.
+For a further step when $R$ is a non-commutative domain, we need to work over $R$ again.
 
-\begin{lemma}\label{2017a2-5}
+\begin{lemma}\label{2017a2-4}
 Over $\Z$, Any $k$-excellent integer has absolute value at most $2$.
 \end{lemma}
 \begin{proof}
 A more general statement is as follows: for any $q \in \Z$, if $|q| > 2$, then the only $q$-good sets are $\emptyset$ and $\{0\}$.
 This suffices to prove the lemma, as $S - S$ always contains a non-zero integer if $|S| \geq 2$.
+
 Without loss of generality, assume that $q > 2$.
 Let $T$ be a non-empty $q$-good set, and let $n$ be the element of $T$ with maximum absolute value.
 Since $T$ is $q$-good, we can write $qn^2 = a^2 + b^2 - c^2 - d^2 \leq 2n^2$ for some $a, b, c, d \in T$.
@@ -127,40 +134,96 @@ Then $q > 2$ necessaily implies $n^2 \leq 0$ and thus $n = 0$.
 By maximality, this means $T = \{0\}$, as desired.
 \end{proof}
 
-\begin{lemma}\label{2017a2-6}
+\begin{lemma}\label{2017a2-5}
 For any $k \geq 3$, $1$ is not $k$-excellent over $\Z$.
 \end{lemma}
 \begin{proof}
 Take $S = \{0, 1, 4, 8, 12, \ldots, 4(k - 2)\}$.
-By this constructing, $S - S$ contains $1$ and $4$, and all its elements are either odd or divisible by $4$.
+By this construction, $S - S$ contains $1$ and $4$, and all its elements are either odd or divisible by $4$.
 In particular, for any $a \in S - S$, we have $a^2 \equiv 0, 1 \pmod{8}$.
 Thus $4 = 1 \cdot 1 \cdot 4$ cannot be represented as $a^2 + b^2 - c^2 - d^2$ for any $a, b, c, d \in S - S$.
 This shows that $1$ is not $k$-excellent over $\Z$.
 \end{proof}
 
+Thus, the $k$-excellent integers are $0$ and $\pm 2$.
+The same holds in $R$ when $R$ is commutative with characteristic zero.
 
+We now show a partial converse.
+Let $R$ be a domain with $\rchar(R) = 0$.
+Suppose that $2$ is $k$-excellent over $R$.
+We prove that $R$ has to be commutative.
 
-\subsection*{Extra notes}
+\begin{lemma}\label{2017a2-6}
+For any $x, y \in R$, there exists an integer $c = c_{x, y}$ such that $2xy = c(xy + yx)$.
+\end{lemma}
+\begin{proof}
+If $x$ and $y$ commute, then we can just take $c = 1$.
+So now, suppose that $x$ and $y$ do not commute.
+Fix a set $M$ of $k - 1 \geq 2$ integers, containing both $0$ and $1$.
+For example, $M = \{0, 1, 2, \ldots, k - 2\}$ works.
+Take $T = \{mx : m \in M\} \cup \{y\}$.
+Note that if $mx = y$ for some $m \in M$, then certainly $x$ and $y$ has to commute; a contradiction.
+Also, $x = 0$ implies $xy = yx$, so $x \neq 0$.
+By assumption, $R$ is torsion free as a $\Z$-module, i.e., $mx = 0$ implies $m = 0$.
+This suffices to justify that $T$ has size $k$.
 
-It is of interest to see what happens in a general ring of characteristic zero.
-The answer is still the same for $k \leq 2$, but for $k \geq 3$, $0$ might be the only $k$-excellent element.
-An example for $k \geq 3$ is as follows.
+By assumption, $2$ is $k$-excellent.
+So that means $T - T$ is $2$-good.
+One can check that $x, y \in T$.
+Thus this means that $2xy = a^2 + b^2 - c^2 - d^2$ for some $a, b, c, d \in T - T$.
+But $T - T$ can be written as $\{nx : n \in M - M\} \cup \{mx - y, y - mx : m \in M\}$.
+In particular, for any $a \in T - T$, we can write either $a^2 = n^2 x^2$ for some $n \in M - M$ or $a^2 = m^2 x^2 + y^2 - m(xy + yx)$ for some $m \in M$.
+Oversimplifying, this means we can write $2xy = q_1 x^2 + q_2 y^2 + q_3 (xy + yx)$ for some integers
+\[ q_1 \in S_1 := \{n_1^2 + n_2^2 - n_3^2 - n_4^2 : n_1, n_2, n_3, n_4 \in M - M\}, \]
+\[ q_2 \in S_2 := \{0, \pm 1, \pm 2\}, \quad q_3 \in S_3 := (M + M) - (M + M). \]
+Note that the sets $S_1, S_2, S_3$ are finite and they depend only on $M$.
+In summary, we have found finite subsets $S_1, S_2, S_3 \subseteq \Z$ with the following property:
+    for any $x, y \in R$, there exists $q_1 \in S_1$, $q_2 \in S_2$, and $q_3 \in S_3$ such that $2xy = q_1 x^2 + q_2 y^2 + q_3 (xy + yx)$.
 
-Let $R$ be the free (non-commutative) ring $\Z[X, Y]$ over two variables.
-Then $2 \in R$ is not $3$-excellent.
-Indeed, take $S = \{0, X, Y\}$, so that $S - S = \{0, \pm X, \pm Y, \pm (X - Y)\}$.
-It is impossible to represent $2XY$ as $a^2 + b^2 - c^2 - d^2$ for some $a, b, c, d \in S - S$.
-The $XY$ and $YX$ coefficient of $a^2$ are the same for all $a \in S - S$, but this is false for $2XY$.
+We now use the previous paragraph and the pigeonhole principle to prove the lemma.
+Consider the above result but with $x$ replaced by $\ell x$, where $\ell$ ranges over the integers.
+By pigeonhole principle, there exists a fixed triple $(q_1, q_2, q_3) \in S_1 \times S_2 \times S_3$ and an infinite set $L \subseteq \Z$ such that, for any $\ell \in L$,
+\[ 2 \ell xy = q_1 \ell^2 x^2 + q_2 y^2 + q_3 \ell (xy + yx). \]
+Actually, we will only need three distinct elements.
+First, given $\ell_1, \ell_2 \in L$ distinct,
+\[ 2 (\ell_1 - \ell_2) xy = q_1 (\ell_1^2 - \ell_2^2) x^2 + q_3 (\ell_1 - \ell_2) (xy + yx). \]
+By assumption, $R$ is $\Z$-torsion free, so we get $2xy = q_1 (\ell_1 + \ell_2) x^2 + q_3 (xy + yx)$.
+Fixing $\ell_1$, we can find at least two distinct values of $\ell_2$ satisfying the equality.
+This forces $q_1 = 0$ and thus $2xy = q_3 (xy + yx)$.
+The lemma follows by taking $c = q_3$.
+\end{proof}
+
+Now we use the lemma to prove that $R$ is commutative.
+By Lemma 6, there exists integers $c$ and $d$ such that $2xy = c(xy + yx)$ and $2(x + 1)y = d(xy + yx + 2y)$.
+By algebraic manipulation, we get $2c(x + 1)y = 2dxy + 2cdy$, i.e. $2c(d - 1) y = 2(c - d) xy$.
+If $d = 1$, then the second equation yields $xy = yx$.
+If $c = d$, then the last equation yields either $d = 1$ or $c = 0$.
+But if $c = 0$, then $2xy = 0$ which implies $xy = yx = 0$ since $R$ is a domain.
+Otherwise, the last equation necessarily implies that $y$ and $xy$ commute.
+That is, $yxy = xyy$, which forces $yx = xy$ or $y = 0$, which also implies $yx = xy$.
+This proves that $R$ is commutative.
 
 
 
 \subsection*{Implementation details}
 
-The cases $k = 0$, $k = 1$, $k = 2$, and $k \geq 3$ differ in solutions.
+We have four cases with distinct treatments.
+Thus we need to split the solution across several files.
+The basic file \texttt{A2\_basic.lean} contains the definitions and the easier lemmas.
+Each of the cases $k = 0$, $k = 1$, and $k = 2$ are implemented in one file.
+Meanwhile, the case $k \geq 3$ (only with $\rchar(R) = 0$) are again split into several files in one folder called \texttt{A2\_k\_ge\_3}.
+
+
+
+
+The case $k \geq 3$ contains a large set of results.
+Thus it 
+
 Thus we split the problem into $5$ files (for now).
 The definitions and small lemmas are put in \texttt{A2\_basic.lean}.
 The (short) solution for the case $k = 0$ are in \texttt{A2\_k\_eq\_0.lean}.
 The other cases also have their corresponding files, which the "obvious" name.
+
 
 
 
