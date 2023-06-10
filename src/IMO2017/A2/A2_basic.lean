@@ -50,5 +50,9 @@ lemma excellent_neg_of_excellent [decidable_eq R]
   {k : ℕ} {q : R} (h : excellent k q) : excellent k (-q) :=
   λ T h0, good_neg_of_good (h T h0)
 
+lemma is_sq_add_diff_of_good_one_mem {q : R} {T : finset R}
+  (h : good q T) (h0 : (1 : R) ∈ T) : is_sq_add_diff T q :=
+  cast (congr_arg _ $ (congr_arg _ $ mul_one 1).trans $ mul_one q) (h 1 1 h0 h0)
+
 end IMO2017A2
 end IMOSL

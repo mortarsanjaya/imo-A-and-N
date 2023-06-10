@@ -28,8 +28,6 @@ lemma doubleton_zero_sub_self_eq (g : G) : ({g, 0} : finset G) - {g, 0} = {0, g,
 
 end add_group
 
-
-
 variables {R : Type*} [ring R] [decidable_eq R]
 
 lemma doubleton_sub_self_mul (r : R) : let T : finset R := {0, r, -r} in
@@ -47,8 +45,8 @@ lemma doubleton_sub_self_mul (r : R) : let T : finset R := {0, r, -r} in
 
 lemma sq_is_sq_add_diff (r : R) : is_sq_add_diff ({0, r, -r} : finset R) (r ^ 2) :=
   let h : (0 : R) ∈ ({0, r, -r} : finset R) := mem_insert_self _ _ in
-  ⟨r, 0, 0, 0, mem_insert_of_mem (mem_insert_self r _), h, h, h,
-    by rw [add_sub_add_right_eq_sub, zero_pow (nat.succ_pos 1), sub_zero]⟩
+  ⟨r, 0, 0, 0, mem_insert_of_mem (mem_insert_self r _), h, h, h, eq.symm $
+    (add_sub_add_right_eq_sub _ _ _).trans $ sub_eq_self.mpr $ zero_pow (nat.succ_pos 1)⟩
 
 lemma good_one_doubleton_sub_self (r : R) : good (1 : R) ({0, r, -r} : finset R) :=
   λ u v h h0, cast (congr_arg _ (one_mul _).symm) $ (doubleton_sub_self_mul r h h0).elim
@@ -64,16 +62,18 @@ lemma two_mul_sq_is_sq_add_diff (r : R) :
   is_sq_add_diff ({0, r, -r} : finset R) (2 * r ^ 2) :=
   let h : r ∈ ({0, r, -r} : finset R) := mem_insert_of_mem (mem_insert_self r {-r}),
     h0 : (0 : R) ∈ ({0, r, -r} : finset R) := mem_insert_self 0 {r, -r} in
-  ⟨r, r, 0, 0, h, h, h0, h0,
-    by rw [zero_pow (nat.succ_pos 1), add_zero, sub_zero, ← two_mul]⟩
-
+  ⟨r, r, 0, 0, h, h, h0, h0, (two_mul _).trans $ eq.symm $ sub_eq_self.mpr $
+    let h1 : (0 : R) ^ 2 = 0 := zero_pow (nat.succ_pos 1) in
+      (congr_arg2 has_add.add h1 h1).trans $ add_zero 0⟩
+    
 lemma good_two_doubleton_sub_self (r : R) : good (2 : R) ({0, r, -r} : finset R) :=
   λ u v h h0, (doubleton_sub_self_mul r h h0).elim
     (λ h1, cast (congr_arg _ (mul_eq_zero_of_right _ h1).symm) $
       zero_is_sq_add_diff_of_mem $ mem_insert_self 0 _)
     (λ h1, let h2 := two_mul_sq_is_sq_add_diff r in h1.elim
       (λ h1, cast (congr_arg _ $ congr_arg _ h1.symm) h2)
-      (λ h1, by rw [h1, mul_neg]; exact neg_is_sq_add_diff h2))
+      (λ h1, cast (congr_arg _ $ (neg_mul_eq_mul_neg _ _).trans $ congr_arg _ h1.symm)
+        (neg_is_sq_add_diff h2)))
 
 lemma excellent_two_two : excellent 2 (2 : R) :=
   λ T h, exists.elim (is_doubleton_sub_self h) $
@@ -99,9 +99,7 @@ lemma zero_one_sub_self_sq_add_sq {r s : R}
 lemma good_doubleton_zero_one_imp {q : R} (h : good q ({0, 1, -1} : finset R)) :
   q = 0 ∨ (q = 1 ∨ q = -1) ∨ (q = 2 ∨ q = -2) :=
 begin
-  replace h := let h0 : (1 : R) ∈ ({0, 1, -1} : finset R) :=
-    mem_insert_of_mem (mem_insert_self 1 {-1}) in h 1 1 h0 h0,
-  rw [mul_one, mul_one] at h,
+  replace h := is_sq_add_diff_of_good_one_mem h (mem_insert_of_mem $ mem_insert_self 1 _),
   rcases h with ⟨a, b, c, d, ha, hb, hc, hd, rfl⟩,
 
   ---- Split into 9 cases and bash
