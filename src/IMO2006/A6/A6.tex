@@ -1,0 +1,72 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\R}{\mathbb{R}}
+
+\title{IMO 2006 A6 (P3)}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Find the smallest real number $M$ such that, for any $a, b, c \in \R$,
+\[ |ab(a^2 - b^2) + bc(b^2 - c^2) + ca(c^2 - a^2)| \leq M(a^2 + b^2 + c^2)^2. \tag{*}\label{2006a6-eq0} \]
+
+
+
+\subsection*{Answer}
+
+$\dfrac{9}{32} \sqrt{2}$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2006SL.pdf}
+
+We present the official solution with shortcuts, relying on some polynomial identities to prove inequalities.
+In particular, we make use of the two identities
+\[ ab(a^2 - b^2) + bc(b^2 - c^2) + ca(c^2 - a^2) = (b - a)(c - b)(a - c)(a + b + c), \]
+\[ (b - c)^2 + (c - a)^2 + (a - b)^2 + (a + b + c)^2 = 3(a^2 + b^2 + c^2). \]
+
+To prove that $M \geq \frac{9}{32} \sqrt{2}$, take $a = \sqrt{2}$, $b = \sqrt{2} - 3$, and $c = \sqrt{2} + 3$.
+Using the above identity, one checks that the left hand side equals $2 \cdot 3^4 \sqrt{2}$.
+On the other hand, the right hand side equals $M(3 \cdot 2 + 2 \cdot 3^2)^2 = 2^6 \cdot 3^2 M$.
+Thus we get $M \geq \frac{9}{32} \sqrt{2}$.
+
+We now prove that $M = \frac{9}{32} \sqrt{2}$ works.
+Let $s = a + b + c$, $x = b - a$, $y = c - b$, and $z = a - c$.
+Based on the above identities,~\eqref{2006a6-eq0} becomes $16 \sqrt{2} |sxyz| \leq (s^2 + x^2 + y^2 + z^2)^2$.
+Equivalently, $2^9 (sxyz)^2 \leq (s^2 + x^2 + y^2 + z^2)^4$.
+We now prove this inequality, noting that $x + y + z = 0$.
+
+Start by using AM-GM of the form $(r + 3t)^4 \geq 4^4 rt^3$ for any $r, t \in \R$.
+In particular, here we get
+\[ 3^4 (s^2 + x^2 + y^2 + z^2)^4 \geq 4^4 \cdot 3 s^2 (x^2 + y^2 + z^2)^3. \]
+Thus it remains to prove that $2 \cdot 3^3 (xyz)^2 \leq (x^2 + y^2 + z^2)^3$.
+Indeed, after substituting $z = -(x + y)$, this inequality reduces to $54 x^2 y^2 (x + y)^2 \leq 8 (x^2 + y^2 + xy)^3$.
+One checks that $8 (x^2 + y^2 + xy)^3 - 54 x^2 y^2 (x + y)^2 = 2 (x - y)^2 (x + 2y)^2 (2x + y)^2$, which is obviously non-negative.
+We are done.
+
+
+
+\subsection*{Implementation details}
+
+We prove the lower bound in a separate file: \texttt{A6\_general.lean}.
+The real case is solved in the main file: \texttt{A3\_main.lean}.
+The file \texttt{A3\_general.lean} does not need to import \texttt{data.real.basic} module, keeping results general.
+
+
+
+\end{document}
