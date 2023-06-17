@@ -1,0 +1,65 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newtheorem{lemma}{Lemma}
+
+\title{IMO 2006 N5}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Determine all triples $(x, y, p)$ of integers, with $p$ prime, such that
+\[ \sum_{k = 0}^{p - 1} x^k = y^{p - 2} - 1. \tag{*}\label{2006n5-eq0} \]
+
+
+
+\subsection*{Answer}
+
+$(-1, t, 2)$ and $(t, t^2 + t + 2, 3)$ for some integer $t$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2006SL.pdf}
+
+We follow the official solution, with the whole idea being the following lemma.
+
+\begin{lemma}\label{2006n5-1}
+Let $p$, $q$ be primes and $x$ be an integer such that $q \mid \sum_{k = 0}^{p - 1} x^k$.
+Then either $q \equiv 1 \pmod{p}$ or $q = p$.
+\end{lemma}
+\begin{proof}
+First note that $q \nmid x$.
+If $x \equiv 1 \pmod{q}$ then we get $q \mid p$, which implies $q = p$.
+Otherwise, $q \mid x^p - 1$ but $q \nmid x - 1$, so the order of $x$ modulo $q$ is not $1$ but divides $p$.
+Since $p$ is prime, that order must be exactly $p$.
+Thus $p \mid q - 1$.
+\end{proof}
+
+In particular, the same can be said if we replace $q$ with any positive divisor $d$ of $\sum_{k = 0}^{p - 1} x^k$.
+That is, $d \equiv 0, 1 \pmod{p}$.
+In addition, note that $y > 0$, since the LHS is always positive.
+This is all we need.
+
+The case $p = 2$ and $p = 3$ are trivial; no need to hard-bash.
+The case $p \geq 5$ uses the above lemma: $y - 1 \equiv 0, 1 \pmod{p}$ since $y - 1$ is a factor of the RHS.
+If $y \equiv 1 \pmod{p}$, then another factor, $\sum_{j = 0}^{p - 3} y^j$, is congruent to $p - 3 \pmod{p}$.
+But $p - 3 \not\equiv 0, 1 \pmod{p}$ since $p \geq 5$.
+Else, if $y \equiv 2 \pmod{p}$, then $y^{p - 2} - 1 \equiv -1/2 \not\equiv 0, 1 \pmod{p}$; a contradiction.
+
+
+
+\end{document}
