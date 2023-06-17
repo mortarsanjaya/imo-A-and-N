@@ -1,0 +1,45 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newtheorem{lemma}{Lemma}
+
+\title{IMO 2007 A3}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $F$ be a totally ordered field, and let $n$ be a positive integer.
+Let $x, y \in F$ be positive elements such that $x^n + y^n = 1$.
+Prove that
+\[ \left(\sum_{k = 1}^n \frac{1 + x^{2k}}{1 + x^{4k}}\right) \left(\sum_{k = 1}^n \frac{1 + y^{2k}}{1 + y^{4k}}\right) < \frac{1}{(1 - x)(1 - y)}. \]
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2007SL.pdf}
+
+We just follow Solution 1 of the official solution.
+
+The solution is based on the inequality $\dfrac{1 + t^2}{1 + t^4} < \dfrac{1}{t}$ for $t > 0$, $t \neq 1$.
+This rearranges as $(t - 1)(t^3 - 1) = t^4 - t^3 - t + 1 > 0$.
+Using this inequality, the left hand side is less than
+\[ \left(\sum_{k = 1}^n \frac{1}{x^k}\right) \left(\sum_{k = 1}^n \frac{1}{y^k}\right) = \frac{x^{-n} - 1}{1 - x} \cdot \frac{y^{-n} - 1}{1 - y}. \]
+Finally, we have $(x^{-n} - 1)(y^{-n} - 1) = 1$ since $x^n + y^n = 1$.
+We are done.
+
+
+
+\end{document}
