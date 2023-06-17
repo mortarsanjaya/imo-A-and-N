@@ -1,0 +1,100 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+
+\newtheorem{lemma}{Lemma}
+
+\title{IMO 2010 C4 (P5)}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Given a positive integer $N \geq 3$, let $\N^N$ denote the set of ordered $N$-tuples of non-negative integers.
+Given a $6$-tuple $\mathbf{n} = (n_1, n_2, \ldots, n_N) \in \N^N$, we are allowed to do one of the following operations:
+\begin{itemize}
+    \item   If $n_k > 0$ for some $k \leq N - 1$, then subtract $1$ from $n_k$ and add $2$ to $n_{k + 1}$.
+    \item   If $n_k > 0$ for some $k \leq N - 2$, then subtract $1$ from $n_k$ and swap $n_{k + 1}$ with $n_{k + 2}$.
+\end{itemize}
+Now consider the case $N = 6$.
+Let $\mathbf{1} = (1, 1, 1, 1, 1, 1)$ and $\mathbf{p} = (0, 0, 0, 0, 0, A)$, where $A = 2010^{2010^{2010}}$.
+Is there a sequence of operations that change $\mathbf{1}$ to $\mathbf{p}$?
+
+
+
+\subsection*{Answer}
+
+Yes.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2010SL.pdf}
+
+We present the official solution below.
+
+Given $\mathbf{n}, \mathbf{p} \in \N^N$, we denote $\mathbf{n} \to \mathbf{p}$ if there is a sequence of (possibly empty) operations that change $\mathbf{n}$ to $\mathbf{p}$.
+The main observations are as follows.
+
+\begin{itemize}
+
+    \item
+    $(b + k, c) \to (b, c + 2k)$ for any $b, c, k \in \N$.
+
+    This follows by simple induction on $k$.
+
+    \item
+    $(a, 0, 0) \to (0, 2^a, 0)$ for any $a \geq 1$.
+
+    For any $b \geq 0$, we have $(b + 1, 0, 0) \to (b, 2, 0)$.
+    By the previous observation, we have $(b + 1, k, 0) \to (b + 1, 0, 2k) \to (b, 2k, 0)$ for any $b, k \in \N$.
+    Now we are done by induction on $a$.
+
+    \item
+    Consider the recursive function $P : \N \to \N$ defined by $P(0) = 1$ and $P(n + 1) = 2^{P(n)}$ for any $n \in \N$.
+    Then $(a, 0, 0, 0) \to (0, P(a), 0, 0)$ for any $a \geq 1$.
+
+    Again, start with $(b + 1, 0, 0, 0) \to (b, 2, 0, 0)$; note that $P(1) = 2$.
+    By the above second observation, for any $b \geq 0$ and $k \geq 1$, $(b + 1, k, 0, 0) \to (b + 1, 0, 2^k, 0) \to (b, 2^k, 0, 0)$.
+    The rest follows by induction on $a$.
+
+\end{itemize}
+
+For any $N \geq 2$, let $\mathbf{1}_N = (1, 1, \ldots, 1) \in \N^N$.
+Then $\mathbf{1}_N \to (0, 3, 0, 0, \ldots, 0)$.
+Indeed, $\mathbf{1}_N \to (1, 1, \ldots, 1, 0, 3)$.
+Then repeat the second type of operation if necessary.
+In particular, for $N = 6$, we get $(1, 1, 1, 1, 1, 1) \to (0, 3, 0, 0, 0, 0)$.
+It remains to show that $(0, 3, 0, 0, 0, 0) \to (0, 0, 0, 0, 0, A)$.
+As in the official solution, we only need the fact that $A \leq P(16)$.
+
+Apply the second observation twice.
+Since $P_3 = 16$, we get $(0, 3, 0, 0, 0, 0) \to (0, 0, 0, P(16), 0, 0)$.
+By induction using the second type of operation, one has $(k, 0, 0) \to (m, 0, 0)$ for any $m \leq k$.
+Since $A \leq P(16)$, we have $(0, 0, 0, A/4, 0, 0)$; note that $4 \mid A$.
+Using the first type of operation twice finishes the solution:
+\[ (0, 0, 0, A/4, 0, 0) \to (0, 0, 0, 0, 0, A). \]
+
+
+
+\subsection*{Implementation details}
+
+We implement the $6$-tuple as a function from $\N$ to itself instead of a function from a totally ordered type of cardinality $6$ to $\N$.
+This makes it easier to implement the legal operations.
+
+
+
+\end{document}
