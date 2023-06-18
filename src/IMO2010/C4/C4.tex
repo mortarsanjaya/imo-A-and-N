@@ -23,13 +23,24 @@
 \subsection*{Problem}
 
 Given a positive integer $N \geq 3$, let $\N^N$ denote the set of ordered $N$-tuples of non-negative integers.
-Given a $6$-tuple $\mathbf{n} = (n_1, n_2, \ldots, n_N) \in \N^N$, we are allowed to do one of the following operations:
+In this problem, an $N$-tuple $(n_1, n_2, \ldots, n_N)$ of non-negative integers resemble an ordered stack of coins, with $n_i$ coins in the $i^{\text{th}}$ stack for each $i \leq N$.
+
+Given an $N$-tuple $\mathbf{n} = (n_1, n_2, \ldots, n_N) \in \N^N$, we are allowed to do one of the following operations:
 \begin{itemize}
-    \item   If $n_k > 0$ for some $k \leq N - 1$, then subtract $1$ from $n_k$ and add $2$ to $n_{k + 1}$.
-    \item   If $n_k > 0$ for some $k \leq N - 2$, then subtract $1$ from $n_k$ and swap $n_{k + 1}$ with $n_{k + 2}$.
+
+    \item
+    If $n_k > 0$ for some $k \leq N - 1$, then subtract $1$ from $n_k$ and add $2$ to $n_{k + 1}$.
+    That is, from a non-empty stack (except the last one), remove a coin from the stack and add two coins to the stack right next to it.
+
+    \item
+    If $n_k > 0$ for some $k \leq N - 2$, then subtract $1$ from $n_k$ and swap $n_{k + 1}$ with $n_{k + 2}$.
+    That is, from a non-empty stack (except the last two), remove a coin from the stack and swap the contents of the next two stacks.
+
+
 \end{itemize}
-Now consider the case $N = 6$.
-Let $\mathbf{1} = (1, 1, 1, 1, 1, 1)$ and $\mathbf{p} = (0, 0, 0, 0, 0, A)$, where $A = 2010^{2010^{2010}}$.
+
+The game consists of $N = 6$ stacks, starting with $\mathbf{1} = (1, 1, 1, 1, 1, 1)$.
+The goal is to reach the state $\mathbf{p} = (0, 0, 0, 0, 0, A)$ using the above operations.
 Is there a sequence of operations that change $\mathbf{1}$ to $\mathbf{p}$?
 
 
