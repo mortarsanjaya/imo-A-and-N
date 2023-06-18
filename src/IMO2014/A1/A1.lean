@@ -5,9 +5,6 @@ import algebra.big_operators.basic
 namespace IMOSL
 namespace IMO2014A1
 
-set_option profiler true
-set_option profiler.threshold 0.1
-
 open finset
 
 def d (z : ℕ → ℤ) (n : ℕ) := (range $ n + 1).sum z - n * z n
