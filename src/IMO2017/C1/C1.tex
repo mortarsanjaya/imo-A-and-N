@@ -43,7 +43,9 @@ In fact, this is done for the problem statement as well.
 
 We will simplify by using short notations for quadruples.
 For each $i \leq k$, denote $q_i = (a_i, b_i, w_i, h_i)$.
-For each quadruple $q \in \N^4$, denote
+We put some weight on the points in $\N^2$, with $(x, y)$ having weight $(-1)^{x + y}$.
+The weight of a finite subset $S \subseteq \N^2$ is the sum of the weight of the points in $S$.
+For each quadruple $q \in \N^4$, denote by $f(q)$ the weight of $R(q)$, i.e.,
 \[ f(q) = \sum_{(x, y) \in R(q)} (-1)^{x + y}. \]
 
 \begin{claim}
