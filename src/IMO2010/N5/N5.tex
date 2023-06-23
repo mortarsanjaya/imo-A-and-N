@@ -47,8 +47,8 @@ Let $p$ be a prime and $x, y \in \N$.
 If $f(x) \equiv f(y) \pmod{p}$, then $x \equiv y \pmod{p}$.
 \end{claim}
 \begin{proof}
-The main idea is to find a positive integer $n$ such that $\nu_p(n + f(x) + c)$ and $\nu_p(n + f(y) + c)$ are both odd.
-This suffices, since then $p$ has to divide $f(n) + x + c$ and $f(n) + y + c$, and thus $x \equiv y \pmod{p}$.
+It suffices to find a positive integer $n$ such that $\nu_p(n + f(x) + c)$ and $\nu_p(n + f(y) + c)$ are both odd.
+Indeed, then $p$ has to divide $f(n) + x + c$ and $f(n) + y + c$, and thus $x \equiv y \pmod{p}$.
 
 First suppose that $f(x) \equiv f(y) \pmod{p^2}$.
 Choose a positive integer $N > f(x) + c$ such that $\nu_p(N) = 1$.
@@ -63,8 +63,9 @@ The latter holds since $f(x) \not\equiv f(y) \pmod{p^2}$ but $f(x) \equiv f(y) \
 \end{proof}
 
 Due to the above claim, $f$ is injective.
-Indeed, if $f(x) \neq f(y)$, then $f(x) \not\equiv f(y) \pmod{p}$ for some large $p$.
-The claim then implies $x \not\equiv y \pmod{p}$ and thus $x \neq y$.
+Indeed, if $f(x) = f(y)$, then $f(x) \equiv f(y) \pmod{p}$ for every $p$.
+The claim then implies $x \equiv y \pmod{p}$.
+Taking $p$ large enough yields $x = y$.
 
 The claim also implies that $f(x + 1) = f(x) \pm 1$ for all $x \in \N$.
 Indeed, it implies $f(x + 1) \not\equiv f(x) \pmod{p}$ for any $x \in \N$ and $p$ prime.
