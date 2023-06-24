@@ -1,4 +1,4 @@
-import algebra.big_operators.intervals number_theory.divisors
+import algebra.big_operators.intervals number_theory.divisors extra.seq_max
 
 /-! # IMO 2006 N3 -/
 
@@ -7,34 +7,21 @@ namespace IMO2006N3
 
 open finset
 
-section extra_lemmas
-
-private lemma exists_sup_fn_fin (f : ℕ → ℕ) : ∀ c : ℕ, ∃ K : ℕ, ∀ n : ℕ, n < c → f n ≤ K
-| 0 := ⟨0, λ n h, absurd h n.not_lt_zero⟩
-| (c+1) := begin
-  cases exists_sup_fn_fin c with K h,
-  refine ⟨max K (f c), λ n h0, _⟩,
-  rw [nat.lt_succ_iff, le_iff_eq_or_lt] at h0,
-  rcases h0 with rfl | h0,
-  exacts [le_max_right K (f n), le_trans (h n h0) (le_max_left K (f c))]
-end
+/- ## Some extra lemmas -/
+private lemma exists_sup_fn_fin (f : ℕ → ℕ) (c : ℕ) : ∃ K : ℕ, ∀ n : ℕ, n < c → f n ≤ K :=
+  ⟨extra.seq_max f c, λ n h, extra.le_seq_max_of_le f (le_of_lt h)⟩
 
 private lemma exists_lt_card_divisor (c : ℕ) : ∃ n : ℕ, c < n.divisors.card :=
   ⟨2 ^ c, by rw [nat.divisors_prime_pow nat.prime_two, card_map, card_range, nat.lt_succ_iff]⟩
 
-end extra_lemmas
 
 
 
 
+/- ## Lemmas on `g` -/
 
 /-- `g(n) = ⌊n/1⌋ + ⌊n/2⌋ + … + ⌊n/n⌋` -/
 def g (n : ℕ) : ℕ := (range n).sum (λ x, n / (x + 1))
-
-/-- `f(n) = g(n)/n`, as a rational. -/
-def f (n : ℕ) : ℚ := ((g n : ℤ) : ℚ) / ((n : ℤ) : ℚ)
-
-
 
 private lemma g_succ (n : ℕ) : g n.succ = g n + n.succ.divisors.card :=
   by rw [nat.divisors, ← nat.cast_id (filter _ _).card, ← sum_boole, sum_Ico_eq_sum_range,
@@ -72,6 +59,11 @@ private lemma card_divisors_prime {p : ℕ} (hp : p.prime) : p.divisors.card = 2
 
 
 
+
+/- ## Final solutions -/
+
+/-- `f(n) = g(n)/n`, as a rational. -/
+def f (n : ℕ) : ℚ := ((g n : ℤ) : ℚ) / ((n : ℤ) : ℚ)
 
 
 
