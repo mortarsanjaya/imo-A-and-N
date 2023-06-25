@@ -27,6 +27,9 @@ lemma seq_max_mono : monotone (seq_max f) :=
 lemma le_seq_max_of_le {m n : ℕ} (h : m ≤ n) : f m ≤ seq_max f n :=
   (le_seq_max_self f m).trans (seq_max_mono f h)
 
+lemma map_zero_le_seq_max (n : ℕ) : f 0 ≤ seq_max f n :=
+  le_seq_max_of_le f n.zero_le
+
 lemma exists_map_eq_seq_max : ∀ n : ℕ, ∃ k : ℕ, k ≤ n ∧ f k = seq_max f n
 | 0 := ⟨0, le_refl 0, rfl⟩
 | (n+1) := (le_total (seq_max f n) (f $ n+1)).elim
