@@ -57,7 +57,7 @@ private lemma strict_map_mem {i : ℕ} (h0 : i < A.card) : finset_to_strict_map 
 begin
   rw [finset_to_strict_map, if_pos h0],
   have h1 := A.finite_to_set,
-  refine nat.nth_mem_of_lt_card_finite (λ a, a ∈ A) h1 _,
+  refine nat.nth_mem_of_lt_card h1 _,
   rwa A.finite_to_set_to_finset
 end
 
@@ -72,10 +72,10 @@ begin
        if_neg (not_lt_of_le h0), add_lt_add_iff_left],
   have h2 := A.finite_to_set,
   rw if_pos h0; cases lt_or_le j A.card with h1 h1,
-  rw if_pos h1; exact nat.nth_strict_mono_of_finite _ h2 (by rwa A.finite_to_set_to_finset) h,
+  rw if_pos h1; refine nat.nth_strict_mono_on h2 _ _ h;
+    rwa finset.finite_to_set_to_finset,
   rw if_neg (not_lt_of_le h1),
-  refine lt_add_of_le_of_pos
-    (A.le_max' _ (nat.nth_mem_of_lt_card_finite (λ a, a ∈ A) h2 _)) (pos_of_gt h),
+  refine lt_add_of_le_of_pos (A.le_max' _ $ nat.nth_mem_of_lt_card h2 _) (pos_of_gt h),
   rwa A.finite_to_set_to_finset
 end
 
@@ -86,7 +86,8 @@ begin
   have h2 : nat.count (λ x, x ∈ A) a < A.card :=
     by convert nat.count_lt_card h1 h0; exact A.finite_to_set_to_finset.symm,
   refine ⟨nat.count (λ x, x ∈ A) a, h2, _⟩,
-  rw [finset_to_strict_map, if_pos h2, nat.nth_count (λ x, x ∈ A) h0]
+  rw [finset_to_strict_map, if_pos h2],
+  refine (nat.nth_count _).symm; exact h0
 end
 
 private lemma strict_map_max : finset_to_strict_map h (A.card - 1) = A.max' h :=

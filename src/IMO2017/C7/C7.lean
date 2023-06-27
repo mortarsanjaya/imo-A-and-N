@@ -34,7 +34,7 @@ lemma count_true : ∀ n : ℕ, nat.count (λ _, true) n = n
 
 lemma nth_true : nat.nth (λ _, true) = id :=
   funext $ λ n, (congr_arg (nat.nth $ λ _, true) (count_true n).symm).trans $
-    nat.nth_count (λ _, true) trivial
+    nat.nth_count trivial
 
 section classical
 open_locale classical
@@ -48,7 +48,7 @@ lemma nth_prop_inj {p q : ℕ → Prop}
   (hp : (set_of p).infinite) (hq : (set_of q).infinite) :
   nat.nth p = nat.nth q ↔ p = q :=
   ⟨λ h, count_prop_inj $ λ n, galois_connection.l_unique
-    (nat.count_nth_gc _ hp) (nat.count_nth_gc _ hq) (congr_fun h),
+    (nat.gc_count_nth hp) (nat.gc_count_nth hq) (congr_fun h),
   congr_arg nat.nth⟩
 
 end classical
@@ -99,8 +99,8 @@ lemma coe_fun_one : ((1 : ℕset) : function.End ℕ) = id :=
 
 private lemma range_coe_fun_eq_compl (X : ℕset) : set.range (X : function.End ℕ) = Xᶜ :=
   set.ext $ λ n, ⟨λ h, exists.elim h $ λ y h0, by rw ← h0;
-      exact nat.nth_mem_of_infinite (λ n, n ∉ X) (nat_finset_infinite_compl X) y,
-    λ h, ⟨nat.count (λ n, n ∉ X) n, nat.nth_count (λ n, n ∉ X) h⟩⟩
+      exact nat.nth_mem_of_infinite (nat_finset_infinite_compl X) y,
+    λ h, ⟨nat.count (λ n, n ∉ X) n, nat.nth_count h⟩⟩
 
 private lemma range_coe_fun_eq_univ_diff (X : ℕset) :
   set.range (X : function.End ℕ) = set.univ \ X :=
@@ -112,7 +112,7 @@ private lemma coe_fun_inj {X Y : ℕset} : (X : function.End ℕ) = Y ↔ X = Y 
     λ h, funext $ λ n, congr_arg not $ congr_arg (has_mem.mem n) h⟩
 
 private lemma coe_fun_strict_mono (X : ℕset) : strict_mono (X : function.End ℕ) :=
-  nat.nth_strict_mono _ (nat_finset_infinite_compl X)
+  nat.nth_strict_mono (nat_finset_infinite_compl X)
 
 private lemma coe_fun_map_inj (X : ℕset) : injective (X : function.End ℕ) :=
   strict_mono.injective (coe_fun_strict_mono X)
@@ -144,8 +144,8 @@ private lemma coe_fun_map_large {X : ℕset} {n : ℕ} (h : X.sup < n) :
 begin
   have h0 := nat_finset_infinite_compl X,
   rw [coe_fun_eq_nth_notin, nth_notin, eq_comm, eq_iff_le_not_lt]; split,
-  rw [← nat.count_le_iff_le_nth _ h0, count_notin_large h],
-  rw [← nat.succ_le_iff, ← nat.count_le_iff_le_nth _ h0, nat.count_succ, count_notin_large h,
+  rw [← nat.count_le_iff_le_nth h0, count_notin_large h],
+  rw [← nat.succ_le_iff, ← nat.count_le_iff_le_nth h0, nat.count_succ, count_notin_large h,
       add_le_iff_nonpos_right, nonpos_iff_eq_zero, ← ne.def, ite_ne_right_iff, and_comm],
   refine ⟨one_ne_zero, λ h1, _⟩,
   replace h1 : id (n + X.card) ≤ X.sup := le_sup h1,

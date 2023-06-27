@@ -167,7 +167,7 @@ begin
     replace h0 := eventually_F_lt_of_S0_lt h h0,
     cases h0 with N h0,
     intros h1,
-    replace h1 := h1.exists_nat_lt N,
+    replace h1 := h1.exists_gt N,
     rcases h1 with ⟨n, h1, h2⟩,
     rw set.mem_set_of_eq at h1,
     exact lt_asymm h1 (h0 n (le_of_lt h2)) }
@@ -182,7 +182,7 @@ begin
   cases h1 with K h1,
 
   ---- Next find the minimum `N > K` with `F_p^N(a) < F_p^N(b)`.
-  replace h0 := h0.exists_nat_lt K,
+  replace h0 := h0.exists_gt K,
   cases nat.find_spec h0 with h2 h3,
   have h4 := nat.find_min h0 (nat.pred_lt (ne_of_gt (pos_of_gt h3))),
   generalize_hyp : nat.find h0 = N at h2 h3 h4,

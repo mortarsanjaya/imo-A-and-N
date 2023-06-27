@@ -149,13 +149,13 @@ theorem dc_wide_or_strong_of_infinite (h0 : (set_of P).infinite) :
   wide P ∨ ∃ p : ℕ, p.prime ∧ strong p P :=
 begin
   ---- First find `x : primes →₀ ℕ` such that `P(n) → ∀ p, v_p(n) ≤ x_p`
-  have h1 : P 1 := by rcases h0.exists_nat_lt 0 with ⟨n, h1, h2⟩;
+  have h1 : P 1 := by rcases h0.exists_gt 0 with ⟨n, h1, h2⟩;
     exact dc_at_one h (ne_of_gt h2) h1,
   by_contra' h2; replace h2 := dc_not_wide_strong_aoc_finsupp h h2.1 h2.2 h1,
   clear h1; rcases h2 with ⟨x, h1, h2⟩,
 
   ---- Now take any `m > ∏_p p^{x_p}` and get a contradiction
-  replace h0 := h0.exists_nat_lt (x.prod has_pow.pow),
+  replace h0 := h0.exists_gt (x.prod has_pow.pow),
   rcases h0 with ⟨m, h0, h3⟩,
   revert h3; rw [imp_false, not_lt],
   cases eq_or_ne m 0 with h3 h3,

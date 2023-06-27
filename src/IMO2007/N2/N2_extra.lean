@@ -1,4 +1,4 @@
-import number_theory.legendre_symbol.quadratic_char
+import number_theory.legendre_symbol.quadratic_char.basic
 
 /-! # IMO 2007 N2, Extra Version -/
 

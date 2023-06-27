@@ -1,4 +1,4 @@
-import data.real.basic analysis.special_functions.pow
+import analysis.special_functions.pow.real
 
 namespace IMOSL
 namespace extra
