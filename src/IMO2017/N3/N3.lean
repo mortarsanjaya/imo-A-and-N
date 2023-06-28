@@ -9,10 +9,10 @@ namespace IMO2017N3
 
 open function finset extra
 
-
-
 def good (n : ℕ) := ∀ x : ℕ → ℤ, periodic x n → ¬(n : ℤ) ∣ (range n).sum x →
   ∃ i : ℕ, ∀ j : ℕ, 0 < j → j ≤ n → ¬(n : ℤ) ∣ (Ico i (i + j)).sum x
+
+
 
 
 
@@ -47,7 +47,7 @@ end dvd_indicator
 private lemma good_is_prime {n : ℕ} (hn : 2 ≤ n) (h : good n) : n.prime :=
 begin
   rw [nat.prime_def_lt'', and_iff_right hn],
-  unfold good at h; contrapose! h,
+  rw good at h; contrapose! h,
   rcases h with ⟨a, ⟨b, rfl⟩, h, h0⟩,
   rw [ne.def, eq_comm, mul_right_eq_self₀, not_or_distrib, ← ne.def] at h0,
   rw [ne_iff_lt_or_gt, nat.lt_succ_iff, gt_iff_lt, nonpos_iff_eq_zero] at h h0,
@@ -58,7 +58,8 @@ begin
   replace hn := lt_of_lt_of_le two_pos hn,
 
   -- The sequence is x_n = a - a = 0 if ab ∣ n and x_n = a - 0 = a otherwise
-  refine ⟨λ i, a - dvd_seq (a * b) a i, λ i, by simp only [dvd_seq_add_self], _, λ i, _⟩,
+  refine ⟨λ i, a - dvd_seq (a * b) a i,
+    λ i, congr_arg2 has_sub.sub rfl (dvd_seq_add_self _ _ _), _, λ i, _⟩,
 
   -- ab ∤ x_0 + x_1 + ... + x_{ab - 1} since the sum is a^2 b - a
   { rintros ⟨c, h1⟩,
@@ -83,7 +84,7 @@ begin
     { rw [add_right_comm, nat.add_mul_div_right _ _ hn, nat.div_eq_of_lt this,
           nat.add_mul_div_right _ _ hn, nat.div_eq_of_lt (lt_trans _ this)],
       rw lt_add_iff_pos_right; exact lt_trans one_pos h0 },
-    convert nat.add_lt_add_right h1 b,
+    refine (nat.add_lt_add_right h1 b).trans_eq _,
     rw [← add_one_mul, nat.sub_add_cancel (le_of_lt h)] },
 
   -- If i % ab ≥ (a - 1)b, pick j = b + 1
@@ -101,7 +102,7 @@ begin
         dvd_seq_sum, nat.add_div_eq_of_le_mod_add_mod _ hn, nat.div_eq_of_lt h2,
         add_zero, succ_nsmul, add_neg_cancel_right],
     rw nat.mod_eq_of_lt h2,
-    convert add_le_add h1 (le_of_lt b.lt_succ_self),
+    refine (add_le_add h1 $ le_of_lt b.lt_succ_self).trans_eq' _,
     rw [← add_one_mul, nat.sub_add_cancel (le_of_lt h)] }
 end
 
@@ -198,7 +199,7 @@ begin
   rcases cycle_sum4 h h0 h1 with ⟨m, c, h3, h4, h5⟩,
   refine ⟨c, h3, h4, _⟩,
   rw [finset.sum_Ico_eq_sum_range, nat.add_sub_cancel_left] at h5,
-  convert h5; clear h3 h4 h5,
+  refine h5.trans (dvd_of_eq $ eq.symm _); clear h3 h4 h5,
   induction c with c c_ih,
   rw [nat.cast_zero, zero_mul, mul_zero, sum_range_zero],
   rw [nat.cast_succ, add_one_mul, c_ih, nat.mul_succ, sum_range_add, add_right_inj],
