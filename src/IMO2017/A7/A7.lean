@@ -1,4 +1,4 @@
-import data.int.basic algebra.big_operators.basic
+import algebra.big_operators.basic
 
 /-! # IMO 2017 A7 -/
 
