@@ -7,263 +7,240 @@ namespace IMO2006A1
 
 open function
 
-private lemma int_seq_eventually_constant_of_mono_bdd_above
+lemma int_seq_not_bdd_above_of_partial_strict_mono
+  {a : ℕ → ℤ} (h : ∀ n, ∃ k, n ≤ k ∧ a n < a k) (c : ℤ) : ∃ n, c < a n :=
+  (lt_or_le c (a 0)).elim (λ h0, ⟨0, h0⟩) $ c.le_induction
+    (exists.elim (h 0) $ λ k h1, ⟨k, h1.2⟩)
+    (λ d h0 h1, exists.elim h1 $ λ m h1, exists.elim (h m) $
+      λ k h2, ⟨k, (int.add_one_le_of_lt h1).trans_lt h2.2⟩)
+
+lemma int_seq_eventually_const_of_mono_bdd_above
   {a : ℕ → ℤ} (h : monotone a) {c : ℤ} (h0 : ∀ n : ℕ, a n ≤ c) :
-  ∃ (d : ℤ) (_ : d ≤ c) (N : ℕ), ∀ n : ℕ, N ≤ n → a n = d :=
-begin
-  suffices : ∃ N : ℕ, ∀ n : ℕ, N ≤ n → a n.succ ≤ a n,
-  { rcases this with ⟨N, h1⟩,
-    refine ⟨a N, h0 N, N, nat.le_induction (by refl) _⟩,
-    intros n h2 h3; rw ← h3; clear h3,
-    exact le_antisymm (h1 n h2) (h n.le_succ) },
-  
-  contrapose! h0,
-  cases exists_lt (a 0) with d h1,
-  cases lt_or_le c d with h2 h2,
-  exact ⟨0, lt_trans h2 h1⟩,
-  revert h2 c; refine int.le_induction ⟨0, h1⟩ _,
-  rintros x - ⟨k, h3⟩; clear h1 d,
-  replace h0 := h0 k,
-  rcases h0 with ⟨n, h0, h1⟩,
-  exact ⟨n.succ, lt_of_le_of_lt (le_trans h3 (h h0)) h1⟩
-end
-
-
-
-
+  ∃ N, ∀ n, N ≤ n → a n = a N :=
+  classical.by_contradiction $ λ h1, exists.elim
+    (@int_seq_not_bdd_above_of_partial_strict_mono a
+      (λ N, exists.elim (not_forall.mp $ not_exists.mp h1 N) $ λ n h2,
+        let h2 := not_imp.mp h2 in ⟨n, h2.1, lt_of_le_of_ne' (h h2.1) h2.2⟩) c)
+    (λ n, not_lt_of_le $ h0 n)
 
 
 
 variables {R : Type*} [linear_ordered_ring R] [floor_ring R]
 
+lemma lt_add_one_of_floor_le {r s : R} (h : ⌊r⌋ ≤ ⌊s⌋) : r - s < 1 :=
+  sub_lt_comm.mp $ (int.sub_one_lt_floor r).trans_le (int.le_floor.mp h)
+
+lemma abs_sub_lt_one_of_floor_eq {r s : R} (h : ⌊r⌋ = ⌊s⌋) : |r - s| < 1 :=
+  abs_sub_lt_iff.mpr $ ⟨lt_add_one_of_floor_le (le_of_eq h),
+    lt_add_one_of_floor_le (le_of_eq h.symm)⟩
+
+lemma exists_one_le_mul_pow_of_pos [archimedean R]
+  {r : R} (h : 0 < r) {n : ℤ} (h0 : 1 < n) (c : R) : ∃ k : ℕ, c ≤ n ^ k * r :=
+  exists.elim (archimedean.arch c h) $ λ k h1, ⟨k, h1.trans $
+    by rw [← int.nat_abs_of_nonneg (le_of_lt $ int.one_pos.trans h0),
+      int.cast_coe_nat, ← nat.cast_pow, ← nsmul_eq_mul];
+    exact nsmul_le_nsmul (le_of_lt h) (le_of_lt $ k.lt_pow_self $
+      int.nat_abs_lt_nat_abs_of_nonneg_of_lt int.one_nonneg h0)⟩
+
+lemma floor_eq_neg_one_of_Ioo_neg_one_zero {r : R} (h : -1 < r) (h0 : r < 0) : ⌊r⌋ = -1 :=
+  by rw [int.floor_eq_iff, int.cast_neg, int.cast_one, neg_add_self];
+    exact ⟨le_of_lt h, h0⟩
+
+
+
+
+
+
+
+/-! ## Start of the problem -/
+
 def f (r : R) := (⌊r⌋ : R) * int.fract r
 
-private lemma f_nonneg_of_nonneg {r : R} (h : 0 ≤ r) : 0 ≤ f r :=
+
+
+lemma f_nonneg_of_nonneg {r : R} (h : 0 ≤ r) : 0 ≤ f r :=
   mul_nonneg (int.cast_nonneg.mpr $ int.floor_nonneg.mpr h) (int.fract_nonneg r)
 
-private lemma f_iterate_nonneg {r : R} (h : 0 ≤ r) : ∀ n : ℕ, 0 ≤ (f^[n] r)
+lemma f_iter_nonneg {r : R} (h : 0 ≤ r) : ∀ n, 0 ≤ (f^[n] r)
 | 0 := h
-| (n+1) := le_of_le_of_eq (f_nonneg_of_nonneg $ f_iterate_nonneg n) $
-    (comp_app f _ r).symm.trans $ congr_fun (iterate_succ' f n).symm r
+| (n+1) := (f_nonneg_of_nonneg $ f_iter_nonneg n).trans_eq
+    (iterate_succ_apply' f n r).symm
 
-private lemma f_floor_eq_zero {r : R} (h : ⌊r⌋ = 0) : f r = 0 :=
-  mul_eq_zero_of_left (int.cast_eq_zero.mpr h) (int.fract r)
+lemma f_iter_large_floor_nonpos : ∀ (n : ℕ) (r : R), ⌊r⌋ ≤ n → ⌊(f^[n]) r⌋ ≤ 0
+| 0 r h := h.trans_eq nat.cast_zero
+| (n+1) r h := (congr_arg int.floor $ iterate_succ_apply f n r).trans_le $
+    f_iter_large_floor_nonpos n (f r) $ int.le_of_lt_add_one $ int.floor_lt.mpr $
+    (le_or_lt (⌊r⌋ : R) 0).elim
+      (λ h0, (mul_nonpos_of_nonpos_of_nonneg h0 $ int.fract_nonneg _).trans_lt $
+        int.cast_pos.mpr $ int.lt_add_one_of_le n.cast_nonneg)
+      (λ h0, (mul_lt_of_lt_one_right h0 $ int.fract_lt_one _).trans_le $
+        int.cast_le.mpr $ h.trans_eq n.cast_succ)
 
-private lemma f_floor_lt_floor_of_ge_one {r : R} (h : 1 ≤ r) : ⌊f r⌋ < ⌊r⌋ :=
-  int.floor_lt.mpr $ mul_lt_of_lt_one_right
-    (int.cast_pos.mpr $ int.floor_pos.mpr h) (int.fract_lt_one r)
+lemma f_iter_large_eq_zero_of_nonneg {r : R} (h : 0 ≤ r) {n : ℕ} (h0 : ⌊r⌋ ≤ n) :
+  f^[n + 1] r = 0 :=
+  (iterate_succ_apply' f n r).trans $
+    mul_eq_zero_of_left (int.cast_eq_zero.mpr $ le_antisymm
+      (f_iter_large_floor_nonpos n r h0) (int.floor_nonneg.mpr $ f_iter_nonneg h n)) _
 
-private lemma f_nonpos_of_nonpos {r : R} (h : r ≤ 0) : f r ≤ 0 :=
-  mul_nonpos_of_nonpos_of_nonneg (le_trans (int.floor_le r) h) (int.fract_nonneg r)
+lemma f_iter_floor_abs_succ_eq_zero_of_nonneg {r : R} (h : 0 ≤ r) :
+  f^[⌊r⌋.nat_abs + 1] r = 0 :=
+  f_iter_large_eq_zero_of_nonneg h int.le_nat_abs
 
-private lemma f_iterate_nonpos {r : R} (h : r ≤ 0) : ∀ n : ℕ, f^[n] r ≤ 0
+lemma f_zero : f (0 : R) = 0 :=
+  mul_eq_zero_of_left (int.cast_eq_zero.mpr int.floor_zero) _
+
+
+
+lemma f_nonpos_of_nonpos {r : R} (h : r ≤ 0) : f r ≤ 0 :=
+  mul_nonpos_of_nonpos_of_nonneg ((int.floor_le r).trans h) (int.fract_nonneg r)
+
+lemma f_iter_nonpos {r : R} (h : r ≤ 0) : ∀ n : ℕ, f^[n] r ≤ 0
 | 0 := h
-| (n+1) := le_of_eq_of_le (congr_fun (iterate_succ' f n) r)
-    (f_nonpos_of_nonpos $ f_iterate_nonpos n)
+| (n+1) := (iterate_succ_apply' f n r).trans_le $ f_nonpos_of_nonpos $ f_iter_nonpos n
 
-private lemma f_floor_ge_of_nonpos {r : R} (h : r ≤ 0) : ⌊r⌋ ≤ ⌊f r⌋ :=
+lemma f_floor_ge_of_nonpos {r : R} (h : r ≤ 0) : ⌊r⌋ ≤ ⌊f r⌋ :=
   int.le_floor.mpr $ le_mul_of_le_one_right
     (int.cast_nonpos.mpr $ int.floor_nonpos h) (le_of_lt $ int.fract_lt_one r)
 
-private lemma f_Ioo_neg_one_zero {r : R} (h : -1 < r) (h0 : r < 0) : f r = -1 - r :=
+lemma exists_f_iter_floor_const {r : R} (h : r ≤ 0) :
+  ∃ N, ∀ n, N ≤ n → ⌊(f^[n]) r⌋ = ⌊(f^[N]) r⌋ :=
+  int_seq_eventually_const_of_mono_bdd_above
+    (monotone_nat_of_le_succ $ λ n,
+      (f_floor_ge_of_nonpos $ f_iter_nonpos h n).trans_eq $
+        congr_arg int.floor (iterate_succ_apply' f n r).symm)
+    (λ n, int.floor_nonpos $ f_iter_nonpos h n)
+
+lemma f_sub_abs_eq_of_floor_eq {n : ℤ} {a b : R} (h : ⌊a⌋ = n) (h0 : ⌊b⌋ = n) :
+  |f a - f b| = |n| * |a - b| :=
+  by rw [f, int.fract, h, f, int.fract, h0, ← mul_sub, sub_sub_sub_cancel_right, abs_mul]
+
+lemma fixed_pt_of_iter_floor_const_lt_neg_one [archimedean R]
+  {r : R} (h : ⌊r⌋ < -1) (h0 : ∀ n, ⌊(f^[n]) r⌋ = ⌊r⌋) : f r = r :=
 begin
-  suffices h1 : ⌊r⌋ = -1,
-    rw [f, int.fract, h1, int.cast_neg, int.cast_one, neg_one_mul, neg_sub],
-  rw [int.floor_eq_iff, int.cast_neg, int.cast_one, neg_add_self],
-  exact ⟨le_of_lt h, h0⟩
-end
-
-private lemma f2_Ioo_neg_one_zero {r : R} (h : -1 < r) (h0 : r < 0) : (f^[2]) r = r :=
-  by rw [iterate_succ, comp_app, iterate_one, f_Ioo_neg_one_zero h h0];
-    exact (f_Ioo_neg_one_zero (lt_sub_iff_add_lt.mpr $ add_lt_iff_neg_left.mpr h0)
-      $ sub_neg.mpr h).trans (sub_sub_self (-1) r)
-
-private lemma f_special_value {k : ℕ} {r : R} (h : (k + 1 : R) * r = -k ^ 2) : f r = r :=
-begin
-  suffices : ⌊r⌋ = -k,
-    rw [f, int.fract, this, int.cast_neg, int.cast_coe_nat, neg_mul, sub_neg_eq_add,
-        mul_add, ← sq, neg_add, ← h, add_one_mul, neg_add_cancel_left],
-  have h0 : 0 < (k : R) + 1 := add_pos_of_nonneg_of_pos k.cast_nonneg one_pos,
-  rw [int.floor_eq_iff, int.cast_neg, int.cast_coe_nat]; split,
-  rw [← mul_le_mul_left h0, h, add_one_mul, mul_neg, ← sq, add_le_iff_nonpos_right, neg_nonpos],
-  exact k.cast_nonneg,
-  rw [← mul_lt_mul_left h0, h, add_one_mul, mul_add_one, mul_neg, add_assoc,
-      ← sq, lt_add_iff_pos_right, ← add_assoc, add_neg_self, zero_add],
-  exact one_pos
-end
-
-private lemma f_floor_iterate_const [archimedean R]
-  {k : ℕ} (h : 1 < k) {r : R} (h0 : ∀ n : ℕ, ⌊(f^[n]) r⌋ = -k) : (k + 1 : R) * r = -k ^ 2 :=
-begin
-  ---- Setup
-  rw eq_neg_iff_add_eq_zero,
-  generalize h1 : (k + 1 : R) * r + k ^ 2 = c,
-
-  ---- For any `n : ℕ`, `(k + 1) (f^n(r) - r) = ((-k)^n - 1) c`
-  replace h1 : ∀ n : ℕ, (k + 1 : R) * ((f^[n]) r - r) = ((-k) ^ n - 1) * c :=
-  begin
-    intros n,
-    rw sub_one_mul; nth_rewrite 1 ← h1,
-    rw [eq_sub_iff_add_eq, mul_sub, ← add_assoc, sub_add_cancel],
-    induction n with n n_ih,
-    rw [iterate_zero, id.def, h1, pow_zero, one_mul],
-    rw [iterate_succ', comp_app, pow_succ _ n, mul_assoc, ← n_ih],
-    replace h0 := h0 n,
-    generalize_hyp : (f^[n]) r = x at h0 n_ih ⊢,
-    rw [f, int.fract, h0, int.cast_neg, int.cast_coe_nat, sub_neg_eq_add,
-        neg_mul, neg_mul, mul_neg, ← sub_eq_neg_add, ← neg_sub, neg_inj, mul_add,
-        ← sq, mul_add, add_sub_assoc, ← sub_one_mul, add_sub_cancel, mul_add,
-        add_left_inj, ← mul_assoc, ← mul_assoc, add_one_mul, mul_add_one]
-  end,
-
-  ---- For any `n : ℕ`, `|f^n(r) - r| < 1`
-  replace h0 : ∀ n : ℕ, |(f^[n]) r - r| < 1 :=
-  begin
-    intros n,
-    have h2 := h0 n,
-    replace h0 := h0 0,
-    rw [iterate_zero, id.def] at h0,
-    rw [int.floor_eq_iff, int.cast_neg, int.cast_coe_nat] at h0 h2,
-    rw [abs_sub_lt_iff, sub_lt_iff_lt_add, sub_lt_iff_lt_add, add_comm, add_comm (1 : R)],
-    exact ⟨lt_of_lt_of_le h2.2 (add_le_add_right h0.1 _),
-           lt_of_lt_of_le h0.2 (add_le_add_right h2.1 _)⟩
-  end,
-
-  ---- Final step
-  by_contra h2; rw [← ne.def, ← abs_pos] at h2,
-  replace h2 := archimedean.arch (k + 1 : R) h2,
-  cases h2 with n h2,
-  replace h1 := congr_arg has_abs.abs (h1 n),
-  revert h1; have h1 : 0 < (k : R) + 1 := add_pos_of_nonneg_of_pos k.cast_nonneg one_pos,
-  rw [abs_mul, abs_mul, abs_of_nonneg (le_of_lt h1)],
-  refine ne_of_lt (lt_of_lt_of_le ((mul_lt_mul_left h1).mpr (h0 n)) _),
-  rw mul_one; refine le_trans h2 _,
-  clear h0 h1 h2,
-  rw nsmul_eq_mul,
-  refine mul_le_mul_of_nonneg_right (le_trans _ (abs_sub_abs_le_abs_sub _ _)) (abs_nonneg c),
-  rw [abs_one, abs_pow, abs_neg, nat.abs_cast, le_sub_iff_add_le,
-      ← nat.cast_succ, ← nat.cast_pow, nat.cast_le, nat.succ_le_iff],
-  exact nat.lt_pow_self h n
-end
-
-
-
-
-
-
-
-
-/-- Final solution, case `x ≥ 0` -/
-theorem final_solution_x_nonneg {x : R} (h : 0 ≤ x) :
-  ∀ n : ℕ, ⌊x⌋ < n → (f^[n]) x = 0 :=
-begin
-  ---- Start with casting `⌊x⌋` to `K : ℕ`
-  lift ⌊x⌋ to ℕ using by rwa [int.le_floor, int.cast_zero] with K h0,
-
-  ---- Reduce to showing `0 ≤ ⌊f^n(x)⌋ ≤ K - n` for all `n ≤ K`
-  suffices : ∀ n : ℕ, n ≤ K → ⌊(f^[n]) x⌋ ≤ ↑(K - n),
-  { replace this := this K (le_refl K),
-    rw [nat.sub_self, nat.cast_zero] at this,
-    simp_rw [nat.cast_lt, ← nat.succ_le_iff],
-    refine nat.le_induction _ (λ n h1 h2, _),
-    rw [iterate_succ', comp_app, f_floor_eq_zero (le_antisymm this _)],
-    rw [int.le_floor, int.cast_zero]; exact f_iterate_nonneg h K,
-    rw [iterate_succ', comp_app, h2, f, int.floor_zero, int.cast_zero, zero_mul] },
+  rw [← sub_eq_zero, ← abs_nonpos_iff, ← not_lt],
+  replace h := lt_abs.mpr (or.inr $ lt_neg_of_lt_neg h),
+  intros h1; cases exists_one_le_mul_pow_of_pos h1 h 1 with k h2,
+  revert h2; refine not_le_of_lt (lt_of_lt_of_eq' (abs_sub_lt_one_of_floor_eq $
+    (h0 k.succ).trans (h0 k).symm) _),
   
-  ---- Proceed by induction, with trivial base case
-  intros n h1; induction n with n n_ih,
-  rw [iterate_zero, id.def, ← h0, nat.sub_zero],
-  replace n_ih := n_ih (le_trans n.le_succ h1),
-  rw [iterate_succ', comp_app],
-  have h2 := f_iterate_nonneg h n,
-  rw [← int.cast_zero, ← int.le_floor, le_iff_eq_or_lt, eq_comm] at h2,
-  cases h2 with h2 h2,
-  rw [f_floor_eq_zero h2, int.floor_zero]; exact nat.cast_nonneg _,
-  rw [← int.add_one_le_iff, zero_add, int.le_floor, int.cast_one] at h2,
-  replace n_ih := lt_of_lt_of_le (f_floor_lt_floor_of_ge_one h2) n_ih,
-  rw ← int.le_sub_one_iff at n_ih,
-  convert n_ih; clear h0 h2 n_ih,
-  rw le_iff_exists_add at h1,
-  rcases h1 with ⟨c, rfl⟩,
-  rw [nat.add_sub_cancel_left, nat.succ_eq_add_one, add_assoc,
-      nat.add_sub_cancel_left, nat.cast_add, nat.cast_one, add_tsub_cancel_left]
+  ---- Induction on `k`
+  induction k with k h2,
+  rw [pow_zero, one_mul, iterate_one, iterate_zero_apply],
+  rw [pow_succ, mul_assoc, h2, iterate_succ_apply', iterate_succ_apply',
+      f_sub_abs_eq_of_floor_eq (h0 k.succ) (h0 k), iterate_succ_apply', int.cast_abs]
 end
 
+lemma f_floor_eq_neg_one {r : R} (h : ⌊r⌋ = -1) : f r = -(r + 1) :=
+  by rw [f, int.fract, h, int.cast_neg, int.cast_one, sub_neg_eq_add, neg_one_mul]
 
+lemma f_floor_eq_neg_one' {r : R} (h : -1 < r) (h0 : r < 0) : f r = -(r + 1) :=
+  f_floor_eq_neg_one $ floor_eq_neg_one_of_Ioo_neg_one_zero h h0
 
-/-- Final solution, case `x ≤ 0` -/
-theorem final_solution_x_nonpos [archimedean R] {x : R} (h : x ≤ 0) :
-  (∃ N k : ℕ, (k + 1 : R) * (f^[N] x) = -k ^ 2) ∨ (∃ N : ℕ, -1 < (f^[N]) x ∧ (f^[N]) x < 0) :=
-begin
-  ---- First obtain some `N` such that `(⌊f^n(x)⌋)_{n ≥ 0}` stabilizes
-  obtain ⟨d, h0, N, h1⟩ : ∃ (d : ℤ) (_ : d ≤ 0) (N : ℕ), ∀ n : ℕ, N ≤ n → ⌊(f^[n]) x⌋ = d :=
-  begin
-    have h0 : ∀ n : ℕ, ⌊(f^[n]) x⌋ ≤ 0 := λ n, int.floor_nonpos (f_iterate_nonpos h n),
-    convert int_seq_eventually_constant_of_mono_bdd_above _ h0,
-    intros m; refine nat.le_induction (by refl) _,
-    simp only []; intros n h0 h1,
-    rw [iterate_succ', comp_app],
-    exact le_trans h1 (f_floor_ge_of_nonpos (f_iterate_nonpos h n))
-  end,
+lemma f_iter_two_fixed_pt {r : R} (h : -1 < r) (h0 : r < 0) : f (f r) = r :=
+  by rw [f_floor_eq_neg_one' h h0, f_floor_eq_neg_one' (neg_lt_neg $ add_lt_of_neg_left 1 h0)
+    (neg_lt_zero.mpr $ neg_lt_iff_pos_add.mp h), neg_eq_iff_eq_neg, ← eq_sub_iff_add_eq, neg_add']
 
-  ---- Remove the case `d = 0` and `d = -1`
-  rw [le_iff_eq_or_lt, ← int.le_sub_one_iff, zero_sub, le_iff_eq_or_lt] at h0,
-  rcases h0 with rfl | rfl | h0,
-  left; refine ⟨N + 1, 0, _⟩,
-  rw [nat.cast_zero, zero_add, one_mul, zero_pow two_pos, neg_zero, iterate_succ', comp_app],
-  exact f_floor_eq_zero (h1 N (le_refl N)),
-  have h2 := h1 N (le_refl N),
-  rw [int.floor_eq_iff, le_iff_lt_or_eq] at h2,
-  rcases h2 with ⟨h2 | h2, h3⟩,
-  rw [int.cast_neg, int.cast_one] at h2 h3,
-  rw neg_add_self at h3; right; exact ⟨N, h2, h3⟩,
-  exfalso; clear h3,
-  replace h1 := h1 N.succ N.le_succ,
-  rw [iterate_succ', comp_app, ← h2, f, int.fract, int.floor_int_cast,
-      sub_self, mul_zero, int.floor_zero, zero_eq_neg] at h1,
-  revert h1; exact one_ne_zero,
-
-  ---- Work on the case `d < -1`
-  left; rw lt_neg at h0,
-  lift -d to ℕ using le_trans zero_le_one (le_of_lt h0) with k h2,
-  rw [eq_neg_iff_add_eq_zero, add_comm, ← eq_neg_iff_add_eq_zero] at h2; subst h2,
-  rw nat.one_lt_cast at h0,
-  refine ⟨N, k, f_floor_iterate_const h0 (λ n, _)⟩,
-  replace h1 := h1 (n + N) le_add_self,
-  rwa [iterate_add, comp_app] at h1
-end
+lemma f_neg_one : f (-1 : R) = 0 :=
+  mul_eq_zero_of_right _ $ int.fract_neg_eq_zero.mpr int.fract_one
 
 
 
 /-- Final solution -/
-theorem final_solution [archimedean R] (x : R) :
-  ∃ N : ℕ, ∀ n : ℕ, N ≤ n → (f^[n + 2]) x = (f^[n]) x :=
+theorem final_solution [archimedean R] (r : R) : ∃ N : ℕ, f (f (f^[N] r)) = (f^[N]) r :=
 begin
-  cases le_total 0 x with h h,
+  cases le_total 0 r with h h,
 
-  ---- Case 1: `x ≥ 0`
-  { lift ⌊x⌋ to ℕ using int.floor_nonneg.mpr h with K h0,
-    replace h := final_solution_x_nonneg h,
-    simp_rw [← h0, nat.cast_lt, ← nat.succ_le_iff] at h,
-    exact ⟨K + 1, λ n h1, by rw [h n h1, h (n + 2) (le_add_right h1)]⟩ },
-  
-  ---- Case 2: `x ≤ 0`
-  { replace h := final_solution_x_nonpos h,
-    rcases h with ⟨N, k, h⟩ | ⟨N, h, h0⟩,
+  ---- `r ≥ 0`
+  { refine ⟨⌊r⌋.nat_abs + 1, _⟩,
+    rw [f_iter_floor_abs_succ_eq_zero_of_nonneg h, f_zero, f_zero] },
 
-    -- Subcase 2.1: `(k + 1) f^N(x) = -k^2` for some `N k : ℕ`
-    { replace h := f_special_value h; clear k,
-      suffices : ∀ {n : ℕ}, N ≤ n → (f^[n]) x = (f^[N]) x,
-        exact ⟨N, λ n h0, by rw [this h0, this (le_add_right h0)]⟩,
-      refine nat.le_induction (by refl) _,
-      rintros n - h0; rw [iterate_succ', comp_app, h0, h] },
+  ---- `r ≤ 0`
+  { cases exists_f_iter_floor_const h with N h0,
+    replace h := f_iter_nonpos h N,
+    rw le_iff_eq_or_lt at h; cases h with h h,
+    refine ⟨N, _⟩; rw [h, f_zero, f_zero],
+    cases lt_or_le ⌊(f^[N]) r⌋ (-1) with h1 h1,
 
-    -- Subcase 2.2: `-1 < f^N(x) < 0` for some `N : ℕ`
-    { replace h := f2_Ioo_neg_one_zero h h0; clear h0,
-      refine ⟨N, λ n h0, _⟩,
-      rw le_iff_exists_add at h0; rcases h0 with ⟨c, rfl⟩,
-      simp_rw [add_comm N, add_right_comm c N, iterate_add, comp_app, h] } }
+    -- `⌊f^N(r)⌋ < -1`
+    { refine ⟨N, _⟩; suffices : f (f^[N] r) = (f^[N]) r,
+        rw [this, this],
+      refine fixed_pt_of_iter_floor_const_lt_neg_one h1 (λ n, _),
+      rw ← iterate_add_apply; exact h0 (n + N) le_add_self },
+
+    -- `f^N(r) ≥ -1`
+    rw [int.le_floor, int.cast_neg, int.cast_one, le_iff_eq_or_lt] at h1,
+    cases h1 with h1 h1,
+    refine ⟨N + 1, _⟩; rw [iterate_succ_apply', ← h1, f_neg_one, f_zero, f_zero],
+    exact ⟨N, f_iter_two_fixed_pt h1 h⟩ }
 end
+
+
+
+
+
+
+
+/- ## Extra -/
+
+lemma nonpos_of_fixed_pt_iter_two {r : R} (h : f (f r) = r) : r ≤ 0 :=
+  le_of_lt_or_eq $ (lt_or_le r 0).imp_right $ λ h0,
+    by rw [← iterate_one f, ← iterate_add_apply] at h;
+      rw [← iterate_fixed h (⌊r⌋.nat_abs + 1), ← iterate_mul, two_mul, iterate_add_apply,
+        f_iter_floor_abs_succ_eq_zero_of_nonneg h0, iterate_fixed f_zero]
+
+lemma fixed_pt_of_fixed_pt_iter_two {r : R} (h : f (f r) = r) (h0 : ⌊r⌋ < -1) : f r = r :=
+begin
+  have h1 : r ≤ 0 := le_of_lt ((int.floor_lt.mp h0).trans $
+    int.cast_lt_zero.mpr $ int.neg_succ_lt_zero 0),
+  replace h1 : ⌊r⌋ = ⌊f r⌋ := le_antisymm (f_floor_ge_of_nonpos h1)
+    ((f_floor_ge_of_nonpos $ f_nonpos_of_nonpos h1).trans_eq $ congr_arg int.floor h),
+  replace h1 := f_sub_abs_eq_of_floor_eq rfl h1.symm,
+  rw [h, abs_sub_comm r] at h1,
+  refine eq_of_abs_sub_eq_zero (eq_zero_of_mul_eq_self_left
+    (ne_of_gt $ lt_abs.mpr $ or.inr _) h1.symm),
+  rwa [lt_neg, ← int.cast_one, ← int.cast_neg, int.cast_lt]
+end
+
+lemma fixed_pt_equiv_special_formula {r : R} : f r = r ↔ (-⌊r⌋ + 1 : R) * r = -⌊r⌋ ^ 2 :=
+  by rw [f, int.fract, mul_sub, sub_eq_iff_eq_add, ← sub_eq_iff_eq_add',
+    ← sub_one_mul, ← sq, ← neg_eq_iff_eq_neg, ← neg_mul, neg_add', neg_neg]
+
+lemma fixed_pt_special_formula {r : R} (h : f r = r) : ∃ n : ℕ, (n + 1 : R) * r = -n ^ 2 :=
+  exists.elim (int.exists_eq_neg_of_nat $ int.floor_nonpos $
+    nonpos_of_fixed_pt_iter_two $ (congr_arg f h).trans h) $
+  λ n h0, ⟨n, by rwa [fixed_pt_equiv_special_formula, h0,
+    int.cast_neg, int.cast_coe_nat, neg_neg, neg_sq] at h⟩
+
+lemma special_formula_imp_fixed_pt {r : R} {n : ℕ} (h : (n + 1 : R) * r = -n ^ 2) : f r = r :=
+  suffices ⌊r⌋ = -n, by rwa [fixed_pt_equiv_special_formula,
+    this, int.cast_neg, int.cast_coe_nat, neg_neg, neg_sq],
+begin
+  have h0 : 0 < (n : R) + 1 := add_pos_of_nonneg_of_pos n.cast_nonneg one_pos,
+  rw [int.floor_eq_iff, int.cast_neg, int.cast_coe_nat]; split,
+  
+  ---- `-n ≤ r`
+  rw [← mul_le_mul_left h0, h, mul_neg, neg_le_neg_iff, sq,
+    add_one_mul, le_add_iff_nonneg_right]; exact n.cast_nonneg,
+  
+  ---- `r < -n + 1`
+  rw [← mul_lt_mul_left h0, h, neg_lt, ← mul_neg, neg_add', neg_neg,
+      ← (commute.one_right (n : R)).sq_sub_sq, sub_lt_self_iff, one_pow]; exact one_pos
+end
+
+/-- Final solution, extra part -/
+theorem final_solution_extra {r : R} :
+  f (f r) = r ↔ (∃ n : ℕ, (n + 1 : R) * r = -n ^ 2) ∨ (-1 < r ∧ r < 0) :=
+⟨λ h, (lt_or_le ⌊r⌋ (-1)).elim
+  (λ h0, or.inl $ fixed_pt_special_formula $ fixed_pt_of_fixed_pt_iter_two h h0)
+  (λ h0, begin
+    rw [int.le_floor, int.cast_neg, int.cast_one, le_iff_eq_or_lt] at h0,
+    rcases h0 with rfl | h0,
+    rw [f_neg_one, f_zero, zero_eq_neg] at h; exact absurd h one_ne_zero,
+    refine (eq_or_lt_of_le $ nonpos_of_fixed_pt_iter_two h).imp (λ h1, _) (and.intro h0),
+    exact ⟨0, by rw [h1, mul_zero, nat.cast_zero, sq, mul_zero, neg_zero]⟩
+  end),
+λ h, h.elim (λ h, exists.elim h $ λ n h, let h := special_formula_imp_fixed_pt h in
+  (congr_arg f h).trans h) (λ h, f_iter_two_fixed_pt h.1 h.2)⟩
 
 end IMO2006A1
 end IMOSL
