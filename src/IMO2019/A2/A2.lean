@@ -1,4 +1,9 @@
-import algebra.order.ring.defs algebra.big_operators.fin algebra.order.group.min_max
+import
+  algebra.order.ring.defs
+  algebra.order.group.min_max
+  algebra.group_power.lemmas 
+  data.multiset.fold
+  tactic.nth_rewrite
 
 /-! # IMO 2019 A2 -/
 
@@ -6,7 +11,6 @@ namespace IMOSL
 namespace IMO2019A2
 
 open multiset function
-open_locale classical
 
 variables {R : Type*} [linear_ordered_comm_ring R]
 
@@ -25,25 +29,23 @@ end
 
 private lemma lem2 (a : multiset R) : 0 ≤ a.fold max 0 :=
   multiset.induction_on a (le_of_eq rfl) $ λ x s h, h.trans $
-    le_of_le_of_eq (le_max_right x $ fold max 0 s) (fold_cons_left max 0 x s).symm
+    (le_max_right x $ fold max 0 s).trans_eq (fold_cons_left max 0 x s).symm
 
 private lemma lem3 {a : multiset R} : (∀ x : R, x ∈ a → x ≤ 0) → a.fold max 0 = 0 :=
-begin
-  refine multiset.induction_on a (λ _, rfl) (λ x s h h0, _),
-  rw [fold_cons_left, h (λ x h1, h0 x $ mem_cons_of_mem h1)],
-  exact max_eq_right (h0 x $ mem_cons_self x s)
-end
+  multiset.induction_on a (λ _, rfl) $ λ x s h h0,
+    by rw [fold_cons_left, h (λ x h1, h0 x $ mem_cons_of_mem h1)];
+      exact max_eq_right (h0 x $ mem_cons_self x s)
 
 private lemma lem4 (a : multiset R) : -a.fold min 0 = (a.map has_neg.neg).fold max 0 :=
-  multiset.induction_on a neg_zero
-    (λ x s h, by rw [map_cons, fold_cons_left, fold_cons_left, ← h, max_neg_neg])
+  multiset.induction_on a neg_zero $ λ x s h,
+    by rw [map_cons, fold_cons_left, fold_cons_left, ← h, max_neg_neg]
 
 variables {a : multiset R} (ha : ∀ x : R, x ∈ a → 0 ≤ x)
 include ha
 
 private lemma lem5 : a.sum ≤ a.card * a.fold max 0 :=
-  le_of_le_of_eq (sum_le_sum_map (const R $ a.fold max 0) (lem1 a))
-    (by rw [map_const, sum_replicate, nsmul_eq_mul])
+  (sum_le_sum_map (const R $ a.fold max 0) (lem1 a)).trans_eq $
+    by rw [map_const, sum_replicate, nsmul_eq_mul]
 
 private lemma lem6 : (a.map $ λ c, c ^ 2).sum ≤ a.sum * a.fold max 0 :=
   le_of_le_of_eq (sum_map_le_sum_map _ _ $ 
@@ -68,21 +70,25 @@ include h
 
 private lemma lem8 : (a.map (λ c, c ^ 2)).sum ≤ (b.card : R) * (a.fold max 0 * b.fold max 0) :=
   by rw [mul_comm (a.fold max 0), ← mul_assoc];
-    exact le_trans (lem6 ha) (mul_le_mul_of_nonneg_right (le_of_eq_of_le h $ lem5 hb) (lem2 a))
+    exact (lem6 ha).trans (mul_le_mul_of_nonneg_right (le_of_eq_of_le h $ lem5 hb) (lem2 a))
 
 /-- The intermediate big result -/
 theorem final_solution' : (a.map (λ c, c ^ 2)).sum + (b.map (λ c, c ^ 2)).sum
     ≤ (a.card + b.card : R) * (a.fold max 0 * b.fold max 0) :=
-  le_of_le_of_eq (add_le_add (lem8 ha hb h) (lem8 hb ha h.symm))
-    (by rw [mul_comm (b.fold max 0), ← add_mul, add_comm])
+  (add_le_add (lem8 ha hb h) (lem8 hb ha h.symm)).trans_eq $
+    by rw [mul_comm (b.fold max 0), ← add_mul, add_comm]
 
 end results
 
 
 
+
+
+open_locale classical
+
 /-- Final solution -/
 theorem final_solution {u : multiset R} (h : u.sum = 0) :
-  (u.card : R) * (u.fold min 0 * u.fold max 0) ≤ -(u.map (λ c, c ^ 2)).sum :=
+  (u.card : R) * (u.fold min 0 * u.fold max 0) ≤ -(u.map $ λ c, c ^ 2).sum :=
 begin
   obtain ⟨a, b, ha, hb, rfl⟩ : ∃ a b : multiset R,
     (∀ x : R, x ∈ a → 0 ≤ x) ∧ (∀ x : R, x ∈ b → 0 ≤ x) ∧ a + b.map has_neg.neg = u :=
