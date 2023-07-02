@@ -1,0 +1,65 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\title{IMO 2013 N2 (P1)}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Prove that, for any $k, n \in \N$, $n > 0$, there exists positive integers $m_1, m_2, \ldots, m_k$ such that
+\[ 1 + \frac{2^k - 1}{n} = \prod_{j = 1}^k \left(1 + \frac{1}{m_j}\right). \tag{*}\label{2013n2-eq0} \]
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2013SL.pdf}
+
+We present Solution 1 of the official solution, with a slight modification.
+We just induct on $k$.
+
+Obviously, we are done if $k = 0$.
+Now replace $k$ with $k + 1$, and consider two cases.
+
+First, suppose that $n = 2t$ for some $t > 0$.
+This time, we see that
+\[ 1 + \frac{2^{k + 1} - 1}{2t} = \left(1 + \frac{1}{2(t + 2^k - 1)}\right) \left(1 + \frac{2^k - 1}{t}\right). \]
+We are done by applying the induction hypothesis to the second factor.
+
+Second, suppose that $n = 2t + 1$ for some $t \geq 0$.
+Then we just notice that
+\[ 1 + \frac{2^{k + 1} - 1}{2t + 1} = \left(1 + \frac{1}{2t + 1}\right) \left(1 + \frac{2^k - 1}{t + 1}\right). \]
+Again, just apply the induction hypothesis to the second factor.
+
+
+
+\subsection*{Implementation details}
+
+The solution stored in \texttt{mathlib} uses \texttt{finset}.
+Here, we will use \texttt{multiset} instead.
+
+We will also use some definition hiding.
+Given $k \geq 0$ and $c \in \N$, we say that $c$ is $k$-good if for any integer $n > 0$, there exists positive integers $m_1, m_2, \ldots, m_k$ such that
+\[ 1 + \frac{c}{n} = \prod_{j = 1}^k \left(1 + \frac{1}{m_j}\right). \]
+The original problem's statement asks to prove that $2^k - 1$ is $k$-good for any $k \geq 0$.
+Solution 1 of the official solution, as presented above, goes more generally by proving that if $c$ is $k$-good, then $2c + 1$ is $(k + 1)$-good.
+Another more obvious property is that $c$ being $k$-good implies that $c + 1$ is $(k + 1)$-good.
+
+
+
+\end{document}
