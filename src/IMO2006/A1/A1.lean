@@ -147,15 +147,12 @@ lemma f_neg_one : f (-1 : R) = 0 :=
 
 /-- Final solution -/
 theorem final_solution [archimedean R] (r : R) : ∃ N : ℕ, f (f (f^[N] r)) = (f^[N]) r :=
+(le_total 0 r).elim
+---- `0 ≤ r`
+(λ h, ⟨⌊r⌋.nat_abs + 1, by rw [f_iter_floor_abs_succ_eq_zero_of_nonneg h, f_zero, f_zero]⟩) $
+---- `r ≤ 0`
 begin
-  cases le_total 0 r with h h,
-
-  ---- `r ≥ 0`
-  { refine ⟨⌊r⌋.nat_abs + 1, _⟩,
-    rw [f_iter_floor_abs_succ_eq_zero_of_nonneg h, f_zero, f_zero] },
-
-  ---- `r ≤ 0`
-  { cases exists_f_iter_floor_const h with N h0,
+    intros h; cases exists_f_iter_floor_const h with N h0,
     replace h := f_iter_nonpos h N,
     rw le_iff_eq_or_lt at h; cases h with h h,
     refine ⟨N, _⟩; rw [h, f_zero, f_zero],
@@ -168,10 +165,10 @@ begin
       rw ← iterate_add_apply; exact h0 (n + N) le_add_self },
 
     -- `f^N(r) ≥ -1`
-    rw [int.le_floor, int.cast_neg, int.cast_one, le_iff_eq_or_lt] at h1,
-    cases h1 with h1 h1,
-    refine ⟨N + 1, _⟩; rw [iterate_succ_apply', ← h1, f_neg_one, f_zero, f_zero],
-    exact ⟨N, f_iter_two_fixed_pt h1 h⟩ }
+    { rw [int.le_floor, int.cast_neg, int.cast_one, le_iff_eq_or_lt] at h1,
+      cases h1 with h1 h1,
+      refine ⟨N + 1, _⟩; rw [iterate_succ_apply', ← h1, f_neg_one, f_zero, f_zero],
+      exact ⟨N, f_iter_two_fixed_pt h1 h⟩ }
 end
 
 
