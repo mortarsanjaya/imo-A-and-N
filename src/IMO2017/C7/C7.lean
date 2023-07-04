@@ -7,7 +7,7 @@ namespace IMO2017C7
 
 open finset function
 
-/-! Extra lemmas -/
+/- ### Extra lemmas -/
 section extra_lemmas
 
 lemma strict_mono_eq_at_large_comm {f g : ℕ → ℕ}
@@ -64,7 +64,7 @@ end extra_lemmas
 
 
 
-/-! `ℕset` and its properties -/
+/- ### `ℕset` and its properties -/
 
 /-- `finset ℕ` but with the special multiplication operation -/
 def ℕset := finset ℕ
@@ -125,18 +125,13 @@ def sup (X : ℕset) := X.sup id
 private lemma count_notin_large {X : ℕset} {n : ℕ} (h : X.sup < n) :
   nat.count (λ x, x ∉ X) (n + X.card) = n :=
 begin
-  have h0 := congr_arg card (filter_union_filter_neg_eq (λ x, x ∈ X) (range (n + X.card))),
-  rw [card_range, card_union_eq, ← nat.count_eq_card_filter_range,
-      ← nat.count_eq_card_filter_range, nat.count_eq_card_fintype] at h0,
+  rw [← add_right_inj (filter (λ (x : ℕ), x ∈ X) (range (n + card X))).card,
+      nat.count_eq_card_filter_range, ← card_union_eq],
   work_on_goal 2 { rw disjoint_iff_inter_eq_empty, exact filter_inter_filter_neg_eq _ _ _ },
-  rw [← add_left_inj X.card, add_comm],
-  revert h0; refine eq.trans (congr_arg2 has_add.add _ rfl),
-  suffices : ∀ k : ℕ, k ∈ X ↔ (k < n + X.card ∧ k ∈ X),
-    refine (fintype.subtype_card X this).symm.trans _,
-    convert rfl using 2,
-  refine λ k, iff_and_self.mpr (λ h0, lt_of_le_of_lt (le_sup h0) (lt_trans h _)),
-  rw [lt_add_iff_pos_right, pos_iff_ne_zero, ne.def, card_eq_zero],
-  exact ne_empty_of_mem h0
+  rw [filter_union_filter_neg_eq, card_range, add_comm, add_left_inj],
+  refine congr_arg card (ext $ λ x, _),
+  rw [mem_filter, iff_and_self, mem_range],
+  exact λ h0, (le_sup h0).trans_lt (h.trans $ nat.lt_add_of_pos_left $ card_pos.mpr ⟨x, h0⟩)
 end
 
 private lemma coe_fun_map_large {X : ℕset} {n : ℕ} (h : X.sup < n) :
@@ -232,6 +227,8 @@ lemma commute_pow_card_eq {X Y : ℕset} (h : X * Y = Y * X) : X ^ Y.card = Y ^ 
     (commute.pow_pow h Y.card X.card)
 
 end ℕset
+
+
 
 
 
