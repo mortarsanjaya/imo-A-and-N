@@ -20,7 +20,7 @@
 
 
 
-\section*{Problem}
+\subsection*{Problem}
 
 Let $S$ denote the set of finite subsets of $\N$.
 For any $X \in S$ and $k \in \N$, denote by $f_X(k)$ the $k^{\text{th}}$ smallest natural number not in $X$, indexed from $0$.
@@ -31,9 +31,11 @@ Also, for $k \geq 0$, define $X^k$ recursively by $X^0 = \emptyset$ and $X^{k + 
 Let $A, B \in S$ such that $AB = BA$.
 Prove that $A^{|B|} = B^{|A|}$.
 
+Extra: Prove the converse: if $A^{|B|} = B^{|A|}$, then $AB = BA$.
 
 
-\section*{Solution}
+
+\subsection*{Solution}
 
 Official solution: \url{http://www.imo-official.org/problems/IMO2017SL.pdf}
 
@@ -81,5 +83,29 @@ By injectivity, we get $f(N) = g(N)$.
 Similarly, we get $f(N) = g(N)$ if $g(N) > N$.
 Otherwise, we have $f(N) = g(N) = N$.
 \end{proof}
+
+
+
+\subsubsection*{Solution for extra part}
+
+It suffices to prove that given any $k \geq 1$, if $A^k B = B A^k$, then $AB = BA$.
+Translate into strictly increasing functions.
+That is, fix $f, g : \N \to \N$ strictly increasing such that $f^k \circ g = g \circ f^k$.
+Suppose that $f(g(n)) = g(f(n))$ for every $n$ large enough.
+Then we prove that $f \circ g = g \circ f$.
+
+We proceed by downwards induction.
+Fix $N \geq 0$, and suppose that $f(g(n)) = g(f(n))$ for all $n > N$.
+Our goal is to prove that $f(g(N)) = g(f(N))$.
+
+If $f(N) = N$, then $g(N) \leq f(g(N)) \leq f^k(g(N)) = g(f^k(N)) = g(N)$.
+So $f(g(N)) = g(N) = g(f(N))$.
+
+Now, suppose that $f(N) > N$.
+One can show that $g(f^{k - 1}(x)) = f^{k - 1}(g(x))$ for any $x > N$.
+In particular, this means $f^k(g(N)) = g(f^{k - 1}(f(N))) = f^{k - 1}(g(f(N)))$.
+Since $f$ is injective, this gives us $f(g(N)) = g(f(N))$.
+
+
 
 \end{document}
