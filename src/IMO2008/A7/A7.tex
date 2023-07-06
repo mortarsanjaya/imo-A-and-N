@@ -1,0 +1,60 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\title{IMO 2008 A7}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\subsection*{Problem}
+
+Let $F$ be a totally ordered field.
+Let $x_0, x_1, x_2, x_3 \in F$ be positive elements.
+Prove that, with the notation $x_{n + 4} = x_n$ for all $n \geq 0$,
+\[ \sum_{j = 0}^3 \frac{(x_j - x_{j + 1})(x_j - x_{j + 2})}{x_j + x_{j + 1} + x_{j + 2}} \geq 0. \tag{*}\label{2008a7-eq0} \]
+Find all cases of equality.
+
+
+
+\subsection*{Answer}
+
+Equality holds if and only if $x_0 = x_2$ and $x_1 = x_3$.
+
+
+
+\subsection*{Solution}
+
+To shorten notation, let $y = x_0 + x_2$, $z = x_1 + x_3$, $\epsilon = x_0 - x_2$, and $\delta = x_1 - x_3$.
+Clearly, $x_0 = x_2$ and $x_1 = x_3$ yields equality.
+To prove~\eqref{2008a7-eq0} with no other equality case, it suffices to prove a stronger bound:
+\[ \sum_{j = 0}^3 \frac{(x_j - x_{j + 1})(x_j - x_{j + 2})}{x_j + x_{j + 1} + x_{j + 2}} \geq \frac{4|\epsilon|^2 + 4|\delta|^2 - |\epsilon||\delta|}{6 (y + z)}. \]
+
+We start with some algebraic manipulation.
+For any $a, b, c, d \in F$ positive, observe that
+\[ 2\left(\frac{a - b}{a + b + c} - \frac{c - d}{c + d + a}\right) = \frac{a - c}{a + c + b} + \frac{a - c}{a + c + d} - \frac{3(a + c)(b - d)}{(a + c + b)(a + c + d)}. \]
+In particular,
+\[ 2\left(\frac{a - b}{a + b + c} - \frac{c - d}{c + d + a}\right) \geq \frac{4(a - c)}{2(a + c) + (b + d)} - \frac{3(a + c)(b - d)}{(a + c + b)(a + c + d)}. \]
+As a result, using Cauchy-Schwarz inequality,
+\begin{align*}
+    & 2 \sum_{j = 0}^3 \frac{(x_j - x_{j + 1})(x_j - x_{j + 2})}{x_j + x_{j + 1} + x_{j + 2}} \\
+    \geq\;& \frac{4 \epsilon^2}{2y + z} - \frac{3y \epsilon \delta}{(y + b)(y + d)} + \frac{4 \delta^2}{2z + y} + \frac{3z \delta \epsilon}{(z + a)(z + c)} \\
+    \geq\;& \frac{4(|\epsilon| + |\delta|)^2}{3(y + z)} - 3 \epsilon \delta \left(\frac{y}{(y + b)(y + d)} - \frac{z}{(z + a)(z + c)}\right) \\
+    \geq\;& \frac{4(|\epsilon| + |\delta|)^2}{3(y + z)} - 3 |\epsilon| |\delta| \max\left\{\frac{y}{(y + b)(y + d)}, \frac{z}{(z + a)(z + c)}\right\} \\
+    \geq\;& \frac{4(|\epsilon| + |\delta|)^2}{3(y + z)} - 3 |\epsilon| |\delta| \cdot \frac{1}{y + z} \\
+    =\;& \frac{4|\epsilon|^2 + 4|\delta|^2 - |\epsilon||\delta|}{3 (y + z)}.
+\end{align*}
+Dividing both sides by $2$ yields the desired inequality.
+In a simpler form, we also get the bound
+\[ \sum_{j = 0}^3 \frac{(x_j - x_{j + 1})(x_j - x_{j + 2})}{x_j + x_{j + 1} + x_{j + 2}} \geq \frac{7(|\epsilon| + |\delta|)^2}{12(y + z)} = \frac{7(|a - c| + |b - d|)^2}{12(a + b + c + d)}. \]
+
+
+\end{document}
