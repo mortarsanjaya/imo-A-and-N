@@ -7,14 +7,13 @@ Let `P : ℕ → Prop` be an `ℕ`-predicate.
 Suppose that we have `P(1)`, `P(n) → P(2n)`, and `P(n + 1) → P(n)` for any `n : ℕ`.
 Then `P(n)` holds for all `n : ℕ`.
 This file provides a proof of this statement.
-
-This is the standard inductive proof for unweighted AM-GM.
-Hence the author decides to call it the AM-GM induction.
+We also prove a multiset version of the statement.
 -/
 
 namespace IMOSL
 namespace extra
 
+/-- `ℕ`-based AM-GM induction -/
 theorem AM_GM_induction {P : ℕ → Prop} (h : P 1)
   (h0 : ∀ n : ℕ, P n → P (2 * n)) (h1 : ∀ n : ℕ, P n.succ → P n) : ∀ n : ℕ, P n
 | 0 := h1 0 h
@@ -30,6 +29,7 @@ open multiset
 
 variables {α : Type*}
 
+/-- If `n ≤ |T|`, we can find `U ≤ T` with `|U| = n` -/
 lemma exists_le_card_eq {n : ℕ} {T : multiset α} (h : n ≤ T.card) :
   ∃ U : multiset α, U ≤ T ∧ U.card = n :=
 begin
@@ -43,9 +43,17 @@ begin
   exact ⟨V, h4.1.trans (U.le_cons_self a), h4.2⟩
 end
 
-theorem multiset_AM_GM_induction {α : Type*} [nonempty α] {P : multiset α → Prop}
+lemma exists_card_eq_add_eq {n : ℕ} {T : multiset α} (h : n ≤ T.card) :
+  ∃ U V : multiset α, U.card = n ∧ T = U + V :=
+  exists.elim (exists_le_card_eq h) $ λ U h0,
+    exists.elim (multiset.le_iff_exists_add.mp h0.1) $
+      λ V h1, ⟨U, V, h0.2, h1⟩
+
+/-- `multiset α`-based AM-GM induction with raw `P(n + 1) → P(n)` hypothesis -/
+theorem multiset_AM_GM_induction' {α : Type*} {P : multiset α → Prop}
   (h : ∀ a : α, P {a}) (h0 : ∀ S T : multiset α, S.card = T.card → P S → P T → P (S + T))
-  (h1 : ∀ (a : α) (S : multiset α), P (a ::ₘ S) → P S) : ∀ S : multiset α, P S :=
+  (h1 : ∀ S : multiset α, (∀ T : multiset α, T.card = S.card + 1 → P T) → P S) :
+  ∀ S : multiset α, P S :=
 suffices ∀ (n : ℕ) {S : multiset α}, S.card = n → P S, from λ S, this S.card rfl,
 AM_GM_induction
 ---- `P(1)`
@@ -53,14 +61,19 @@ AM_GM_induction
 ---- `P(n) → P(2n)`
 (λ n h2 S h3, begin
   rw two_mul at h3,
-  rcases exists_le_card_eq (le_add_self.trans_eq h3.symm) with ⟨T, h4, h5⟩,
-  rw multiset.le_iff_exists_add at h4,
-  rcases h4 with ⟨U, rfl⟩,
-  rw [card_add, h5, add_right_inj] at h3,
-  exact h0 T U (h5.trans h3.symm) (h2 h5) (h2 h3)
+  rcases exists_card_eq_add_eq (le_add_self.trans_eq h3.symm) with ⟨T, U, h4, rfl⟩,
+  rw [card_add, h4, add_right_inj] at h3,
+  exact h0 T U (h4.trans h3.symm) (h2 h4) (h2 h3)
 end)
 ---- `P(n + 1) → P(n)`
-(λ n h2 S h3, _inst_1.elim $ λ a, h1 a S $ h2 $ (S.card_cons _).trans $ congr_arg nat.succ h3)
+(λ n h2 S h3, h1 S $ λ T h4, h2 $ h4.trans $ congr_arg nat.succ h3)
+
+/-- `multiset α`-based AM-GM induction -/
+theorem multiset_AM_GM_induction {α : Type*} {P : multiset α → Prop} (f : α → α)
+  (h : ∀ a : α, P {a}) (h0 : ∀ S T : multiset α, S.card = T.card → P S → P T → P (S + T))
+  (h1 : ∀ S : multiset α, ∃ a : α, P (a ::ₘ S.map f) → P S) : ∀ S : multiset α, P S :=
+multiset_AM_GM_induction' h h0 $ λ S h2, exists.elim (h1 S) $ λ a h3, h3 $
+  h2 _ $ (card_cons a $ S.map f).trans $ congr_arg nat.succ $ S.card_map f
 
 end multiset
 
