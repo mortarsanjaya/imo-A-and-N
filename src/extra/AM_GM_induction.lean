@@ -69,11 +69,12 @@ end)
 (λ n h2 S h3, h1 S $ λ T h4, h2 $ h4.trans $ congr_arg nat.succ h3)
 
 /-- `multiset α`-based AM-GM induction -/
-theorem multiset_AM_GM_induction {α : Type*} {P : multiset α → Prop} (f : α → α)
+theorem multiset_AM_GM_induction {α : Type*} {P : multiset α → Prop}
   (h : ∀ a : α, P {a}) (h0 : ∀ S T : multiset α, S.card = T.card → P S → P T → P (S + T))
-  (h1 : ∀ S : multiset α, ∃ a : α, P (a ::ₘ S.map f) → P S) : ∀ S : multiset α, P S :=
-multiset_AM_GM_induction' h h0 $ λ S h2, exists.elim (h1 S) $ λ a h3, h3 $
-  h2 _ $ (card_cons a $ S.map f).trans $ congr_arg nat.succ $ S.card_map f
+  (h1 : ∀ S : multiset α, ∃ (a : α) (T : multiset α), T.card = S.card ∧ (P (a ::ₘ T) → P S)) :
+  ∀ S : multiset α, P S :=
+multiset_AM_GM_induction' h h0 $ λ S h2, exists.elim (h1 S) $ λ a h3,
+  exists.elim h3 $ λ T h3, h3.2 $ h2 _ $ (card_cons a T).trans $ congr_arg nat.succ h3.1
 
 end multiset
 
