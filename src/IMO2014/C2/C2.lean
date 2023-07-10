@@ -1,4 +1,4 @@
-import algebra.big_operators.multiset.basic extra.AM_GM_induction algebra.group_power.lemmas
+import extra.AM_GM_induction algebra.group_power.lemmas tactic.nth_rewrite
 
 /-! # IMO 2014 C2 -/
 
@@ -10,38 +10,19 @@ def good {α : Type*} [has_add α] (S T : multiset α) :=
 
 
 
-/-- Wrapper for the last element of a cons list `a :: l`, guaranteed to be non-empty. -/
-private def cons_last {α : Type*} (a : α) (l : list α) : α :=
-  (list.cons a l).last (list.cons_ne_nil a l)
-
 
 
 open multiset
 
 section multiset_lemmas
 
-variables {α : Type*}
+variables {α : Type*} [has_add α]
 
-private lemma exists_le_card_eq {n : ℕ} {T : multiset α} (h : n ≤ T.card) :
-  ∃ U : multiset α, U ≤ T ∧ U.card = n :=
-begin
-  generalize_hyp h0 : T.card = m at h,
-  revert h0 T; refine nat.le_induction (λ T h0, ⟨T, le_refl T, h0⟩) (λ k h0 h1 T h2, _) m h,
-  rcases T.empty_or_exists_mem with h3 | ⟨a, h3⟩,
-  rw [h3, card_zero] at h2; exact absurd h2 k.succ_ne_zero.symm,
-  rcases exists_cons_of_mem h3 with ⟨U, rfl⟩,
-  rw [card_cons, add_left_inj] at h2,
-  cases h1 h2 with V h4,
-  refine ⟨V, h4.1.trans (U.le_cons_self a), h4.2⟩
-end
-
-variables [has_add α]
-
-private lemma good_card_eq {S T : multiset α} (h : good S T) : T.card = S.card :=
+lemma good_card_eq {S T : multiset α} (h : good S T) : T.card = S.card :=
   by rcases h with ⟨R, a, b, rfl, rfl⟩; rw [card_add, card_add, card_pair, card_pair]
 
-private lemma good_chain_card_eq : ∀ {C : list (multiset α)} {S : multiset α},
-  list.chain good S C → (cons_last S C).card = S.card
+lemma good_chain_card_eq : ∀ {C : list (multiset α)} {S : multiset α},
+  list.chain good S C → ((list.cons S C).last (list.cons_ne_nil S C)).card = S.card
 | list.nil := λ S _, congr_arg card rfl
 | (T :: C) := λ S h, let h0 := list.chain_cons.mp h in
     (good_chain_card_eq h0.2).trans $ good_card_eq h0.1
@@ -55,53 +36,50 @@ end multiset_lemmas
 variables {R : Type*} [linear_ordered_comm_ring R]
 
 /-- This takes between 0.5s and 0.7s... but I don't think it can be improved either. -/
-lemma multiset_AM_GM : ∀ {S : multiset R},
-  (∀ x : R, x ∈ S → 0 ≤ x) → (S.card : R) ^ S.card * S.prod ≤ S.sum ^ S.card :=
-suffices ∀ (n : ℕ) {S : multiset R}, S.card = n →
-  (∀ x : R, x ∈ S → 0 ≤ x) → (n : R) ^ n * S.prod ≤ S.sum ^ n,
-from λ S, this S.card rfl,
-extra.AM_GM_induction
-  ---- `P(1)`
-  (λ S h h0, exists.elim (card_eq_one.mp h) $ λ x h1,
-    by rw [nat.cast_one, pow_one, one_mul, pow_one, h1, prod_singleton, sum_singleton])
-  ---- `P(n) → P(2n)`
-  (λ n h S h0 h1, begin
-    rw two_mul at h0,
-    rcases exists_le_card_eq (le_of_le_of_eq le_add_self h0.symm) with ⟨U, h2, h3⟩,
-    rw multiset.le_iff_exists_add at h2,
-    rcases h2 with ⟨V, rfl⟩,
-    rw [card_add, h3, add_right_inj] at h0,
-    rw [prod_add, sum_add, nat.cast_mul, nat.cast_two, mul_pow, pow_mul,
-        pow_mul', sq (↑n ^ n), pow_mul, mul_assoc, mul_mul_mul_comm],
-    have h2 : ∀ x : R, x ∈ U → 0 ≤ x := λ x h2, h1 x $ mem_add.mpr $ or.inl h2,
-    replace h1 : ∀ x : R, x ∈ V → 0 ≤ x := λ x h4, h1 x $ mem_add.mpr $ or.inr h4,
-    replace h0 := h h0 h1,
-    replace h3 := h h3 h2,
-    replace h : 0 ≤ (n : R) ^ n := pow_nonneg n.cast_nonneg n,
-    refine (mul_le_mul_of_nonneg_left (mul_le_mul h3 h0 (mul_nonneg h $ prod_nonneg h1) $
-      pow_nonneg (sum_nonneg h2) n) $ pow_nonneg (sq_nonneg (2 : R)) n).trans _,
-    rw [sq, ← mul_pow, ← mul_pow],
-    refine pow_le_pow_of_le_left (mul_nonneg (mul_self_nonneg _) $
-      mul_nonneg (sum_nonneg h2) (sum_nonneg h1)) _ _,
-    rw [mul_assoc, two_mul, add_sq', ← mul_assoc, add_le_add_iff_right],
-    exact two_mul_le_add_sq U.sum V.sum
+lemma multiset_AM_GM : ∀ {S : multiset R}, (∀ x : R, x ∈ S → 0 ≤ x) →
+  (S.card : R) ^ S.card * S.prod ≤ S.sum ^ S.card :=
+extra.multiset_AM_GM_induction
+---- `P({a})`
+(λ a h, by rw [card_singleton, nat.cast_one, one_pow,
+  one_mul, prod_singleton, sum_singleton, pow_one])
+---- `|S| = |T| → P(S) → P(T) → P(S + T)`
+(λ S T h h0 h1 h2, begin
+  rw ← h at h1,
+  rw [card_add, prod_add, sum_add, ← h, ← two_mul, nat.cast_mul, nat.cast_two, mul_pow,
+      pow_mul, pow_mul', sq (↑S.card ^ _), pow_mul, mul_assoc, mul_mul_mul_comm],
+  have h3 : ∀ x : R, x ∈ S → 0 ≤ x := λ x h3, h2 x $ mem_add.mpr $ or.inl h3,
+  replace h2 : ∀ x : R, x ∈ T → 0 ≤ x := λ x h4, h2 x $ mem_add.mpr $ or.inr h4,
+  have h4 : 0 ≤ (S.card : R) ^ S.card := pow_nonneg S.card.cast_nonneg S.card,
+  refine (mul_le_mul_of_nonneg_left
+    (mul_le_mul (h0 h3) (h1 h2) (mul_nonneg h4 $ prod_nonneg h2) $
+      pow_nonneg (sum_nonneg h3) S.card)
+    (pow_nonneg (sq_nonneg (2 : R)) _)).trans _,
+  rw [sq, ← mul_pow, ← mul_pow],
+  refine pow_le_pow_of_le_left (mul_nonneg (mul_self_nonneg _) $
+    mul_nonneg (sum_nonneg h3) (sum_nonneg h2)) _ _,
+  rw [mul_assoc, two_mul, add_sq', ← mul_assoc, add_le_add_iff_right],
+  exact two_mul_le_add_sq S.sum T.sum
+end)
+---- `P(a ::ₘ T) → P(S)` for some `a : R` and `T : multiset R`
+(λ S, ⟨S.sum, S.map (λ x, (S.card : R) * id x), S.card_map _,
+λ h h0, (eq_or_lt_of_le $ sum_nonneg h0).elim
+  -- `∑_{x ∈ S} x = 0`
+  (λ h1, begin
+    cases S.card.eq_zero_or_pos with h2 h2,
+    rw [← h1, h2, pow_zero, pow_zero, one_mul, card_eq_zero.mp h2, prod_zero],
+    nth_rewrite 2 eq_replicate_card.mpr (all_zero_of_le_zero_le_of_sum_eq_zero h0 h1.symm),
+    rw [← h1, prod_replicate, zero_pow h2, mul_zero]
   end)
-  ---- `P(n + 1) → P(n)`
-  (λ n h S h0 h1, begin
-    replace h := @h (S.sum ::ₘ S.map (λ x, (n : R) * id x)) (by rw [card_cons, card_map, h0])
-      (λ x h2, (mem_cons.mp h2).elim (λ h3, le_of_le_of_eq (sum_nonneg h1) h3.symm) $
-      λ h3, exists.elim (mem_map.mp h3) $
-        λ c h4, le_of_le_of_eq (mul_nonneg n.cast_nonneg $ h1 c h4.1) h4.2),
-    rw [prod_cons, sum_cons, sum_map_mul_left, prod_map_mul, map_id, map_const, prod_replicate,
-        h0, ← one_add_mul, add_comm, ← nat.cast_succ, mul_pow, pow_succ S.sum] at h,
-    refine (lt_or_eq_of_le $ sum_nonneg h1).elim (le_of_mul_le_mul_left $
-      le_of_mul_le_mul_left h $ pow_pos (nat.cast_pos.mpr n.succ_pos) n.succ) (λ h2, _),
-    
-    replace h := all_zero_of_le_zero_le_of_sum_eq_zero h1 h2.symm,
-    cases n,
-    rw [pow_zero, pow_zero, one_mul, card_eq_zero.mp h0, prod_zero],
-    rw [← h2, eq_replicate_card.mpr h, h0, prod_replicate, zero_pow n.succ_pos, mul_zero]
-  end)
+  -- `∑_{x ∈ S} x > 0`
+  (λ h1, begin
+    have h2 : 0 < ((S.card + 1 : ℕ) : R) := nat.cast_pos.mpr S.card.succ_pos,
+    rw [card_cons, card_map, prod_cons, sum_cons, prod_map_mul, sum_map_mul_left,
+        map_id, map_const, prod_replicate, ← one_add_mul, add_comm (1 : R),
+        ← nat.cast_add_one, mul_pow, mul_le_mul_left (pow_pos h2 _), pow_succ] at h,
+    refine le_of_mul_le_mul_left (h $ λ x h, _) h1,
+    rw [mem_cons, mem_map] at h; rcases h with rfl | ⟨a, h, rfl⟩,
+    exacts [sum_nonneg h0, mul_nonneg (S.card.cast_nonneg) (h0 a h)]
+  end)⟩)
 
 lemma good_nonneg {S T : multiset R} (h : good S T)
   (h0 : ∀ x : R, x ∈ S → 0 ≤ x) (x : R) (h1 : x ∈ T) : 0 ≤ x :=
@@ -114,7 +92,8 @@ begin
 end
 
 lemma good_chain_nonneg : ∀ {C : list (multiset R)} {S : multiset R},
-  (∀ x : R, x ∈ S → 0 ≤ x) → list.chain good S C → ∀ x : R, x ∈ cons_last S C → 0 ≤ x
+  (∀ x : R, x ∈ S → 0 ≤ x) → list.chain good S C →
+    ∀ x : R, x ∈ (list.cons S C).last (list.cons_ne_nil S C) → 0 ≤ x
 | list.nil := λ S h _, h
 | (T :: C) := λ S h h0, let h1 := list.chain_cons.mp h0 in
     good_chain_nonneg (good_nonneg h1.1 h) h1.2
@@ -131,7 +110,7 @@ end
 
 lemma good_chain_prod_le : ∀ {C : list (multiset R)} {S : multiset R},
   (∀ x : R, x ∈ S → 0 ≤ x) → list.chain good S C →
-  (2 * 2) ^ C.length * S.prod ≤ (cons_last S C).prod
+  (2 * 2) ^ C.length * S.prod ≤ ((list.cons S C).last (list.cons_ne_nil S C)).prod
 | list.nil := λ S _ _, le_of_eq $ (congr_arg (* S.prod) (pow_zero _)).trans $ one_mul S.prod
 | (T :: C) := λ S h h0, by rw list.chain_cons at h0; rw [list.length_cons, pow_succ', mul_assoc];
     exact (mul_le_mul_of_nonneg_left (good_prod_le h0.1 h) $
@@ -140,7 +119,8 @@ lemma good_chain_prod_le : ∀ {C : list (multiset R)} {S : multiset R},
 /-- A generalized form of the final solution -/
 lemma good_chain_le_sum {C : list (multiset R)} {S : multiset R}
   (h : list.chain good S C) (h0 : ∀ x : R, x ∈ S → 0 ≤ x) :
-  (S.card : R) ^ S.card * ((2 * 2) ^ C.length * S.prod) ≤ (cons_last S C).sum ^ S.card :=
+  (S.card : R) ^ S.card * ((2 * 2) ^ C.length * S.prod)
+    ≤ ((list.cons S C).last (list.cons_ne_nil S C)).sum ^ S.card :=
   (mul_le_mul_of_nonneg_left (good_chain_prod_le h0 h) $ pow_nonneg S.card.cast_nonneg _).trans $
     by rw ← good_chain_card_eq h; exact multiset_AM_GM (good_chain_nonneg h0 h)
 
@@ -151,7 +131,7 @@ lemma good_chain_le_sum {C : list (multiset R)} {S : multiset R}
 /-- Final solution -/
 theorem final_solution {m : ℕ} (h : 0 < m) {C : list (multiset R)}
   (h0 : C.length = m * 2 ^ (m - 1)) : let S := replicate (2 ^ m) (1 : R) in
-  list.chain good S C → 4 ^ m ≤ (cons_last S C).sum :=
+  list.chain good S C → 4 ^ m ≤ ((list.cons S C).last (list.cons_ne_nil S C)).sum :=
 begin
   intros S h1,
   rw [bit0, ← two_mul],
