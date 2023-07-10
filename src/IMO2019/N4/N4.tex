@@ -1,0 +1,101 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+
+\title{IMO 2019 N4}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Fix some $C \geq 0$.
+Find all functions $f : \N \to \N$ such that $a + f(b) \mid a^2 + f(a) b$ for any $a, b \in \N$ satisfying $a + b > C$.
+
+
+
+\subsection*{Answer}
+
+$n \mapsto kn$ for some $k \in \N$, regardless of $C$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2019SL.pdf}
+
+We follow Solution 1 of the official solution.
+We have a slightly different problem, but after obtaining $f(0) = 0$, this problem is essentially the same as the original problem with the exception that $f$ may attain zero at non-zero input.
+The official solution implicitly uses pigeonhole principle after obtaining $p \mid f(p)$ for all $p$ prime.
+We will instead explicitly show that $f(p) = p f(1)$ for every $p$ prime large enough.
+
+Plugging $a = 1$ gives $1 + f(b) \mid 1 + f(1) b$, which implies $f(b) \leq f(1) b$ for $b > C$ since $1 + b f(1) > 0$.
+We now show that $b \mid f(b)^2$ for all $b > 0$.
+Since $b > 0$, there exists $n \in \N$ such that $nb > C + f(b)$.
+Then plugging $a = nb - f(b)$ yields $b \mid a^2$ and thus $b \mid f(b)^2$ since $b \mid a + f(b)$.
+In particular, for any $p$ prime, $p \mid f(p)$.
+
+We claim that $f(p) = f(1) p$ for any $p$ prime with $p > \max\{C, f(1)\}$.
+Write $f(p) = kp$ for some $k \in \N$; note that $k \leq f(1)$ since $p > C$ and thus $f(p) \leq f(1) p$.
+Then plugging $a = 1$ again and $b = p$ yields $1 + kp \mid 1 + f(1) p \iff 1 + kp \mid (f(1) - k) p$.
+But $1 + kp$ and $p$ are coprime, so $1 + kp \mid f(1) - k$.
+Since $p > f(1)$, this forces $k \in \{0, f(1)\}$.
+
+Now suppose that $k = 0$, i.e., $f(p) = 0$.
+Plugging $a = p$ and $b = 1$ yields $p + f(1) \mid p^2$, which means $f(1) \in \{0, p(p - 1)\}$.
+But $f(1) < p$, so this means $f(1) = 0$, which also means $f(p) = 0 = f(1) p$ regardless.
+
+Finally, we prove that $f(n) = f(1) n$ for all $n \in \N$.
+We split into three cases.
+
+\begin{itemize}
+
+    \item
+    $f(1) = 0$.
+
+    Pick $p$ large enough with $p > \max\{C, f(n)\}$.
+    The previous claim yields $f(p) = 0$.
+    Plugging $a = p$ and $b = n$ yields $p + f(n) \mid p^2$.
+    Since $p > f(n)$ by our choice of $p$, this yields $f(n) = 0 = f(1) n$.
+
+    \item 
+    $n = 0$.
+    
+    Let $p > \max\{C, f(0)\}$ be a prime, and plug $a = p$ and $b = 0$.
+    We get $p + f(0) \mid p^2$, and $p > f(0)$ yields $f(0) = 0$.
+
+    \item
+    $f(1), n > 0$.
+
+    Let $p$ be a large enough prime, and plug $a = n$ and $b = p$.
+    We get $n + f(1) p \mid n^2 + f(n) p$; in particular $n (n + f(1) p) \equiv n^2 + f(n) p \pmod{n + f(1) p}$.
+    For $p$ large, $\gcd(n + f(1) p, p) = 1$, so this yields $n f(1) \equiv f(n) \pmod{n + f(1) p}$.
+    Finally, for $p$ large enough with respect to $n$, this forces $f(n) = f(1) n$.
+
+\end{itemize}
+
+
+
+\subsection*{Extra notes}
+
+The original problem can actually be deduced from this alternative problem.
+Indeed, fix some $g : \N^+ \to \N^+$ satisfying the original condition.
+Extend $g$ to $f : \N \to \N$ by defining $f(0) = 0$.
+Then one could verify that $f$ satisfies the above condition.
+Thus, by our solution above, $f = n \mapsto kn$ for some $k \in \N$.
+The same holds for $g$, and $k > 0$ since $f \neq 0$.
+
+
+
+\end{document}
