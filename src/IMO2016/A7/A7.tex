@@ -1,0 +1,150 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\title{IMO 2016 A7}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $R$ be a commutative ring, and let $S$ be a totally ordered commutative ring.
+Find all functions $f : R \to S$ such that, for any $x, y \in R$,
+\[ f(x + y)^2 = 2 f(x) f(y) + \max\{f(x^2) + f(y^2), f(x^2 + y^2)\}. \tag{*}\label{2016a7-eq0} \]
+
+
+
+\subsection*{Answer}
+
+$f = 0$, $f = \phi$, $f = -1$, and $f = x \mapsto \phi(x) - 1$ for some ring homomorphism $\phi : R \to S$.
+
+
+
+\subsection*{Solution}
+
+It is easy to see that the above functions work.
+We now show the converse.
+
+First, plugging $x = y = 0$ into~\eqref{2016a7-eq0} yields $f(0)^2 = 2f(0)^2 + \max\{2 f(0), f(0)\}$.
+Equivalently, $\max\{2 f(0), f(0)\} = -f(0)^2$, which is in particular non-positive.
+This implies $f(0) \leq 0$, and thus $f(0) = -f(0)^2$, which forces $f(0) \in \{0, -1\}$.
+The case $f(0) = 0$ corresponds to the first two answer; the case $f(0) = -1$ corresponds to the last two.
+
+Regardless of the value of $f(0)$, we still have a useful equality.
+Since $f(0) \leq 0$, plugging $x = 0$ into~\eqref{2016a7-eq0} yields
+\[ f(y)^2 = 2 f(0) f(y) + f(y^2) \iff f(y^2) = f(y)^2 - 2 f(0) f(y). \tag{1}\label{2016a7-eq1} \]
+In particular, for any $y \in R$, we get either $f(-y) = f(y)$ or $f(-y) = 2 f(0) - f(y)$.
+We now divide into two cases based on the value of $f(0)$.
+
+\begin{itemize}
+
+
+
+    \item
+    Case 1: $f(0) = 0$.
+
+    Now~\eqref{2016a7-eq1} reads as $f(x^2) = f(x)^2$, which also implies $f(-x) = \pm f(x)$, for every $x \in R$.
+    We prove that the sign is always negative; $f(-x) = f(x)$ implies $f(x) = 0$.
+    Indeed, fix $x \in R$ and suppose that $f(-x) = f(x)$.
+    Plug $y = -x$ into~\eqref{2016a7-eq0} and get $0 \geq 2 f(x)^2 + 2 f(x^2)$.
+    But $f(x^2) = f(x)^2$, so $0 \geq 4 f(x)^2$.
+    This forces $f(x) = 0$, as desired.
+    In summary, $f$ is odd.
+
+    Now, replacing $(x, y)$ with $(x, -y)$ in~\eqref{2016a7-eq0} and comparing the two equalities yield
+    \[ f(x + y)^2 - f(x - y)^2 = 4 f(x) f(y). \tag{2}\label{2016a7-eq2} \]
+    Plugging $x = y$ yields $f(2y) = \pm 2 f(y)$ for all $y \in R$.
+    Plugging $x = 2y$ yields $f(3y)^2 = f(y)^2 + 4 f(2y) f(y)$.
+    If $f(2y) \neq 2 f(y)$, then $f(2y) = -2 f(y) \neq 0$ and this would mean $f(3y)^2 = -7 f(y)^2 < 0$.
+    Thus we have $f(2y) = 2 f(y)$ for all $y \in R$.
+
+    Now notice that~\eqref{2016a7-eq0} yields $f(x + y)^2 \geq 2 f(x) f(y) + f(x^2) + f(y^2) = (f(x) + f(y))^2$, or $|f(x + y)| \geq |f(x) + f(y)|$.
+    By~\eqref{2016a7-eq2}, this inequality and the inequality $|f(x - y)| \geq |f(x) - f(y)|$ are either both equalities or strict inequalities.
+    By the substitution $(x, y) \to (x + y, x - y)$ and $f(2y) = 2 f(y)$,~\eqref{2016a7-eq2} yields $f(x)^2 - f(y)^2 = f(x + y) f(x - y)$.
+    In particular, the previous two inequalities cannot be strict, which means $|f(x + y)| = |f(x) + f(y)|$ for all $x, y \in R$.
+    The next step is to remove the absolute value from the equation and show that $f$ is additive.
+
+    Since $f$ is odd, we can rewrite the equation as $|f(z)| = |f(x) + f(y)|$ whenever $x + y + z = 0$.
+    The goal reduces to proving $f(x) + f(y) + f(z) = 0$ whenever $x + y + z = 0$.
+    If this equality is false, then we have $f(z) = f(x) + f(y)$.
+    Working cyclically also gives us $f(x) = f(y) + f(z)$ and $f(y) = f(z) + f(x)$.
+    But then summing all three equations give $f(x) + f(y) + f(z) = 0$.
+    This proves that $f$ is additive.
+
+    Along with $f(x^2) = f(x)^2$ for all $x \in R$, it is easy to prove that $f$ is either zero or a ring homomorphism.
+    Indeed, the above equation yields $f(1) \in \{0, 1\}$, so it remains to prove that $f$ is multiplicative.
+    Here is a proof of multiplicativity.
+
+    For any $x, y \in R$, we have $f(x^2 + y^2 + 2xy) = f(x + y)^2$.
+    Additivity and $f(x^2) = f(x)^2$ again yields $f(x)^2 + f(y)^2 + 2 f(xy) = f(x)^2 + f(y)^2 + 2 f(x) f(y)$.
+    Finally, we just cancel the factor of $2$ out of the equation.
+
+
+    
+    \item
+    Case 2: $f(0) = -1$.
+    
+    This time, for any $x \in R$, we have $f(x^2) = f(x)^2 + 2 f(x)$, which can also be written as $f(x^2) + 1 = (f(x) + 1)^2$.
+    This also implies that either $f(-x) = f(x)$ or $f(-x) + f(x) = -2$.
+    The hard part of this case is showing that the latter always has to hold.
+
+    First consider the substution $(x, y) \to (-x, -y)$ in~\eqref{2016a7-eq0}.
+    Comparing with the original equation yields
+    \[ f(x + y)^2 - f(-(x + y))^2 = 2 (f(x) f(y) - f(-x) f(-y)). \]
+    Note that $f(x)^2 = f(x^2) - 2 f(x)$ for all $x \in R$.
+    Thus the above equation can be simplified to
+    \[ f(x + y) - f(-(x + y)) = f(-x) f(-y) - f(x) f(y). \tag{3}\label{2016a7-eq3}\]
+
+    First suppose that $f(-x) + f(x) = -2$ for all $x \in R$.
+    Then~\eqref{2016a7-eq3} becomes
+    \[ 2 f(x + y) + 2 = (f(x) + 2)(f(y) + 2) - f(x) f(y) = 2 (f(x) + f(y) + 2), \]
+        which implies $f(x + y) + 1 = (f(x) + 1) + (f(y) + 1)$.
+    Together with the equation $f(x^2 + 1) = (f(x) + 1)^2$, the same method as in the previous paragraph yields the desired solution.
+    That is, $f + 1$ is either zero or a ring homomorphism.
+    It remains to prove that $f(-x) + f(x) = -2$ for all $x \in R$.
+
+    For $t \in R$ such that $f(-t) = f(t)$,~\eqref{2016a7-eq3} can be rewritten as
+    \[ f(x + t) - f(-(x + t)) = (f(x) - f(-x)) \cdot (-f(t)). \]
+    Then multiplying again by $-f(-t) = -f(t)$ gives us
+    \[ f(x) - f(-x) = (f(x) - f(-x)) f(t)^2. \]
+
+    If $f$ is not even, then $f(t) = f(-t)$ implies $f(t) = \pm 1$.
+    On the other hand, $f(t) = f(-t) = 1$ is actually impossible; plugging $(x, y) = (t, -t)$ into~\eqref{2016a7-eq0} yields
+    \[ 1 \geq 2 f(t) f(-t) + 2 f(t^2) = 2 + 2 (1^2 + 2 \cdot 1) = 8 > 1. \]
+    Then this means $f(t) = f(-t) = -1$, and $f(-t) + f(t) = -2$.
+    The remaining case to consider is when $f$ is even.
+
+    First, plugging $y = -x$ into~\eqref{2016a7-eq0} yields
+    \[ 1 = 2 f(x)^2 + \max\{f(2x^2), 2 f(x^2)\} = f(2x)^2. \]
+    In particular, $f(2x) = \pm 1$, and the above argument yields $f(2x) = -1$ for all $x \in R$.
+    The above equation is now equivalent to
+    \[ 1 = 2 f(x)^2 + \max\{-1, 2 f(x)^2 + 4 f(x)\}. \]
+    This yields either $2 f(x)^2 = 2 \implies |f(x)| = -1$ or $4 f(x)^2 + 4 f(x) = 1$.
+    Note that the former again yields $f(x) = -1$.
+    The latter forces $2 f(x)^2 - 1 \leq 1 \implies |f(x)| \leq 1$.
+    In particular, $f(x) \geq -1$, and $4 f(x)^2 + 4 f(x) = 1$ now forces $f(x) > 0$.
+    In short, for any $x \in R$, either $f(x) = -1$ or $f(x) > 0$ and $4 f(x)^2 + 4 f(x) = 1$.
+
+    To show that the latter is impossible, we just look at $f(x^2) = f(x)^2 + 2 f(x)$.
+    In the latter case, we have $f(x^2) > 0$, but also we have $f(x^2) > f(x)$.
+    Thus $f(x^2) = -1$ is impossible, and $4 f(x^2)^2 + 4 f(x^2) > 4 f(x)^2 + 4 f(x) = 1$; a contradiction.
+    Thus, when $f$ is even, we get $f \equiv -1$, which also implies $f(-x) + f(x) = -2$ for all $x \in R$.
+    We are done.
+    
+    
+
+\end{itemize}
+
+
+
+\end{document}
