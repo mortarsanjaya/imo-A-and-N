@@ -188,6 +188,11 @@ lemma pnat_good_imp_linear {C : ℕ+} {f : ℕ+ → ℕ+} (h : pnat_good C f) (n
   by rwa [pnat_fun_extension_pnat, ← pnat.one_coe,
     pnat_fun_extension_pnat, ← pnat.mul_coe, pnat.coe_inj] at this
 
+
+
+
+
+/-- Final solution, `ℕ+` version -/
 theorem final_solution_pnat {C : ℕ+} {f : ℕ+ → ℕ+} :
   (∀ a b : ℕ+, C < a + b → a + f b ∣ a ^ 2 + b * f a) ↔ ∃ k : ℕ+, f = has_mul.mul k :=
 ⟨λ h, ⟨f 1, funext $ pnat_good_imp_linear h⟩,
