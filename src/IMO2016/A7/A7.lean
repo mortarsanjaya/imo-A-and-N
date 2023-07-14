@@ -338,6 +338,8 @@ end ring_comm_ring
 
 
 
+/- #### Final solution -/
+
 /-- Final solution -/
 theorem final_solution {R S : Type*} [comm_ring R] [linear_ordered_comm_ring S] {f : R → S} :
   good f ↔ (f = 0 ∨ ∃ φ : R →+* S, f = φ) ∨ (f = (λ _, -1) ∨ ∃ φ : R →+* S, f = λ x, φ x - 1) :=
