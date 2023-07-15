@@ -5,48 +5,37 @@ import algebra.order.field.canonical.defs algebra.big_operators.intervals algebr
 namespace IMOSL
 namespace IMO2010A3
 
-open finset function
-
 variables {F : Type*} [canonically_linear_ordered_semifield F]
 
+lemma ordered_semifield_AM_GM : ∀ a b : F, 2 * a * b ≤ a ^ 2 + b ^ 2 :=
+suffices ∀ a b : F, a ≤ b → 2 * a * b ≤ a ^ 2 + b ^ 2,
+from λ a b, (le_total a b).elim (this a b) $
+  λ h, (mul_right_comm 2 a b).trans_le $ (this b a h).trans_eq $ add_comm (b ^ 2) (a ^ 2),
+λ a b h, exists.elim (le_iff_exists_add.mp h) $
+  λ c h0, le_iff_exists_add.mpr ⟨c ^ 2, by rw h0; ring⟩
 
-
-section extra_lemmas
-
-private lemma AM_GM (a b : F) : 2 * a * b ≤ a ^ 2 + b ^ 2 :=
-begin
-  rw le_iff_exists_add,
-  cases le_total a b with h h; rw le_iff_exists_add at h;
-    rcases h with ⟨c, rfl⟩; use c ^ 2,
-  rw [add_sq, ← add_assoc, ← add_assoc, ← two_mul, sq, ← mul_assoc, ← mul_add],
-  rw [add_sq, add_right_comm, add_right_comm _ _ (b ^ 2),
-      ← two_mul, sq, ← mul_assoc, ← mul_add, mul_right_comm]
-end
-
-private lemma special_ineq {w x y z c : F} (h : w + x + y ≤ c) (h0 : x + y + z ≤ c) :
+lemma special_ineq {w x y z c : F} (h : w + x + y ≤ c) (h0 : x + y + z ≤ c) :
   w * y + x * z ≤ (c / 2) ^ 2 :=
 begin
   rw [← add_le_add_iff_right (x * (x + y)), add_assoc, ← mul_add, add_comm z],
-  refine le_trans (add_le_add_left (mul_le_mul_left' h0 _) _) _; clear h0 z,
+  refine (add_le_add_left (mul_le_mul_left' h0 _) _).trans _,
   rw [add_comm, ← add_le_add_iff_right ((x + y) * y), add_assoc, ← add_mul, ← add_assoc],
-  refine le_trans (add_le_add_left (mul_le_mul_right' h _) _) _; clear h w,
+  refine (add_le_add_left (mul_le_mul_right' h _) _).trans _,
   rw [mul_comm, ← mul_add, add_assoc, mul_comm x, ← mul_add, ← sq],
   nth_rewrite 0 ← mul_div_cancel' c two_ne_zero,
-  exact AM_GM (c / 2) (x + y)
+  exact ordered_semifield_AM_GM (c / 2) (x + y)
 end
 
-end extra_lemmas
 
 
 
 
-
-
+open finset
 
 /-- Final solution -/
 theorem final_solution (n : ℕ) (c : F) :
   is_greatest ((λ x : ℕ → F, (range (2 * n)).sum (λ i, x i * x (i + 2))) ''
-    {x | (∀ j : ℕ, x j + x (j + 1) + x (j + 2) ≤ c) ∧ periodic x (2 * n)})
+    {x | (∀ j : ℕ, x j + x (j + 1) + x (j + 2) ≤ c) ∧ function.periodic x (2 * n)})
       (n • (c / 2) ^ 2) :=
 begin
   refine ⟨⟨λ i, ite (even i) (c / 2) 0, ⟨λ i, _, λ i, if_congr _ rfl rfl⟩, _⟩, _⟩,
