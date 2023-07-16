@@ -1,4 +1,4 @@
-import data.pnat.basic data.nat.periodic
+import data.pnat.basic data.nat.periodic extra.seq_max
 
 /-! # IMO 2009 A3 (P5) -/
 
@@ -9,13 +9,8 @@ open function
 
 section extra_lemmas
 
-private lemma exists_sup_fn_fin (f : ℕ → ℕ) :
-  ∀ c : ℕ, ∃ K : ℕ, ∀ n : ℕ, n < c → f n ≤ K
-| 0 := ⟨0, λ n h, absurd h n.not_lt_zero⟩
-| (c+1) := exists.elim (exists_sup_fn_fin c) $ λ K h, ⟨max K (f c),
-    λ n h0, (eq_or_lt_of_le $ nat.le_of_lt_succ h0).elim
-      (λ h1, le_max_of_le_right $ le_of_eq $ congr_arg f h1)
-      (λ h1, (h n h1).trans $ le_max_left K $ f c)⟩
+private lemma exists_sup_fn_fin (f : ℕ → ℕ) (c : ℕ) : ∃ K : ℕ, ∀ n : ℕ, n < c → f n ≤ K :=
+⟨extra.seq_max f c, λ n h, extra.le_seq_max_of_le f (le_of_lt h)⟩
 
 private lemma pnat_to_nat_prop {P : ℕ+ → Prop} :
   (∀ n : ℕ+, P n) ↔ (∀ n : ℕ, P n.succ_pnat) :=
