@@ -20,6 +20,10 @@ instance {R : Type*} [linear_ordered_comm_ring R] : domain_without_zero {x : R /
   .. positive.subtype.add_right_cancel_semigroup,
   .. positive.subtype.distrib }
 
+
+
+
+
 /-- Final solution, general version with `domain_without_zero` -/
 theorem final_solution_general {R : Type*} [domain_without_zero R] (f : R → R) :
   (∀ x y, x * f (x ^ 2) * f (f y) + f (y * f x) = f (x * y) * (f (f (x ^ 2)) + f (f (y ^ 2))))
