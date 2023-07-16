@@ -1,12 +1,27 @@
-import extra.integral_domain_without_zero algebra.group_power.basic
+import algebra.order.positive.ring algebra.group_power.basic
 
 /-! # IMO 2016 A4, Ring Version -/
 
 namespace IMOSL
 namespace IMO2016A4
 
-/-- Final solution, general version with `extra.domain_without_zero` -/
-theorem final_solution_general {R : Type*} [extra.domain_without_zero R] (f : R → R) :
+set_option old_structure_cmd true
+
+@[protect_proj]
+class domain_without_zero (R : Type*) extends
+  cancel_comm_monoid R, add_comm_semigroup R,
+    add_left_cancel_semigroup R, add_right_cancel_semigroup R, distrib R
+
+instance {R : Type*} [linear_ordered_comm_ring R] : domain_without_zero {x : R // 0 < x} :=
+{ mul_left_cancel := cancel_comm_monoid.mul_left_cancel,
+  .. positive.subtype.linear_ordered_cancel_comm_monoid,
+  .. positive.subtype.add_comm_semigroup,
+  .. positive.subtype.add_left_cancel_semigroup,
+  .. positive.subtype.add_right_cancel_semigroup,
+  .. positive.subtype.distrib }
+
+/-- Final solution, general version with `domain_without_zero` -/
+theorem final_solution_general {R : Type*} [domain_without_zero R] (f : R → R) :
   (∀ x y, x * f (x ^ 2) * f (f y) + f (y * f x) = f (x * y) * (f (f (x ^ 2)) + f (f (y ^ 2))))
     ↔ ∀ x, x * f x = 1 :=
 begin
