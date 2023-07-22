@@ -1,0 +1,167 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+
+\newtheorem*{claim}{Claim}
+
+\title{IMO 2022 C6}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+In a single-player game, initially a multiset $S_0$ of natural numbers is given on a board.
+At any time, given a multiset $S$ of natural numbers on the board, we may perform one of the following moves:
+
+\begin{itemize}
+
+    \item
+    Take two elements $a, b \in S$ so that $\{a, b\} \leq S$ as a multiset.
+    Pick some $c \in \N$ with $c \leq \min\{a, b\}$.
+    Then remove $\{a, b\}$ from $S$ and add $\{2c, a - c, b - c\}$ into $S$.
+
+    \item
+    Remove any occurrence of $0$ in $S$.
+
+\end{itemize}
+
+Given $S_0$, find the smallest possible size of the multiset on the board at any point.
+
+
+
+\subsection*{Answer}
+
+For any multiset $S$ of natural numbers, denote by $\sigma_S$ the sum of all elements of $S$, including multiplicity.
+The answer is:
+
+\begin{itemize}
+
+    \item 
+    $0$, if $S_0$ only consists of $0$.
+
+    \item
+    $1$, if $\sigma_{S_0} = 2^k m$ with $m$ odd and $m$ divides all elements of $S_0$,
+
+    \item
+    $2$, otherwise.
+
+\end{itemize}
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{http://www.imo-official.org/problems/IMO2022SL.pdf}
+
+Solution 1 only describes the case where $S_0$ consists of just ones.
+However, the remark on starting configurations that follows after the solution solves this more general problem.
+We will adapt Solution 1 but on this more general setting.
+Given multisets $A$ and $B$ of natural numbers, we denote $A \to B$ if $B$ is obtained from one move on $A$.
+We denote $A \implies B$ is $B$ can be obtained from $A$ through any (possibly empty) sequence of moves.
+In this case, we also say that $A$ reaches $B$.
+
+Clearly the answer is $0$ if $S_0$ only consists of $0$.
+For example, induction on $|S_0|$ works.
+From now on, we assume that $S_0$ contains a positive integer.
+
+Using the same notation $\sigma_S$, one can observe that $A \to B$ implies $\sigma_A = \sigma_B$.
+By induction, $A \implies B$ implies $\sigma_A = \sigma_B$.
+If $S_0$ contains a positive integer, then at any time, the multiset $S$ on the board satisfies $\sigma_S = \sigma_{S_0} > 0$.
+In particular, $|S| = 0$ is impossible, so the answer is at least $1$.
+
+Now consider the second case.
+Write $\sigma_{S_0} = 2^k m$ where $m$ is odd, and suppose that $m$ divides every element of $S_0$.
+One can prove that (with the pointwise multiplication notation) for any multisets $A$ and $B$, $A \to B$ implies $mA \to mB$.
+In particular, $A \implies B$ implies $mA \implies mB$.
+Thus, dividing by $m$, it suffices to consider the case where $\sigma_{S_0} = 2^k$, i.e., $m = 1$.
+
+For convenience, denote by $R_a(b)$ the multiset consisting of $a$ copies of $b$.
+Consider the following general observations.
+
+\begin{itemize}
+
+    \item
+    For any multiset $A, B, X$ of natural numbers, $A \to B$ implies $A + X \to B + X$.
+    By induction, $A \implies B$ implies $A + X \implies B + X$.
+    In particular, given multisets $A, B, C, D$, $A \implies B$ and $C \implies D$ implies $A + C \implies B + D$.
+
+    \item
+    For any $n \in \N$, we have $\{2, n + 1\} \to \{2, 1, n\}$.
+    Indeed, this is a legal move of the first type, with $a = c = 1$ and $b = n$.
+    By induction, one can show that $A \implies \{2\} + R_{\sigma_A - 2}(1)$ for any multiset $A$ with $\sigma_A \geq 2$.
+    Here the number of ones in the second multiset is $\sigma_A - 2$.
+
+\end{itemize}
+
+Now, for $k = 0$, $\sigma_{S_0} = 2^k = 1$ implies $S_0 = \{1\} + R_a(0)$ for some $a \in \N$.
+Removing all occurrences of zero leaves us with a singleton, $\{1\}$.
+Now suppose that $k \geq 1$.
+By the above observation, $S_0 \implies \{2\} + R_{2^k - 2}(1)$.
+Since $\{1, 1\} \to \{2, 0\} \to \{2\}$, one can induct to show that $R_{2n}(k) \implies R_n(2k)$ for any $n, k \in \N$.
+In particular, we get $S_0 \implies R_{2^{k - 1}}(2)$.
+Inducting again allows us to prove $R_{2^{k - 1}}(2) \implies R_1(2^k) = \{2^k\}$, and we are done.
+
+For the remaining case, an odd integer $m$ divides $\sigma_{S_0}$ but it does not divide at least one element of $S_0$.
+The following claim implies that $S_0$ cannot reach a singleton.
+
+\begin{claim}
+Fix an odd integer $m$ and multisets $A$ and $B$ such that $A \to B$.
+If some element of $A$ is not divisible by $m$, then some element of $B$ is not divisible by $m$.
+\end{claim}
+
+Indeed, by induction, the claim follows if we replace $A \to B$ with $A \implies B$.
+If $S_0$ reaches a singleton $\{N\}$, then $m \mid N = \sigma_{S_0}$.
+Yet the claim implies $m \nmid N$; a contradiction.
+
+\begin{proof}
+Arguing by contrapositive, suppose that $m$ divides every element of $B$.
+If $A \to B$ via the second type move, then $A = \{0\} + B$ and the goal is proved.
+If $A \to B$ via the first type move, then $A = \{a + c, b + c\} + X$ and $B = \{a, b, 2c\} + X$ for some $a, b, c \in \N$.
+Every element of $X$ is divisible by $m$, and $a, b, 2c$ are all divisible by $m$.
+Since $m$ is odd, we also have $m \mid c$, and thus $m$ divides both $a + c$ and $b + c$.
+\end{proof}
+
+It now remains to show that any multiset can reach a multiset of size at most $2$.
+Using one of the above observation, it suffices to prove this result when the multiset is of form $\{2\} + R_n(1)$ for some $n \in \N$.
+
+Let $k$ be the largest non-negative integer such that $2^k \leq n + 2$; note that $k \geq 1$.
+By the case $\sigma_{S_0} = 2^k$, if $n + 2 = 2^k$, then $\{2\} + R_n(1) \implies \{2^k\}$.
+If $n + 2 = 2^k + 1$, then $\{2\} + R_n(1) \implies \{2^k, 1\}$; both has size at most $2$.
+Finally, consider the case $n \geq 2^k$, and write $n = 2^k + m$ for some $0 \leq m < 2^k - 2$.
+Then $\{2\} + R_n(1) \implies \{2^k, 2\} + R_m(1)$.
+By one of the above observations and induction, we have $\{a, 2\} \implies \{b, 2\} + R_{a - b}(1)$ for any $a \geq b \geq 0$.
+In particular, $\{2^k, 2\} + R_m(1) \implies \{m + 2, 2\} + R_{2^k - 2}(1) \implies \{m + 2, 2^k\}$.
+We are done.
+
+
+
+\subsection*{Extra notes}
+
+In correspondence to the original formulation, each number $k$ in $S$ represents a pile of $k$ pebbles.
+If one literally translates the original formulation, the only legal move is the first option listed above.
+The problem changes to finding the smallest possible number of non-zero elements of $S$, up to multiplicity.
+This seems to be more cumbersome than just allowing to remove any zeroes from $S$.
+
+
+
+\subsection*{Implementation details}
+
+We split into two files.
+The file \texttt{C6_basic.lean} focuses on the general properties of a multiset obtainable from another multiset via series of moves.
+The file \texttt{C6_main.lean} focuses on the problem itself; the minimal possible size of $A$ such that $S_0 \implies A$, where $S_0$ is fixed.
+
+
+
+\end{document}
