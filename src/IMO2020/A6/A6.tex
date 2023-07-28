@@ -1,0 +1,75 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\title{IMO 2020 A6}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Find all functions $f : \Z \to \Z$ such that, for any $a, b \in \Z$,
+\[ f^{a^2 + b^2}(a + b) = a f(a) + b f(b). \tag{*}\label{2020a6-eq0} \]
+
+
+
+\subsection*{Answer}
+
+$x \mapsto 0$ and $x \mapsto x + 1$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2020SL.pdf}
+
+We follow the official solution, but we avoid the explicit use of finiteness of orbits.
+Instead, if $f$ is injective, we are done after $f^{a^2 + 1}(a - 1) = f^{a^2}(a)$.
+If $f$ is not injective, then we show that the orbit $\{f^n(0) : n \in \N\}$ is bounded, and proceed as in case 1.
+
+Plugging $b = 0$ yields $f^{a^2}(a) = a f(a)$ for all $a \in \Z$.
+Then plugging $a = -1$, $b = 0$ yields $f(-1) = 0$.
+Next, plugging $b = -1$ yields $f^{a^2 + 1}(a - 1) = a f(a) = f^{a^2}(a)$ for all $a \in \Z$.
+In particular, if $f$ is injective, we immediately get $f = x \mapsto x + 1$.
+For the rest of the solution, we assume that $f$ is not injective.
+
+Consider the equation $f^{(a + 1)^2 + 1}(a) = f^{(a + 1)^2}(a + 1)$.
+This means that $f^{n + 1}(a) = f^n(a + 1)$ whenever $n \geq (a + 1)^2$.
+From this, we can induct on $k \in \N$ to show that, for any integer $a$, there exists $N \in \N$ such that $f^{n + k}(a) = f^n(a + k)$ for all $n \geq N$.
+We now show, from $f$ being non-injective, that $f^m(0) = f^{m + k}(0)$ for some $m, k \in \N$ with $k > 0$.
+
+First, since $f$ is not injective, we can find $a, k \in \Z$ with $k > 0$ such that $f(a + k) = f(a)$.
+Then for some positive integer $N$, we have $f^{n + k}(a) = f^n(a + k) = f^n(a)$ for all $n \geq N$.
+If $a \geq 0$, then for $n$ big enough, we will get $f^n(a) = f^{n + a}(0)$.
+If $a < 0$, replace $n$ with $n + |a|$ and for $n$ big enough, we will get $f^{n + |a|}(a) = f^n(0)$.
+Either way, we have $f^{n + k}(0) = f^k(f^n(0)) = f^n(0)$ for $n$ big enough.
+
+From this, we can show that the set $\{f^n(0) : n \in \N\}$ is finite, thus bounded.
+Say that for some $N \in \N$ we have $|f^n(0)| < N$ for any $n \in \N$.
+For any integer $a$, plugging $b = -a$ into~\eqref{2020a6-eq0} yields $a (f(a) - f(-a)) = f^{2a^2}(0)$.
+For $|a| \geq N$, this forces $f(a) = f(-a)$ and $f^{2a^2}(0) = 0$.
+Plugging this equation for $a = N$ and $a = N^2 + 1$ gives us $f^{2N^2}(0) = f^{2 N^2 (N^2 + 2) + 2}(0) = 0$.
+Then we get $f(f(0)) = f^2(0) = 0$, which also means that $f(a) = f(-a)$ for all integers $a$.
+So now, we have that $f$ is even and $f(f(0)) = 0$.
+
+Next, for $a \neq 0$, we have $f^{a^2}(a) = f^{a^2}(-a)$ and thus $-a f(a) = -a f(-a) = a f(a)$.
+This forces $f(a) = 0$ for all $a \neq 0$.
+Finally, plugging $a = b = 1$ into~\eqref{2020a6-eq0} yields $f^2(2) = 2 f(1) = 0$.
+Since $f(2) = 0$, this gives us $f(0) = 0$.
+
+
+
+\end{document}
