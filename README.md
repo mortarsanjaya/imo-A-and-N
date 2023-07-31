@@ -4,4 +4,4 @@ Formalization (and generalization) of some IMO Shortlist problems, starting from
 
 Number of formalized problems as of June 11, 2023: 63
 
-Number of formalized problems as of July 17, 2023: 81
+Number of formalized problems as of July 31, 2023: 90
