@@ -16,9 +16,7 @@ lemma field_good_iff (M : F) : good M ↔ 9 * sqrt2 / 32 ≤ M :=
 lemma field_good_num : good (9 * sqrt2 / 32) :=
   (field_good_iff h h0 _).mpr (le_refl _)
 
-lemma field_good_minimum {F : Type*} [linear_ordered_field F]
-  {sqrt2 : F} (h : 0 ≤ sqrt2) (h0 : sqrt2 ^ 2 = 2) :
-  is_least (good : F → Prop) (9 * sqrt2 / 32) := 
+lemma field_good_minimum : is_least (good : F → Prop) (9 * sqrt2 / 32) := 
   ⟨field_good_num h h0, λ M, (field_good_iff h h0 M).mp⟩
 
 end general_field
