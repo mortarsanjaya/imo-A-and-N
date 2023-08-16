@@ -82,14 +82,9 @@ end)
       exact jacobi_sym_two_five } }
 end)
 
-
-
-lemma sixty_five_mod_sixty : 65 % 60 = 5 :=
-  nat.add_mod_left 60 5
-
 /-- Final solution, original version -/
 theorem final_solution {n : ℕ} (h : 2 ^ n + 65 ∣ 5 ^ n - 3 ^ n) : n = 0 :=
-  final_solution_general sixty_five_mod_sixty h
+  final_solution_general (nat.add_mod_left 60 5) h
 
 end IMO2022N8
 end IMOSL
