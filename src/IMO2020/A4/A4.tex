@@ -1,0 +1,67 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\title{IMO 2020 A4}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $a, x_1, x_2, \ldots, x_n$ be a positive real numbers such that $a \geq x_i$ for each $i \leq n$ and
+\[ a + \sum_{i = 1}^n x_i = 1. \]
+Prove that
+\[ (3 - 2a) a^a \prod_{i = 1}^n x_i^{x_i} \leq 1, \tag{*}\label{2020a4-eq0} \]
+    and determine all cases of equality.
+
+
+
+\subsection*{Answer}
+
+Equality holds iff either $n = 0$ and $a = 1$ or $n = 1$ and $a = x_1 = 1/2$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2020SL.pdf}
+
+The problem presented above is almost entirely different from the official problem.
+However, the method that we will use still derives the idea from the two official solutions.
+
+For $a < 1/2$, as in Solution 2, we just use the fact that $x_i \leq a$ for each $i \leq n$.
+We get
+\[ a^a \prod_{i = 1}^n x_i^{x_i} \leq a^{a + \sum_{i \leq n} x_i} = a. \]
+But $1 - (3 - 2a) a = (1 - a)(1 - 2a) > 0$ for $a < 1/2$, so $(3 - 2a) a < 1$.
+
+For $1/2 \leq a \leq 1$, as in Solution 1, we use the weighted AM-GM inequality:
+\[ a^a \prod_{i = 1}^n x_i^{x_i} \leq a^2 + \sum_{i = 1}^n x_i^2 \leq a^2 + (1 - a)^2. \]
+Since the $x_i$s are positive, the last inequality becoming equality if and only if $n \leq 1$.
+For $1/2 \leq a \leq 1$, we have
+\[ 1 - (3 - 2a) (a^2 + (1 - a)^2) = 2 (1 - a)^2 (2a - 1) \geq 0, \]
+    with equality forcing $a \in \{1/2, 1\}$.
+Thus~\eqref{2020a4-eq0} holds, with equality forcing $a \in \{1/2, 1\}$.
+Clearly, $a = 1$ implies $n = 0$.
+Meanwhile, $a = 1/2$ implies $n > 0$, and the equality case from the previous inequality yields $n = 1$.
+This also forces $x_1 = 1/2$.
+
+
+
+\subsection*{Extra notes}
+
+We will also have to implement the original problem with $n = 3$, $x_1 \geq x_2 \geq x_3 > 0$, and~\eqref{2020a4-eq0} weakened to
+\[ (a + 2x_1 + 3x_2 + 4x_3) a^a x_1^{x_1} x_2^{x_2} x_3^{x_3} < 1. \]
+
+
+
+\end{document}
