@@ -180,7 +180,7 @@ end GameState
 
 
 
-/- ### Game termination -/
+/- ### Final solution -/
 
 /-- Final solution: Game termination -/
 alias GameState.moves_lt_two_pow ← final_solution_max_moves
