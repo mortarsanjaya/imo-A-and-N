@@ -374,7 +374,10 @@ A contradiction, since $\rchar(S) \neq 3$.
 
 \subsection*{Step 6: Case 2: $f(-1) = 0$}
 
-This covers the rest of the solution.
+This covers the rest of the solution, which consists of four subcases.
+The Subcase 2.3 needs to steal some results from Subcase 2.1.
+The details will come later.
+
 As before, we collect important equations here and do an important computation.
 We computed $f(-1)$ in the previous case; now we will compute $f(2)$ instead.
 
@@ -544,9 +547,110 @@ That is, we claim that there exists a ring homomorphism $\phi : R \to S$ such th
 The solution in this subsection requires at least that $2$ is invertible in $S$.
 For convenience, we just assume that $S$ is a field.
 We will still begin with only assuming that $S$ is an integral domain.
+Note that we will borrow~\eqref{2012a5-eq7-4} to cover the case $\rchar(S) = 3$ in the first important statement.
 
-...
+In this subcase,~\eqref{2012a5-eq6-5} reads as
+\[ f(x + 2) = 3 (f(x + 1) - f(x)) + f(x - 1) \quad \text{for all } x \in R. \tag{9.1}\label{2012a5-eq9-1} \]
+Applying the above equality to~\eqref{2012a5-eq6-6} yields
+\[ f(x) (3 f(x - 1) + f(x + 1)) - (f(x - 1) + 3 f(x + 1)) (1 + f (x - 1)) = 0 \quad \text{for all } x \in R. \tag{9.2}\label{2012a5-eq9-2} \]
+Replacing $x$ with $-x$ and using~\eqref{2012a5-eq6-1} yields
+\[ f(x) (3 f(x + 1) + f(x - 1)) - (f(x + 1) + 3 f(x - 1)) (1 + f (x + 1)) = 0 \quad \text{for all } x \in R. \]
+Subtracting~\eqref{2012a5-eq9-2} from this equation yields
+\[ f(x + 1) + f(x - 1) = 2 f(x) + 2 \text{ or } f(x + 1) = f(x - 1) \quad \text{for all } x \in R. \tag{9.3}\label{2012a5-eq9-3} \]
 
+Next, we prove that
+\[ f(x + 1) + f(x - 1) = 2 f(x) + 2 \text{ or } f(x + 1) = f(x - 1) = 0 \quad \text{for all } x \in R. \tag{9.4}\label{2012a5-eq9-4} \]
+Suppose that the former does not hold for some $x \in R$.
+By~\eqref{2012a5-eq9-3}, we have $f(x + 1) = f(x - 1)$.
+Plugging into~\eqref{2012a5-eq9-2} yields
+\[ f(x + 1) = f(x - 1) = 0 \text{ or } f(x + 1) = f(x - 1) = f(x) - 1. \]
+By~\eqref{2012a5-eq9-1}, the latter yields $f(x + 2) = f(x) - 4$.
+By manual computation and $\rchar(S) \neq 2$, this contradicts~\eqref{2012a5-eq9-3}.
+So, we have $f(x + 1) = f(x - 1) = 0$, as desired.
+
+Now note that~\eqref{2012a5-eq9-1} yields $f(x + 1) + f(x - 1) - 2 f(x) = f(x + 2) + f(x) - 2 f(x + 1)$.
+Thus,~\eqref{2012a5-eq9-4} yields a stronger result:
+\[ f(x + 1) + f(x - 1) = 2 f(x) + 2 \text{ or } f(x + 1) = f(x) = f(x - 1) = 0 \quad \text{for all } x \in R. \tag{9.5}\label{2012a5-eq9-5} \]
+Finally, we show that the latter yields a contradiction.
+For the case $\rchar(S) = 3$, we have $f(2) = 3 = 0$.
+We can then borrow~\eqref{2012a5-eq7-4} from Step 7, which does not require $f(2) \neq 3$.
+It directly yields a contradiction.
+It remains to consider the case $\rchar(S) \neq 3$.
+
+By~\eqref{2012a5-eq6-2} and~\eqref{2012a5-eq0}, we have $f(2x + 1) = f(2x - 1) = 0$.
+So~\eqref{2012a5-eq9-5} with $\rchar(S) \neq 2$ tells us that $f(2x) \in \{-1, 0\}$.
+On the other hand, we will show that $f(2x) = -3$, which is a contradiction since $\rchar(S) \neq 2, 3$.
+Indeed, by~\eqref{2012a5-eq6-2} and~\eqref{2012a5-eq0},
+\[ f(x^2 - 2) = f(x + 1) f(x - 1) + f(2) = 3, \]
+\[ f(x^2 - 1) = f(x)^2 - 1 = -1, \]
+\[ f(x^2) = f(x + 1) f(x - 1) + f(2x) = f(2x), \]
+\[ f(x^2 + 1) = f(x)^2 + f(2x) = f(2x), \]
+    so~\eqref{2012a5-eq9-1} implies
+\[ f(2x) = 3 (f(2x) + 1) + 3 \iff 2 (f(2x) + 3) = 0 \iff f(2x) = -3, \]
+    since $\rchar(S) \neq 2$.
+This proves
+\[ f(x + 1) + f(x - 1) = 2 f(x) + 2 \quad \text{for all } x \in R. \tag{9.6}\label{2012a5-eq9-6} \]
+For the rest of the subsection, we assume that $S$ is a field.
+
+Consider the function $g : R \to S$ defined by
+\[ g(x) = \frac{f(x) - f(x - 1) + 1}{2}. \]
+Since $f(1) = 0$ and $f(0) = -1$, we have
+\[ g(0) = 0. \tag{9.g1}\label{2012a5-eq9-g1} \]
+By~\eqref{2012a5-eq9-6}, we have
+\[ g(x + 1) = g(x) + 1 \quad \text{for all } x \in R, \tag{9.g2}\label{2012a5-eq9-g2} \]
+By~\eqref{2012a5-eq9-6} and~\eqref{2012a5-eq6-1}, we have
+\[ g(-x) = -g(x) \quad \text{for all } x \in R, \tag{9.g3}\label{2012a5-eq9-g3} \]
+We claim that $g$ is the desired homomorphism.
+
+We first prove that
+\[ f(x) = g(x)^2 - 1 \quad \text{for all } x \in R. \tag{9.g4}\label{2012a5-eq9-g4} \]
+We plug~\eqref{2012a5-eq9-6} to~\eqref{2012a5-eq9-2}.
+After some rearranging, we get
+\[ (f(x) - f(x - 1) - 1)^2 + 4 = 4 f(x), \]
+    which implies~\eqref{2012a5-eq9-g4} after division by $4 = 2^2 \neq 0 \in S$.
+
+Now, by~\eqref{2012a5-eq9-g2},~\eqref{2012a5-eq0} becomes
+\[ (g(xy) + 1)^2 - g(x + y)^2 = (g(x)^2 - 1)(g(y)^2 - 1) \quad \text{for all } x, y \in R. \tag{9.g5}\label{2012a5-eq9-g5} \]
+On the other hand,~\eqref{2012a5-eq6-2} becomes
+\[ (g(xy) - 1)^2 - g(x - y)^2 = (g(x)^2 - 1)(g(y)^2 - 1) \quad \text{for all } x, y \in R. \tag{9.g6}\label{2012a5-eq9-g6} \]
+Subtracting the two equalities and using~\eqref{2012a5-eq9-g2} gives
+\[ 4 g(xy) = g(x + y)^2 - g(x - y)^2 \quad \text{for all } x, y \in R. \tag{9.g7}\label{2012a5-eq9-g7} \]
+Now adding~\eqref{2012a5-eq9-g5} and~\eqref{2012a5-eq9-g6} gives
+\[ 2 g(xy)^2 + 2 - (g(x + y)^2 + g(x - y)^2) = 2 (g(x)^2 - 1)(g(y)^2 - 1). \]
+Multiplying by $2^3 = 8$ and using~\eqref{2012a5-eq9-g7} gives
+\[ (g(x + y)^2 - g(x - y)^2)^2 + 16 = 8(g(x + y)^2 + g(x - y)^2) + 16 (g(x)^2 - 1)(g(y)^2 - 1). \tag{9.g8}\label{2012a5-eq9-g8} \]
+
+Consider the following identity, which holds due to~\eqref{2012a5-eq9-g2}:
+\[ g(x + 1)^2 + g(x - 1)^2 = 2 g(x)^2 + 2 \quad \text{for all } x \in R. \]
+We use this identity as follows.
+Consider~\eqref{2012a5-eq9-g8} with $y$ replaced by $y + 1$ and also by $y - 1$.
+Add the two equations, and then subtract with twice of~\eqref{2012a5-eq9-g8}.
+Due to the above identity, after some heavy rearrangement and simplification, we get
+\[ 8 (g(x + y) + g(x - y))^2 = 32 g(x)^2. \]
+That is, we get
+\[ g(x + y) + g(x - y) = \pm 2 g(x) \quad \text{for all } x, y \in R. \]
+
+We now remove the sign constrain and prove
+\[ g(x + y) + g(x - y) = 2 g(x) \quad \text{for all } x, y \in R. \tag{9.g9}\label{2012a5-eq9-g9} \]
+Suppose for the sake of contradiction that the above equality does not hold for some $x, y \in R$.
+Then we have
+\[ g(x + y) + g(x - y) = -2 g(x) \text{ and } g(x + y + 1) + g(x - y + 1) = -2 g(x + 1), \]
+    since $g(x + y + 1) + g(x - y + 1) = 2 g(x + 1)$ implies~\eqref{2012a5-eq9-g9}.
+The two equalities yield $4 = 0$ in $S$; a contradiction.
+
+Now~\eqref{2012a5-eq9-g3} also yields $g(x + y) - g(x - y) = 2 g(y)$.
+Thus,~\eqref{2012a5-eq9-g7} becomes $4 g(xy) = 4 g(x) g(y)$ for all $x, y \in R$.
+Since $\rchar(S) \neq 2$, we get that
+\[ g(xy) = g(x) g(y) \quad \text{for all } x, y \in R. \tag{9.g10}\label{2012a5-eq9-g10} \]
+
+Finally, we prove that $g$ is additive.
+Plugging $x = 2$ yields $g(2y) = 2g(y)$ for all $y \in R$ since $g(2) = 2$.
+Now replace $x$ and $y$ in~\eqref{2012a5-eq9-g9} with $x + y$ and $x - y$, respectively.
+We get $2 g(x) + 2 g(y) = 2 g(x + y)$, and thus
+\[ g(x) + g(y) = g(x + y) \quad \text{for all } x, y \in R \]
+    since $\rchar(S) \neq 2$.
+Thus $g$ is indeed a ring homomorphism.
+The formula~\eqref{2012a5-eq9-4} now proves that $f$ can be written as $g^2 - 1$, where $g : R \to S$ is a ring homomorphism.
 
 
 
