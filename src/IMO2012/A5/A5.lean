@@ -1,9 +1,6 @@
 import
-  algebra.hom.ring
-  algebra.ring.regular
   ring_theory.ideal.quotient
   logic.lemmas
-  tactic.ring
   IMO2012.A5.explicit_rings.F2
   IMO2012.A5.explicit_rings.F2e
   IMO2012.A5.explicit_rings.F3
