@@ -163,7 +163,7 @@ lemma filter_central_init_card (M n : ℕ) :
 
 lemma filter_central_ends {n : ℕ} {X : GameState n} (h : X.ends) :
   X.central_cards = ∅ :=
-  (filter_eq_empty_iff _).mpr $ λ i h0, nat.not_dvd_of_pos_of_lt i.succ_pos $
+  filter_eq_empty_iff.mpr $ λ i h0, nat.not_dvd_of_pos_of_lt i.succ_pos $
     nat.succ_lt_succ $ mem_range.mp $ ends_iff.mp h h0
 
 /-- The number of moves made has the same parity as `⌊M/n⌋` when the game ends. -/
