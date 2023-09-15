@@ -320,9 +320,6 @@ def period_ideal : ideal R :=
   zero_mem' := λ x, congr_arg f $ zero_add x,
   smul_mem' := λ d c h0, period_mul h h0 d }
 
-lemma period_ideal_le_quasi_period_ideal : period_ideal h ≤ quasi_period_ideal h :=
-  λ _, period_imp_quasi_period h
-
 lemma period_equiv_imp_f_eq {a b : R} (h0 : ideal.quotient.ring_con (period_ideal h) a b) :
   f a = f b :=
   (congr_arg f (sub_add_cancel a b).symm).trans $
@@ -1289,9 +1286,6 @@ lemma add_add_cancel (x y : R) : x + y + y = x :=
 
 lemma sub_eq_add (x y : R) : x - y = x + y :=
   sub_eq_of_eq_add (add_add_cancel h x y).symm
-
-lemma add_add_left_cancel (x y : R) : x + (x + y) = y :=
-  (add_assoc x x y).symm.trans $ (congr_arg (+ y) (add_self h x)).trans (zero_add y)
 
 lemma add_sq (x y : R) : (x + y) ^ 2 = x ^ 2 + y ^ 2 :=
   (add_sq' x y).trans $ (congr_arg (has_add.add _) $
