@@ -8,27 +8,17 @@ namespace IMO2013N1
 /-- Final solution -/
 theorem final_solution (f : ℕ+ → ℕ+) :
   (∀ m n : ℕ+, m * m + f n ∣ m * f m + n) ↔ f = id :=
-begin
-  symmetry; refine ⟨λ h m n, _, λ h, funext (λ n, le_antisymm _ _)⟩,
-  rw h; exact dvd_refl _,
-
+⟨λ h, funext $ λ n, le_antisymm
   ---- `f(n) ≤ n`
-  { replace h := h (f n) n,
-    rw ← mul_add_one at h,
-    replace h := dvd_trans (dvd_mul_right _ _) h,
-    rw [pnat.dvd_iff, pnat.add_coe, pnat.mul_coe, nat.dvd_add_right ⟨_, rfl⟩, ← pnat.dvd_iff] at h,
-    exact pnat.le_of_dvd h },
-
+  (pnat.le_of_dvd $ pnat.dvd_iff.mpr $ (nat.dvd_add_right ⟨(f (f n)), rfl⟩).mp $
+    pnat.dvd_iff.mp $ dvd_trans ⟨f n + 1, (mul_add_one (f n) (f n)).symm⟩ (h (f n) n))
   ---- `f(n) ≥ n`
-  { rcases eq_or_ne n 1 with h | h0,
-    exact le_of_eq_of_le h (f n).one_le,
-    replace h := pnat.le_of_dvd (h n n),
-    generalize_hyp : f n = m at h ⊢; clear f,
-    replace h0 := pnat.exists_eq_succ_of_ne_one h0,
-    rcases h0 with ⟨k, rfl⟩,
-    rwa [add_one_mul, add_right_comm, add_le_add_iff_right,
-         add_one_mul, add_le_add_iff_right, mul_le_mul_iff_left] at h }
-end
+  ((eq_or_ne n 1).elim (λ h, h.trans_le (f n).one_le) $
+    λ h0, exists.elim (pnat.exists_eq_succ_of_ne_one h0) $ λ k h0,
+    let h := pnat.le_of_dvd (h (k + 1) (k + 1)) in
+      by rwa [add_one_mul, add_right_comm, add_le_add_iff_right,
+        add_one_mul, add_le_add_iff_right, mul_le_mul_iff_left, ← h0] at h),
+λ h m n, h.symm ▸ dvd_refl _⟩
 
 end IMO2013N1
 end IMOSL
