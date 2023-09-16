@@ -1,4 +1,4 @@
-import data.nat.choose.basic data.nat.gcd.basic tactic.norm_num
+import data.nat.choose.basic data.nat.gcd.basic
 
 /-! # IMO 2015 N2 -/
 
