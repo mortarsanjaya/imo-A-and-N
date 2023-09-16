@@ -1,88 +1,67 @@
-import data.int.basic data.pi.algebra
+import data.int.order.basic
 
 /-! # IMO 2015 A2 -/
 
 namespace IMOSL
 namespace IMO2015A2
 
-def fn_eq (f : ℤ → ℤ) := ∀ x y : ℤ, f (x - f y) = f (f x) - f y - 1
+def good (f : ℤ → ℤ) := ∀ x y : ℤ, f (x - f y) = f (f x) - f y - 1
 
 
 
-namespace extra
 
-/-- Deduce linearity from f(x + 1) - f(x) being constant -/
-lemma fn_linear_diff {f : ℤ → ℤ} {c : ℤ} (h : ∀ x : ℤ, f (x + 1) = f x + c) :
-  ∀ x : ℤ, f x = c * x + f 0 :=
-begin
-  suffices : ∀ (x : ℤ) (n : ℕ), f (x + ↑n) = f x + c * ↑n,
-  { intros x,
-    rcases int.eq_coe_or_neg x with ⟨n, rfl | rfl⟩,
-    rw [add_comm, ← this, zero_add],
-    rw [add_comm, mul_neg, eq_add_neg_iff_add_eq, ← this, neg_add_self] },
-  intros x n,
-  induction n with n n_ih,
-  rw [int.coe_nat_zero, mul_zero, add_zero, add_zero],
-  rw [int.coe_nat_succ, ← add_assoc, h, n_ih, mul_add_one, add_assoc]
-end
 
-/-- A criterion for two linear polynomials to be equal -/
-lemma linear_eq_match {a b c d : ℤ} (h : ∀ x : ℤ, a * x + b = c * x + d) : a = c ∧ b = d :=
-begin
-  have h0 := h 0,
-  rw [mul_zero, mul_zero, zero_add, zero_add] at h0,
-  have h1 := h 1,
-  rw [mul_one, mul_one, h0, add_left_inj] at h1,
-  exact and.intro h1 h0
-end
+lemma add_one_is_good : good (λ x : ℤ, x + 1) :=
+  λ x y, eq.symm $ (sub_sub _ _ _).trans $
+    (add_sub_add_right_eq_sub _ _ _).trans $ add_sub_right_comm _ _ _
 
-end extra
+lemma const_neg_one_is_good : good (λ _ : ℤ, -1) :=
+  λ _ _, (sub_eq_neg_self.mpr $ sub_self (-1)).symm
 
 
 
-section results
+section lemmas
 
-variables {f : ℤ → ℤ} (feq : fn_eq f)
-include feq
+variables {f : ℤ → ℤ} (h : good f)
+include h
 
-private lemma fn_lem1 (x : ℤ) : f (f x) = f (x + 1) :=
-begin
-  have h := feq 0 (f 0),
-  rw [zero_sub, sub_self, zero_sub] at h,
-  have h0 := feq x (-f (f 0)),
-  rwa [h, sub_neg_eq_add, sub_neg_eq_add, add_sub_cancel, eq_comm] at h0
-end
+lemma map_map_eq_map_add_one (x : ℤ) : f (x + 1) = f (f x) :=
+  let A := 0 - f (f 0), h0 : f A = -1 := (h 0 (f 0)).trans $ sub_eq_neg_self.mpr (sub_self _) in
+    (congr_arg f $ (congr_arg2 _ rfl h0).trans $ sub_neg_eq_add x 1).symm.trans $
+      (h x A).trans $ sub_eq_of_eq_add $ h0.symm ▸ sub_neg_eq_add _ _
 
-private lemma fn_lem2 : ∀ x : ℤ, f x = (f (-1) + 1) * x + f 0 :=
-begin
-  apply extra.fn_linear_diff; intros x,
-  rw [add_comm (f x), ← sub_eq_iff_eq_add, ← sub_eq_iff_eq_add, ← fn_lem1 feq, ← feq,
-      ← sub_add_cancel (x - f x) 1, ← fn_lem1 feq, sub_sub, add_comm, ← sub_sub, feq,
-      fn_lem1 feq, sub_add_cancel, sub_self, zero_sub]
-end
+lemma map_is_linear : ∀ x : ℤ, f x = f 0 + (f (-1) + 1) * x :=
+let A := f (-1) + 1 in suffices ∀ x, f (x + 1) = f x + A,
+  from λ x, int.induction_on' x 0 (A.mul_zero.symm ▸ (f 0).add_zero.symm)
+    (λ k _ h0, (this k).trans $ h0.symm ▸
+      (mul_add_one A k).symm ▸ int.add_assoc _ _ _)
+    (λ k _ h0, (sub_eq_of_eq_add $ this (k - 1)).symm.trans $ (mul_sub_one A k).symm ▸
+      (sub_add_cancel k 1).symm ▸ h0.symm ▸ add_sub_assoc _ _ _),
+λ x, let h0 := map_map_eq_map_add_one h in suffices f (x - f x) = f (-1),
+  from (h0 x).trans $ eq_add_of_sub_eq' $ eq_add_of_sub_eq $ (h x x).symm.trans this,
+suffices f (x - f x - 1) = -1, from sub_add_cancel (x - f x) 1 ▸ congr_arg f this ▸ h0 _,
+  (congr_arg f $ sub_right_comm x 1 (f x)).symm.trans $ (h _ x).trans $ sub_eq_neg_self.mpr $
+    sub_eq_zero_of_eq $ (h0 _).symm.trans $ congr_arg f $ sub_add_cancel x 1
 
-end results
+end lemmas
+
+
 
 
 
 /-- Final solution -/
-theorem final_solution (f : ℤ → ℤ) :
-  fn_eq f ↔ f = -1 ∨ f = (+ 1) :=
-begin
-  split,
-  { intros feq,
-    have h := fn_lem2 feq,
-    cases eq_or_ne (f (-1) + 1) 0 with h0 h0,
-    { simp only [h0, zero_mul, zero_add] at h,
-      left; funext x,
-      rw [h, ← h (-1), pi.neg_apply, pi.one_apply, ← add_eq_zero_iff_eq_neg, h0] },
-    { right; funext x,
-      have h1 := fn_lem1 feq x,
-      rw [h, h (x + 1), add_left_inj] at h1,
-      exact int.eq_of_mul_eq_mul_left h0 h1 } },
-  { rintros (rfl | rfl) x y; simp,
-    rw [← add_sub_right_comm, sub_sub] }
-end
+theorem final_solution {f : ℤ → ℤ} : good f ↔ f = (λ _, -1) ∨ f = (λ x : ℤ, x + 1) :=
+⟨λ h, let h0 := map_is_linear h in (eq_or_ne (f (-1) + 1) 0).imp
+  ---- Case 1: `f(-1) + 1 = 0`, thus `f` is constant
+  (λ h1, suffices ∀ x, f x = f 0,
+    from funext $ λ x, (this x).trans $ (this (-1)).symm.trans $ eq_neg_of_add_eq_zero_left h1,
+  λ x, (h0 x).trans $ add_right_eq_self.mpr $ mul_eq_zero_of_left h1 x)
+  ---- Case 2: `f(-1) + 1 ≠ 0`, thus `f` is injective
+  (λ h1, suffices function.injective f,
+    from funext $ λ x, this (map_map_eq_map_add_one h x).symm,
+  λ a b h, mul_right_injective₀ h1 $ add_right_injective (f 0) $
+    (h0 a).symm.trans $ h.trans $ h0 b),
+λ h, h.elim (λ h, h.symm ▸ const_neg_one_is_good) (λ h, h.symm ▸ add_one_is_good)⟩
 
 end IMO2015A2
 end IMOSL
