@@ -16,34 +16,33 @@ lemma nat_decreasing_induction_zero {P : ℕ → Prop} (h : ∃ N : ℕ, ∀ n :
   (h0 : ∀ n, (∀ k, n < k → P k) → P n) : ∀ n : ℕ, P n :=
 suffices ∀ n : ℕ, 0 ≤ n → P n, from λ n, this n n.zero_le,
 exists.elim h $ λ N h, nat.decreasing_induction
-  (λ t h1 n h2, (lt_or_eq_of_le h2).elim (h1 n) $ λ h2, cast (congr_arg P h2) $ h0 t h1)
-  N.zero_le h
+  (λ t h1 n h2, h2.lt_or_eq.elim (h1 n) $ λ h2, h2 ▸ h0 t h1) N.zero_le h
 
 /-- For some reason, this lemma is nowhere to be found in mathlib. -/
 lemma function_End_pow_eq_iterate {α : Type*} (f : function.End α) : ∀ k : ℕ, f ^ k = (f^[k])
 | 0 := rfl
-| (k+1) := by rw [pow_succ, iterate_succ', function_End_pow_eq_iterate]; refl
+| (k+1) := eq.symm $ (f.iterate_succ' k).trans $ function_End_pow_eq_iterate k ▸ rfl
 
 lemma strict_mono_eq_at_large_comm {f g : ℕ → ℕ} (hf : strict_mono f) (hg : strict_mono g)
   (h : ∃ N : ℕ, ∀ n : ℕ, N ≤ n → f n = g n) (h0 : f ∘ g = g ∘ f) : f = g :=
   funext $ nat_decreasing_induction_zero h $
-    λ n h, (lt_or_eq_of_le $ hf.id_le n).elim
+    λ n h, (hf.id_le n).lt_or_eq.elim
       (λ h1, hf.injective $ (h (f n) h1).trans $ congr_fun h0.symm n) $
-      λ h1, (eq_or_lt_of_le $ hg.id_le n).elim h1.symm.trans
+      λ h1, (hg.id_le n).eq_or_lt.elim h1.symm.trans
         (λ h2, hg.injective $ (congr_fun h0.symm n).trans $ h (g n) h2)
 
 lemma strict_mono_iterate_comm_at_large {f g : ℕ → ℕ} {N : ℕ}
   (hf : strict_mono f) (h : ∀ n : ℕ, N < n → f (g n) = g (f n)) :
   ∀ k n : ℕ, N < n → (f^[k]) (g n) = g (f^[k] n)
 | 0 n _ := rfl
-| (k+1) n h0 := (iterate_succ_apply f k $ g n).trans $ (congr_arg _ $ h n h0).trans $
+| (k+1) n h0 := (iterate_succ_apply f k (g n)).trans $ (congr_arg _ $ h n h0).trans $
     (strict_mono_iterate_comm_at_large k (f n) $ h0.trans_le $ hf.id_le n).trans $
       congr_arg g (iterate_succ_apply f k n).symm
 
 lemma strict_mono_comm_of_comm_at_large_of_iter_comm {f g : ℕ → ℕ} 
   (hf : strict_mono f) {k : ℕ} (h : 0 < k) (h0 : (f^[k]) ∘ g = g ∘ (f^[k]))
   (h1 : ∃ N : ℕ, ∀ n : ℕ, N ≤ n → f (g n) = g (f n)) : f ∘ g = g ∘ f :=
-funext $ nat_decreasing_induction_zero h1 $ λ n h1, (eq_or_lt_of_le $ hf.id_le n).elim
+funext $ nat_decreasing_induction_zero h1 $ λ n h1, (hf.id_le n).eq_or_lt.elim
 ---- Case 1: `f(n) = n`
 (λ h2, begin
   rw [comp_app, comp_app, ← h2],
@@ -89,7 +88,8 @@ lemma nth_prop_inj {p q : ℕ → Prop}
 end classical
 
 lemma nat_finset_infinite_compl (X : finset ℕ) : {n : ℕ | n ∉ X}.infinite :=
-  by have h := (X : set ℕ).to_finite.infinite_compl; rwa set.compl_def at h
+  (X : set ℕ).compl_def ▸ (X : set ℕ).to_finite.infinite_compl
+  -- by have h := (X : set ℕ).to_finite.infinite_compl; rwa set.compl_def at h
 
 end extra_lemmas
 
