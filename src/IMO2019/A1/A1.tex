@@ -45,9 +45,12 @@ It is easy to check that $n \mapsto 0$ and $n \mapsto Nn + c$ satisfies~\eqref{2
 Start by substituting $(a, b) = (0, n + 1)$ and $(a, b) = (1, n)$ into~\eqref{2019a1-eq0}.
 Comparing the two obtained equalities give us
 \[ f(N) + N f(n) = f(0) + N f(n + 1) \implies f(n + 1) - f(n) = \frac{f(N) - f(0)}{N}. \]
-Standard induction on both sides reveal that $f$ is linear, i.e. $f(n) = qn + c$ for some $q, c \in \Z$.
+Standard induction on both sides reveal that $f$ is linear.
+That is, there exists $q, c \in \Z$ such that $f(n) = qn + c$ for all integers $n$.
+
 Finally, substitute this equality and $b = 0$ into~\eqref{2019a1-eq0}.
-The equation reduces to $qNa + c + Nc = q(qa + c) + c \iff N(qa + c) = q(qa + c)$ for all $a \in \Z$.
+The equation reduces to
+\[ qNa + c + Nc = q(qa + c) + c \implies N(qa + c) = q(qa + c) \quad \text{for all } a \in \Z. \]
 In particular, we have either $q = N$ or $f(a) = qa + c = 0$ for all $a \in \Z$.
 The former also yields the solution $f(x) = Nx + c$.
 

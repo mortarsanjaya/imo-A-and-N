@@ -1,82 +1,72 @@
 import
-  algebra.order.ring.defs
   algebra.order.group.min_max
-  algebra.group_power.lemmas 
+  algebra.group_power.lemmas
   data.multiset.fold
-  tactic.nth_rewrite
 
 /-! # IMO 2019 A2 -/
 
 namespace IMOSL
 namespace IMO2019A2
 
-open multiset function
+open multiset 
 
 variables {R : Type*} [linear_ordered_comm_ring R]
 
+set_option profiler true
+set_option profiler.threshold 0.04
 
 
 section results
 
-private lemma lem1 (a : multiset R) : ∀ x : R, x ∈ a → x ≤ a.fold max 0 :=
-begin
-  refine multiset.induction_on a (λ x h, h.rec _) _,
-  clear a; intros x a h y h0,
-  rw multiset.mem_cons at h0,
-  rw [fold_cons_left, le_max_iff],
-  exact h0.imp le_of_eq (h y)
-end
+lemma le_fold_max_of_mem (S : multiset R) : ∀ x : R, x ∈ S → x ≤ S.fold max 0 :=
+  multiset.induction_on S (λ x h, h.elim) $ λ a S h x h0,
+    (le_max_iff.mpr $ (mem_cons.mp h0).imp le_of_eq (h x)).trans_eq
+    (S.fold_cons_left _ _ _).symm 
 
-private lemma lem2 (a : multiset R) : 0 ≤ a.fold max 0 :=
-  multiset.induction_on a (le_of_eq rfl) $ λ x s h, h.trans $
-    (le_max_right x $ fold max 0 s).trans_eq (fold_cons_left max 0 x s).symm
+lemma zero_le_fold_max (S : multiset R) : 0 ≤ S.fold max 0 :=
+  multiset.induction_on S (le_refl 0) $ λ x S h, h.trans $
+    (le_max_right x $ S.fold max 0).trans_eq (S.fold_cons_left max 0 x).symm
 
-private lemma lem3 {a : multiset R} : (∀ x : R, x ∈ a → x ≤ 0) → a.fold max 0 = 0 :=
-  multiset.induction_on a (λ _, rfl) $ λ x s h h0,
-    by rw [fold_cons_left, h (λ x h1, h0 x $ mem_cons_of_mem h1)];
-      exact max_eq_right (h0 x $ mem_cons_self x s)
+lemma fold_max_eq_of_all_le {S : multiset R} : (∀ x : R, x ∈ S → x ≤ 0) → S.fold max 0 = 0 :=
+  multiset.induction_on S (λ _, rfl) $ λ x S h h0, let h0 := forall_mem_cons.mp h0 in
+    (S.fold_cons_left _ _ _).trans $ (h h0.2).symm ▸ max_eq_right h0.1
 
-private lemma lem4 (a : multiset R) : -a.fold min 0 = (a.map has_neg.neg).fold max 0 :=
-  multiset.induction_on a neg_zero $ λ x s h,
-    by rw [map_cons, fold_cons_left, fold_cons_left, ← h, max_neg_neg]
+lemma fold_max_map_neg_eq_neg_fold_min (S : multiset R) :
+  (S.map has_neg.neg).fold max 0 = -S.fold min 0 :=
+  multiset.induction_on S neg_zero.symm $ λ x S h,
+    (S.map_cons has_neg.neg x).symm ▸ (S.fold_cons_left min 0 x).symm ▸
+    ((S.map has_neg.neg).fold_cons_left max 0 (-x)).symm ▸ h.symm ▸ max_neg_neg _ _
 
 variables {a : multiset R} (ha : ∀ x : R, x ∈ a → 0 ≤ x)
 include ha
 
-private lemma lem5 : a.sum ≤ a.card * a.fold max 0 :=
-  (sum_le_sum_map (const R $ a.fold max 0) (lem1 a)).trans_eq $
-    by rw [map_const, sum_replicate, nsmul_eq_mul]
-
-private lemma lem6 : (a.map $ λ c, c ^ 2).sum ≤ a.sum * a.fold max 0 :=
-  le_of_le_of_eq (sum_map_le_sum_map _ _ $ 
-    λ x h, le_of_eq_of_le (sq x) $ mul_le_mul_of_nonneg_left (lem1 a x h) (ha x h))
-  (by rw [sum_map_mul_right, map_id'])
+lemma sum_map_sq_le_sum_mul_max : (a.map $ λ c, c ^ 2).sum ≤ a.sum * a.fold max 0 :=
+  (sum_map_le_sum_map _ _ $ λ x h, (sq x).trans_le $
+    mul_le_mul_of_nonneg_left (le_fold_max_of_mem a x h) (ha x h)).trans_eq $
+  sum_map_mul_right.trans $ congr_arg2 _ (congr_arg multiset.sum a.map_id') rfl
 
 variables {b : multiset R} (hb : ∀ x : R, x ∈ b → 0 ≤ x) 
 include hb
 
-private lemma lem7 : fold max 0 (a + map has_neg.neg b) = fold max 0 a :=
-begin
-  nth_rewrite 0 ← max_self (0 : R),
-  rw [fold_add, max_eq_left_iff],
-  refine le_of_eq_of_le (lem3 $ λ x h0, _) (lem2 a),
-  rw mem_map at h0; rcases h0 with ⟨c, h0, rfl⟩,
-  exact neg_nonpos.mpr (hb c h0)
-end
+lemma lem1 : fold max 0 (a + map has_neg.neg b) = fold max 0 a :=
+  (congr_arg2 (fold max) (max_self _).symm rfl).trans $ (fold_add _ _ _ _ _).trans $
+    max_eq_left $ (fold_max_eq_of_all_le $ λ x h0, exists.elim (mem_map.mp h0) $
+      λ c h0, h0.2.symm.trans_le $ neg_nonpos.mpr (hb c h0.1)).trans_le (zero_le_fold_max a)
 
 
 variables (h : a.sum = b.sum)
 include h
 
-private lemma lem8 : (a.map (λ c, c ^ 2)).sum ≤ (b.card : R) * (a.fold max 0 * b.fold max 0) :=
-  by rw [mul_comm (a.fold max 0), ← mul_assoc];
-    exact (lem6 ha).trans (mul_le_mul_of_nonneg_right (le_of_eq_of_le h $ lem5 hb) (lem2 a))
+lemma lem2 : (a.map (λ c, c ^ 2)).sum ≤ b.card • (a.fold max 0 * b.fold max 0) :=
+  (sum_map_sq_le_sum_mul_max ha).trans $ mul_comm (b.fold max 0) (a.fold max 0) ▸
+    smul_mul_assoc b.card (b.fold max 0) (a.fold max 0) ▸ mul_le_mul_of_nonneg_right
+      (h.trans_le $ b.sum_le_card_nsmul _ (le_fold_max_of_mem b)) (zero_le_fold_max a)
 
 /-- The intermediate big result -/
 theorem final_solution' : (a.map (λ c, c ^ 2)).sum + (b.map (λ c, c ^ 2)).sum
-    ≤ (a.card + b.card : R) * (a.fold max 0 * b.fold max 0) :=
-  (add_le_add (lem8 ha hb h) (lem8 hb ha h.symm)).trans_eq $
-    by rw [mul_comm (b.fold max 0), ← add_mul, add_comm]
+    ≤ (a.card + b.card) • (a.fold max 0 * b.fold max 0) :=
+  (add_le_add (lem2 ha hb h) (lem2 hb ha h.symm)).trans_eq $ add_comm b.card a.card ▸
+    mul_comm (fold max 0 a) (fold max 0 b) ▸ (add_nsmul _ _ _).symm
 
 end results
 
@@ -88,7 +78,7 @@ open_locale classical
 
 /-- Final solution -/
 theorem final_solution {u : multiset R} (h : u.sum = 0) :
-  (u.card : R) * (u.fold min 0 * u.fold max 0) ≤ -(u.map $ λ c, c ^ 2).sum :=
+  u.card • (u.fold min 0 * u.fold max 0) ≤ -(u.map $ λ c, c ^ 2).sum :=
 begin
   obtain ⟨a, b, ha, hb, rfl⟩ : ∃ a b : multiset R,
     (∀ x : R, x ∈ a → 0 ≤ x) ∧ (∀ x : R, x ∈ b → 0 ≤ x) ∧ a + b.map has_neg.neg = u :=
@@ -101,13 +91,12 @@ begin
   end,
 
   rw [sum_add, sum_map_neg, map_id', add_neg_eq_zero] at h,
-  rw [card_add, card_map, multiset.map_add, map_map, le_neg,
-      ← mul_neg, ← neg_mul, nat.cast_add, sum_add],
-  conv_lhs { congr, skip, congr, simp only [comp_app, neg_sq] },
-  rw [mul_comm (-(fold min (0 : R) _)), lem7 ha hb, lem4],
-  refine le_of_le_of_eq (final_solution' ha hb h)
-    (congr_arg (has_mul.mul _) $ congr_arg (has_mul.mul $ fold max 0 a) _),
-  rw [multiset.map_add, map_map, neg_comp_neg, map_id, add_comm, lem7 hb ha]
+  rw [card_add, card_map, multiset.map_add, map_map, le_neg, ← neg_nsmul, ← neg_mul, sum_add],
+  simp only [function.comp_app, neg_sq],
+  rw [mul_comm (-(fold min (0 : R) _)), lem1 ha hb, ← fold_max_map_neg_eq_neg_fold_min],
+  refine (final_solution' ha hb h).trans_eq
+    (congr_arg (has_smul.smul _) $ congr_arg (has_mul.mul $ fold max 0 a) _),
+  rw [multiset.map_add, map_map, neg_comp_neg, map_id, add_comm, lem1 hb ha]
 end
 
 end IMO2019A2

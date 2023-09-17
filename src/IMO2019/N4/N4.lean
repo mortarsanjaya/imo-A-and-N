@@ -113,6 +113,7 @@ end) $
     ((h p n $ h1.1.trans_le le_self_add).trans $ dvd_of_eq _),
   rw [f_prime_large h h2 (le_of_lt h1.1) (h0.trans_lt h2.pos), h0, zero_mul, mul_zero, add_zero]
 end)
+---- `f(1) > 0`
 (λ h0 h1, begin
   rcases nat.exists_infinite_primes (max C $ max (f n) (f 1 * n)).succ with ⟨p, h2, h3⟩,
   rw [nat.succ_le_iff, max_lt_iff, max_lt_iff] at h2,
@@ -134,7 +135,7 @@ end results
 /-- Final solution -/
 theorem final_solution {C : ℕ} {f : ℕ → ℕ} : good C f ↔ ∃ k : ℕ, f = has_mul.mul k :=
 ⟨λ h, ⟨f 1, funext $ f_is_linear h⟩,
-λ h, exists.elim h $ λ k h, cast (congr_arg _ h.symm) (linear_is_good C k)⟩
+λ h, exists.elim h $ λ k h, h.symm ▸ linear_is_good C k⟩
 
 
 
@@ -196,7 +197,7 @@ lemma pnat_good_imp_linear {C : ℕ+} {f : ℕ+ → ℕ+} (h : pnat_good C f) (n
 theorem final_solution_pnat {C : ℕ+} {f : ℕ+ → ℕ+} :
   (∀ a b : ℕ+, C < a + b → a + f b ∣ a ^ 2 + b * f a) ↔ ∃ k : ℕ+, f = has_mul.mul k :=
 ⟨λ h, ⟨f 1, funext $ pnat_good_imp_linear h⟩,
-λ h, exists.elim h $ λ k h, cast (congr_arg _ h.symm) (pnat_linear_is_good C k)⟩
+λ h, exists.elim h $ λ k h, h.symm ▸ pnat_linear_is_good C k⟩
 
 end IMO2019N4
 end IMOSL
