@@ -15,12 +15,14 @@ def good (f g : ℕ → ℕ) :=
 
 
 lemma good_id_zero : good id (λ _, 0) :=
-  λ k, congr_arg nat.succ $ congr_arg _ $ iterate_succ_apply' _ k k
+  λ k, congr_arg nat.succ $ congr_arg _ (iterate_succ_apply' _ k k)
 
 lemma eq_zero_of_good_id {g : ℕ → ℕ} (h : good id g) : g = λ _, 0 :=
-suffices ∀ k, g^[k + 1] k + g (k + 1) = 0, from funext $ λ k,
-  match k with | 0 := nat.eq_zero_of_add_eq_zero_right $ this 0
-    | (k+1) := nat.eq_zero_of_add_eq_zero_left $ this k end,
+suffices ∀ k, g^[k + 1] k + g (k + 1) = 0,
+  from funext $ λ k, match k with
+  | 0 := nat.eq_zero_of_add_eq_zero_right $ this 0
+  | (k+1) := nat.eq_zero_of_add_eq_zero_left $ this k
+  end,
 λ k, nat.add_left_cancel $ nat.add_right_cancel $ (h k).trans $
   (congr_arg nat.succ $ (congr_fun (iterate_id _) _ : id^[g k + 2] k = k)).symm
 
@@ -49,7 +51,7 @@ lemma f_strict_mono : strict_mono f :=
   strict_mono_nat_of_lt_succ $ λ n, (h n).trans_le' $ le_iterate_self h (f n) (g n + 1)
 
 lemma main_ineq_imp_eq_id : f = id :=
-  let h0 := f_strict_mono h in funext $ λ k, eq.symm $ (strict_mono.id_le h0 k).antisymm $
+  let h0 := f_strict_mono h in funext $ λ k, (strict_mono.id_le h0 k).antisymm' $
     nat.le_of_lt_succ $ h0.lt_iff_lt.mp $ (h k).trans_le' $ le_iterate_self h _ (g k)
 
 end main_ineq
@@ -58,9 +60,9 @@ end main_ineq
 
 /-- Final solution -/
 theorem final_solution {f g : ℕ → ℕ} : good f g ↔ f = id ∧ g = λ _, 0 :=
-  ⟨λ h, (and_iff_left_of_imp $ λ h0, eq_zero_of_good_id $ cast (congr_arg2 _ h0 rfl) h).mpr
-    (main_ineq_imp_eq_id $ good_imp_main_ineq h),
-  λ h, cast (congr_arg2 _ h.1.symm h.2.symm) good_id_zero⟩
+  ⟨λ h, let h0 := main_ineq_imp_eq_id (good_imp_main_ineq h) in
+    ⟨h0, eq_zero_of_good_id $ h0 ▸ h⟩,
+  λ h, h.1.symm ▸ h.2.symm ▸ good_id_zero⟩
 
 
 
@@ -103,10 +105,10 @@ theorem final_solution_pnat {f g : ℕ+ → ℕ+} : good_pnat f g ↔ f = id ∧
   good_pnat_iff_good.trans $ final_solution.trans $ and_congr
     ⟨λ h, funext $ λ k, pnat.nat_pred_injective $ eq.symm $ (congr_fun h k.nat_pred).symm.trans $
         congr_arg pnat.nat_pred $ congr_arg f k.succ_pnat_nat_pred,
-      λ h, funext $ λ k, by rw h; exact k.nat_pred_succ_pnat⟩
+      λ h, funext $ λ k, h.symm ▸ k.nat_pred_succ_pnat⟩
     ⟨λ h, funext $ λ k, pnat.nat_pred_injective $ eq.symm $ (congr_fun h k.nat_pred).symm.trans $
         congr_arg pnat.nat_pred $ congr_arg g k.succ_pnat_nat_pred,
-      λ h, funext $ λ k, by rw h; refl⟩
+      λ h, funext $ λ k, h.symm ▸ rfl⟩
 
 end IMO2011A4
 end IMOSL
