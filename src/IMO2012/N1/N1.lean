@@ -44,8 +44,8 @@ theorem final_solution {R : Type*} [comm_ring R] (x y : R) :
 λ h A h0 h1 h2, suffices (1 : R) ∈ A,
   from λ x, mul_one x ▸ (one_pow 2 : (1 : R) ^ 2 = 1) ▸ admissible_mem_sq_mul h0 this x,
 exists.elim (h.pow : is_coprime (x ^ 2) (y ^ 2)) $ λ a h, exists.elim h $ λ b h,
-  let h0 := admissible_add_sq h0 (admissible_mem_sq_mul h0 h1 a)
-    (admissible_mem_sq_mul h0 h2 b) in by rwa [h, one_pow] at h0⟩
+  (one_pow 2 : (1 : R) ^ 2 = 1) ▸ h ▸ admissible_add_sq h0
+    (admissible_mem_sq_mul h0 h1 a) (admissible_mem_sq_mul h0 h2 b)⟩
 
 end IMO2012N1
 end IMOSL
