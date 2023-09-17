@@ -5,6 +5,11 @@ import logic.relation algebra.big_operators.multiset.basic data.nat.parity data.
 namespace IMOSL
 namespace IMO2022C6
 
+/-
+set_option profiler true
+set_option profiler.threshold 0.05
+-/
+
 open function relation multiset
 
 /- ### Extra lemmas -/
@@ -48,11 +53,11 @@ theorem add_right (A : multiset ℕ) :
   ∀ {B C : multiset ℕ}, legal_op B C → legal_op (B + A) (C + A) := 
 induction
 (λ a b c X, by iterate 5 { rw cons_add }; exact move_pebble a b c (X + A))
-(λ X, cast (congr_arg2 _ (cons_add 0 X A).symm rfl) $ remove_zero (X + A))
+(λ X, (cons_add 0 X A).symm ▸ remove_zero (X + A))
 
 theorem add_left (A : multiset ℕ) {B C : multiset ℕ} (h : legal_op B C) :
   legal_op (A + B) (A + C) := 
-  cast (congr_arg2 _ (add_comm B A) (add_comm C A)) (add_right A h)
+  add_comm B A ▸ add_comm C A ▸ add_right A h
 
 theorem cons_congr (a : ℕ) {B C : multiset ℕ} (h : legal_op B C) :
   legal_op (a ::ₘ B) (a ::ₘ C) := 
@@ -63,7 +68,7 @@ theorem map_mul_left (m : ℕ) : ∀ {A B : multiset ℕ}, legal_op A B →
 induction
 (λ a b c X, by iterate 5 { rw map_cons }; rw [mul_left_comm, mul_add, mul_add];
   exact move_pebble (m * a) (m * b) (m * c) _)
-(λ X, by rw [map_cons, mul_zero]; exact remove_zero _)
+(λ X, (X.map_cons (has_mul.mul m) 0).symm ▸ remove_zero _)
 
 theorem sum_eq : ∀ {A B : multiset ℕ}, legal_op A B → A.sum = B.sum :=
 induction
@@ -75,7 +80,7 @@ induction
 
 theorem succ_two_to_self_two_one (n : ℕ) (X : multiset ℕ) :
   legal_op (n.succ ::ₘ 2 ::ₘ X) (n ::ₘ 2 ::ₘ 1 ::ₘ X) :=
-  cast (congr_arg _ $ congr_arg _ $ cons_swap 1 2 X) (move_pebble n 1 1 X)
+  cons_swap 1 2 X ▸ move_pebble n 1 1 X
 
 theorem exists_two_cons_right {X : multiset ℕ} (h : ∀ a, a ∈ X → a ≠ 0) (h0 : 1 < X.card) :
   ∃ Y : multiset ℕ, legal_op X (2 ::ₘ Y) :=
@@ -133,7 +138,7 @@ theorem remove_zero (X : multiset ℕ) : is_reachable (0 ::ₘ X) X :=
   refl_trans_gen.single $ legal_op.remove_zero X
 
 theorem congr {A B : multiset ℕ} (h : A = B) : is_reachable A B :=
-  cast (congr_arg2 is_reachable rfl h) refl_trans_gen.refl
+  h ▸ refl_trans_gen.refl
 
 theorem add_right (A : multiset ℕ) {B C : multiset ℕ} (h : is_reachable B C) :
   is_reachable (B + A) (C + A) := 
@@ -142,7 +147,7 @@ theorem add_right (A : multiset ℕ) {B C : multiset ℕ} (h : is_reachable B C)
 
 theorem add_left (A : multiset ℕ) {B C : multiset ℕ} (h : is_reachable B C) :
   is_reachable (A + B) (A + C) := 
-  cast (congr_arg2 _ (add_comm B A) (add_comm C A)) (add_right A h)
+  add_comm B A ▸ add_comm C A ▸ add_right A h
 
 theorem add_congr {A B C D : multiset ℕ} (h : is_reachable A B) (h0 : is_reachable C D) :
   is_reachable (A + C) (B + D) :=
@@ -235,16 +240,15 @@ from λ X h, exists.elim (exists_reachable_no_zero X) $ λ Y h0,
   h0.1.trans $ this h0.2 $ (sum_eq h0.1).symm.trans h,
 λ X h h0, (le_or_lt X.card 1).elim
 ---- Case 1: `|X| ≤ 1`
-(λ h1, begin
-  rw [nat.le_add_one_iff, le_zero_iff, card_eq_zero, zero_add, card_eq_one] at h1,
-  rcases h1 with rfl | ⟨a, rfl⟩,
-  exact absurd h0.symm (pow_ne_zero k $ nat.succ_ne_zero 1),
-  exact congr (congr_arg singleton h0)
-end)
+(λ h1, (nat.le_add_one_iff.mp h1).elim
+  (λ h1, absurd h0.symm $ (card_eq_zero.mp $ le_zero_iff.mp h1).symm ▸
+    pow_ne_zero k $ nat.succ_ne_zero 1)
+  (λ h1, congr $ exists.elim (card_eq_one.mp h1) $ λ a h1,
+    h1.trans $ congr_arg singleton $ h0 ▸ h1.symm ▸ rfl))
 ---- Case 2: `|X| > 1`
-(λ h1, begin
-  cases legal_op.exists_two_cons_right h h1 with Y h2,
-  refine ((to_cons_two_replicate_one Y).head h2).trans _,
+(λ h1, exists.elim (legal_op.exists_two_cons_right h h1) $ λ Y h2,
+  ((to_cons_two_replicate_one Y).head h2).trans $
+begin
   rw [h2.sum_eq, sum_cons] at h0,
   cases k, exact absurd h0.symm (nat.lt_add_right _ _ _ $ nat.lt_succ_self 1).ne,
   obtain ⟨N, h3⟩ : 2 ∣ Y.sum := by rw [← nat.dvd_add_right (dvd_refl 2), h0];
@@ -253,8 +257,7 @@ end)
       or_iff_left (nat.succ_ne_zero 1)] at h0,
   rw h3; refine (cons_right 2 $ replicate_two_mul_left_to_right N 1).trans _,
   rw [mul_one, ← replicate_succ, h0],
-  exact cast (congr_arg2 _ rfl $ congr_arg singleton (pow_succ' 2 k).symm)
-    (replicate_two_pow_to_singleton 2 k)
+  exact (pow_succ' 2 k).symm ▸ replicate_two_pow_to_singleton 2 k
 end)
 
 theorem sum_eq_two_pow_mul_to_singleton_of_dvd_all {k m : ℕ} (h : m ≠ 0) {X : multiset ℕ}
@@ -262,8 +265,7 @@ theorem sum_eq_two_pow_mul_to_singleton_of_dvd_all {k m : ℕ} (h : m ≠ 0) {X 
 begin
   rcases multiset_exists_map_mul_of_dvd_all h1 with ⟨Y, rfl⟩,
   rw [sum_map_mul_left, map_id', mul_comm, mul_eq_mul_right_iff, or_iff_left h] at h0,
-  exact cast (congr_arg2 _ rfl $ congr_arg singleton $ m.mul_comm _)
-    ((sum_eq_two_pow_to_singleton h0).map_mul_left m)
+  exact m.mul_comm (2 ^ k) ▸ (sum_eq_two_pow_to_singleton h0).map_mul_left m
 end
 
 

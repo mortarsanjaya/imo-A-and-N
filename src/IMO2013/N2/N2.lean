@@ -15,12 +15,11 @@ def good (k c : ℕ) := ∀ n : ℕ, 0 < n →
 /-- Base case. -/
 theorem good_zero_zero : good 0 0 :=
   λ n h, ⟨0, ⟨card_zero, λ m h, absurd h $ not_mem_zero m⟩,
-    by rw [multiset.map_zero, prod_zero, nat.cast_zero, add_zero];
-      exact div_self (ne_of_gt $ nat.cast_pos.mpr h)⟩
+    (congr_arg2 _ (add_zero _) rfl).trans $ div_self $ (nat.cast_pos.mpr h).ne.symm⟩
 
 /-- Induction step, presented in a more general setting. -/
 theorem good_succ_bit1_of_good {k c : ℕ} (h : good k c) : good (k + 1) (2 * c + 1) :=
-  λ n h0, 
+  λ n h0,
 begin
   rcases n.even_or_odd' with ⟨t, rfl | rfl⟩,
   
@@ -32,7 +31,7 @@ begin
     rw [map_cons, prod_cons, ← h3, ← nat.cast_add, ← nat.cast_add, ← add_assoc,
         ← mul_add, nat.cast_succ, nat.cast_mul, nat.cast_mul, nat.cast_two,
         ← div_div _ (2 : ℚ) ↑(t + c), div_mul_div_cancel, div_div],
-    exact ne_of_gt (nat.cast_pos.mpr $ nat.add_pos_left X c) },
+    exact (nat.cast_pos.mpr $ nat.add_pos_left X c).ne.symm },
 
   ---- `n = 2t + 1`
   { have X := t.succ_pos,
@@ -43,7 +42,7 @@ begin
         ← nat.cast_add_one, add_assoc (2 * t) 1, ← bit0, ← mul_add, ← mul_add_one,
         ← mul_add_one, nat.cast_mul, nat.cast_mul, mul_div_assoc, mul_div_assoc,
         mul_assoc, mul_comm (_ / _), div_mul_div_cancel, add_right_comm],
-    exact ne_of_gt (nat.cast_pos.mpr X) }
+    exact (nat.cast_pos.mpr X).ne.symm }
 end
 
 lemma bit1_two_pow_sub_one (k : ℕ) : 2 * (2 ^ k - 1) + 1 = 2 ^ (k + 1) - 1 :=
@@ -54,8 +53,7 @@ lemma bit1_two_pow_sub_one (k : ℕ) : 2 * (2 ^ k - 1) + 1 = 2 ^ (k + 1) - 1 :=
 /-- Final solution -/
 theorem final_solution : ∀ k : ℕ, good k (2 ^ k - 1)
 | 0 := good_zero_zero
-| (k+1) := cast (congr_arg _ $ bit1_two_pow_sub_one k) $
-    good_succ_bit1_of_good (final_solution k)
+| (k+1) := bit1_two_pow_sub_one k ▸ good_succ_bit1_of_good (final_solution k)
 
 end IMO2013N2
 end IMOSL

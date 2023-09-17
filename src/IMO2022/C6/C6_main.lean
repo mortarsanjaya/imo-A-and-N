@@ -62,12 +62,12 @@ begin
   
   cases em (∀ x, x ∈ X → ord_compl[2] X.sum ∣ x) with h1 h1,
   rw if_pos h1; refine ⟨good_one_of_ord_compl2_dvd_mem h h1, 
-    λ c h2, nat.pos_of_ne_zero $ λ h3, h0 $ cast (congr_arg _ h3) h2⟩,
+    λ c h2, nat.pos_of_ne_zero $ λ h3, h0 $ h3 ▸ h2⟩,
 
   rw if_neg h1; refine ⟨good_two X, λ c h2, le_of_not_lt $ λ h3, _⟩,
   rw [nat.lt_succ_iff, le_iff_lt_or_eq, nat.lt_one_iff] at h3,
-  exact h3.elim (λ h3, h0 $ cast (congr_arg _ h3) h2)
-    (λ h3, h1 $ ord_compl2_dvd_mem_of_good_one h $ cast (congr_arg _ h3) h2)
+  exact h3.elim (λ h3, h0 $ h3 ▸ h2)
+    (λ h3, h1 $ ord_compl2_dvd_mem_of_good_one h $ h3 ▸ h2)
 end
 
 end IMO2022C6

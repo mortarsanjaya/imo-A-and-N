@@ -15,9 +15,9 @@ theorem final_solution (f : ℕ+ → ℕ+) :
   ---- `f(n) ≥ n`
   ((eq_or_ne n 1).elim (λ h, h.trans_le (f n).one_le) $
     λ h0, exists.elim (pnat.exists_eq_succ_of_ne_one h0) $ λ k h0,
-    let h := pnat.le_of_dvd (h (k + 1) (k + 1)) in
-      by rwa [add_one_mul, add_right_comm, add_le_add_iff_right,
-        add_one_mul, add_le_add_iff_right, mul_le_mul_iff_left, ← h0] at h),
+    (mul_le_mul_iff_left k).mp $ (add_le_add_iff_right n).mp $
+    (add_one_mul k n).symm.trans_le $ (add_le_add_iff_right (f n)).mp $
+    add_right_comm (k * f n) (f n) n ▸ (add_one_mul k (f n)) ▸ h0 ▸ pnat.le_of_dvd (h n n)),
 λ h m n, h.symm ▸ dvd_refl _⟩
 
 end IMO2013N1

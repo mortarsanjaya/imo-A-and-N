@@ -1,8 +1,4 @@
-import
-  analysis.mean_inequalities
-  algebra.big_operators.multiset.basic
-  data.multiset.fintype
-  IMO2020.A4.A4_general
+import analysis.mean_inequalities data.multiset.fintype IMO2020.A4.A4_general
 
 /-! # IMO 2020 A4 (P2) -/
 
@@ -18,7 +14,7 @@ lemma multiset_weighted_AM_GM_specialized_mul_self {S : multiset ℝ}
   (h : ∀ x : ℝ, x ∈ S → 0 ≤ x) (h0 : S.sum = 1) :
   (S.map $ λ x : ℝ, x ^ x).prod ≤ (S.map $ λ x : ℝ, x * x).sum :=
   (congr_arg multiset.prod (S.map_univ _).symm).trans_le $
-  le_of_eq_of_le' (congr_arg sum $ S.map_univ _) $
+  (congr_arg multiset.sum $ S.map_univ _).le.trans' $
   real.geom_mean_le_arith_mean_weighted (finset.univ : finset ↥S) coe coe
     (λ x _, h _ coe_mem) (S.sum_eq_sum_coe.symm.trans h0) (λ x _, h _ coe_mem)
 

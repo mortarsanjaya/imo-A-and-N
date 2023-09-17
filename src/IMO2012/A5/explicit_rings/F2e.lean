@@ -283,7 +283,8 @@ lemma cast'_mul : ∀ x y : 𝔽₂ε, cast' r (x * y) = cast' r x * cast' r y
 | Y O := (mul_zero $ r + 1).symm
 | Y X := (add_left_eq_self.mpr h0).symm.trans (add_one_mul r r).symm
 | Y Y := eq.symm $ (mul_add_one (r + 1) r).trans $ (add_assoc _ _ _).symm.trans $
-    add_left_eq_self.mpr $ by rwa [← add_one_mul, add_assoc, ← bit0, h, add_zero]
+    add_left_eq_self.mpr $ add_one_mul (r + 1) r ▸ (add_assoc r 1 1).symm ▸ h0 ▸
+      congr_arg2 _ (add_right_eq_self.mpr h) rfl
 
 def cast'_hom : 𝔽₂ε →+* R :=
   ⟨cast' r, rfl, cast'_mul h h0, rfl, cast'_add h r⟩
@@ -296,7 +297,7 @@ lemma cast'_hom_eq_zero_imp : ∀ x : 𝔽₂ε, cast'_hom h h0 x = 0 → x = 0
 | I := λ h2, absurd ((one_mul r).symm.trans $ (congr_arg (* r) h2).trans (zero_mul r)) h1
 | X := λ h2, absurd h2 h1
 | Y := λ h2, let h3 := eq_neg_of_add_eq_zero_left h2 in
-    absurd h0 $ by rwa [h3, mul_neg_one, neg_eq_zero, ← h3]
+    absurd h0 $ λ h4, neg_ne_zero.mpr h1 $ (neg_one_mul r).symm.trans $ h3 ▸ h4
 
 lemma cast'_hom_injective : function.injective (cast'_hom h h0) :=
   (injective_iff_map_eq_zero $ cast'_hom h h0).mpr (cast'_hom_eq_zero_imp h h0 h1)

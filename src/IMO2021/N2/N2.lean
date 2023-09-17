@@ -20,7 +20,8 @@ lemma good_cond2 {n} (h : ∃ k, n ≤ 2 * k ^ 2 + 4 * k ∧ k ^ 2 + 6 * k + 8 �
   exists.elim h $ λ k h,  good_cond1 (2 * k ^ 2 + 4 * k) (2 * k ^ 2 + 8 * k + 9)
     (2 * (k ^ 2 + 6 * k + 8)) (2 * k + 3) (2 * k + 4) (2 * k + 5)
     h.1 (nat.lt_succ_of_le $ le_iff_exists_add.mpr ⟨4 * k + 8, by ring⟩)
-    (nat.lt_of_succ_le $ le_iff_exists_add.mpr ⟨4 * k + 6, by rw nat.succ_eq_add_one; ring⟩)
+    (nat.lt_of_succ_le $ le_iff_exists_add.mpr
+      ⟨4 * k + 6, (2 * k ^ 2 + 8 * k + 9).succ_eq_add_one.symm ▸ by ring⟩)
     (nat.mul_le_mul_left 2 h.2) (by ring) (by ring) (by ring)
 
 
@@ -29,36 +30,33 @@ lemma good_cond2 {n} (h : ∃ k, n ≤ 2 * k ^ 2 + 4 * k ∧ k ^ 2 + 6 * k + 8 �
 
 /-- Final solution -/
 theorem final_solution {n : ℕ} (h : 99 ≤ n) : good n :=
-begin
-  apply good_cond2,
-  revert n h; apply nat.le_induction,
-  ---- Base case: `n = 99`
-  exact ⟨7, by norm_num⟩,
-  ---- Induction step
-  rintros n h ⟨k, h0, h1⟩,
-  rw le_iff_lt_or_eq at h0,
-  rcases h0 with h0 | rfl,
-  ---- Case 1: `n < 2k^2 + 4k`
-  exact ⟨k, h0, h1.trans n.le_succ⟩,
-  ---- Case 2: `n = 2k^2 + 4k`
-  refine ⟨k + 1, le_iff_exists_add.mpr ⟨4 * k + 5, by ring⟩, _⟩,
-  calc (k + 1) ^ 2 + 6 * (k + 1) + 8 = (4 * k + 14) + (k ^ 2 + 4 * k + 1) : by ring
-  ... ≤ k ^ 2 + (k ^ 2 + 4 * k + 1) : nat.add_le_add_right _ _
-  ... = 2 * k ^ 2 + 4 * k + 1 : by ring,
+good_cond2 $ nat.le_induction
+  ⟨7, nat.add_le_add_left (nat.succ_pos 27) 98, nat.le_refl 99⟩
+  (λ n h h0, begin
+    rcases h0 with ⟨k, h0, h1⟩,
+    rw le_iff_lt_or_eq at h0,
+    rcases h0 with h0 | rfl,
+    ---- Case 1: `n < 2k^2 + 4k`
+    exact ⟨k, h0, h1.trans n.le_succ⟩,
+    ---- Case 2: `n = 2k^2 + 4k`
+    refine ⟨k + 1, le_iff_exists_add.mpr ⟨4 * k + 5, by ring⟩, _⟩,
+    calc (k + 1) ^ 2 + 6 * (k + 1) + 8 = (4 * k + 14) + (k ^ 2 + 4 * k + 1) : by ring
+    ... ≤ k ^ 2 + (k ^ 2 + 4 * k + 1) : nat.add_le_add_right _ _
+    ... = 2 * k ^ 2 + 4 * k + 1 : by ring,
 
-  ---- It remains to show that if `99 ≤ 2k^2 + 4k`, then `4k + 14 ≤ k^2`
-  suffices : 7 ≤ k,
-  { rw [bit0_eq_two_mul 7, sq],
-    calc 4 * k + 2 * 7 ≤ 4 * k + 2 * k :
-      nat.add_le_add_left (nat.mul_le_mul_left 2 this) _
-    ... = 6 * k : (add_mul 4 2 k).symm
-    ... ≤ k * k : k.mul_le_mul_right ((nat.le_succ 6).trans this) },
+    ---- It remains to show that if `99 ≤ 2k^2 + 4k`, then `4k + 14 ≤ k^2`
+    suffices : 7 ≤ k,
+    { rw [bit0_eq_two_mul 7, sq],
+      calc 4 * k + 2 * 7 ≤ 4 * k + 2 * k :
+        nat.add_le_add_left (nat.mul_le_mul_left 2 this) _
+      ... = 6 * k : (add_mul 4 2 k).symm
+      ... ≤ k * k : k.mul_le_mul_right ((nat.le_succ 6).trans this) },
   
-  refine nat.succ_le_of_lt (lt_of_not_le $ λ h2, h.not_lt _),
-  calc _ ≤ 2 * 6 ^ 2 + 4 * 6 : nat.add_le_add
-    (nat.mul_le_mul_left _ $ nat.pow_le_pow_of_le_left h2 2) (nat.mul_le_mul_left 4 h2)
-  ... < 99 : by norm_num,
-end
+    refine nat.succ_le_of_lt (lt_of_not_le $ λ h2, h.not_lt _),
+      calc _ ≤ 2 * 6 ^ 2 + 4 * 6 : nat.add_le_add
+      (nat.mul_le_mul_left _ $ nat.pow_le_pow_of_le_left h2 2) (nat.mul_le_mul_left 4 h2)
+    ... < 99 : by norm_num
+  end) n h
 
 end IMO2021N2
 end IMOSL

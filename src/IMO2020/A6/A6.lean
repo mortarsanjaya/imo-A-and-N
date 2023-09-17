@@ -99,12 +99,8 @@ have ∀ a b : ℤ, f a = f b → a < b → ∃ (a : ℤ) (k : ℕ), 0 < k ∧ f
 from λ a b h h0, let h1 := sub_pos_of_lt h0 in
   ⟨a, (b - a).nat_abs, int.nat_abs_pos_of_ne_zero h1.ne.symm,
     h.trans $ congr_arg f $ eq_add_of_sub_eq' $ (int.of_nat_nat_abs_eq_of_nonneg h1.le).symm⟩,
-begin
-  rw [injective, not_forall] at h, cases h with a h,
-  rw not_forall at h, cases h with b h,
-  rw [not_imp, ← ne.def, ne_iff_lt_or_gt] at h, cases h with h h0,
-  exact h0.elim (this a b h) (this b a h.symm)
-end
+exists.elim (not_forall.mp h) $ λ a h, exists.elim (not_forall.mp h) $ λ b h,
+  let h := not_imp.mp h in (lt_or_gt_of_ne h.2).elim (this a b h.1) (this b a h.1.symm)
 
 lemma minimal_period_zero_pos_of_not_injective (h0 : ¬injective f) :
   ∃ N : ℕ, 0 < f.minimal_period (f^[N] 0) :=
@@ -167,8 +163,8 @@ end
 
 lemma map_eq_zero (h0 : f.is_periodic_pt 2 0) : f = λ _, 0 :=
   funext $ λ a, (ne_or_eq a 0).elim (map_nonzero_eq_zero h h0) $ λ h1, (congr_arg f h1).trans $
-    by have h2 : (f^[2]) (-2) = -1 * f (-1) + -1 * f (-1) := h (-1) (-1);
-    rwa [map_neg_one h, mul_zero, add_zero, iterate_succ_apply,
+    let h2 : (f^[2]) (-2) = -1 * f (-1) + -1 * f (-1) := h (-1) (-1) in
+    by rwa [map_neg_one h, mul_zero, add_zero, iterate_succ_apply,
       map_nonzero_eq_zero h h0 (neg_ne_zero.mpr two_ne_zero)] at h2
 
 end solution

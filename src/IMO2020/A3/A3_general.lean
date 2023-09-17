@@ -20,12 +20,13 @@ section ordered_comm_ring
 variables {R : Type*} [linear_ordered_comm_ring R]
 
 lemma AM_GM2 (a b : R) : 4 * (a * b) ≤ (a + b) ^ 2 :=
-  by rw [add_sq', bit0, add_mul, ← mul_assoc, add_le_add_iff_right];
-    exact two_mul_le_add_sq a b
+  (add_mul 2 2 (a * b)).trans_le $ mul_assoc 2 a b ▸
+    (add_sq' a b).symm ▸ add_le_add_right (two_mul_le_add_sq a b) _
 
 lemma good_ring_bound {x : fin4 → R} (h : ∀ i, 0 ≤ x i) (h0 : good x) :
   4 ^ 2 * ((x i1 * x i3) * (x i2 * x i4)) ≤ (x i1 * x i3 + x i2 * x i4) ^ 2 :=
-  by rw [sq, mul_mul_mul_comm, h0.symm, mul_pow]; exact mul_le_mul (AM_GM2 _ _)
+  (sq (4 : R)).symm ▸ mul_mul_mul_comm 4 (x i1 * x i3) 4 (x i2 * x i4) ▸
+    h0 ▸ (mul_pow (x i1 + x i3) (x i2 + x i4) 2).symm ▸ mul_le_mul (AM_GM2 _ _)
     (AM_GM2 _ _) (mul_nonneg zero_le_four $ mul_nonneg (h i2) (h i4)) (sq_nonneg _)
 
 end ordered_comm_ring
@@ -37,14 +38,14 @@ section ordered_field
 variables {F : Type*} [linear_ordered_field F]
 
 lemma AM_GM_fractions (a b c d : F) : 4 * ((a * c) / (b * d)) ≤ (a / b + c / d) ^ 2 :=
-  le_of_le_of_eq' (AM_GM2 (a / b) (c / d)) $
+  (AM_GM2 (a / b) (c / d)).trans_eq' $
     congr_arg (has_mul.mul 4) (div_mul_div_comm a b c d).symm
 
 lemma div_add_div_pos {a b c d : F} (h : 0 < a) (h0 : 0 < b) (h1 : 0 < c) (h2 : 0 < d) :
   0 < a / b + c / d :=
   add_pos (div_pos h h0) (div_pos h1 h2)
 
-lemma eight_sq_eq_four_mul_four_sq : (8 : F) ^ 2 = 4 * 4 ^ 2 :=
+lemma eight_sq_eq_four_mul_four_sq {R : Type*} [comm_ring R] : (8 : R) ^ 2 = 4 * 4 ^ 2 :=
   by rw [bit0, ← two_mul, mul_pow, sq, two_mul, ← bit0]
 
 
@@ -70,12 +71,11 @@ begin
   have h0 := mul_pos (h i2) (h i4),
   have h3 := mul_pos (h i1) (h i3),
   replace h1 := mul_le_mul h1 h2
-    (mul_nonneg zero_le_four $ le_of_lt $ div_pos h0 h3) (sq_nonneg _),
-  rw [mul_mul_mul_comm, div_mul_div_cancel _ (ne_of_gt h0),
-      div_self (ne_of_gt h3), mul_one, ← sq, ← mul_pow] at h1,
-  exact (abs_le_of_sq_le_sq' h1 $ le_of_lt $ mul_pos
-    (div_add_div_pos (h i1) (h i2) (h i3) (h i4))
-    (div_add_div_pos (h i2) (h i3) (h i4) (h i1))).2
+    (mul_nonneg zero_le_four (div_pos h0 h3).le) (sq_nonneg _),
+  rw [mul_mul_mul_comm, div_mul_div_cancel _ h0.ne.symm,
+      div_self h3.ne.symm, mul_one, ← sq, ← mul_pow] at h1,
+  exact (abs_le_of_sq_le_sq' h1 (mul_pos (div_add_div_pos (h i1) (h i2) (h i3) (h i4))
+    (div_add_div_pos (h i2) (h i3) (h i4) (h i1))).le).2
 end
 
 lemma target_val_pos : 0 < target_val x :=
@@ -93,10 +93,9 @@ lemma good_field_bound (h0 : good x) :
 
 lemma target_val_good_bound (h0 : good x) : 8 ≤ target_val x :=
   and.right $ abs_le_of_sq_le_sq'
-    (le_trans (le_of_eq_of_le eight_sq_eq_four_mul_four_sq
-        (mul_le_mul_of_nonneg_left (good_field_bound h h0) zero_le_four))
-      (target_val_general_bound h))
-    (le_of_lt $ target_val_pos h)
+    ((target_val_general_bound h).trans' $ eight_sq_eq_four_mul_four_sq.trans_le $
+        mul_le_mul_of_nonneg_left (good_field_bound h h0) zero_le_four)
+    (target_val_pos h).le
 
 end lower_bound
 

@@ -43,9 +43,8 @@ le_of_not_lt $ λ h1, (lt_or_le 1 $ a (N + 1)).elim
   ---- `1 < a_{N + 3}`
   (λ h3, no_consecutive_one_lt (h $ N + 1) h1 h3 (h $ N + 4) (h0 $ N + 1) (h0 $ N + 2))
   ---- `a_{N + 1}, a_{N + 3} ≤ 1`
-  (λ h3, not_le_of_lt
-    ((sub_pos_of_lt $ (one_lt_sq_iff_one_lt_abs _).mpr $ h1.trans_le $
-      le_abs_self _).trans_le $ main_ineq_alt_form $ h0 $ N + 1)
+  (λ h3, ((sub_pos_of_lt $ (one_lt_sq_iff_one_lt_abs _).mpr $ h1.trans_le $
+      le_abs_self _).trans_le $ main_ineq_alt_form $ h0 $ N + 1).not_le
     (mul_nonpos_of_nonneg_of_nonpos (sub_nonneg_of_le h2) (sub_nonpos_of_le h3)))
 
 end IMO2022A1

@@ -48,9 +48,10 @@ end step1
 /-- Extra lemma on the denominator of `n + q` with `n : ℤ`, `q : ℚ` -/
 lemma rat_coe_int_add_denom : ∀ (n : ℤ) (q : ℚ), ((n : ℚ) + q).denom = q.denom :=
 suffices ∀ (n : ℤ) (q : ℚ), ((n : ℚ) + q).denom ∣ q.denom,
-from λ n q, nat.dvd_antisymm (this n q) $ cast (congr_arg2 _ (congr_arg rat.denom $
-  by rw [int.cast_neg, neg_add_cancel_left]) rfl) (this (-n) (n + q)),
-λ n q, (rat.add_denom_dvd n q).trans $ by rw [rat.coe_int_denom, one_mul]
+from λ n q,(this n q).antisymm $ let h := this (-n) (n + q) in
+  suffices (((-n : ℤ) : ℚ) + (n + q)).denom = q.denom, from this ▸ h,
+  congr_arg rat.denom $ (n.cast_neg : ((-n : ℤ) : ℚ) = -n).symm ▸ neg_add_cancel_left _ q,
+λ n q, (rat.add_denom_dvd n q).trans $ (rat.coe_int_denom n).symm ▸ dvd_of_eq q.denom.one_mul
 
 /-- Note: this function is computable! -/
 def rat_bad_fn (q x : ℚ) : ℤ :=
@@ -83,13 +84,15 @@ begin
       int.cast_add, add_sub_right_comm, ← one_sub_mul] at h,
   nth_rewrite 0 ← mul_div_right_comm,
   rw [← h, mul_comm, ← add_div' _ _ _ h0, int.cast_ite, div_eq_mul_inv, ite_mul, add_ite],
-  refine if_congr (iff.refl _) (congr_arg _ $ one_mul _) (add_right_eq_self.mpr $ zero_mul _)
+  exact if_congr (iff.refl _) (congr_arg _ $ one_mul _) (add_right_eq_self.mpr $ zero_mul _)
 end
 
 lemma rat_bad_fn_eq_mul_imp : ∃ n : ℤ, n ≠ 0 ∧ q = 1 + (n : ℚ)⁻¹ :=
 let h0 := rat_bad_fn_eq_mul_alt_form x h in
-(eq_or_ne (q / (1 - q) * int.fract x).denom 1).elim
----- Case 1: `q {x}/(1 - q)` is an integer
+(ne_or_eq (q / (1 - q) * int.fract x).denom 1).elim
+---- Case 1: `q {x}/(1 - q)` is not an integer
+(λ h1, false.elim $ h1 $ rat.coe_int_denom ⌊x⌋ ▸ congr_arg _ $ h0.trans $ if_neg h1)
+---- Case 2: `q {x}/(1 - q)` is an integer
 (λ h1, begin
   rw if_pos h1 at h0,
   rw [h0, rat_coe_int_add_denom] at h1,
@@ -97,12 +100,6 @@ let h0 := rat_bad_fn_eq_mul_alt_form x h in
     inv_ne_zero (one_sub_ne_zero_of_rat_bad_fn_eq_mul x h), _⟩,
   rwa [← sub_eq_iff_eq_add', eq_comm, inv_eq_iff_eq_inv, int.cast_neg,
        neg_eq_iff_eq_neg, neg_inv, neg_sub, ← rat.denom_eq_one_iff]
-end)
----- Case 2: `q {x}/(1 - q)` is not an integer
-(λ h1, begin
-  rw if_neg h1 at h0,
-  rw [h0, rat.coe_int_denom] at h1,
-  exact absurd rfl h1
 end)
 
 end step2
@@ -128,22 +125,19 @@ lemma finsupp_rat_bad_fn_eq_mul_imp {α : Type*} {a : α} {q : ℚ} (x : α →�
     (finsupp.congr_fun h0 a).trans $ x.smul_apply q a
 
 
+
 lemma infectious_equiv {V : Type*} [add_comm_group V] [module ℚ V] {f : V → V}
   (h : infectious f) {W : Type*} [add_comm_group W] [module ℚ W] (φ : W ≃ₗ[ℚ] V) :
   infectious (φ.symm ∘ f ∘ φ) :=
-  λ x y, by iterate 6 { rw function.comp_app };
-    rw [φ.map_add, φ.apply_symm_apply, h, φ.symm.map_add]
-
+  λ x y, φ.symm.map_add (f (φ x)) (f (φ y)) ▸ h (φ x) (φ y) ▸ congr_arg (φ.symm ∘ f)
+    ((φ.map_add _ _).trans $ congr_arg2 _ rfl $ φ.apply_symm_apply _)
 
 lemma good_imp_of_basis_elt (V : Type*) [add_comm_group V] [module ℚ V]
   (ι : Type*) (B : basis ι ℚ V) (i : ι) {q : ℚ} (h : good V q) :
   ∃ n : ℤ, n ≠ 0 ∧ q = 1 + (n : ℚ)⁻¹ :=
-begin
-  ---- The first line takes more than 0.1s; I don't know why
-  cases h _ (infectious_equiv (finsupp_rat_bad_fn_is_infectious i q) B.repr) with x h0,
-  rw [function.comp_app, function.comp_app, B.repr.symm_apply_eq, B.repr.map_smul] at h0,
-  exact finsupp_rat_bad_fn_eq_mul_imp _ h0
-end
+  exists.elim (h _ $ infectious_equiv (finsupp_rat_bad_fn_is_infectious i q) B.repr) $
+    λ x h0, finsupp_rat_bad_fn_eq_mul_imp _ $
+      (B.repr.symm_apply_eq.mp h0).trans (B.repr.map_smul q x)
 
 
 

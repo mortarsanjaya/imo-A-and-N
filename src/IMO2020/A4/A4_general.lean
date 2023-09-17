@@ -1,27 +1,9 @@
-import algebra.order.ring.defs algebra.big_operators.multiset.basic tactic.ring
+import algebra.big_operators.multiset.basic tactic.ring
 
 /-! # IMO 2020 A4 (P2), General properties not reliant on `ℝ` -/
 
 namespace IMOSL
 namespace IMO2020A4
-
-section comm_ring_identities
-
-variables {R : Type*} [comm_ring R] (a : R)
-
-lemma ring_id1 : 1 - (3 - 2 * a) * a = (1 - 2 * a) * (1 - a) :=
-  by ring
-
-lemma ring_id2 : 1 - (3 - 2 * a) * (a ^ 2 + (1 - a) ^ 2) = 2 * (1 - a) ^ 2 * (2 * a - 1) :=
-  by ring
-
-lemma ring_id4 (b c d : R) :
-  3 * (a + (b + (c + d))) - 2 * a - (a + (2 * b + (3 * c + 4 * d))) = b - d :=
-  by ring
-
-end comm_ring_identities
-
-
 
 /-- Very obvious statement about all-`<` implies all-`≤`... -/
 lemma all_le_of_all_lt {α : Type*} [linear_order α] {S : multiset α} {a : α}
@@ -73,19 +55,18 @@ lemma multiset_ring_prod_map_le_prod_map {ι : Type*} (f g : ι → R) {S : mult
 ... = ((i ::ₘ S).map g).prod : congr_arg prod (S.map_cons g i).symm
 
 lemma ring_ineq1 {a : R} (h : 2 * a < 1) : (3 - 2 * a) * a < 1 :=
-  lt_of_sub_pos $ lt_of_eq_of_lt' (ring_id1 a).symm $ mul_pos (sub_pos_of_lt h) $
+let h0 : 1 - (3 - 2 * a) * a = (1 - 2 * a) * (1 - a) := by ring in
+  lt_of_sub_pos $ h0.ge.trans_lt' $ mul_pos (sub_pos_of_lt h) $
     sub_pos_of_lt $ (mul_lt_mul_left zero_lt_two).mp $ h.trans $
     one_lt_two.trans_eq (mul_one 2).symm
 
 lemma multiset_sum_sq_le_sq_sum {S : multiset R} :
   (∀ x : R, x ∈ S → 0 ≤ x) → (S.map $ λ x : R, x ^ 2).sum ≤ S.sum ^ 2 :=
 multiset.induction_on S (λ _, (zero_pow $ nat.succ_pos 1).symm.le) $ λ a S h h0,
-begin
-  rw forall_mem_cons at h0,
-  rw [map_cons, sum_cons, sum_cons, add_sq'],
-  exact le_add_of_le_of_nonneg (add_le_add_left (h h0.2) _)
-    (mul_nonneg (mul_nonneg zero_le_two h0.1) (sum_nonneg h0.2))
-end
+  let h0 := forall_mem_cons.mp h0 in
+  (congr_arg multiset.sum $ map_cons _ _ _).trans_le $ (sum_cons _ _).trans_le $
+    (S.sum_cons a).symm ▸ (add_sq' a S.sum).ge.trans' $ le_add_of_le_of_nonneg
+    (add_le_add_left (h h0.2) _) (mul_nonneg (mul_nonneg zero_le_two h0.1) (sum_nonneg h0.2))
 
 lemma multiset_cons_cons_sum_sq_lt_sq_sum {a b : R} (h : 0 < a) (h0 : 0 < b)
   {S : multiset R} (h1 : ∀ x : R, x ∈ S → 0 ≤ x) :
@@ -109,18 +90,22 @@ begin
   exact multiset_cons_cons_sum_sq_lt_sq_sum h0.1 h0.2.1 (λ x, all_le_of_all_lt h0.2.2)
 end
 
+private lemma ring_id {R : Type*} [comm_ring R] (a : R) :
+  1 - (3 - 2 * a) * (a ^ 2 + (1 - a) ^ 2) = 2 * (1 - a) ^ 2 * (2 * a - 1) :=
+  by ring
+
 lemma ring_ineq2 {a : R} (h : 1 ≤ 2 * a) : (3 - 2 * a) * (a ^ 2 + (1 - a) ^ 2) ≤ 1 :=
-  le_of_sub_nonneg $ le_of_eq_of_le' (ring_id2 a).symm $
+  le_of_sub_nonneg $ (ring_id a).ge.trans' $
     mul_nonneg (mul_nonneg zero_le_two $ sq_nonneg _) (sub_nonneg_of_le h)
 
 lemma ring_ineq3 {a : R} (h : 1 < 2 * a) (h0 : a ≠ 1) :
   (3 - 2 * a) * (a ^ 2 + (1 - a) ^ 2) < 1 :=
-  lt_of_sub_pos $ lt_of_eq_of_lt' (ring_id2 a).symm $ mul_pos
+  lt_of_sub_pos $ (ring_id a).ge.trans_lt' $ mul_pos
     (mul_pos two_pos $ sq_pos_of_ne_zero _ $ sub_ne_zero_of_ne h0.symm) (sub_pos_of_lt h)
 
 lemma ring_ineq4 (a b c d : R) (h : d ≤ b) :
   a + (2 * b + (3 * c + 4 * d)) ≤ 3 * (a + (b + (c + d))) - 2 * a :=
-  le_of_sub_nonneg $ le_of_eq_of_le' (ring_id4 a b c d).symm $ sub_nonneg_of_le h
+  le_of_sub_nonneg $ (sub_nonneg_of_le h).trans_eq (by ring)
 
 end comm_ring_ineq
 

@@ -27,17 +27,18 @@ lemma add_four_induction {P : ℕ → Prop} (h : P 0) (h0 : P 1) (h1 : P 2) (h2 
 
 def good (f : ℕ → ℕ) := ∀ n : ℕ, f^[3] n = f (n + 1) + 1
 
-
-
-lemma good_succ : good nat.succ :=
-  λ n, rfl
-
+/-- The second class of answer -/
 def answer2 : ℕ → ℕ
 | 0 := 1
 | 1 := 6
 | 2 := 3
 | 3 := 0
 | (n+4) := answer2 n + 4
+
+
+
+lemma good_succ : good nat.succ :=
+  λ n, rfl
 
 lemma good_answer2 : good answer2
 | 0 := rfl
@@ -61,7 +62,7 @@ suffices ∀ n : ℕ, f^[4] (n + 1) = (f^[4] n) + 1,
 λ n, (h $ f (n + 1)).trans $ congr_arg nat.succ $ congr_arg f (h n).symm
 
 lemma good_injective : function.injective f :=
-suffices function.injective (f^[3] ∘ f), from this.of_comp,
+suffices (f^[3] ∘ f).injective, from this.of_comp,
 λ m n h0, nat.add_left_cancel $ (iter_four_eq h m).symm.trans $ h0.trans (iter_four_eq h n)
 
 noncomputable def fin_chain_fn_of_good : extra.fin_chain_fn f :=
@@ -76,14 +77,11 @@ lemma iter_range_compl_three_subset :
     ⊆ insert 0 (insert (f 0).succ $ image nat.succ (fin_chain_fn_of_good h).range_compl) :=
   λ x h0, mem_insert.mpr $ x.eq_zero_or_eq_succ_pred.imp id $
     λ h1, mem_insert.mpr $ (em $ x.pred ∈ set.range f).imp
-  (λ h2, h1.trans $ congr_arg nat.succ $ begin
-    rw set.mem_range at h2,
-    rcases h2 with ⟨n, h2⟩,
-    rw ← h2; refine congr_arg f ((eq_or_ne n 0).resolve_right $ λ h3, _),
-    rw [h1, ← h2, (fin_chain_fn_of_good h).mem_iter_range_compl_iff] at h0,
-    exact h0 ⟨n.pred, (h n.pred).trans (congr_arg nat.succ $ congr_arg f $
-      nat.succ_pred_eq_of_pos $ nat.pos_of_ne_zero h3)⟩
-  end)
+  (λ h2, h1.trans $ congr_arg nat.succ $ exists.elim (set.mem_range.mp h2) $ λ n h2,
+    h2.symm.trans $ congr_arg f $ (eq_or_ne n 0).resolve_right $ λ h3,
+    (fin_chain_fn_of_good h).mem_iter_range_compl_iff.mp h0 $
+    ⟨n.pred, (h n.pred).trans $ (congr_arg nat.succ $
+      (congr_arg f $ nat.succ_pred_eq_of_pos $ nat.pos_of_ne_zero h3).trans h2).trans h1.symm⟩)
   (λ h2, h1.symm ▸ mem_image_of_mem _ $ (fin_chain_fn_of_good h).mem_range_compl_iff.mpr h2)
 
 lemma card_range_compl_eq_one : (fin_chain_fn_of_good h).range_compl.card = 1 :=
@@ -108,19 +106,16 @@ lemma exists_range_compl_eq_singleton : ∃ a : ℕ, (fin_chain_fn_of_good h).ra
 
 lemma iter_four_zero_eq_four : f^[4] 0 = 4 :=
 suffices (fin_chain_fn_of_good h).iter_range_compl 4 = range (f^[4] 0),
-  by rw [← card_range (f^[4] 0), ← this,
-    (fin_chain_fn_of_good h).iter_range_compl_card, card_range_compl_eq_one h, mul_one],
-begin
-  ext n,
-  rw [(fin_chain_fn_of_good h).mem_iter_range_compl_iff, mem_range,
-      not_iff_comm, not_lt, set.mem_range, le_iff_exists_add],
-  refine exists_congr (λ a, _),
-  rw [eq_comm, iter_four_eq h a]
-end
+  from (card_range (f^[4] 0)).symm.trans $ this ▸
+    ((fin_chain_fn_of_good h).iter_range_compl_card _).trans $
+    congr_arg2 has_mul.mul rfl (card_range_compl_eq_one h),
+ext $ λ n, (fin_chain_fn_of_good h).mem_iter_range_compl_iff.trans $ iff.symm $
+  mem_range.trans $ not_le.symm.trans $ not_iff_not.mpr $ le_iff_exists_add.trans $
+  iff.symm $ set.mem_range.trans $ exists_congr $ λ a, iter_four_eq h a ▸ eq_comm
 
 lemma map_add_four (n : ℕ) : f (n + 4) = f n + 4 :=
-  iter_four_zero_eq_four h ▸
-    by rw [add_comm, ← iter_four_eq h, add_comm, ← iter_four_eq h]; refl
+  let h0 := λ n, (iter_four_eq h n).trans ((f^[4] 0).add_comm n) in
+  iter_four_zero_eq_four h ▸ h0 n ▸ h0 (f n) ▸ rfl
 
 
 
@@ -195,26 +190,22 @@ end
 
 
 lemma case1 (h0 : f (f 0 + 1) = f 0 + 2) (h1 : f (f 0 + 2) = 0) : f = answer2 :=
-begin
-  have h2 := h (f 0 + 1),
-  rw [f.iterate_succ_apply, h0, f.iterate_succ_apply, h1, f.iterate_one, zero_add] at h2,
-  rw h2 at h0 h1,
-  have h3 := h 3,
-  rwa [f.iterate_succ_apply, h1, f.iterate_succ_apply, h2,
-      ← zero_add (3 + 1), map_add_four h, h2] at h3,
-  exact funext (add_four_induction h2 h3 h0 h1 $
-    λ n h4, (map_add_four h n).trans $ congr_arg (+ 4) h4)
-end
+  let h2 : f 0 = 0 + 1 := h1 ▸ (congr_arg (f ∘ f) h0.symm).trans $ h _ in
+suffices f (0 + 1) = 4 + (0 + 1 + 1), from funext $ add_four_induction h2 this
+  (h2 ▸ h0 : f (nat.succ (0 + 1)) = (0 + 1) + 2)
+  ((congr_arg f $ congr_arg (+ 2) h2.symm).trans h1)
+  (λ n h4, (map_add_four h n).trans $ congr_arg (+ 4) h4),
+(congr_arg f $ (congr_arg f $ (congr_arg f h0).trans h1).trans h2).symm.trans $
+  (iter_four_eq h (f 0 + 1)).trans $ congr_arg2 _
+  (iter_four_zero_eq_four h) (congr_arg nat.succ h2)
 
 lemma case2 (h0 : f 0 = 1) (h1 : f 1 = 2) : f = nat.succ :=
-begin
-  have h2 := h 0,
-  rw [f.iterate_succ_apply, h0, f.iterate_succ_apply, h1, f.iterate_one] at h2,
-  have h3 := h 1,
-  rw [f.iterate_succ_apply, h1, f.iterate_succ_apply, h2, f.iterate_one] at h3,
-  exact funext (add_four_induction h0 h1 h2 h3 $
-    λ n h4, (map_add_four h n).trans $ congr_arg (+ 4) h4)
-end
+  let h2 := (congr_arg f $ (congr_arg f h0).trans h1).symm.trans $
+    (h 0).trans (congr_arg nat.succ h1 : f (0 + 1) + 1 = 3),
+  h3 := (congr_arg f $ (congr_arg f h1).trans h2).symm.trans $
+    (h 1).trans (congr_arg nat.succ h2 : f (1 + 1) + 1 = 4) in
+  funext $ add_four_induction h0 h1 h2 h3 $
+    λ n h4, (map_add_four h n).trans $ congr_arg (+ 4) h4
 
 end solution
 
@@ -226,8 +217,8 @@ end solution
 theorem final_solution {f : ℕ → ℕ} : good f ↔ f = nat.succ ∨ f = answer2 :=
   ⟨λ h, exists.elim (exists_range_compl_eq_singleton h) $ λ a h0,
     let h1 := iter_range_three_cases h h0 in h1.2.symm.imp
-      (λ h2, case2 h (by rw h2.1 at h1; exact h1.1) h2.2)
-      (λ h2, case1 h (by rw h2.1 at h1; exact h1.1) h2.2),
+      (λ h2, case2 h (h2.1 ▸ h1.1 : f 0 = 0 + 1) h2.2)
+      (λ h2, case1 h (h2.1 ▸ h1.1 : f (f 0 + 1) = f 0 + 1 + 1) h2.2),
   λ h, h.elim (λ h, h.symm ▸ good_succ) (λ h, h.symm ▸ good_answer2)⟩
 
 end IMO2013A5
