@@ -178,7 +178,7 @@ begin
   refine ⟨one_ne_zero, λ h1, _⟩,
   replace h1 : id (n + X.card) ≤ X.sup := le_sup h1,
   rw [id.def, ← not_lt] at h1,
-  exact h1 (lt_of_lt_of_le h le_self_add)
+  exact h1 (h.trans_le le_self_add)
 end
 
 

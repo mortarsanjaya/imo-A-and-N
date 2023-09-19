@@ -199,7 +199,7 @@ include h
 
 lemma cast_add : ∀ x y : 𝔽₃, ((x + y : 𝔽₃) : R) = x + y
 | 𝔽₃0 x := (zero_add ↑x).symm
-| x 𝔽₃0 := (congr_arg cast x.add_zero).trans (add_zero ↑x).symm
+| x 𝔽₃0 := x.add_zero.symm ▸ (add_zero ↑x).symm
 | 𝔽₃1 𝔽₃1 := (eq_neg_of_add_eq_zero_left h).symm
 | 𝔽₃1 𝔽₃2 := (add_neg_self 1).symm
 | 𝔽₃2 𝔽₃1 := (neg_add_self 1).symm

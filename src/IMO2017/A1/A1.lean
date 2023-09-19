@@ -20,22 +20,22 @@ end
 lemma bernoulli_ineq {x y : R} (h : 0 ≤ x) (h0 : 0 ≤ y) :
   ∀ n : ℕ, y ^ n * (n.succ * x + y) ≤ (x + y) ^ n.succ
 | 0 := by rw [pow_zero, one_mul, nat.cast_one, one_mul, pow_one]
-| (n+1) := (bernoulli_ineq_aux h h0 n).trans $ le_of_le_of_eq
-    (mul_le_mul_of_nonneg_right (bernoulli_ineq n) $ add_nonneg h h0)
+| (n+1) := (bernoulli_ineq_aux h h0 n).trans $
+    (mul_le_mul_of_nonneg_right (bernoulli_ineq n) $ add_nonneg h h0).trans_eq
     (pow_succ' (x + y) n.succ).symm
 
 lemma bernoulli_ineq_strict {x y : R} (h : 0 < x) (h0 : 0 ≤ y) :
   ∀ n : ℕ, y ^ n.succ * (n.succ.succ * x + y) < (x + y) ^ n.succ.succ
 | 0 := by rw [pow_one, mul_add, nat.cast_two, add_sq, mul_comm,
     add_assoc, ← sq, lt_add_iff_pos_left]; exact pow_pos h 2
-| (n+1) := lt_of_le_of_lt (bernoulli_ineq_aux (le_of_lt h) h0 n.succ) $ lt_of_lt_of_eq 
-  (mul_lt_mul_of_pos_right (bernoulli_ineq_strict n) $ add_pos_of_pos_of_nonneg h h0)
+| (n+1) := (bernoulli_ineq_aux h.le h0 n.succ).trans_lt $
+  (mul_lt_mul_of_pos_right (bernoulli_ineq_strict n) $ add_pos_of_pos_of_nonneg h h0).trans_eq
   (pow_succ' (x + y) n.succ.succ).symm
 
 lemma bernoulli_eq_case {x y : R} (h : 0 < x) (h0 : 0 ≤ y) :
   ∀ {n : ℕ}, y ^ n * (n.succ * x + y) = (x + y) ^ n.succ → n = 0
 | 0 := λ _, rfl
-| (n+1) := λ h1, absurd h1 $ ne_of_lt $ bernoulli_ineq_strict h h0 n
+| (n+1) := λ h1, absurd h1 $ (bernoulli_ineq_strict h h0 n).ne
 
 lemma special_ineq {x : R} (h : 0 ≤ x) :
   ∀ {a : ℕ}, 0 < a → (a : R) ^ a * (x + 1) ≤ (x + a) ^ a
@@ -94,12 +94,12 @@ begin
   contrapose h1; apply ne_of_lt,
   rcases multiset.exists_cons_of_mem h2 with ⟨T, rfl⟩,
   rw [map_cons, map_cons, prod_cons, prod_cons],
-  exact mul_lt_mul (lt_of_le_of_ne (h0 j h2) h1)
-    (ring_map_prod_le_map_prod (λ i h3, le_of_lt $ h i $ mem_cons_of_mem h3) $
+  exact mul_lt_mul ((h0 j h2).lt_of_ne h1)
+    (ring_map_prod_le_map_prod (λ i h3, (h i $ mem_cons_of_mem h3).le) $
       λ i h3, h0 i $ mem_cons_of_mem h3)
     (multiset_prod_pos $ λ r h3, exists.elim (mem_map.mp h3) $
       λ i h3, (h i $ mem_cons_of_mem h3.1).trans_eq h3.2)
-    ((le_of_lt $ h j h2).trans $ h0 j h2)
+    ((h j h2).le.trans (h0 j h2))
 end
 
 lemma all_eq_of_pos_le_of_prod_pow_self_eq {f g : ℕ → R} {S : multiset ℕ}
@@ -107,8 +107,8 @@ lemma all_eq_of_pos_le_of_prod_pow_self_eq {f g : ℕ → R} {S : multiset ℕ}
   (a : ℕ → ℕ) (h1 : ∀ n, n ∈ S → 0 < a n)
   (h2 : (S.map $ λ n, f n ^ a n).prod = (S.map $ λ n, g n ^ a n).prod)
   {n : ℕ} (h3 : n ∈ S) : f n = g n :=
-le_antisymm (h0 n h3) $ le_of_pow_le_pow (a n) (le_of_lt $ h n h3) (h1 n h3) $ ge_of_eq $
-  let h0 := λ N h4, pow_le_pow_of_le_left (le_of_lt $ h N h4) (h0 N h4) (a N),
+le_antisymm (h0 n h3) $ le_of_pow_le_pow (a n) (h n h3).le (h1 n h3) $ ge_of_eq $
+  let h0 := λ N h4, pow_le_pow_of_le_left (h N h4).le (h0 N h4) (a N),
     h := λ N h4, pow_pos (h N h4) (a N), h4 := all_eq_of_pos_le_of_prod_eq h h0 h2 h3 in h4
 
 
@@ -141,7 +141,7 @@ from λ h3 n h4, special_ineq_eq_case h1 $
   let h5 : ∀ n, n ∈ S → 0 < ↑n ^ n * (x + 1) :=
     λ N h5, mul_pos (pow_pos (nat.cast_pos.mpr $ h0 N h5) N) (add_pos h1 one_pos) in
   all_eq_of_pos_le_of_prod_pow_self_eq h5
-    (λ N h6, special_ineq (le_of_lt h1) (h0 N h6)) (has_div.div S.prod)
+    (λ N h6, special_ineq h1.le (h0 N h6)) (has_div.div S.prod)
     (λ N h6, nat.div_pos (nat.le_of_dvd (multiset_prod_pos h0) (h2 h6)) (h0 N h6))
     (this.2.trans $ (congr_arg2 has_pow.pow h3 rfl).trans this.1) h4,
 ⟨prod_map_pow.symm.trans $ congr_arg multiset.prod $ map_congr rfl $ λ n h3,

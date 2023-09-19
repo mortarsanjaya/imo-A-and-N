@@ -14,7 +14,7 @@ def good (f : ℕ+ → S) (n : ℕ+) := f (n ^ 4 + n ^ 2 + 1) = f ((n + 1) ^ 4 +
 /-- Proof of the identity `(n + 1)⁴ + (n + 1)² + 1 = (n² + n + 1)((n + 1)² + (n + 1) + 1)`. -/
 private lemma special_identity (n : ℕ+) :
   ((n + 1) ^ 2) ^ 2 + (n + 1) ^ 2 + 1 = (n ^ 2 + n + 1) * ((n + 1) ^ 2 + (n + 1) + 1) :=
-  by apply pnat.eq; simp only [positive.coe_one, pnat.mul_coe, pnat.pow_coe, pnat.add_coe]; ring
+  pnat.eq $ by simp only [positive.coe_one, pnat.mul_coe, pnat.pow_coe, pnat.add_coe]; ring
 
 
 

@@ -259,7 +259,7 @@ private lemma add_self_eq_zero' (r : R) : r + r = 0 :=
 
 lemma cast'_add (r : R) : ∀ x y : 𝔽₂ε, cast' r (x + y) = cast' r x + cast' r y
 | O x := (zero_add _).symm
-| x O := (congr_arg (cast' r) x.add_zero).trans (add_zero _).symm
+| x O := x.add_zero.symm ▸ (add_zero _).symm
 | I I := h.symm
 | I X := add_comm r 1
 | I Y := (self_eq_add_right.mpr h).trans (add_left_comm r 1 1)
@@ -276,7 +276,7 @@ include h0
 lemma cast'_mul : ∀ x y : 𝔽₂ε, cast' r (x * y) = cast' r x * cast' r y
 | O x := (zero_mul _).symm
 | I x := (one_mul _).symm
-| x I := (congr_arg (cast' r) x.mul_one).trans (mul_one _).symm
+| x I := x.mul_one.symm ▸ (mul_one _).symm
 | X O := (mul_zero r).symm
 | X X := h0.symm
 | X Y := (add_left_eq_self.mpr h0).symm.trans (mul_add_one r r).symm
@@ -294,7 +294,7 @@ include h1
 
 lemma cast'_hom_eq_zero_imp : ∀ x : 𝔽₂ε, cast'_hom h h0 x = 0 → x = 0
 | O := λ _, rfl
-| I := λ h2, absurd ((one_mul r).symm.trans $ (congr_arg (* r) h2).trans (zero_mul r)) h1
+| I := λ h2, false.elim $ h1 $ (one_mul r).symm.trans $ (congr_arg (* r) h2).trans (zero_mul r)
 | X := λ h2, absurd h2 h1
 | Y := λ h2, let h3 := eq_neg_of_add_eq_zero_left h2 in
     absurd h0 $ λ h4, neg_ne_zero.mpr h1 $ (neg_one_mul r).symm.trans $ h3 ▸ h4

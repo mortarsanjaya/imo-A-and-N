@@ -70,7 +70,7 @@ lemma hom_is_good (φ : R →+* S) : good φ :=
   λ x y, (congr_arg (λ x : S, x ^ 2) (φ.map_add x y)).trans $
     (add_sq' _ _).trans $ (add_comm _ _).trans $ congr_arg (has_add.add _) $
       (congr_arg2 has_add.add (φ.map_pow _ 2).symm (φ.map_pow _ 2).symm).trans $
-        (max_eq_left $ le_of_eq $ φ.map_add (x ^ 2) (y ^ 2)).symm
+        (max_eq_left (φ.map_add (x ^ 2) (y ^ 2)).le).symm
 
 lemma hom_sub_one_is_good (φ : R →+* S) : good (λ x : R, φ x - 1) :=
   λ x y, (congr_arg (λ x : S, (x - 1) ^ 2) (φ.map_add x y)).trans $
@@ -78,7 +78,7 @@ lemma hom_sub_one_is_good (φ : R →+* S) : good (λ x : R, φ x - 1) :=
     (congr_arg (λ x : S, x - 1) $ (congr_arg2 has_add.add (φ.map_pow x 2).symm
       (φ.map_pow y 2).symm).trans (φ.map_add _ _).symm).trans $
     (max_eq_right $ (sub_add_sub_comm _ _ _ _).trans_le $
-      sub_le_sub (le_of_eq (φ.map_add (x ^ 2) (y ^ 2)).symm) one_le_two).symm
+      sub_le_sub (φ.map_add (x ^ 2) (y ^ 2)).ge one_le_two).symm
 
 
 
@@ -96,14 +96,14 @@ begin
       two_mul, add_assoc, self_eq_add_right, sq] at h,
   refine (le_or_lt 0 (f 0)).imp (λ h0, _) (λ h0, _),
   { rw [max_eq_left (le_add_of_nonneg_left h0), ← two_mul, ← add_mul, mul_eq_zero] at h,
-    exact h.resolve_left (ne_of_gt $ add_pos_of_nonneg_of_pos h0 two_pos) },
-  { rw [max_eq_right (add_le_of_nonpos_left $ le_of_lt h0), ← add_one_mul, mul_eq_zero] at h,
-    exact eq_neg_of_add_eq_zero_left (h.resolve_right $ ne_of_lt h0) }
+    exact h.resolve_left (add_pos_of_nonneg_of_pos h0 two_pos).ne.symm },
+  { rw [max_eq_right (add_le_of_nonpos_left h0.le), ← add_one_mul, mul_eq_zero] at h,
+    exact eq_neg_of_add_eq_zero_left (h.resolve_right $ h0.ne) }
 end
 
 lemma good_map_sq (x : R) : f (x ^ 2) = f x ^ 2 - 2 * f 0 * f x :=
 begin
-  have h0 : f 0 ≤ 0 := (good_map_zero h).elim le_of_eq
+  have h0 : f 0 ≤ 0 := (good_map_zero h).elim eq.le
     (λ h0, h0.trans_le $ neg_nonpos.mpr $ zero_le_one' S),
   have h := (h 0 x).symm,
   rwa [zero_add, zero_pow (nat.succ_pos 1), zero_add,
@@ -169,8 +169,8 @@ begin
       add_sub_cancel, mul_neg, ← mul_assoc, ← sq, ← mul_assoc,
       ← pow_succ', le_neg_add_iff_le, ← sub_nonpos, ← sub_one_mul] at h1,
   have h3 : (1 : S) < 2 ^ (2 + 1) := one_lt_pow one_lt_two (nat.succ_ne_zero 2),
-  replace h1 := le_antisymm h1 (mul_nonneg (le_of_lt $ sub_pos.mpr h3) (sq_nonneg _)),
-  rw [mul_eq_zero, sub_eq_zero, or_iff_right (ne_of_gt h3)] at h1,
+  replace h1 := h1.antisymm (mul_nonneg (sub_pos.mpr h3).le (sq_nonneg _)),
+  rw [mul_eq_zero, sub_eq_zero, or_iff_right h3.ne.symm] at h1,
   rw [h2, pow_eq_zero h1, mul_zero, neg_zero]
 end
 
@@ -195,7 +195,7 @@ begin
 
   have h3 := congr_arg has_abs.abs (good_case1_map_sq_sub_map_sq h h0 x y),
   rw [abs_mul, sq_sub_sq, abs_mul] at h3,
-  revert h3; exact ne_of_lt (mul_lt_mul'' h2 h1 (abs_nonneg _) (abs_nonneg _))
+  exact (mul_lt_mul'' h2 h1 (abs_nonneg _) (abs_nonneg _)).ne h3
 end
 
 lemma good_case1_map_add (x y : R) : f (x + y) = f x + f y :=
@@ -299,7 +299,7 @@ begin
     refine ⟨lt_of_not_le (λ h5, ne_of_gt ((zero_lt_one' S).trans_le' _) h3), h3.symm⟩,
     rw [abs_eq_neg_self.mpr h5, neg_le_iff_add_nonneg'] at h4,
     rw [sq, ← add_one_mul],
-    exact mul_nonpos_of_nonneg_of_nonpos (zero_le_bit0.mpr $ le_of_lt X0)
+    exact mul_nonpos_of_nonneg_of_nonpos (zero_le_bit0.mpr X0.le)
       (mul_nonpos_of_nonneg_of_nonpos h4 h5) }
 end
 
@@ -309,7 +309,7 @@ have f x < f (x ^ 2) :=
   by rw [good_case2_map_sq h h0, two_mul, ← add_assoc];
     exact lt_add_of_pos_left _ (add_pos (pow_pos h2.1 2) h2.1),
 (good_case2_even_map_values' h h0 h1 (x ^ 2)).elim
-  (λ h3, not_le_of_lt (h2.1.trans this) $ h3.trans_le $ neg_nonpos.mpr $ zero_le_one' S)
+  (λ h3, (h2.1.trans this).not_le $ h3.trans_le $ neg_nonpos.mpr $ zero_le_one' S)
   (λ h3, absurd (h2.2.trans h3.2.symm) $ ne_of_lt $ mul_lt_mul_of_pos_left
     (add_lt_add (sq_lt_sq' ((neg_lt_zero.mpr h3.1).trans h2.1) this) this)
     (zero_lt_four' S))

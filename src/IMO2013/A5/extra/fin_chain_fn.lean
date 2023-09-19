@@ -49,7 +49,7 @@ suffices ∀ {m n}, m < n → ∀ (a b : α), a ∈ h.range_compl → (f^[m]) a 
   from λ m n h0 a b h1 h2, h0.lt_or_lt.elim
     (λ h0, this h0 _ _ h1) (λ h0, (this h0 _ _ h2).symm),
 λ m n h0 a b h1 h2, begin
-  rcases (exists_pos_add_of_lt h0) with ⟨k, h3, rfl⟩,
+  rcases exists_pos_add_of_lt h0 with ⟨k, h3, rfl⟩,
   rw [iterate_add_apply, (h.injective.iterate m).eq_iff] at h2,
   rw [h2, mem_range_compl_iff, set.mem_range] at h1,
   refine h1 ⟨f^[k.pred] b, _⟩,

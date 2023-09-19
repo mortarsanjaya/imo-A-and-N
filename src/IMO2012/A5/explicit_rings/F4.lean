@@ -257,7 +257,7 @@ private lemma add_self_eq_zero' (r : R) : r + r = 0 :=
 
 lemma cast'_add (r : R) : ∀ x y : 𝔽₄, cast' r (x + y) = cast' r x + cast' r y
 | O x := (zero_add _).symm
-| x O := (congr_arg (cast' r) x.add_zero).trans (add_zero _).symm
+| x O := x.add_zero.symm ▸ (add_zero _).symm
 | I I := h.symm
 | I X := add_comm r 1
 | I Y := (self_eq_add_right.mpr h).trans (add_left_comm r 1 1)
@@ -274,7 +274,7 @@ include h0
 lemma cast'_mul : ∀ x y : 𝔽₄, cast' r (x * y) = cast' r x * cast' r y
 | O x := (zero_mul _).symm
 | I x := (one_mul _).symm
-| x I := (congr_arg (cast' r) x.mul_one).trans (mul_one _).symm
+| x I := x.mul_one.symm ▸ (mul_one _).symm
 | X O := (mul_zero r).symm
 | X X := (add_left_inj r).mp $ (add_right_comm r 1 r).trans $
     (self_eq_add_left.mpr $ add_self_eq_zero' h r).symm.trans h0.symm

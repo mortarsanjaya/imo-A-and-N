@@ -80,7 +80,7 @@ lemma f_aux_matrix_description1 :
 end
 
 lemma f_description1 (l : list R) : f l = f_aux_alt1 l 0 :=
-  by rw [f, f_aux_matrix_description1]
+  let h := f_aux_matrix_description1 l in congr_arg prod.fst h
 
 
 
@@ -123,7 +123,7 @@ lemma f_aux_matrix_description2 :
 end
 
 lemma f_description2 (l : list R) : f l = f_aux_alt2 l 0 :=
-  by rw [f, f_aux_matrix_description2]
+  let h := f_aux_matrix_description2 l in congr_arg prod.fst h
 
 
 

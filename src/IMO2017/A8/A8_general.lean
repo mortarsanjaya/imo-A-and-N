@@ -36,7 +36,7 @@ begin
     left; exact h5.symm,
     exfalso; revert h0,
     rw [imp_false, not_lt, ← add_le_add_iff_left z, add_comm z y],
-    exact le_trans (h y z h4).elim_right (h z x h5).elim_left
+    exact (h y z h4).elim_right.trans (h z x h5).elim_left
   end,
 
   ---- Finishing
@@ -46,28 +46,28 @@ begin
     obtain ⟨h5, h6⟩ := h y x h1,
     rw ← sub_le_iff_le_add' at h5,
     rw ← le_sub_iff_add_le at h6,
-    exact h2 z (lt_of_le_of_lt h5 h3) (lt_of_lt_of_le h4 h6)
+    exact h2 z (h5.trans_lt h3) (h4.trans_le h6)
   end,
   { rcases exists_between h3 with ⟨w, h6, h7⟩; clear h3,
-    replace h2 := h2 (f z - w) (sub_lt_sub (by rwa h5) (lt_trans h7 h4))
+    replace h2 := h2 (f z - w) (sub_lt_sub (h1.trans_eq h5.symm) (h7.trans h4))
       (by rw h5; exact sub_lt_sub_left h6 (f x)),
     clear h6; cases h2 with h2 h2,
     { rw ← h2 at h1; replace h1 := (h _ _ h1).elim_right,
       revert h1; rw [h2, ← h5, imp_false, not_le, ← sub_lt_iff_lt_add'],
-      exact sub_lt_sub_left (lt_trans h7 h4) (f z) },
+      exact sub_lt_sub_left (h7.trans h4) (f z) },
     { rw [← h2, ← h5] at h1; replace h1 := (h _ _ h1).elim_right,
       revert h1; rw [imp_false, not_le, ← sub_lt_iff_lt_add],
       exact sub_lt_sub_left h7 (f z) } },
   { rcases exists_between h4 with ⟨w, h6, h7⟩; clear h4,
     replace h2 := h2 (f z - w) (by rw h5; exact sub_lt_sub_left h7 (f y))
-      (sub_lt_sub (by rwa h5) (lt_trans h3 h6)),
+      (sub_lt_sub (h5.trans_lt h1) (h3.trans h6)),
     clear h7; cases h2 with h2 h2,
     { rw [← h2, ← h5] at h1; replace h1 := (h _ _ h1).elim_left,
       revert h1; rw [imp_false, not_le, ← lt_sub_iff_add_lt'],
       exact sub_lt_sub_left h6 (f z) },
     { rw ← h2 at h1; replace h1 := (h _ _ h1).elim_left,
       revert h1; rw [h2, ← h5, imp_false, not_le, ← lt_sub_iff_add_lt],
-      exact sub_lt_sub_left (lt_trans h3 h6) (f z) } }
+      exact sub_lt_sub_left (h3.trans h6) (f z) } }
 end
 
 
@@ -91,7 +91,7 @@ begin
 
   ---- Show that the function is not monotone
   { rw monotone; simp_rw not_forall,
-    refine ⟨0, g, le_of_lt h, _⟩,
+    refine ⟨0, g, h.le, _⟩,
     rw [if_pos rfl, if_neg (ne_of_gt h), if_pos rfl, not_le],
     exact smul_pos two_pos h },
 
@@ -110,7 +110,7 @@ begin
       rw [if_neg hy0.symm, if_neg hyg.symm] at h1 ⊢,
       rw [zero_add, and_comm, two_nsmul, le_add_iff_nonneg_left, two_nsmul, ← le_sub_iff_add_le],
       rw smul_lt_smul_iff_of_pos at h1,
-      exacts [⟨le_of_lt (lt_trans h h1), h0 _ (sub_pos_of_lt h1)⟩, two_pos] },
+      exacts [⟨(h.trans h1).le, h0 _ (sub_pos_of_lt h1)⟩, two_pos] },
     rw if_neg hx0.symm at h1 ⊢,
     rcases eq_or_ne g x with rfl | hxg,
 
@@ -118,14 +118,14 @@ begin
     { rw if_pos rfl at h1 ⊢,
       rcases eq_or_ne 0 y with rfl | hy0,
       rw if_pos rfl at h1 ⊢,
-      rw add_zero; exact ⟨le_of_lt h, h0 _ h1⟩,
+      rw add_zero; exact ⟨h.le, h0 _ h1⟩,
       rcases eq_or_ne g y with rfl | hyg,
       rw [if_neg hy0.symm, if_pos rfl] at h1 ⊢,
       exfalso; exact lt_irrefl 0 h1,
       rw [if_neg hy0.symm, if_neg hyg.symm] at h1 ⊢,
       rw [two_nsmul, add_le_add_iff_right],
       rw smul_pos_iff_of_pos at h1,
-      exacts [⟨le_of_lt (add_pos h h1), h0 y h1⟩, two_pos] },
+      exacts [⟨(add_pos h h1).le, h0 y h1⟩, two_pos] },
 
     -- Case 3: `x ∉ {0, g}`
     { rw if_neg hxg.symm at h1 ⊢,
@@ -133,17 +133,17 @@ begin
       rw if_pos rfl at h1 ⊢,
       rw [add_zero, two_nsmul, add_le_iff_nonpos_left, and_iff_left_of_imp],
       contrapose! h1; exact nsmul_le_nsmul_of_le_right (h0 x h1) 2,
-      intros h2; exact le_trans h2 (nsmul_nonneg (le_of_lt h) 2),
+      intros h2; exact h2.trans (nsmul_nonneg h.le 2),
       rcases eq_or_ne g y with rfl | hyg,
       rw [if_neg hy0.symm, if_pos rfl] at h1 ⊢,
       rw [two_nsmul, add_le_add_iff_left, ← le_neg_iff_add_nonpos_left],
       rw left.nsmul_neg_iff at h1,
-      exact ⟨le_of_lt (lt_trans h1 h), h0 _ (neg_pos.mpr h1)⟩,
+      exact ⟨(h1.trans h).le, h0 _ (neg_pos.mpr h1)⟩,
       exact two_pos,
       rw [if_neg hy0.symm, if_neg hyg.symm] at h1 ⊢,
       rw [two_nsmul, add_le_add_iff_left, two_nsmul, add_le_add_iff_right, and_self],
       rw smul_lt_smul_iff_of_pos at h1,
-      exacts [le_of_lt h1, two_pos] } }
+      exacts [h1.le, two_pos] } }
 end
 
 
