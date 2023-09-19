@@ -1,0 +1,78 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\title{IMO 2022 A6}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $V$ be a non-trivial $\Q$-vector space.
+A function $f : V \to V$ is called \emph{infectious} if $f(x + f(y)) = f(x) + f(y)$ for all $x, y \in V$.
+Find all rational numbers $q$ such that for any $f : V \to V$ infectious, there exists $z \in V$ such that $f(z) = qz$.
+
+
+
+\subsection*{Answer}
+
+The set of such rational numbers is $\{1 + n^{-1} : n \in \Z \setminus \{0\}\}$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{http://www.imo-official.org/problems/IMO2022SL.pdf}
+
+We follow the official solution with some modification.
+Lemma 1 will be presented algorithmically for the case where $V = \Q$.
+Then we extend the construction to a construction over general non-trivial $\Q$-vector spaces.
+
+We start by proving that $q = 1 + n^{-1}$ works for any non-zero integer $n$.
+Fix any $f : V \to V$ infectious.
+Plugging $y = 0$ gives $f(x + f(0)) = f(x) + f(0)$ for all $x \in V$.
+Two-sided integer induction gives $f(n f(0)) = (n + 1) f(0)$ for all $n \in \Z$.
+For $n \neq 0$, this can be re-written as $f(n f(0)) = (1 + n^{-1}) n f(0)$.
+
+For the converse, we first find a suitable construction for each non-answer $q$ when $V = \Q$.
+If $q = 1$ then the function $x \mapsto x + 1$ works.
+Now suppose that $q \neq 1$ and $q \neq 1 + n^{-1}$ for any integer $n \neq 0$.
+Equivalently, $(1 - q)^{-1}$ is not an integer.
+Define $f_q : \Q \to \Q$ as follows:
+\[ f_q(x) = \lfloor x \rfloor + \begin{cases} 1, & \frac{q \{x\}}{1 - q} \in \Z, \\ 0, & \text{otherwise.} \end{cases} \]
+One can check that $f_q$ is infectious using the fact that it only takes integer values.
+Next, $f_q(x) = qx$ is equivalent to
+\[ \frac{q \{x\}}{1 - q} = \begin{cases} \frac{1}{1 - q} + \lfloor x \rfloor, & \frac{q \{x\}}{1 - q} \in \Z, \\ \lfloor x \rfloor, & \text{otherwise.} \end{cases} \]
+The second formula implies $\frac{q \{x\}}{1 - q} \in \Z$.
+The first formula implies $(1 - q)^{-1} \in \Z$.
+Thus $f_q$ works whenever $(1 - q)^{-1}$ is not an integer.\footnote{
+    In Lean, $f_q$ works even for $q = 1$ via a small implementation detail: division by $0$ always gives $0$.}
+
+Finally, we use $f_q$ to construct the desired function $g_q : V \to V$.
+Choose a basis $B$ for $V$ and a fixed vector $v_0 \in V$; note that $B \neq \emptyset$ since $V \neq 0$.
+Now any vector can be represented uniquely as a finite linear combinations of vectors in $B$.
+We take $g_q(v) = f_q(x) v_0$, where $x \in \Q$ is the $v_0$-coefficient of $v$ in this linear combination.
+Since $g_q$ only takes values in the subspace spanned by $v_0$, one can check that $g_q$ is infectious.
+We claim that $g_q(v) \neq qv$ for any $v \in V$.
+
+Since $(1 - 0)^{-1} = 1$ is an integer, $q \neq 0$.
+Thus, $f_q(x) v_0 = g_q(v) = qv$ implies $v = x v_0$ and $f_q(x) = qx$ for some $x \in \Q$.
+The latter yields a contradiction by the property of $f_q$ we had obtained before.
+We are done.
+
+
+
+\end{document}

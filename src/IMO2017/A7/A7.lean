@@ -17,7 +17,7 @@ def a : ℕ → ℤ
 
 open finset
 
-private lemma main_equality :
+lemma main_equality :
   ∀ n : ℕ, a b_pos n.succ = a b_pos n * (b n - 1) + (range n).sum (λ i, a b_pos i * |b i - 2|) + 1
 | 0 := self_eq_add_left.mpr $ congr_arg2 has_add.add (zero_mul _) (sum_range_zero _)
 | (n+1) := begin
@@ -31,21 +31,16 @@ private lemma main_equality :
   rw [if_neg h, bit0, abs_of_nonneg h0, sub_sub_sub_cancel_left, sub_add_cancel']
 end
 
-private lemma a_and_sum_nonneg :
+lemma a_and_sum_nonneg :
   ∀ n : ℕ, 0 ≤ a b_pos n ∧ 0 ≤ (range n).sum (λ i, a b_pos i * |b i - 2|)
 | 0 := ⟨le_refl 0, le_refl 0⟩
 | (n+1) := let h := a_and_sum_nonneg n in
-  ⟨le_of_le_of_eq
-    (int.add_nonneg
-      (int.add_nonneg (int.mul_nonneg h.1 $ int.sub_nonneg_of_le $
-        int.add_one_le_of_lt $ b_pos n) h.2)
-      int.one_nonneg)
-    (main_equality b_pos n).symm,
-  le_of_le_of_eq
-    (int.add_nonneg h.2 $ int.mul_nonneg h.1 $ abs_nonneg _)
-    (sum_range_succ _ n).symm⟩
+  ⟨le_of_eq_of_le' (main_equality b_pos n).symm $
+    int.add_nonneg (int.add_nonneg (int.mul_nonneg h.1 $ int.sub_nonneg_of_le $
+        int.add_one_le_of_lt $ b_pos n) h.2) int.one_nonneg,
+  (int.add_nonneg h.2 $ int.mul_nonneg h.1 $ abs_nonneg _).trans_eq (sum_range_succ _ n).symm⟩
 
-private lemma a_plus_sum_ge :
+lemma a_plus_sum_ge :
   ∀ n : ℕ, (n : ℤ) ≤ a b_pos n + (range n).sum (λ i, a b_pos i * |b i - 2|)
 | 0 := le_refl 0
 | (n+1) := begin
@@ -66,9 +61,8 @@ theorem final_solution (n : ℕ) : (n : ℤ) ≤ a b_pos n ∨ (n : ℤ) ≤ a b
 begin
   cases n with _ n,
   exact or.inl (le_refl 0),
-  have h : 1 < b n ∨ 1 = b n := lt_or_eq_of_le (int.add_one_le_of_lt $ b_pos n),
   have h0 : ∀ n : ℕ, 0 ≤ a b_pos n := λ n, (a_and_sum_nonneg _ n).1,
-  revert h; refine or.imp (λ h, _) (λ h, _),
+  refine (int.add_one_le_of_lt $ b_pos n).lt_or_eq.imp (λ h, _) (λ h, _),
 
   -- `b_n ≥ 2 → n + 1 ≤ a_{n + 1}`
   rw [main_equality, nat.cast_succ, add_le_add_iff_right],
@@ -79,7 +73,7 @@ begin
   rw [nat.cast_succ, main_equality, add_le_add_iff_right],
   refine le_trans _ (le_add_of_nonneg_left $
     int.mul_nonneg (h0 n.succ) (int.le_sub_one_of_lt $ b_pos n.succ)),
-  rw [sum_range_succ_comm, ← h, bit0, sub_add_cancel', abs_neg, abs_one, mul_one],
+  rw [sum_range_succ_comm, ← h, bit0, zero_add, sub_add_cancel', abs_neg, abs_one, mul_one],
   exact a_plus_sum_ge b_pos n
 end
 

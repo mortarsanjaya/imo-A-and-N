@@ -5,14 +5,32 @@ import algebra.order.positive.ring algebra.group_power.basic
 namespace IMOSL
 namespace IMO2016A4
 
-/-- Final solution, general ring version -/
-theorem final_solution_general_ring {R : Type*} [linear_ordered_comm_ring R] :
-  ∀ f : {x : R // 0 < x} → {x : R // 0 < x},
-    (∀ x y, x * f (x ^ 2) * f (f y) + f (y * f x) = f (x * y) * (f (f (x ^ 2)) + f (f (y ^ 2))))
-      ↔ ∀ x, x * f x = 1 :=
+set_option old_structure_cmd true
+
+@[protect_proj]
+class domain_without_zero (R : Type*) extends
+  cancel_comm_monoid R, add_comm_semigroup R,
+    add_left_cancel_semigroup R, add_right_cancel_semigroup R, distrib R
+
+instance {R : Type*} [linear_ordered_comm_ring R] : domain_without_zero {x : R // 0 < x} :=
+{ mul_left_cancel := cancel_comm_monoid.mul_left_cancel,
+  .. positive.subtype.linear_ordered_cancel_comm_monoid,
+  .. positive.subtype.add_comm_semigroup,
+  .. positive.subtype.add_left_cancel_semigroup,
+  .. positive.subtype.add_right_cancel_semigroup,
+  .. positive.subtype.distrib }
+
+
+
+
+
+/-- Final solution, general version with `domain_without_zero` -/
+theorem final_solution_general {R : Type*} [domain_without_zero R] (f : R → R) :
+  (∀ x y, x * f (x ^ 2) * f (f y) + f (y * f x) = f (x * y) * (f (f (x ^ 2)) + f (f (y ^ 2))))
+    ↔ ∀ x, x * f x = 1 :=
 begin
   ---- First deal with the `←` direction.
-  intros f; symmetry; refine ⟨λ h x y, _, λ h, _⟩,
+  symmetry; refine ⟨λ h x y, _, λ h, _⟩,
   { have h0 : ∀ x, f (f x) = x :=
       λ x, by have h0 := h (f x); rwa [← h x, mul_comm, mul_left_inj] at h0,
     rw [h0, h0, h0, ← mul_right_inj (x * y), ← mul_assoc, h, one_mul, mul_add,
@@ -58,6 +76,17 @@ begin
   replace h0 := h0 x,
   rwa [h h1, sq, ← mul_assoc, mul_left_eq_self] at h0
 end
+
+
+
+
+
+/-- Final solution -/
+theorem final_solution {R : Type*} [linear_ordered_comm_ring R]
+  (f : {x : R // 0 < x} → {x : R // 0 < x}) :
+  (∀ x y, x * f (x ^ 2) * f (f y) + f (y * f x) = f (x * y) * (f (f (x ^ 2)) + f (f (y ^ 2))))
+    ↔ ∀ x, x * f x = 1 :=
+  final_solution_general f
 
 end IMO2016A4
 end IMOSL

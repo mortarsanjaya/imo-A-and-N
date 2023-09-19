@@ -31,7 +31,7 @@ begin
         ← add_mul, add_assoc _ (2 * k), ← mul_add, nat.add_sub_of_le (le_of_lt h),
         add_comm (2 * k), ← add_assoc, mul_add_one],
     refine ⟨le_self_add, add_le_add_left _ _⟩,
-    rw add_assoc; exact le_trans (pow_le_pow_of_le_left' (nat.sub_le r k) 2) le_self_add }
+    rw add_assoc; exact le_self_add.trans' (pow_le_pow_of_le_left' (nat.sub_le r k) 2) }
 end
 
 
@@ -45,15 +45,15 @@ begin
     λ a b h, nat.succ_injective (nat.pow_left_injective one_le_two (add_left_injective 1 h)),
   refine set.infinite_of_injective_forall_mem h (λ x h0, _),
   rcases h0 with ⟨a, b, h0, h1, h2, h3⟩,
-  rw nat.sqrt_add_eq' _ (le_add_right (nat.succ_le_succ (zero_le x))) at h1,
+  rw nat.sqrt_add_eq' _ (le_add_right $ nat.succ_le_succ x.zero_le) at h1,
   generalize_hyp : x.succ = y at h1 h2 h3; clear h x,
 
   ---- Get the contradiction
   rw [mul_add_one, ← mul_pow] at h2,
-  replace h2 := lt_of_lt_of_le (lt_add_of_pos_right _ (pow_pos h0 2)) h2,
+  replace h2 := h2.trans_lt' (lt_add_of_pos_right _ $ pow_pos h0 2),
   rw [nat.pow_lt_iff_lt_left one_le_two, ← nat.add_one_le_iff] at h2,
   revert h3; rw [imp_false, not_le, add_assoc, ← bit0, mul_add, ← mul_pow],
-  refine lt_of_lt_of_le _ (pow_le_pow_of_le_left' h2 2),
+  refine(pow_le_pow_of_le_left' h2 2).trans_lt' _,
   rw [add_sq, one_pow, nat.lt_succ_iff, add_le_add_iff_left, mul_one, sq, mul_comm],
   exact mul_le_mul_left' (mul_le_mul_left' h1 b) 2
 end

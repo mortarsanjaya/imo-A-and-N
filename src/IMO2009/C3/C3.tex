@@ -1,0 +1,73 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+
+\title{IMO 2009 C3}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $\alpha$ be an arbitrary type.
+Let $M$ be a commutative monoid.
+Consider arbitrary $\alpha$-indexed vectors $p, q : \alpha \to \N$.
+For each $a \in \alpha$, define the homomorphism $f_a : M \times M \to M \times M$ by
+\[ f_a(m, n) = (n, p_a m + q_a n). \]
+
+Let $\alpha^*$ denote the set of finite strings with alphabets in $\alpha$.
+For any strings $\ell = a_1 a_2 \ldots a_k \in \alpha$, define
+\[ f_{\ell} = f_{a_k} \circ f_{a_{k - 1}} \circ \ldots f_{a_1}. \]
+Let $x, y, z \in M$, and suppose that $p_a x + q_a y = z$ for each $a \in \alpha$.
+Prove that
+\[ f_{\overline{\ell}}(y, z)_2 = f_{\ell}(y, z)_2 \]
+    for any $\ell \in \alpha^*$, where $\overline{\ell}$ denote the reversal of $\ell$ and $(m_1, m_2)_j = m_j$ for each $j = 1, 2$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2009SL.pdf}
+
+We generalize the official solution.
+However, the key observations are given away in the problem statement.
+
+We proceed by strong induction on $|\ell|$.
+The base case $|\ell| \leq 1$ is trivial.
+Now fix $\ell \in \alpha^*$ and $a, b \in \alpha$.
+Assume that $f_{\overline{\ell}}(y, z)_2 = f_{\ell}(y, z)_2$ and $f_{a \overline{\ell}}(y, z)_2 = f_{\ell \alpha}(y, z)_2$.
+Our goal is to show that $f_{\ell ab}(y, z)_2 = f_{ba \overline{\ell}}(y, z)_2$.
+We proceed via bash.
+
+On one hand,
+\[ f_{ba \overline{\ell}}(y, z)_2 = f_{a \overline{\ell}}(z, p_b y + q_b z)_2
+    = f_{a \overline{\ell}}(p_b x + q_b y, p_b y + q_b z)_2. \]
+Using linearity,
+\[ f_{ba \overline{\ell}}(y, z)_2 = p_b f_{a \overline{\ell}}(x, y)_2 + q_b f_{a \overline{\ell}}(y, z)_2. \]
+On the other hand,
+\[ f_{w a b}(y, z)_2 = p_b f_{\ell}(y, z)_2 + q_b f_{w a}(y, z)_2
+    = p_b f_{\overline{\ell}}(y, z)_2 + q_b f_{a \overline{\ell}}(y, z)_2. \]
+Finally, note that
+\[ f_{a \overline{\ell}}(x, y)_2 = f_{\overline{\ell}}(f_{a}(x, y))_2 = f_{\overline{\ell}}(y, z)_2. \]
+
+
+
+\subsection*{Extra notes}
+
+In the original problem, we have $R = M = \N$.
+We also have $\alpha = \{0, 1\}$ and $(p_0, q_0, p_1, q_1) = (2, 3, 3, 1)$.
+
+
+
+\end{document}

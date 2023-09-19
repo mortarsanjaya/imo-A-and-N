@@ -76,9 +76,11 @@ Thus,~\eqref{2016a4-eq2} gives $x f(x)^2 = f(x)$ and thus $x f(x) = 1$.
 
 \subsection*{Implementation details}
 
-At the time of writing, the Lean API apparently breaks when trying to work over totally ordered commutative rings while also importing the \texttt{algebra.order.positive.field} module.
-The module is necessary to get the inverse function.
-Thus, we will only implement a version with rings without mentioning what happens if $R$ is a field.
+The above solution only needs $R^+$ to be an integral (multiplicative) monoid with a commutative (additive) semigroup structure satisfying some extra properties.
+First, the semigroup is cancellative in the sense that $a + b = a + c$ implies $b = c$.
+Second, the addition on $R^+$ distributes with respect to multiplication.
+We define this more general class in
+\[ \texttt{extra.integral\_domain\_without\_zero.lean}. \]
 
 
 

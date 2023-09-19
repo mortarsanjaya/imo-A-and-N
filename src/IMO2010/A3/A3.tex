@@ -20,18 +20,18 @@
 
 \subsection*{Problem}
 
-Let $F$ be a canonically ordered semifield.
-Fix a positive integer $n$ and $c \in F$.
+Let $R$ be an ordered ring.
+Fix a positive integer $n$ and $c \in R$ non-negative.
 Determine the maximal possible value of
 \[ \sum_{i = 1}^{2n} x_i x_{i + 2} \tag{*}\label{2010a3-eq0} \]
-    over all $x_1, x_2, \ldots, x_{2n} \in R$ such that $x_i + x_{i + 1} + x_{i + 2} \leq c$ for all $i = 1, 2, \ldots, 2n$.
+    over all $x_1, x_2, \ldots, x_{2n} \in R$ such that $x_i + x_{i + 1} + x_{i + 2} \leq 2c$ for all $i = 1, 2, \ldots, 2n$.
 Here, we denote $x_{2n + 1} = x_1$ and $x_{2n + 2} = x_2$.
 
 
 
 \subsection*{Answer}
 
-$n (c/2)^2$.
+$n c^2$.
 
 
 
@@ -42,19 +42,19 @@ Official solution: \url{https://www.imo-official.org/problems/IMO2010SL.pdf}
 The official solution works in this more general setting.
 We present Solution 1.
 
-To show that $n (c/2)^2$ is attainable, we take $x_i = c/2$ if $i$ is even and $x_i = 0$ if $i$ is odd.
-Then $x_i x_{i + 2}$ equals $(c/2)^2$ when $i$ is even and $0$ when $i$ is odd.
-Thus, the expression~\eqref{2010a3-eq0} equals $n (c/2)^2$.
+To show that $n c^2$ is attainable, we take $x_i = c$ if $i$ is even and $x_i = 0$ if $i$ is odd.
+Then $x_i x_{i + 2}$ equals $c^2$ when $i$ is even and $0$ when $i$ is odd.
+Thus, the expression~\eqref{2010a3-eq0} equals $n c^2$.
 The converse follows from the following claim, which implies
-\[ \sum_{i = 1}^{2n} x_i x_{i + 2} = \sum_{i = 1}^n (x_{2i} x_{2i + 2} + x_{2i + 1} x_{2i + 3}) \leq \sum_{i = 1}^n (c/2)^2 = n (c/2)^2. \]
+\[ \sum_{i = 1}^{2n} x_i x_{i + 2} = \sum_{i = 1}^n (x_{2i} x_{2i + 2} + x_{2i + 1} x_{2i + 3}) \leq \sum_{i = 1}^n c^2 = n c^2. \]
 
 \bgin{claim}
-Let $w, x, y, z \in R$ such that $w + x + y, x + y + z \leq c$.
-Then $wy + xz \leq (c/2)^2$.
+Let $w, x, y, z \in R$ such that $x, y \geq 0$ and $w + x + y, x + y + z \leq 2c$.
+Then $wy + xz \leq c^2$.
 \end{claim}
 \begin{proof}
-We have $wy + xz + (x + y)^2 = (w + x + y) y + x (x + y + z) \leq c(x + y) \leq (c/2)^2 + (x + y)^2$.
-Cancel out $(x + y)^2$ from both sides proves the claim.
+Indeed, $wy + xz \leq (2c - (x + y)) y + x (2c - (x + y)) = (x + y)(2c - (x + y))$.
+Then AM-GM inequality yields the claim.
 \end{proof}
 
 

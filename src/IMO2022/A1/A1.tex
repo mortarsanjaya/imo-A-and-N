@@ -1,0 +1,49 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\title{IMO 2022 A1}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $R$ be a totally ordered ring.
+Let $(a_n)_{n \geq 0}$ be a sequence of non-negative elements of $R$ such that $a_{n + 1}^2 + a_n a_{n + 2} \leq a_n + a_{n + 2}$ for all $n \geq 0$.
+Show that $a_{N + 2} \leq 1$ for all $N \geq 0$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{http://www.imo-official.org/problems/IMO2022SL.pdf}
+
+We use an alternative way to prove that two consecutive terms without $a_0$ cannot be greater than $1$.
+
+First consider any $b, c > 1$ and $a \geq 0$ in $R$ such that $b^2 + ac \leq a + c$.
+Rearranging the equations yield $b^2 - 1 \leq (1 - a)(c - 1)$.
+Since $b, c > 1$, this gives us $2(b - 1) < b^2 - 1 \leq (1 - a)(c - 1) \leq c - 1$.
+
+Now consider $a, b, c, d \geq 0$ in $R$ such that $b^2 + ac \leq a + c$ and $c^2 + bd \leq b + d$.
+If $b, c > 1$, the previous paragraph yields $2(b - 1) < c - 1$ and $2(c - 1) < b - 1$.
+Then $4(b - 1) < b - 1$; a contradiction.
+In particular, this means that in the sequence $(a_n)_{n \geq 0}$, $a_{n + 1} > 1$ implies $a_{n + 2} \leq 1$.
+
+Finally, suppose for the sake of contradiction that $a_{N + 2} > 1$ for some $n > 0$.
+Again, we get $0 < a_{N + 2}^2 - 1 \leq (1 - a_{N + 1})(a_{N + 3} - 1)$.
+This forces either $a_{N + 1} > 1$ or $a_{N + 3} > 1$.
+But both yields contradiction from the previous paragraph.
+
+
+
+\end{document}

@@ -22,19 +22,7 @@ section extra
 
 lemma sum_nonneg_eq_zero {M : Type*} [linear_ordered_add_comm_group M] {a : ℕ → M}
   (h : ∀ i : ℕ, 0 ≤ a i) {n : ℕ} (h0 : (range n).sum a = 0) {j : ℕ} (h1 : j < n) : a j = 0 :=
-begin
-  revert h1 j; induction n with n n_ih,
-  intros j h1; exfalso; exact not_le_of_lt h1 j.zero_le,
-  rw [sum_range_succ, add_eq_zero_iff_eq_neg] at h0,
-  have h1 : 0 ≤ (range n).sum (λ (x : ℕ), a x) := sum_nonneg (λ i _, h i),
-  rw [h0, neg_nonneg] at h1,
-  replace h1 := le_antisymm h1 (h n),
-  rw [h1, neg_zero] at h0,
-  intros j h2,
-  rw [nat.lt_succ_iff, le_iff_eq_or_lt] at h2,
-  rcases h2 with rfl | h2,
-  exacts [h1, n_ih h0 h2]
-end
+  (sum_eq_zero_iff_of_nonneg $ λ i _, h i).mp h0 j (mem_range.mpr h1)
 
 lemma periodic_shift {α M : Type*} [add_comm_monoid M] {f : M → α} {c : M}
     (h : periodic f c) (d : M) : periodic (λ m, f (m + d)) c :=
@@ -62,7 +50,7 @@ begin
         mul_assoc, ← mul_sub, mul_right_inj' (two_ne_zero : (2 : R) ≠ 0),
         sub_eq_sub_iff_sub_eq_sub, ← sub_one_mul, mul_comm, sq, ← sub_one_mul],
     rw good at h,
-    conv at h { find (_ = _) { rw ← eq_sub_iff_add_eq } },
+    simp_rw ← eq_sub_iff_add_eq at h,
     rw [← h, mul_assoc, bit0, ← add_assoc, h]
   end,
   repeat { rw sum_add_distrib at h2 },
@@ -95,7 +83,8 @@ begin
 end
 
 private lemma good_shift {a : ℕ → R} (h : good a) (k : ℕ) : good (λ i, a (i + k)) :=
-  λ i, by simp only []; rw [add_right_comm, h, add_right_comm]
+  λ i, (congr_arg2 _ (congr_arg2 _ rfl $ congr_arg a $ i.add_right_comm 1 k) rfl).trans $
+    (h _).trans $ congr_arg a (i.add_right_comm k 2)
 
 
 
@@ -171,15 +160,14 @@ begin
 end
 
 /-- Final solution, extra version, case 3 ∤ n -/
-theorem final_solution_extra_not3dvd {n : ℕ} (h : 0 < n) (h0 : ¬ 3 ∣ n)
+theorem final_solution_extra_not3dvd {n : ℕ} (h : 0 < n) (h0 : ¬3 ∣ n)
   {a : ℕ → R} (h1 : periodic a n) : ¬good a :=
 begin
-  replace h0 := (or_iff_left h0).mp (nat.coprime_or_dvd_of_prime nat.prime_three n),
-  rw nat.coprime_comm at h0,
+  rw [← nat.prime_three.coprime_iff_not_dvd, nat.coprime_comm] at h0,
   intros h2,
   replace h1 : periodic a 1 :=
   begin
-    cases nat.exists_mul_mod_eq_one_of_coprime h0 (by norm_num) with q h3,
+    cases nat.exists_mul_mod_eq_one_of_coprime h0 (nat.le_succ 2) with q h3,
     have h4 := periodic_to_periodic3 h2 h h1,
     intros i,
     rw [← h3, ← periodic.map_mod_nat h4, nat.add_mod_mod, periodic.map_mod_nat h4,
@@ -192,17 +180,9 @@ end
 
 /-- Final solution, original version -/
 theorem final_solution (n : ℕ) (h : 0 < n) : (∃ a : ℕ → R, good a ∧ periodic a n) ↔ 3 ∣ n :=
-begin
-  split,
-  { rintros ⟨a, h0, h1⟩,
-    by_contra h2,
-    exact final_solution_extra_not3dvd h h2 h1 h0 },
-  { rintros ⟨n, rfl⟩,
-    use good_ex; split,
-    exact good_ex_good,
-    intros i,
-    simp only [good_ex, nat.add_mul_mod_self_left] }
-end
+⟨λ h0, exists.elim h0 $ λ a h0, by_contra $ λ h1, final_solution_extra_not3dvd h h1 h0.2 h0.1,
+λ h0, exists.elim h0 $ λ k h0, ⟨good_ex, good_ex_good, λ i,
+  if_congr (h0.symm ▸ (i.add_mul_mod_self_left 3 k).symm ▸ iff.rfl) rfl rfl⟩⟩
 
 end IMO2018A2
 end IMOSL

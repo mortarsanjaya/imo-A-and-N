@@ -18,7 +18,7 @@
 
 \subsection*{Problem}
 
-Prove that, for any positive integer $n > 1$, there exists infinitely many positive integer $m$ such that $\left\lfloor \dfrac{n^m}{m} \right\rfloor$ is odd.
+Prove that, for any positive integer $n > 1$, there exists infinitely many positive integers $m$ such that $\lfloor n^m/m \rfloor$ is odd.
 
 
 
@@ -28,30 +28,35 @@ Official solution: \url{https://www.imo-official.org/problems/IMO2014SL.pdf}
 
 The presented solution below is Solution 2 of the official solution, with a difference in one case.
 When $n > 2$ and $n$ is even, instead of taking $k$ to be the powers of a fixed prime factor of $n - 1$, we just use powers of $n - 1$.
+There are three cases.
 
-Since $n > 1$, we have $k < n^k$ for any $k \geq 0$.
-So, if $n$ is odd, $\dfrac{n^{n^k}}{n^k} = n^{n^k - k}$ is odd for any $k \geq 0$.
-It remains to consider the case where $n$ is even.
+\begin{itemize}
 
-First, suppose that $n > 2$ is even.
-We take $m = (n - 1)^k$, where $k > 0$.
-One can prove by induction on $k$ that, for any positive integer $m$ and $k \geq 0$, $m^k \mid (m + 1)^{m^k} - 1$.
-Using $m = n - 1$ in this case gives us $n^{(n - 1)^k} \equiv 1 \pmod{(n - 1)^k}$.
-Thus, if we denote $q = \left\lfloor \dfrac{n^{(n - 1)^k}}{(n - 1)^k} \right\rfloor$, we have $n^{(n - 1)^k} = q (n - 1)^k + 1$ since $q > 1$.
-But $n^{(n - 1)^k}$ is even, while $(n - 1)^k$ is odd, so $q$ must be odd.
+    \item 
+    Case 1: $n > 1$ is odd.
 
-Finally, suppose that $n = 2$.
-This time, take $m = 3 \cdot 4^k$ where $k > 0$, and let $q = \left\lfloor \dfrac{2^{3 \cdot 4^k}}{3 \cdot 4^k} \right\rfloor = \left\lfloor \dfrac{2^{3 \cdot 4^k - 2^k}}{3} \right\rfloor$.
-Following the same argument as in the previous paragraph, it suffices to show that $2^{3 \cdot 4^k - 2k} \equiv 1 \pmod{3}$.
-This is easy since $3 \cdot 4^k - 2k$ is even and positive for $k > 0$.
+    Then for any $k \geq 0$, since $k < n^k$, we get $\lfloor n^{n^k}/n^k \rfloor = n^{n^k - k}$, which is odd.
+    Thus the choice $m = n^k$ for all $k \geq 0$ works.
 
+    \item
+    Case 2: $n > 2$ is even.
 
+    Write $n = r + 1$, where $r > 1$ is odd.
+    Then $(r + 1)^{r^k}$ is even and congruent to $1$ modulo $r^k$ for any $k \geq 1$.
+    This can be proved, for example, by induction on $k$.
+    This means that $\lfloor (r + 1)^{r^k}/r^k \rfloor$ is always odd for any $k \geq 1$.
+    So, $m = r^k$ for all $k \geq 1$ works.
 
-\subsubsection*{Implementation details}
+    \item
+    Case 3: $n = 2$.
 
-The following fact is used in two separate cases in the above solution:
-    for any positive integers $m$ and $n$, if $m$ is even and the remainder of $m$ divided by $n$ is exactly $1$, then $n$ is odd.
-Thus, we implement this result as a separate lemma.
+    This time, we take $m = 3 \cdot 4^k$ across all $k \geq 1$.
+    That is, we only need that $q = \lfloor 2^{3 \cdot 4^k}/(3 \cdot 4^k) \rfloor$ is odd for all $k \geq 1$.
+    Since $2k \leq 3 \cdot 4^k$ for all $k \geq 1$, we can write $q = \lfloor 2^{3 \cdot 4^k - 2k}/3 \rfloor$.
+    But $2^{3 \cdot 4^k - 2k} \equiv 1 \pmod{3}$ since $3 \cdot 4^k - 2k$ is even.
+    So indeed, $q$ is odd.
+
+\end{itemize}
 
 
 

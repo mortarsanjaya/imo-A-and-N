@@ -5,7 +5,6 @@ import algebra.hom.ring
 
 In this file, we explicitly construct the field of 2 elements.
 We prove just the necessary properties for the purpose of the main problem.
-We won't even prove that it is a field or a decidable type; just a ring.
 -/
 
 namespace IMOSL

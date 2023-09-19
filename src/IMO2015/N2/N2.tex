@@ -1,0 +1,84 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+
+\title{IMO 2015 N2}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $a, b \in \N$ such that $a! + b! \mid a! b!$.
+Prove that $3a \geq 2b + 2$, and find all the equality cases.
+
+
+
+\subsection*{Answer}
+
+Equality holds iff $(a, b) \in \{(2, 2), (4, 5)\}$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{http://www.imo-official.org/problems/IMO2015SL.pdf}
+
+We present Solution 1 of the official solution below.
+The original problem only asks to prove the inequality, but the equality case comes naturally afterwards.
+
+Clearly, $b! > 1$, so $b \geq 2$.
+If $a \geq b$, then the inequality $3a \geq 2b + 2$ is obvious.
+So now, assume that $a < b$, and write $b = a + c$ for some $c \in \N$ positive.
+It now suffices to show that $a \geq 2c + 2$.
+
+Clearly, $a! + b! \mid a! b!$ implies $a! + b! \mid (a!)^2$.
+Then $a! + b! = a! + (a + c)! = a!$ divide $(a!)^2$.
+This simplifies to
+\[ 1 + \binom{a + c}{c} c! = 1 + (a + 1)(a + 2) \ldots (a + c) \mid a!. \]
+Clearly, $a > c$, and the above also means that
+\[ 1 + (a + 1)(a + 2) \ldots (a + c) \mid (c + 1)(c + 2) \ldots a. \tag{1}\label{2015n2-eq1} \]
+    since the divisor is coprime with $1, 2, \ldots, c$.
+Now this implies the inequality
+\[ (a + 1)(a + 2) \ldots (a + c) < (c + 1)(c + 2) \ldots a. \]
+
+Clearly, this fails if $a \leq 2c$.
+Next, consider the case $a = 2c + 1$.
+Then $a + 1 = 2(c + 1)$, so the factor $c + 1$ on the right hand side of~\eqref{2015n2-eq1} can be cancelled out.
+Now the divisibility implies
+\[ (a + 1)(a + 2) \ldots (a + c) < (a - c + 1) \ldots a, \]
+    which is again a contradiction.
+
+Finally, consider the case $a = 2c + 2$.
+Plugging into~\eqref{2015n2-eq1} yields
+\[ 1 + (2c + 3)(2c + 4) \ldots (3c + 2) \mid (c + 1)(c + 2) \ldots (2c + 2). \]
+It is easy to check that $c = 0$ works (with the product on the LHS taken to be $1$).
+It is also easy to check that $c = 1$ works, so it remains to show that $c \leq 1$.
+
+Suppose for the sake of contradiction that $c \geq 2$.
+For $c = 2$, we would have $57 \mid 360$; a contradiction.
+For $c \geq 3$, it suffices to show that $c + 2$ and $c + 3$ divides $M = (2c + 3)(2c + 4) \ldots (3c + 2)$.
+Indeed, then they will be coprime with $1 + M$, and so
+\[ 1 + M \mid (c + 1)(c + 4)(c + 5) \ldots (2c + 2). \]
+This is a contradiction since for $c \geq 3$,
+\[ M = (2c + 3)(2c + 4) \ldots (3c + 2) \geq (c + 3)(c + 4) \ldots (2c + 2). \]
+
+Now we show that $c + 2$ and $c + 3$ divides $M$ for $c \geq 3$.
+For $c \geq 3$, the term $2c + 4 = 2(c + 2)$ exists in the product expansion of $M$, so $c + 2 \mid M$.
+For $c \geq 4$, the term $2c + 6 = 2(c + 3)$ exists in the product expansion of $M$, so $c + 3 \mid M$.
+Finally, $c + 3 \mid M$ for $c = 3$ follows by direct computation.
+
+
+
+\end{document}

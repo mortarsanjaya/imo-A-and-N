@@ -1,61 +1,46 @@
-import data.int.parity data.int.modeq ring_theory.coprime.lemmas
+import data.int.parity
 
 /-! # IMO 2015 N1 -/
 
 namespace IMOSL
 namespace IMO2015N1
 
-open function
-
 def f (n : ℤ) := n * (n / 2)
 
-/-- Final solution -/
-theorem final_solution (n : ℤ) : (∃ k : ℕ, even (f^[k] n)) ↔ n ≠ 3 :=
+lemma main_claim {c m : ℤ} (h : 2 * c ∣ m - 3) (h0 : 2 * c ∣ f m - 3) :
+  2 * (2 * c) ∣ m - 3 :=
+(eq_or_ne c 0).elim
+---- Case 1: `c = 0`
+(λ h1, suffices 2 * c = 2 * (2 * c), from this ▸ h, h1.symm ▸ rfl)
+---- Case 2: `c ≠ 0`
+(λ h1, exists.elim h $ λ d h, suffices 2 ∣ d,
+  from h.symm ▸ d.mul_comm (2 * c) ▸ mul_dvd_mul_right this _,
 begin
-  ---- Go for the contrapositive and prove the easy direction
-  rw [← not_iff_not, not_not, not_exists, iff.comm]; split,
-  rintros rfl,
-  suffices : ∀ x : ℕ, f^[x] 3 = 3,
-    intros x; rw this; norm_num,
-  intros x; induction x with x x_ih,
-  rw [iterate_zero, id.def],
-  rw [iterate_succ', comp_app, x_ih]; refl,
+  have X : (2 : ℤ) ≠ 0 := (int.bit0_pos int.one_pos).ne.symm,
+  rw [f, eq_add_of_sub_eq h, add_mul, add_sub_assoc, mul_assoc, dvd_add_right ⟨_, rfl⟩,
+      mul_assoc, add_comm, int.add_mul_div_left _ _ X, mul_add, add_comm] at h0,
+  have X0 : (3 : ℤ) / 2 = 1 := rfl,
+  rwa [X0, mul_one, add_sub_cancel, mul_comm, mul_left_comm,
+       mul_dvd_mul_iff_left h1, bit1, add_one_mul, dvd_add_right ⟨_, rfl⟩] at h0
+end)
 
-  ---- Reduce to a more general result
-  revert n; suffices : ∀ {n c : ℤ},
-    c ≠ 0 → n ≡ 3 [ZMOD 2 * c] → f n ≡ 3 [ZMOD 2 * c] → n ≡ 3 [ZMOD 2 * (2 * c)],
-  { intros n h,
-    suffices : ∀ x k : ℕ, (f^[k] n) ≡ 3 [ZMOD 2 ^ x],
-    { obtain ⟨x, h0⟩ : ∃ x : ℕ, (n - 3).nat_abs < x :=
-        ⟨(n - 3).nat_abs.succ, nat.lt_succ_self _⟩,
-      replace this := (this x 0).symm,
-      rw [iterate_zero, id.def, int.modeq_iff_dvd] at this,
-      replace h0 := lt_trans h0 (nat.lt_two_pow x),
-      rw [← int.coe_nat_lt, nat.cast_pow, nat.cast_two, ← int.abs_eq_nat_abs] at h0,
-      rw ← sub_eq_zero; exact int.eq_zero_of_abs_lt_dvd this h0 },
-    intros x; cases x with _ x,
-    intros k; rw pow_zero; exact int.modeq_one,
-    induction x with x h0; intros k,
-    rw [pow_one, int.modeq_iff_dvd, ← even_iff_two_dvd, int.even_sub'],
-    norm_num; exact h k,
-    refine this (pow_ne_zero _ two_ne_zero) (h0 k) _,
-    convert h0 k.succ; rw iterate_succ' },
-
-  ---- Prove the general result
-  intros n c hc h h0,
-  replace h := h.symm,
-  rw int.modeq_iff_dvd at h; cases h with d h,
-  rw sub_eq_iff_eq_add at h; subst h,
-  symmetry; rw [int.modeq_iff_dvd, add_sub_cancel, mul_comm],
-  refine mul_dvd_mul_left (2 * c) _,
-  unfold f at h0,
-  replace h0 : 3 ≡ 3 * ((2 * c * d + 3) / 2) [ZMOD 2 * c] :=
-    h0.symm.trans (int.modeq.mul_right _ (by rw [int.modeq_iff_dvd, add_sub_cancel]; use d)).symm,
-  rw [int.modeq_iff_dvd, mul_assoc, add_comm, int.add_mul_div_left _ _ two_ne_zero] at h0,
-  norm_num at h0,
-  rwa [← mul_sub_one, add_sub_cancel', mul_comm c, ← mul_assoc, bit1,
-       mul_dvd_mul_iff_right hc, add_one_mul, dvd_add_right ⟨d, rfl⟩] at h0
-end
+/-- Final solution -/
+theorem final_solution {M : ℤ} :
+  (∃ k : ℕ, 2 ∣ (f^[k] M)) ↔ M ≠ 3 :=
+iff.symm $ not_iff_comm.mp $ not_exists.trans $
+---- If `f^k(M)` is odd for all `k ≥ 0`, then `M = 3`
+⟨λ h, suffices ∀ x k : ℕ, 2 ^ (x + 1) ∣ (f^[k]) M - 3,
+  from let K := (M - 3).nat_abs,
+    h0 := int.coe_nat_lt.mpr (K.lt_succ_self.trans K.succ.lt_two_pow) in
+  eq_of_sub_eq_zero $ int.eq_zero_of_abs_lt_dvd (this K 0) $
+    (M - 3).coe_nat_abs.symm.trans_lt $ h0.trans_eq (int.coe_nat_pow 2 K.succ),
+λ x, nat.rec_on x
+  (λ x, (int.dvd_iff_mod_eq_zero _ _).mpr $ int.even_iff.mp $ int.even_sub'.mpr $
+    iff_of_true (int.odd_iff.mpr $ int.two_dvd_ne_zero.mp $ h x) (odd_bit1 1))
+  (λ x h0 k, main_claim (h0 k) (f.iterate_succ_apply' k M ▸ h0 (k + 1))),
+---- `f^k(3)` is odd for all `k ≥ 0`
+λ h x, h.symm ▸ (function.iterate_fixed (rfl : f 3 = 3) x).symm ▸
+  int.two_not_dvd_two_mul_add_one 1⟩
 
 end IMO2015N1
 end IMOSL

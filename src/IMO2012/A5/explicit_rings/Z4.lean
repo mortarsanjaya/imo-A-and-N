@@ -272,7 +272,7 @@ include h
 
 lemma cast_add : ∀ x y : ℤ₄, ((x + y : ℤ₄) : R) = x + y
 | ℤ₄0 x := (zero_add ↑x).symm
-| x ℤ₄0 := (congr_arg cast x.add_zero).trans (add_zero ↑x).symm
+| x ℤ₄0 := x.add_zero.symm ▸ (add_zero ↑x).symm
 | ℤ₄1 ℤ₄1 := rfl
 | ℤ₄1 ℤ₄2 := neg_eq_of_add_eq_zero_right $ (add_assoc 1 1 2).symm.trans h
 | ℤ₄1 ℤ₄3 := (add_neg_self 1).symm
@@ -286,7 +286,7 @@ lemma cast_add : ∀ x y : ℤ₄, ((x + y : ℤ₄) : R) = x + y
 lemma cast_mul : ∀ x y : ℤ₄, ((x * y : ℤ₄) : R) = x * y
 | ℤ₄0 x := (zero_mul ↑x).symm
 | ℤ₄1 x := (one_mul ↑x).symm
-| x ℤ₄1 := (congr_arg cast x.mul_one).trans (mul_one ↑x).symm
+| x ℤ₄1 := x.mul_one.symm ▸ (mul_one ↑x).symm
 | ℤ₄2 ℤ₄0 := (mul_zero 2).symm
 | ℤ₄2 ℤ₄2 := h.symm.trans (mul_two 2).symm
 | ℤ₄2 ℤ₄3 := (eq_neg_of_add_eq_zero_left h).trans (mul_neg_one 2).symm
@@ -302,10 +302,10 @@ include h0
 
 lemma cast_hom_eq_zero_imp : ∀ x : ℤ₄, cast_hom h x = 0 → x = 0
 | ℤ₄0 := λ _, rfl
-| ℤ₄1 := λ h2, absurd ((congr_arg2 has_add.add h2 h2).trans $ add_zero 0) h0
+| ℤ₄1 := λ h2, false.elim $ h0 $ h2.symm ▸ (congr_arg2 has_add.add h2 h2).trans (add_zero 0)
 | ℤ₄2 := λ h2, absurd h2 h0
-| ℤ₄3 := λ h2, let h3 := neg_eq_zero.mp h2 in 
-    absurd ((congr_arg2 has_add.add h3 h3).trans $ add_zero 0) h0
+| ℤ₄3 := λ h2, false.elim $ h0 $ let h3 := neg_eq_zero.mp h2 in 
+    (congr_arg2 has_add.add h3 h3).trans (add_zero 0)
 
 lemma cast_hom_injective : function.injective (cast_hom h) :=
   (injective_iff_map_eq_zero $ cast_hom h).mpr (cast_hom_eq_zero_imp h h0)

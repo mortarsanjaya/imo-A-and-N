@@ -1,0 +1,75 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\Z}{\mathbb{Z}}
+
+\title{IMO 2016 N5}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Fix some $k, a \in \Z$ with $k \geq 0$ and $a > 0$.
+A pair $(x, y) \in \Z^2$ is called \emph{nice} if $(k + 1) y^2 - k x^2 = a$.
+Suppose that a nice pair exists.
+
+\begin{enumerate}
+\item   Prove that for any integer $N$, there exists a nice pair $(x, y)$ with $x \geq N$.
+\item   Prove that there exists a nice pair $(x, y)$ with $x^2 \leq a$.
+\end{enumerate}
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{http://www.imo-official.org/problems/IMO2016SL.pdf}
+
+We follow Solution 2 of the official solution.
+The main idea is the following fact.
+For any nice pair $(x, y)$, one can check that $(x', y') = ((2k + 1) x + (2k + 2) y, 2k x + (2k + 1) y)$ is also nice.
+Indeed, by bashing,
+\[ (k + 1) (2k x + (2k + 1) y)^2 - k ((2k + 1) x + (2k + 2) y)^2 = (k + 1) y^2 - k x^2. \]
+
+\begin{enumerate}
+
+\item
+It suffices to show that, for any nice pair $(x, y)$, there exists a nice pair $(x', y')$ with $x' > x$.
+Take $x' = (2k + 1) |x| + (2k + 2) |y|$ and $y' = 2k |x| + (2k + 1) |y|$, which works by the above fact.
+It is easy to see that $x' > |x| \geq x$; note that $|y| > 0$ is forced.
+This proves the first part.
+
+\item
+It suffices to show that if $x^2 > a$, then we can find another nice pair $(x', y')$ with $|x'| < |x|$.
+This time, use $x' = (2k + 1) |x| - (2k + 2) |y|$ and $y' = 2k |x| - (2k + 1) |y|$.
+Again, the above fact means that $(x', y')$ is nice.
+Thus it remains to prove that
+\[ |x'| < |x| \iff 2k |x| - (2k + 2) |y| < 0 < (2k + 2) |x| - (2k + 2) |y|. \]
+For the latter, $x^2 > a$ and $(k + 1) y^2 - k x^2 = a$ implies $x^2 > y^2$ and thus $|x| > |y|$.
+The former is equivalent to $k|x| < (k + 1)|y| \iff k^2 x^2 < (k + 1)^2 y^2$.
+But $0 \leq kx^2 < (k + 1) y^2$ and $k \geq 0$, so $k^2 x^2 < (k + 1)^2 y^2$ follows easily.
+
+\end{enumerate}
+
+
+
+\subsection*{Extra notes}
+
+The original problem only asks to prove that there exists a nice pair $(x, y)$ with $x \leq \sqrt{a}$ iff there exists a nice pair $(x, y)$ with $x > \sqrt{a}$.
+Both clearly yields that a nice pair exists, and the existence of a nice pair implies one of the statements.
+The above version shows a stronger result on one direction: if a nice pair exists, then one exists with arbitrarily large $x$-value.
+
+
+
+
+\end{document}

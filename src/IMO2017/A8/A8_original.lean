@@ -17,11 +17,11 @@ begin
   revert x y; refine final_solution_part1 _ (λ x y h0, _),
   replace h := h x y; contrapose h,
   rw [← add_sub_right_comm, ← add_sub_right_comm, add_comm, sub_right_inj, add_comm, not_imp],
-  refine ⟨_, ne_of_lt h0⟩,
+  refine ⟨_, h0.ne⟩,
   rw [not_and_distrib, not_le, not_le, ← sub_neg, or_comm, ← sub_pos] at h,
   cases h with h h,
-  exacts [mul_pos (lt_trans h (sub_lt_sub_left h0 (x + y))) h,
-    mul_pos_of_neg_of_neg h (lt_trans (sub_lt_sub_left h0 (x + y)) h)]
+  exacts [mul_pos (h.trans (sub_lt_sub_left h0 (x + y))) h,
+    mul_pos_of_neg_of_neg h ((sub_lt_sub_left h0 (x + y)).trans h)]
 end
 
 end IMO2017A8

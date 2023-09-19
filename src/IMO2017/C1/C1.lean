@@ -80,8 +80,8 @@ begin
   replace h0 : 0 < (lattice_rect ((0, 0), m, n)).sum f :=
     rect_weight_pos_iff.mpr ⟨h0, even_zero⟩,
   replace h1 : 0 < I.sum (λ i, (lattice_rect $ Q i).sum f) :=
-    lt_of_lt_of_eq h0 ((sum_congr h1 $ λ p _, rfl).trans (sum_disj_Union I _ h)),
-  rcases exists_lt_of_sum_lt (lt_of_eq_of_lt sum_const_zero h1) with ⟨i, h2, h3⟩,
+    h0.trans_eq ((sum_congr h1 $ λ p _, rfl).trans (sum_disj_Union I _ h)),
+  rcases exists_lt_of_sum_lt (sum_const_zero.trans_lt h1) with ⟨i, h2, h3⟩,
   exact ⟨i, h2, rect_weight_pos_iff.mp h3⟩
 end
 

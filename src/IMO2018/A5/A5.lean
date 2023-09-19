@@ -10,30 +10,30 @@ variables {F V : Type*} [linear_ordered_field F] [add_comm_group V] [module F V]
 def good (f : {x : F // 0 < x} → V) :=
   ∀ x y : {x : F // 0 < x}, (x + x⁻¹ : F) • f y = f (x * y) + f (x⁻¹ * y)
 
-
-
-private def good_space (F V : Type*) [linear_ordered_field F] [add_comm_group V] [module F V] :
+def good_space (F V : Type*) [linear_ordered_field F] [add_comm_group V] [module F V] :
   submodule F ({x : F // 0 < x} → V) :=
 { carrier := set_of good,
-  add_mem' := λ f g h h0 x y,
-    by simp_rw [pi.add_apply, smul_add]; rw [h x y, h0 x y, add_add_add_comm],
-  zero_mem' := λ x y, by simp_rw pi.zero_apply; rw [smul_zero, zero_add],
-  smul_mem' := λ c f h x y, by simp_rw [pi.smul_apply, smul_comm _ c, h x, ← smul_add] }
+  add_mem' := λ f g h h0 x y, (smul_add _ _ _).trans $
+    (congr_arg2 _ (h x y) (h0 x y)).trans $ add_add_add_comm _ _ _ _,
+  zero_mem' := λ x y, (smul_zero _).trans (zero_add 0).symm,
+  smul_mem' := λ c f h x y, (smul_comm _ c _).trans $
+    (h x y).symm ▸ (smul_add _ _ _) }
 
-private lemma smul_vec_is_good (v : V) :
+lemma smul_vec_is_good (v : V) :
   good (λ x : {x : F // 0 < x}, (x : F) • v) :=
-  λ x y, by simp_rw [positive.coe_mul, positive.coe_inv, ← smul_smul, ← add_smul]
-
-private lemma inv_smul_vec_is_good (v : V) :
+  λ x y, (add_smul _ _ _).trans $ congr_arg2 _ (smul_smul _ _ _) (smul_smul _ _ _)
+  
+lemma inv_smul_vec_is_good (v : V) :
   good (λ x : {x : F // 0 < x}, (x⁻¹ : F) • v) :=
-  λ x y, by simp_rw [positive.coe_mul, mul_inv, positive.coe_inv, inv_inv, ← smul_smul];
-    rw [← add_smul, add_comm (x : F)]
+  λ x y, (add_smul _ _ _).trans $ (add_comm _ _).trans $ congr_arg2 _
+    ((smul_smul _ _ _).trans $ congr_arg2 _ (mul_inv _ _).symm rfl)
+    ((smul_smul _ _ _).trans $ congr_arg2 _ (inv_inv (x : F) ▸ (mul_inv _ _).symm) rfl)
     
-private lemma smul_add_inv_smul_is_good (v1 v2 : V) :
+lemma smul_add_inv_smul_is_good (v1 v2 : V) :
   good (λ x : {x : F // 0 < x}, (x : F) • v1 + (x⁻¹ : F) • v2) :=
   (good_space F V).add_mem (smul_vec_is_good v1) (inv_smul_vec_is_good v2)
 
-private lemma exists_smul_add_inv_smul_two_eq {a b : {x : F // 0 < x}} (h : a ≠ b) (v1 v2 : V) :
+lemma exists_smul_add_inv_smul_two_eq {a b : {x : F // 0 < x}} (h : a ≠ b) (v1 v2 : V) :
  ∃ w1 w2 : V, (a : F) • w1 + (a : F)⁻¹ • w2 = v1 ∧ (b : F) • w1 + (b : F)⁻¹ • w2 = v2 :=
 begin
   set S := {x : F // 0 < x},
@@ -63,7 +63,7 @@ begin
     rw [mul_inv_cancel h0, inv_mul_cancel h0, sub_add_sub_cancel', ← sub_smul, mul_comm x] }
 end
 
-private lemma good_two_eq_zero {f : {x : F // 0 < x} → V} (h : good f)
+lemma good_two_eq_zero {f : {x : F // 0 < x} → V} (h : good f)
   {a b : {x : F // 0 < x}} (h0 : a ≠ b) (h1 : f a = 0) (h2 : f b = 0) :
   f = 0 :=
 begin
@@ -90,20 +90,23 @@ end
 
 
 
+
+
 /-- Final solution -/
 theorem final_solution (f : {x : F // 0 < x} → V) :
   good f ↔ ∃ v1 v2 : V, f = λ x, (x : F) • v1 + (x⁻¹ : F) • v2 :=
-begin
-  symmetry; refine ⟨λ h, _, λ h, _⟩,
-  rcases h with ⟨v1, v2, rfl⟩,
-  exact smul_add_inv_smul_is_good v1 v2,
+---- `→`
+⟨λ h, begin
   obtain ⟨a, b, h0⟩ : ∃ a b : {x : F // 0 < x}, a ≠ b :=
-    ⟨⟨2, two_pos⟩, ⟨1, one_pos⟩, ne_of_gt (by rw subtype.mk_lt_mk; exact one_lt_two)⟩,
+    ⟨⟨2, two_pos⟩, ⟨1, one_pos⟩, ne_of_gt one_lt_two⟩,
   obtain ⟨v1, v2, h1, h2⟩ := exists_smul_add_inv_smul_two_eq h0 (f a) (f b),
   rw [eq_comm, ← sub_eq_zero] at h1 h2,
   refine ⟨v1, v2, sub_eq_zero.mp (good_two_eq_zero _ h0 h1 h2)⟩,
   exact (good_space F V).sub_mem h (smul_add_inv_smul_is_good v1 v2)
-end
+end,
+---- `←`
+λ h, exists.elim h $ λ v1 h, exists.elim h $ λ v2 h,
+  h.symm ▸ smul_add_inv_smul_is_good v1 v2⟩
 
 end IMO2018A5
 end IMOSL
