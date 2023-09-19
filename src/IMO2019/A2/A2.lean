@@ -12,10 +12,6 @@ open multiset
 
 variables {R : Type*} [linear_ordered_comm_ring R]
 
-set_option profiler true
-set_option profiler.threshold 0.04
-
-
 section results
 
 lemma le_fold_max_of_mem (S : multiset R) : ∀ x : R, x ∈ S → x ≤ S.fold max 0 :=

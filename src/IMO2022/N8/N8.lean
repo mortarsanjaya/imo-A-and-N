@@ -5,9 +5,6 @@ import number_theory.legendre_symbol.jacobi_symbol
 namespace IMOSL
 namespace IMO2022N8
 
-set_option profiler true
-set_option profiler.threshold 0.4
-
 lemma jacobi_sym_pow_odd'_eq_self (a : ℤ) (b n : ℕ) :
   jacobi_sym a b ^ (2 * n + 1) = jacobi_sym a b :=
 (jacobi_sym.trichotomy a b).elim (λ h, h.symm ▸ zero_mul _) $

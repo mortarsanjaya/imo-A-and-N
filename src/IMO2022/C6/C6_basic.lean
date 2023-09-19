@@ -5,11 +5,6 @@ import logic.relation algebra.big_operators.multiset.basic data.nat.parity data.
 namespace IMOSL
 namespace IMO2022C6
 
-/-
-set_option profiler true
-set_option profiler.threshold 0.05
--/
-
 open function relation multiset
 
 /- ### Extra lemmas -/
