@@ -1,4 +1,4 @@
-import data.nat.order.basic data.set.image
+import data.nat.basic
 
 /-! # IMO 2010 A6 -/
 
@@ -9,81 +9,63 @@ open_locale classical
 
 def good (f g : ℕ → ℕ) := ∀ n : ℕ, f (g n) = (f n).succ
 
-private lemma lem1 {f g : ℕ → ℕ} (h : good f g) :
-  ∃ a : ℕ, ∀ k : ℕ, k ∈ set.range f ↔ a ≤ k :=
-  let h0 : ∃ n, n ∈ set.range f := ⟨f 0, set.mem_range_self 0⟩ in
-  ⟨nat.find h0, λ k, ⟨nat.find_min' h0, nat.le_induction (nat.find_spec h0)
-    (λ n _ h1, exists.elim h1 $ λ m h2, ⟨g m, (h m).trans $ congr_arg nat.succ h2⟩) k⟩⟩
+lemma lem1 {f g : ℕ → ℕ} (h : good f g) : ∃ a, ∀ k, (∃ x, f x = k) ↔ a ≤ k :=
+  let h0 : ∃ n, ∃ x, f x = n := ⟨f 0, 0, rfl⟩ in
+  ⟨nat.find h0, λ k, ⟨nat.find_min' h0, k.le_induction (nat.find_spec h0) $
+    λ n _ h1, exists.elim h1 $ λ m h2, ⟨g m, h2 ▸ h m⟩⟩⟩
 
-private lemma lem2 {f g : ℕ → ℕ} (h : good f g) {x y : ℕ} (h0 : g x = g y) : f x = f y :=
-  nat.succ_injective $ (h x).symm.trans $ (congr_arg f h0).trans (h y)
+lemma lem2 {f g : ℕ → ℕ} (h : good f g) {x y : ℕ} (h0 : g x = g y) : f x = f y :=
+  nat.succ_injective $ h x ▸ h y ▸ congr_arg f h0 
 
-private lemma lem3 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {x y : ℕ} :
-  f x = f y ↔ g x = g y := ⟨lem2 h0, lem2 h⟩
+lemma lem3 {f g : ℕ → ℕ} (h : good g f) {a : ℕ} (h0 : ∀ k, (∃ x, f x = k) ↔ a ≤ k) :
+  a < f a :=
+((h0 (f a)).mp ⟨a, rfl⟩).lt_or_eq.resolve_right $
+  λ h1, (g a).succ_ne_self $ (h a).symm.trans $ congr_arg g h1.symm
 
-private lemma lem4 {f g : ℕ → ℕ} (h : good g f) {a : ℕ}
-  (ha : ∀ k : ℕ, k ∈ set.range f ↔ a ≤ k) : a.succ ≤ f a :=
-  (lt_or_eq_of_le $ (ha $ f a).mp ⟨a, rfl⟩).elim id $
-    λ h1, not.elim (nat.succ_ne_self $ g a) $ (h a).symm.trans $ congr_arg g h1.symm
+lemma lem4 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {k m : ℕ}
+  (h1 : ∃ x, f x = k) (h2 : ∃ y, f y = m) (h3 : f k = f m) : k = m :=
+  exists.elim h1 $ λ x h1, exists.elim h2 $ λ y h2, h1 ▸ h2 ▸
+    lem2 h (nat.succ_injective $ h0 x ▸ h0 y ▸ lem2 h0 (h1.symm ▸ h2.symm ▸ h3))
 
-private lemma lem5 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a b : ℕ} (h1 : a ≤ b)
-  (ha : ∀ k : ℕ, k ∈ set.range f ↔ a ≤ k) (hb : ∀ k : ℕ, k ∈ set.range g ↔ b ≤ k) : a = b :=
-begin
-  obtain ⟨x, h2⟩ : ∃ x : ℕ, f a = f x + 1 :=
-    exists.elim (le_iff_exists_add.mp $ lem4 h0 ha)
-      (λ c h2, exists.elim ((ha $ a + c).mpr le_self_add) $
-        λ x h3, ⟨x, h2.trans $ (add_right_comm a 1 c).trans $ congr_arg (+ 1) h3.symm⟩),
-  obtain ⟨c, h3⟩ := (ha a).mpr (le_refl a),
-  obtain ⟨d, h4⟩ := (ha $ g x).mpr (h1.trans $ (hb $ g x).mp ⟨x, rfl⟩),
-  rw [← nat.succ_eq_add_one, ← h, ← h3, ← h4, lem3 h h0, h0, h0, nat.succ_inj', lem3 h0 h] at h2,
-  exact le_antisymm h1 ((hb a).mp ⟨x, h4.symm.trans $ h2.symm.trans h3⟩)
-end
+lemma lem5 : ∀ {f g : ℕ → ℕ}, good f g → good g f → ∀ {a b : ℕ},
+  (∀ k : ℕ, (∃ x, f x = k) ↔ a ≤ k) → (∀ k : ℕ, (∃ x, g x = k) ↔ b ≤ k) → a = b :=
+suffices ∀ {f g : ℕ → ℕ}, good f g → good g f → ∀ {a b : ℕ}, a ≤ b →
+    (∀ k : ℕ, (∃ x, f x = k) ↔ a ≤ k) → (∀ k : ℕ, (∃ x, g x = k) ↔ b ≤ k) → a = b,
+  from λ f g h h0 a b, (le_total a b).elim (this h h0) (λ h1 h2 h3, (this h0 h h1 h3 h2).symm),
+λ f g h h0 a b h1 h2 h3, h1.antisymm $ (h3 a).mp $
+  exists.elim (nat.exists_eq_add_of_lt $ lem3 h0 h2) $ λ t h4,
+  exists.elim ((h2 (a + t)).mpr $ a.le_add_right t) $ λ x h5,
+⟨x, lem4 h h0 ((h2 _).mpr $ h1.trans $ (h3 _).mp ⟨x, rfl⟩)
+  ((h2 _).mpr a.le_refl) ((h x).trans $ h5.symm ▸ h4.symm)⟩
 
-private lemma lem6 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a b : ℕ}
-  (ha : ∀ k : ℕ, k ∈ set.range f ↔ a ≤ k) (hb : ∀ k : ℕ, k ∈ set.range g ↔ b ≤ k) : a = b :=
-  (le_total a b).elim (λ h1, lem5 h h0 h1 ha hb) (λ h1, (lem5 h0 h h1 hb ha).symm)
+lemma lem6 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) :
+  ∃ a : ℕ, (∀ k, (∃ x, f x = k) ↔ a ≤ k) ∧ (∀ k : ℕ, (∃ x, g x = k) ↔ a ≤ k) :=
+  exists.elim (lem1 h) $ λ a h1, ⟨a, h1, exists.elim (lem1 h0) $
+    λ b h2, (lem5 h h0 h1 h2).symm ▸ h2⟩
 
-private lemma lem7 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a : ℕ}
-  (ha : ∀ k : ℕ, k ∈ set.range f ↔ a ≤ k) (ha' : ∀ k : ℕ, k ∈ set.range g ↔ a ≤ k) :
+lemma lem7 {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) {a : ℕ}
+  (h1 : ∀ k : ℕ, (∃ x, f x = k) ↔ a ≤ k) (h2 : ∀ k : ℕ, (∃ x, g x = k) ↔ a ≤ k) :
   f a = a.succ :=
-  (eq_or_lt_of_le $ lem4 h0 ha).elim eq.symm $
-  λ h1, begin
-    rw ← nat.succ_le_iff at h1,
-    obtain ⟨x, h2⟩ : ∃ x : ℕ, f a = f x + 1 + 1 :=
-    begin
-      rw [nat.succ_eq_add_one, nat.succ_eq_add_one, add_assoc, le_iff_exists_add] at h1,
-      cases h1 with c h1,
-      obtain ⟨x, h2⟩ : a + c ∈ set.range f := (ha (a + c)).mpr le_self_add,
-      exact ⟨x, by rw [h1, h2, add_right_comm]⟩
-    end,
+(nat.succ_le_of_lt $ lem3 h0 h1).eq_or_gt.resolve_right $ λ h3,
+  exists.elim (nat.exists_eq_add_of_lt h3) $ λ t h4,
+  exists.elim ((h1 (a + t)).mpr $ a.le_add_right t) $ λ x h5,
+suffices a = g (g x), from exists.elim ((h1 (g x)).mpr $ (h2 _).mp ⟨x, rfl⟩) $
+  λ y h6, this.ge.not_lt $ h6 ▸ (h0 y).symm ▸ nat.lt_succ_of_le ((h2 _).mp ⟨y, rfl⟩),
+lem4 h h0 ((h1 _).mpr a.le_refl) ((h1 _).mpr $ (h2 _).mp ⟨g x, rfl⟩) $
+  h4.trans $ (h (g x)).symm ▸ (h x).symm ▸ h5.symm ▸ congr_arg nat.succ (a.succ_add t)
 
-    rw [← nat.succ_eq_add_one, ← nat.succ_eq_add_one, ← h, ← h] at h2,
-    obtain ⟨c, h3⟩ := (ha a).mpr (le_refl a),
-    obtain ⟨d, h4⟩ := (ha (g (g x))).mpr ((ha' _).mp ⟨(g x), rfl⟩),
-    rw [← h3, ← h4, lem3 h h0, h0, h0, nat.succ_inj', lem3 h0 h] at h2,
-    obtain ⟨e, h5⟩ := (ha $ g x).mpr ((ha' $ g x).mp ⟨x, rfl⟩),
-    replace h2 := le_of_le_of_eq (nat.succ_le_succ_iff.mpr $ (ha' $ g e).mp ⟨e, rfl⟩)
-      (h3.symm.trans $ h2.trans $ h4.trans $ (congr_arg g h5.symm).trans $ h0 e).symm,
-    rw [nat.succ_eq_add_one, add_le_iff_nonpos_right, ← not_lt] at h2,
-    exact absurd nat.one_pos h2
-  end
+
 
 
 
 /-- Final solution -/
 theorem final_solution {f g : ℕ → ℕ} (h : good f g) (h0 : good g f) : f = g :=
-begin
-  cases lem1 h with a h1,
-  cases lem1 h0 with b h2,
-  have h3 := lem6 h h0 h1 h2; subst h3,
-  suffices : ∀ n : ℕ, a ≤ n → (f n = n.succ ∧ g n = n.succ),
-    ext n; rw [← nat.succ_inj', ← h, (this (g n) $ (h2 _).mp ⟨n, rfl⟩).left],
-  apply nat.le_induction,
-  exact ⟨lem7 h h0 h1 h2, lem7 h0 h h2 h1⟩,
-  rintros n h3 ⟨h4, h5⟩; split,
-  rw [← nat.succ_eq_add_one, ← h5, h, h4, h5],
-  rw [← nat.succ_eq_add_one, ← h4, h0, h5, h4]
-end
+  exists.elim (lem6 h h0) $ λ a h1,
+suffices ∀ n : ℕ, a ≤ n → (f n = n.succ ∧ g n = n.succ),
+  from funext $ λ n, nat.succ_injective $ (h n).symm.trans $ (this _ $ (h1.2 _).mp ⟨n, rfl⟩).1,
+λ n h2, nat.le_induction ⟨lem7 h h0 h1.1 h1.2, lem7 h0 h h1.2 h1.1⟩
+  (λ n h2 h3, ⟨(congr_arg f h3.2.symm).trans $ (h n).trans $ congr_arg nat.succ h3.1,
+    (congr_arg g h3.1.symm).trans $ (h0 n).trans $ congr_arg nat.succ h3.2⟩) n h2
 
 end IMO2010A6
 end IMOSL
