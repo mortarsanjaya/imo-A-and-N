@@ -5,57 +5,40 @@ import algebra.module.basic
 namespace IMOSL
 namespace IMO2018A1
 
-open function
+/-- General lemma on left-cancellation of `•` on abelian groups embedding to `ι → ℤ` -/
+lemma zsmul_left_cancel_of_embed_to_int_pi {G : Type*} [add_group G]
+  {ι : Type*} {ρ : G →+ ι → ℤ} (h : (ρ : G → ι → ℤ).injective)
+  {n : ℤ} (h0 : n ≠ 0) {x y : G} (h1 : n • x = n • y) : x = y :=
+  h $ funext $ λ i, mul_left_cancel₀ h0 $ let h2 : n • ρ x = n • ρ y :=
+      (ρ.map_zsmul x _).symm.trans $ h1.symm ▸ ρ.map_zsmul y _ in
+    (zsmul_eq_mul _ _).symm.trans $ (congr_fun h2 i).trans $ zsmul_eq_mul _ n
 
 /-- Final solution -/
-theorem final_solution {n : ℤ} (h : 1 < |n|)
-  {G : Type*} [add_group G] {S : Type*} {ρ : G →+ S → ℤ} (h0 : injective ρ) :
-  ∀ f : G → G, (∀ x y : G, f (n • (x + f y)) = n • f x + f y) ↔ f = 0 :=
-begin
-  ---- First, remove the `←` direction
-  intros f; symmetry; refine ⟨λ h1 x y, _, λ h1, _⟩,
-  subst h1; simp_rw [pi.zero_apply, smul_zero, add_zero],
-
-  ---- Initial setup
-  simp_rw [injective_iff_map_eq_zero', funext_iff, pi.zero_apply] at h0,
-  simp_rw [funext_iff, pi.zero_apply, ← h0],
-  haveI _inst_2 : no_zero_smul_divisors ℤ G :=
-  ⟨λ k x h2, begin
-      rw [← h0, or_iff_not_imp_left]; intros h3 s,
-      rw ← h0 at h2; replace h2 := h2 s,
-      rwa [map_zsmul, pi.smul_apply, smul_eq_zero, or_iff_right h3] at h2
-  end⟩,
-
-  ---- Some more setup
-  replace h0 := h1 (-f 0) 0,
-  rw [neg_add_self, smul_zero, self_eq_add_left, smul_eq_zero,
-      or_iff_right (abs_pos.mp (lt_trans one_pos h : 0 < |n|))] at h0,
-  have h2 := λ x, h1 x (-f 0),
-  simp_rw [h0, add_zero] at h2,
-  replace h1 := h1 0,
-  simp_rw [zero_add, h2] at h1,
-  replace h0 := h2 0,
-  replace h2 : n ≠ 1 := by rintros rfl; rw abs_one at h; exact ne_of_gt h rfl,
-  rw [← one_zsmul (f (n • 0)), smul_zero, eq_comm, ← add_neg_eq_zero,
-      ← sub_zsmul, smul_eq_zero, sub_eq_zero, or_iff_right h2] at h0,
-  simp_rw [h0, smul_zero, zero_add] at h1,
-  clear h0 h2,
-
-  suffices : ∀ (s : S) (k : ℕ) (x : G), |n| ^ k ∣ ρ (f x) s,
-  { intros x s; refine int.eq_zero_of_abs_lt_dvd (this s (ρ (f x) s).nat_abs x) _,
-    lift |n| to ℕ using abs_nonneg n with N,
-    rw nat.one_lt_cast at h,
-    change |↑(ρ (f x) s)| < (N : ℤ) ^ (ρ (f x) s).nat_abs,
-    rw [← nat.cast_pow, ← int.cast_nat_abs, nat.cast_lt],
-    exact nat.lt_pow_self h (ρ (f x) s).nat_abs },
-
-  ---- Induction step
-  simp_rw [← abs_pow, abs_dvd],
-  intros s k; induction k with k h0; intros x,
-  rw pow_zero; exact one_dvd (ρ (f x) s),
-  rw [← h1, map_zsmul, pi.smul_apply, smul_eq_mul, pow_succ],
-  exact mul_dvd_mul_left n (h0 (f x))
-end
+theorem final_solution {n : ℤ} (h : 1 < |n|) {G : Type*} [add_group G]
+  {ι : Type*} {ρ : G →+ ι → ℤ} (h0 : (ρ : G → ι → ℤ).injective) {f : G → G} :
+  (∀ x y : G, f (n • (x + f y)) = n • f x + f y) ↔ f = 0 :=
+-- First reduce to `n^k ∣ ρ_{f(x)}(i)` for each `i : ι`, `k : ℕ`, and `x : G`
+⟨λ h1, suffices ∀ (i : ι) (k : ℕ) (x : G), (n.nat_abs : ℤ) ^ k ∣ ρ (f x) i,
+  from funext $ λ x, h0 $ suffices ρ (f x) = 0, from this.trans ρ.map_zero.symm,
+  funext $ λ i, int.eq_zero_of_abs_lt_dvd (this i (ρ (f x) i).nat_abs x) $
+    (int.abs_eq_nat_abs _).trans_lt $ int.coe_nat_pow n.nat_abs (ρ (f x) i).nat_abs ▸
+    int.coe_nat_lt.mpr (nat.lt_pow_self (int.coe_nat_lt.mp $ h.trans_eq n.abs_eq_nat_abs) _),
+-- Now reduce to the equation `n • f(-f(0) + f(x)) = f(x)` for all `x : G`
+suffices ∀ x, n • f (-f 0 + f x) = f x,
+  from λ i k, nat.rec_on k (λ x, one_dvd _) $ λ k h2 x, let y := -f 0 + f x in
+    this x ▸ (ρ.map_zsmul (f y) n).symm ▸ (pi.smul_apply n (ρ (f y)) i).symm ▸
+    (zsmul_eq_mul (ρ (f y) i) n).symm ▸ mul_dvd_mul (int.nat_abs_dvd.mpr $ dvd_refl n) (h2 y),
+-- Now prove `n • f(f(x)) = f(x)` for all `x : G`
+have h2 : (0 : G) = n • 0 := (zsmul_zero n).symm,
+have h3 : f (-f 0) = 0 :=
+  suffices n • f (-f 0) = 0, from zsmul_left_cancel_of_embed_to_int_pi h0
+    (abs_pos.mp $ h.trans' int.one_pos) (this.trans h2),
+  self_eq_add_left.mp $ (h1 (-f 0) 0).trans $ (neg_add_self (f 0)).symm ▸ h2 ▸ rfl,
+have h4 : ∀ x : G, f (n • x) = n • f x,
+  from λ x, add_zero (n • f x) ▸ h3 ▸ h1 x (-f 0) ▸ h3.symm ▸ (add_zero x).symm ▸ rfl,
+λ x, (h4 _).symm.trans $ (h1 _ _).trans $ h3.symm ▸ h2 ▸ zero_add (f x),
+-- `←` direction: straightforward
+λ h1, h1.symm ▸ λ x y, ((add_zero _).trans (smul_zero n)).symm⟩
 
 end IMO2018A1
 end IMOSL

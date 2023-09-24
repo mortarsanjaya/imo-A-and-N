@@ -1,5 +1,6 @@
 \documentclass{article}
 
+\usepackage{fullpage}
 \usepackage{amsmath, amsfonts, amssymb, amsthm}
 \usepackage{hyperref}
 
@@ -7,6 +8,7 @@
 \setlength{\parskip}{5pt}
 
 \newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
 \newcommand{\Q}{\mathbb{Q}}
 
 \title{IMO 2018 A1}
@@ -23,8 +25,8 @@
 
 Let $G$ be a group and $n$ be an integer with $|n| > 1$.
 Suppose that $G$ embeds into the group of functions $\Z^S$ for some set $S$.
-Find all functions $f : G \to G$ such that, for any $x, y \in G$,
-\[ f(n(x + f(y))) = n f(x) + f(y). \tag{*}\label{2018a1-eq0} \]
+Find all functions $f : G \to G$ such that
+\[ f(n(x + f(y))) = n f(x) + f(y) \quad \text{for all } x, y \in G. \tag{*}\label{2018a1-eq0} \]
 
 
 
@@ -43,36 +45,31 @@ However, we obtain $f(0) = 0$ in the beginning, and then deduce $n f(f(x)) = f(x
 We then proceed to prove $f = 0$ afterwards.
 Before that, note that $G$ must be abelian and torsion-free due to the embedding.
 
-First, plugging $(x, y) = (-f(0), 0)$ into~\eqref{2018a1-eq0} gives us $f(0) = n f(-f(0)) + f(0)$.
-Since $n \neq 0$, we get $f(-f(0)) = 0$.
+First, plugging $(x, y) = (-f(0), 0)$ into~\eqref{2018a1-eq0} gives us
+\[ f(0) = n f(-f(0)) + f(0) \implies f(-f(0)) = 0. \]
 Next, pluging $y = -f(0)$ into~\eqref{2018a1-eq0} gives us $f(nx) = n f(x)$ for all $x \in G$.
-This, in particular, yields $f(0) = 0$ since $n \neq 1$.
-Now plugging $x = 0$ into~\eqref{2018a1-eq0} yields $n f(f(y)) = f(n f(y)) = f(y)$ for all $y \in G$.
-This suffices to prove that $f = 0$.
+Plugging $x = -f(0)$ into~\eqref{2018a1-eq0} yields
+\[ n f(-f(0) + f(y)) = f(n (-f(0) + f(y))) = f(y) \quad \text{for all } y \in G. \tag{1}\label{2018a1-eq1} \]
 
+We now prove that $f = 0$.
 Let $\phi : G \to \Z^S$ be an embedding.
 We use subscript notation for applications of $\phi$.
 That is, we denote $\phi(x)$ by $\phi_x$ for any $x \in G$.
-To show that $f = 0$, it suffices to show that $n^k \mid \phi_{f(x)}(s)$ for any $s \in S$, $x \in G$, and $k \geq 0$.
-This would imply $f(x) = 0$ since $|n| > 1$.
-We fix $s$ and then proceed by induction on $k$.
+To show $f = 0$, it suffices to show that
+\[ \phi_{f(y)}(s) = 0 \quad \text{for all } s \in S. \]
 
-The base case $k = 0$ is trivial.
-Now suppose that, for some $k \geq 0$, we have $n^k \mid \phi_{f(x)}(s)$ for all $x \in G$.
-Due to the equation $n f(f(x)) = f(x)$, we have $\phi_{f(x)}(s) = n \phi_{f(f(x))}(s)$.
-But $n^k \mid \phi_{f(f(x))}(s)$ by the inductive hypothesis.
-This implies $n^{k + 1} \mid \phi_{f(x)}(s)$.
-Induction step is complete; we are done.
+Fix some $s \in S$.
+By~\eqref{2018a1-eq1} and small induction on $k$, we get
+\[ n^k \phi_{f^{k + 1}(y)}(s) = \phi_{f(y)}(s) \quad \text{for all } k \in \N. \]
+Since $|n| > 1$, this is possible only if $\phi_{f(y)}(s) = 0$, as desired.
 
 
 
 \subsection*{Implementation details}
 
-We implement a version with multiplicative group as well.
-However, we just provide a correspondence without the full solution for the multiplicative case.
-Then we state the answer for the case where the multiplicative group is $\Q^+$, which embeds into $\Z^P$, where $P$ is the set of primes.
-
-The fact that $\Q^+$ embeds into $\Z^P$ is implemented in \texttt{extra/number\_theory/pos\_rat\_primes.lean}.
+In a separate file, we give the answer for the case where $G$ is the multiplicative group $\Q^+$.
+The fact that $\Q^+$ embeds into $\Z^P$ is implemented in the file
+\[ \texttt{extra/number\_theory/pos\_rat\_primes.lean}. \]
 
 
 
