@@ -75,20 +75,21 @@ open_locale classical
 /-- Final solution -/
 theorem final_solution {u : multiset R} (h : u.sum = 0) :
   u.card • (u.fold min 0 * u.fold max 0) ≤ -(u.map $ λ c, c ^ 2).sum :=
+---- Decompose `u` into `a + (-b)`, where `a b : multiset R` have non-negative elements
+have ∃ a b : multiset R, (∀ x : R, x ∈ a → 0 ≤ x) ∧
+  (∀ x : R, x ∈ b → 0 ≤ x) ∧ a + b.map has_neg.neg = u,
+from ⟨u.filter (λ x, 0 ≤ x), (u.filter (λ x : R, ¬0 ≤ x)).map has_neg.neg,
+  λ x h0, (mem_filter.mp h0).2,
+  λ x h0, exists.elim (mem_map.mp h0) $ λ y h0,
+    h0.2 ▸ neg_nonneg.mpr (le_of_not_le (mem_filter.mp h0.1).2),
+  let v := u.filter (λ x : R, ¬0 ≤ x) in (v.map_map has_neg.neg has_neg.neg).symm ▸
+    (neg_comp_neg R).symm ▸ v.map_id.symm ▸ u.filter_add_not _⟩,
+---- Finishing
 begin
-  obtain ⟨a, b, ha, hb, rfl⟩ : ∃ a b : multiset R,
-    (∀ x : R, x ∈ a → 0 ≤ x) ∧ (∀ x : R, x ∈ b → 0 ≤ x) ∧ a + b.map has_neg.neg = u :=
-  begin
-    refine ⟨u.filter (λ x, 0 ≤ x), (u.filter (λ x : R, ¬0 ≤ x)).map has_neg.neg,
-      λ x h0, (mem_filter.mp h0).2, λ x h0, _, _⟩,
-    rw mem_map at h0; rcases h0 with ⟨y, h0, rfl⟩,
-    rw [mem_filter, not_le, ← neg_pos] at h0; exact le_of_lt h0.2,
-    rw [map_map, neg_comp_neg, map_id]; exact u.filter_add_not _
-  end,
-
+  rcases this with ⟨a, b, ha, hb, rfl⟩,
   rw [sum_add, sum_map_neg, map_id', add_neg_eq_zero] at h,
   rw [card_add, card_map, multiset.map_add, map_map, le_neg, ← neg_nsmul, ← neg_mul, sum_add],
-  simp only [function.comp_app, neg_sq],
+  simp_rw [function.comp_app, neg_sq],
   rw [mul_comm (-(fold min (0 : R) _)), lem1 ha hb, ← fold_max_map_neg_eq_neg_fold_min],
   refine (final_solution' ha hb h).trans_eq
     (congr_arg (has_smul.smul _) $ congr_arg (has_mul.mul $ fold max 0 a) _),
