@@ -1,106 +1,94 @@
-import ring_theory.int.basic
+import algebra.module.basic ring_theory.coprime.lemmas
 
 /-! # IMO 2010 A5 -/
 
 namespace IMOSL
 namespace IMO2010A5
 
-open function
+/- ### Extra lemmas -/
+
+/-- General lemma on left-cancellation of `•` on abelian groups embedding to `ι → ℤ` -/
+lemma succ_nsmul_left_cancel_of_embed_to_int_pi {G : Type*} [add_comm_group G]
+  {ι : Type*} {ρ : G →+ ι → ℤ} (h : (ρ : G → ι → ℤ).injective)
+  (n : ℕ) (x y : G) (h1 : (n + 1) • x = (n + 1) • y) : x = y :=
+  h $ funext $ λ i, mul_left_cancel₀ (int.coe_nat_ne_zero_iff_pos.mpr n.succ_pos) $
+    let h2 : (n + 1) • ρ x = (n + 1) • ρ y :=
+      (ρ.map_nsmul x _).symm.trans $ h1.symm ▸ ρ.map_nsmul y _ in
+    (nsmul_eq_mul _ _).symm.trans $ (congr_fun h2 i).trans $ nsmul_eq_mul (n + 1) _
+
+
+
+
+
+/- ### Start of the problem -/
 
 def good {G : Type*} [add_monoid G] (f : G → G) :=
   ∀ x y : G, f (2 • f x + y) = 3 • x + f (x + y)
 
 
 
-private lemma neg_is_good {G : Type*} [add_comm_group G] : good (has_neg.neg : G → G) :=
-  λ x y, by rw [eq_add_neg_iff_add_eq, add_comm, ← sub_eq_add_neg,
-    add_sub_add_right_eq_sub, smul_neg, sub_neg_eq_add, eq_comm, succ_nsmul]
+lemma neg_is_good {G : Type*} [add_comm_group G] : good (has_neg.neg : G → G) :=
+  λ x y, (neg_add' _ _).trans $ eq_add_neg_iff_add_eq.mpr $ (sub_add_add_cancel _ _ _).trans $
+    (smul_neg 2 x).symm ▸ (neg_neg (2 • x)).symm ▸ (succ_nsmul' x 2).symm
 
-private lemma good_iff {G : Type*} [add_comm_group G] [no_zero_smul_divisors ℕ G] (f : G → G) :
-  good f ↔ ∃ φ : G →+ G, f = φ ∧ ∀ x : G, 2 • φ (φ x) = 3 • x + φ x :=
-begin
-  ---- First, solve the `←` direction.
-  symmetry; refine ⟨λ h x y, _, λ h, _⟩,
-  rcases h with ⟨φ, rfl, h⟩; rw [map_add, map_add, ← add_assoc, ← h, map_nsmul],
+lemma good_imp_hom {G : Type*} [add_comm_group G]
+  (h : ∀ x y : G, 2 • x = 2 • y → x = y) (h0 : ∀ x y : G, 3 • x = 3 • y → x = y)
+  {f : G → G} (h1 : good f) : ∃ φ : G →+ G, f = φ :=
+suffices ∀ x y : G, f (x + y) = f x + f y, from ⟨add_monoid_hom.mk' f this, rfl⟩,
+have h2 : ∀ x : G, f (2 • f x) = 3 • x + f x,
+  from λ x, add_zero (2 • f x) ▸ (h1 x 0).trans
+    (congr_arg (has_add.add _) (congr_arg f $ add_zero x)),
+have h3 : f.injective := λ x y h3, h0 x y $
+  (sub_eq_of_eq_add $ h2 x).symm.trans $ h3.symm ▸ sub_eq_of_eq_add (h2 y),
+---- Finishing
+λ x y, suffices f (2 • f (x + y)) = f (2 • f x + 2 • f y),
+  from h _ _ $ h3 $ this.trans $ congr_arg f (nsmul_add _ _ _).symm,
+(h2 _).trans $ (congr_arg2 _ (nsmul_add _ _ _) (congr_arg f $ add_comm x y)).trans $
+  (add_assoc _ _ _).trans $ h1 y x ▸ add_comm x (2 • f y) ▸ (h1 _ _).symm
 
-  ---- Now solve the `→` direction.
-  -- First reduce to just `f` being additive.
-  have h0 := λ x, h x 0,
-  simp_rw add_zero at h0,
-  suffices : ∀ x y, f (x + y) = f x + f y,
-  { refine ⟨⟨f, _, this⟩, rfl, λ x, _⟩,
-    replace this := this 0 0,
-    rwa [add_zero, self_eq_add_left] at this,
-    rw [add_monoid_hom.coe_mk, ← h0, two_nsmul, ← this, ← two_nsmul] },
+lemma hom_good_equality {G : Type*} [add_comm_group G] {φ : G →+ G} (h : good φ) (x : G) :
+  2 • φ (φ x) = 3 • x + φ x :=
+  (map_nsmul φ 2 _).symm.trans $ add_zero (2 • φ x) ▸
+    (h _ 0).trans ((add_zero x).symm ▸ rfl)
 
-  -- Reduce to showing that `f` is injective.
-  revert h; suffices : injective f,
-  { intros h x y,
-    have h1 := h x (2 • f y),
-    rw [← smul_add, add_comm x, h, ← add_assoc, ← smul_add, add_comm y, ← h0] at h1,
-    exact (smul_right_injective G (nat.succ_ne_zero 1) (this h1)).symm },
+lemma hom_good_eq_neg_of_embed_to_int_pi {G : Type*} [add_comm_group G]
+  {ι : Type*} {ρ : G →+ ι → ℤ} (h : (ρ : G → ι → ℤ).injective)
+  {f : G → G} (h0 : ∀ x, 2 • f (f x) = 3 • x + f x) :
+  f = has_neg.neg :=
+let γ : G → G := λ x, f x + x in suffices ∀ x, γ x = 0,
+  from funext $ λ x, eq_neg_of_add_eq_zero_left (this x),
+---- The main equation
+have h0 : ∀ (x : G) (i : ι), 2 • ρ (γ (f x)) i = 3 • ρ (γ x) i :=
+  λ x, suffices 2 • γ (f x) = 3 • γ x,
+    from congr_fun $ (ρ.map_nsmul _ 2).symm.trans $ this.symm ▸ ρ.map_nsmul _ 3,
+  (nsmul_add _ _ _).trans $ (h0 x).symm ▸ (nsmul_add (f x) x 3).symm ▸
+    add_comm (3 • x) (3 • f x) ▸ (add_assoc _ _ _).trans
+    (congr_arg2 _ rfl (succ_nsmul _ _).symm),
+---- Reduce to `2 ^ k ∣ ρ (γ x) i` for all `i : ι`, `k : ℕ`, and `x : G`.
+suffices ∀ (i : ι) (k : ℕ) (x : G), 2 ^ k ∣ ρ (γ x) i,
+  from λ x, (map_eq_zero_iff ρ h).mp $ funext $ λ i,
+    int.eq_zero_of_abs_lt_dvd (this i (ρ (γ x) i).nat_abs x) $
+    (int.abs_eq_nat_abs _).trans_lt $ int.coe_nat_one ▸ int.coe_nat_bit0 1 ▸
+    int.coe_nat_pow 2 (ρ (γ x) i).nat_abs ▸ int.coe_nat_lt.mpr (nat.lt_two_pow _),
+---- Prove `2 ^ k ∣ ρ (γ x) i` for all `k : ℕ` using induction
+λ i k, nat.rec_on k (λ x, one_dvd _) $ λ k h x, have h1 : is_coprime (2 : ℤ) 3 :=
+  ⟨-1, 1, (congr_arg2 _ (neg_one_mul 2) (one_mul 3)).trans $ neg_add_cancel_left 2 1⟩,
+h1.pow_left.dvd_of_dvd_mul_left $ nsmul_eq_mul 3 (ρ (γ x) i) ▸ h0 x i ▸
+  (nsmul_eq_mul 2 $ ρ (γ (f x)) i).symm ▸ mul_dvd_mul (dvd_refl 2) (h _)
 
-  -- Now show that `f` is injective.
-  intros x y h,
-  have h1 := h0 y,
-  rwa [← h, h0, add_left_inj] at h1,
-  exact smul_right_injective G (nat.succ_ne_zero 2) h1,
-end
 
 
 
 
-
-
-
-/-- Final solution -/
+/-- Final solution, general version -/
 theorem final_solution {G : Type*} [add_comm_group G]
-  {S : Type*} {ρ : G →+ S → ℤ} (h : injective ρ) :
-  ∀ f : G → G, good f ↔ f = has_neg.neg :=
-begin
-  ---- A characterization of zeroes in `G` using `ρ`
-  refine λ f, ⟨λ h0, _, λ h0, by subst h0; exact neg_is_good⟩,
-  simp_rw [injective_iff_map_eq_zero', funext_iff, pi.zero_apply] at h,
-
-  ---- Set up `no_zero_smul_divisors ℕ G` instance
-  haveI _inst_2 : no_zero_smul_divisors ℕ G :=
-  ⟨λ n x h1, begin
-      rw [← h, or_iff_not_imp_left]; intros h2 s,
-      rw ← h at h1; replace h1 := h1 s,
-      rwa [map_nsmul, pi.smul_apply, smul_eq_zero, or_iff_right h2] at h1
-  end⟩,
-
-  ---- Setup for the final step of induction
-  rw good_iff at h0; rcases h0 with ⟨φ, rfl, h0⟩,
-  obtain ⟨γ, rfl⟩ : ∃ γ : G →+ G, γ - add_monoid_hom.id G = φ :=
-    ⟨φ + add_monoid_hom.id G, add_sub_cancel _ _⟩,
-  simp_rw [add_monoid_hom.sub_apply, add_monoid_hom.id_apply, map_sub, nsmul_sub] at h0,
-  replace h0 : ∀ x : G, 2 • γ (γ x) - 5 • γ x = 0 :=
-    λ x, by replace h0 := h0 x; rwa [succ_nsmul' x 2, add_add_sub_cancel, add_comm, ← sub_add,
-      add_left_inj, sub_sub, ← add_nsmul, sub_eq_iff_eq_add, ← succ_nsmul, ← sub_eq_zero] at h0,
-  simp_rw [← h, map_sub, pi.sub_apply, sub_eq_zero, map_nsmul, pi.smul_apply,
-    nsmul_eq_mul, nat.cast_bit1, nat.cast_bit0, nat.cast_one] at h0,
-  simp_rw [funext_iff, add_monoid_hom.sub_apply,
-    add_monoid_hom.id_apply, sub_eq_neg_self, ← h],
-  clear h,
-
-  suffices : ∀ (s : S) (k : ℕ) (x : G), 2 ^ k ∣ ρ (γ x) s,
-  { intros x s; refine int.eq_zero_of_abs_lt_dvd (this s (ρ (γ x) s).nat_abs x) _,
-    change |↑(ρ (γ x) s)| < ((2 : ℕ) : ℤ) ^ (ρ (γ x) s).nat_abs,
-    rw [← nat.cast_pow, ← int.cast_nat_abs, nat.cast_lt],
-    exact (ρ (γ x) s).nat_abs.lt_two_pow },
-
-  ---- Induction
-  intros s k; induction k with k h; intros x,
-  rw pow_zero; exact one_dvd _,
-  replace h := h (γ x); cases h with c h,
-  replace h0 := h0 x s,
-  generalize_hyp : ρ (γ (γ x)) s = A at h h0,
-  subst h; generalize_hyp : ρ (γ x) s = A at h0 ⊢,
-  rw [← mul_assoc, ← pow_succ] at h0,
-  refine (is_coprime.pow_left ⟨(-2 : ℤ), 1, _⟩).dvd_of_dvd_mul_left ⟨c, h0.symm⟩,
-  norm_num
-end
+  {ι : Type*} {ρ : G →+ ι → ℤ} (h : (ρ : G → ι → ℤ).injective) {f : G → G} :
+  good f ↔ f = has_neg.neg :=
+⟨λ h0, hom_good_eq_neg_of_embed_to_int_pi h $
+  let h1 := succ_nsmul_left_cancel_of_embed_to_int_pi h in
+  exists.elim (good_imp_hom (h1 1) (h1 2) h0) $
+    λ φ h2, h2.symm ▸ hom_good_equality (h2 ▸ h0),
+λ h, h.symm ▸ neg_is_good⟩
 
 end IMO2010A5
 end IMOSL
