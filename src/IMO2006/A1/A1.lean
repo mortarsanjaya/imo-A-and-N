@@ -5,6 +5,9 @@ import algebra.order.archimedean
 namespace IMOSL
 namespace IMO2006A1
 
+set_option profiler true
+set_option profiler.threshold 0.03
+
 open function
 
 lemma int_seq_not_bdd_above_of_partial_strict_mono
@@ -20,8 +23,8 @@ lemma int_seq_eventually_const_of_mono_bdd_above
   classical.by_contradiction $ λ h1, exists.elim
     (@int_seq_not_bdd_above_of_partial_strict_mono a
       (λ N, exists.elim (not_forall.mp $ not_exists.mp h1 N) $ λ n h2,
-        let h2 := not_imp.mp h2 in ⟨n, h2.1, lt_of_le_of_ne' (h h2.1) h2.2⟩) c)
-    (λ n, not_lt_of_le $ h0 n)
+        let h2 := not_imp.mp h2 in ⟨n, h2.1, (h h2.1).lt_of_ne' h2.2⟩) c)
+    (λ n, (h0 n).not_lt)
 
 
 
@@ -31,22 +34,19 @@ lemma lt_add_one_of_floor_le {r s : R} (h : ⌊r⌋ ≤ ⌊s⌋) : r - s < 1 :=
   sub_lt_comm.mp $ (int.sub_one_lt_floor r).trans_le (int.le_floor.mp h)
 
 lemma abs_sub_lt_one_of_floor_eq {r s : R} (h : ⌊r⌋ = ⌊s⌋) : |r - s| < 1 :=
-  abs_sub_lt_iff.mpr $ ⟨lt_add_one_of_floor_le (le_of_eq h),
-    lt_add_one_of_floor_le (le_of_eq h.symm)⟩
+  abs_sub_lt_iff.mpr ⟨lt_add_one_of_floor_le h.le, lt_add_one_of_floor_le h.ge⟩
 
 lemma exists_one_le_mul_pow_of_pos [archimedean R]
   {r : R} (h : 0 < r) {n : ℤ} (h0 : 1 < n) (c : R) : ∃ k : ℕ, c ≤ n ^ k * r :=
-  exists.elim (archimedean.arch c h) $ λ k h1, ⟨k, h1.trans $
-    by rw [← int.nat_abs_of_nonneg (le_of_lt $ int.one_pos.trans h0),
+  exists.elim (archimedean.arch c h) $ λ k h1, ⟨k, h1.trans $ 
+    by rw [← int.nat_abs_of_nonneg (int.one_pos.trans h0).le,
       int.cast_coe_nat, ← nat.cast_pow, ← nsmul_eq_mul];
-    exact nsmul_le_nsmul (le_of_lt h) (le_of_lt $ k.lt_pow_self $
-      int.nat_abs_lt_nat_abs_of_nonneg_of_lt int.one_nonneg h0)⟩
+    exact nsmul_le_nsmul h.le
+      (k.lt_pow_self $ int.nat_abs_lt_nat_abs_of_nonneg_of_lt int.one_nonneg h0).le⟩
 
 lemma floor_eq_neg_one_of_Ioo_neg_one_zero {r : R} (h : -1 < r) (h0 : r < 0) : ⌊r⌋ = -1 :=
-  by rw [int.floor_eq_iff, int.cast_neg, int.cast_one, neg_add_self];
-    exact ⟨le_of_lt h, h0⟩
-
-
+  int.floor_eq_iff.mpr $ (int.cast_neg _ : ((-1 : ℤ) : R) = -↑1).symm ▸
+    (int.cast_one : ((1 : ℤ) : R) = 1).symm ▸ ⟨h.le, h0.trans_eq (neg_add_self _).symm⟩
 
 
 
@@ -100,14 +100,13 @@ lemma f_iter_nonpos {r : R} (h : r ≤ 0) : ∀ n : ℕ, f^[n] r ≤ 0
 
 lemma f_floor_ge_of_nonpos {r : R} (h : r ≤ 0) : ⌊r⌋ ≤ ⌊f r⌋ :=
   int.le_floor.mpr $ le_mul_of_le_one_right
-    (int.cast_nonpos.mpr $ int.floor_nonpos h) (le_of_lt $ int.fract_lt_one r)
+    (int.cast_nonpos.mpr $ int.floor_nonpos h) (int.fract_lt_one r).le
 
 lemma exists_f_iter_floor_const {r : R} (h : r ≤ 0) :
   ∃ N, ∀ n, N ≤ n → ⌊(f^[n]) r⌋ = ⌊(f^[N]) r⌋ :=
   int_seq_eventually_const_of_mono_bdd_above
-    (monotone_nat_of_le_succ $ λ n,
-      (f_floor_ge_of_nonpos $ f_iter_nonpos h n).trans_eq $
-        congr_arg int.floor (iterate_succ_apply' f n r).symm)
+    (monotone_nat_of_le_succ $ λ n, (iterate_succ_apply' f n r).symm ▸ 
+      f_floor_ge_of_nonpos $ f_iter_nonpos h n)
     (λ n, int.floor_nonpos $ f_iter_nonpos h n)
 
 lemma f_sub_abs_eq_of_floor_eq {n : ℤ} {a b : R} (h : ⌊a⌋ = n) (h0 : ⌊b⌋ = n) :
