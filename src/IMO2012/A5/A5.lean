@@ -98,29 +98,16 @@ lemma sub_one_is_good : good (λ x : R, x - 1) :=
   λ x y, (sub_sub_sub_cancel_right _ _ 1).trans $ sub_sub_sub_eq (x * y) x y 1 ▸ 
     mul_sub_one x y ▸ (sub_one_mul x (y - 1)).symm
 
-/-- The map `𝔽₂_map` is good. -/
-theorem 𝔽₂_map_is_good : good (𝔽₂_map R)
-| 𝔽₂.O x := (zero_sub (𝔽₂_map R x)).trans (neg_one_mul (𝔽₂_map R x)).symm
-| 𝔽₂.I x := (zero_mul (𝔽₂_map R x)).symm ▸ add_comm x 1 ▸ sub_self _
-
 /-- The map `x ↦ x^2 - 1` is good if `R` is commutative. -/
 theorem sq_sub_one_is_good {R : Type*} [comm_ring R] : good (λ x : R, x ^ 2 - 1) :=
 λ x y, suffices (x * y + 1) ^ 2 - (x + y) ^ 2 = (x ^ 2 - 1) * (y ^ 2 - 1),
   from (sub_sub_sub_cancel_right _ _ _).trans this,
 by ring
 
-/-- The map `𝔽₂ε_map` is good. -/
-theorem 𝔽₂ε_map_is_good : good (𝔽₂ε_map R)
-| 𝔽₂ε.O x := (zero_sub (𝔽₂ε_map R x)).trans (neg_one_mul (𝔽₂ε_map R x)).symm
-| 𝔽₂ε.I x := (zero_mul (𝔽₂ε_map R x)).symm ▸ add_comm x 1 ▸ sub_self _
-| 𝔽₂ε.X 𝔽₂ε.O := (zero_sub 1).trans (one_mul (-1)).symm
-| 𝔽₂ε.X 𝔽₂ε.I := (sub_self 0).trans (one_mul 0).symm
-| 𝔽₂ε.X 𝔽₂ε.X := (zero_sub (-1)).trans $ (neg_neg 1).trans (one_mul 1).symm
-| 𝔽₂ε.X 𝔽₂ε.Y := (sub_self 0).trans (one_mul 0).symm
-| 𝔽₂ε.Y 𝔽₂ε.O := (sub_self 0).trans (zero_mul (-1)).symm
-| 𝔽₂ε.Y 𝔽₂ε.I := (sub_self 1).trans (zero_mul 0).symm
-| 𝔽₂ε.Y 𝔽₂ε.X := (sub_self 0).trans (zero_mul 1).symm
-| 𝔽₂ε.Y 𝔽₂ε.Y := (sub_self (-1)).trans (zero_mul 0).symm
+/-- The map `𝔽₂_map` is good. -/
+theorem 𝔽₂_map_is_good : good (𝔽₂_map R)
+| 𝔽₂.O x := (zero_sub (𝔽₂_map R x)).trans (neg_one_mul (𝔽₂_map R x)).symm
+| 𝔽₂.I x := (zero_mul (𝔽₂_map R x)).symm ▸ add_comm x 1 ▸ sub_self _
 
 /-- The map `𝔽₃_map1` is good. -/
 theorem 𝔽₃_map1_is_good : good (𝔽₃_map1 R)
@@ -138,6 +125,32 @@ theorem 𝔽₃_map2_is_good : good (𝔽₃_map2 R)
 | 𝔽₃.𝔽₃2 𝔽₃.𝔽₃1 := (sub_self (-1)).trans (mul_zero 0).symm 
 | 𝔽₃.𝔽₃2 𝔽₃.𝔽₃2 := (sub_zero 0).trans (mul_zero 0).symm
 
+/-- The map `ℤ₄_map` is good. -/
+theorem ℤ₄_map_is_good : good (ℤ₄_map R)
+| ℤ₄.ℤ₄0 x := (zero_sub (ℤ₄_map R x)).trans (neg_one_mul (ℤ₄_map R x)).symm
+| ℤ₄.ℤ₄1 x := (zero_mul (ℤ₄_map R x)).symm ▸ add_comm x 1 ▸ sub_self _
+| ℤ₄.ℤ₄2 ℤ₄.ℤ₄0 := (zero_sub 1).trans (one_mul (-1)).symm
+| ℤ₄.ℤ₄2 ℤ₄.ℤ₄1 := (sub_self 0).trans (mul_zero 1).symm
+| ℤ₄.ℤ₄2 ℤ₄.ℤ₄2 := (zero_sub (-1)).trans $ (neg_neg 1).trans (mul_one 1).symm
+| ℤ₄.ℤ₄2 ℤ₄.ℤ₄3 := (sub_self 0).trans (mul_zero 1).symm
+| ℤ₄.ℤ₄3 ℤ₄.ℤ₄0 := (sub_self 0).trans (zero_mul (-1)).symm
+| ℤ₄.ℤ₄3 ℤ₄.ℤ₄1 := (sub_self (-1)).trans (zero_mul 0).symm
+| ℤ₄.ℤ₄3 ℤ₄.ℤ₄2 := (sub_self 0).trans (zero_mul 1).symm
+| ℤ₄.ℤ₄3 ℤ₄.ℤ₄3 := (sub_self 1).trans (zero_mul 0).symm
+
+/-- The map `𝔽₂ε_map` is good. -/
+theorem 𝔽₂ε_map_is_good : good (𝔽₂ε_map R)
+| 𝔽₂ε.O x := (zero_sub (𝔽₂ε_map R x)).trans (neg_one_mul (𝔽₂ε_map R x)).symm
+| 𝔽₂ε.I x := (zero_mul (𝔽₂ε_map R x)).symm ▸ add_comm x 1 ▸ sub_self _
+| 𝔽₂ε.X 𝔽₂ε.O := (zero_sub 1).trans (one_mul (-1)).symm
+| 𝔽₂ε.X 𝔽₂ε.I := (sub_self 0).trans (one_mul 0).symm
+| 𝔽₂ε.X 𝔽₂ε.X := (zero_sub (-1)).trans $ (neg_neg 1).trans (one_mul 1).symm
+| 𝔽₂ε.X 𝔽₂ε.Y := (sub_self 0).trans (one_mul 0).symm
+| 𝔽₂ε.Y 𝔽₂ε.O := (sub_self 0).trans (zero_mul (-1)).symm
+| 𝔽₂ε.Y 𝔽₂ε.I := (sub_self 1).trans (zero_mul 0).symm
+| 𝔽₂ε.Y 𝔽₂ε.X := (sub_self 0).trans (zero_mul 1).symm
+| 𝔽₂ε.Y 𝔽₂ε.Y := (sub_self (-1)).trans (zero_mul 0).symm
+
 /-- The map `𝔽₄_map` is good. -/
 theorem 𝔽₄_map_is_good {φ : R} (h : φ * (1 - φ) = -1) : good (𝔽₄_map R φ)
 | 𝔽₄.O x := (zero_sub (𝔽₄_map R φ x)).trans (neg_one_mul (𝔽₄_map R φ x)).symm
@@ -152,19 +165,6 @@ theorem 𝔽₄_map_is_good {φ : R} (h : φ * (1 - φ) = -1) : good (𝔽₄_ma
     (commute.one_right φ).sub_right (commute.refl φ)
 | 𝔽₄.Y 𝔽₄.Y := sub_eq_of_eq_add $ eq_add_of_sub_eq' $
     (one_sub_mul _ _).symm.trans $ (congr_arg (* (1 - φ)) (sub_sub_cancel 1 φ)).trans h
-
-/-- The map `ℤ₄_map` is good. -/
-theorem ℤ₄_map_is_good : good (ℤ₄_map R)
-| ℤ₄.ℤ₄0 x := (zero_sub (ℤ₄_map R x)).trans (neg_one_mul (ℤ₄_map R x)).symm
-| ℤ₄.ℤ₄1 x := (zero_mul (ℤ₄_map R x)).symm ▸ add_comm x 1 ▸ sub_self _
-| ℤ₄.ℤ₄2 ℤ₄.ℤ₄0 := (zero_sub 1).trans (one_mul (-1)).symm
-| ℤ₄.ℤ₄2 ℤ₄.ℤ₄1 := (sub_self 0).trans (mul_zero 1).symm
-| ℤ₄.ℤ₄2 ℤ₄.ℤ₄2 := (zero_sub (-1)).trans $ (neg_neg 1).trans (mul_one 1).symm
-| ℤ₄.ℤ₄2 ℤ₄.ℤ₄3 := (sub_self 0).trans (mul_zero 1).symm
-| ℤ₄.ℤ₄3 ℤ₄.ℤ₄0 := (sub_self 0).trans (zero_mul (-1)).symm
-| ℤ₄.ℤ₄3 ℤ₄.ℤ₄1 := (sub_self (-1)).trans (zero_mul 0).symm
-| ℤ₄.ℤ₄3 ℤ₄.ℤ₄2 := (sub_self 0).trans (zero_mul 1).symm
-| ℤ₄.ℤ₄3 ℤ₄.ℤ₄3 := (sub_self 1).trans (zero_mul 0).symm
 
 end answer_checking
 
