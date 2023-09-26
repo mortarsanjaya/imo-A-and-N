@@ -1,5 +1,6 @@
 \documentclass{article}
 
+\usepackage{fullpage}
 \usepackage{amsmath, amsfonts, amssymb, amsthm}
 \usepackage{hyperref}
 \usepackage{float}
@@ -64,13 +65,13 @@ The map into the intermediate ring is necessarily a ring homomorphism in this co
     Class & Intermediate ring & Map to $S$ \\ \hline
     1 & $0$ & $0 \mapsto 0$ \\ \hline
     2 & $S$ & $x \mapsto x - 1$ \\ \hline
-    3 & $\F_3$ & $[0, 1, 2] \mapsto [-1, 0, 1]$ \\ \hline
-    4 & $\F_3$ & $[0, 1, 2] \mapsto [-1, 0, 0]$ \\ \hline
-    5 & $\Z/4\Z$ & $[0, 1, 2, 3] \mapsto [-1, 0, 1, 0]$ \\ \hline
-    6 & $S$ & $x \mapsto x^2 - 1$ \\ \hline
-    7 & $\F_2$ & $[0, 1] \mapsto [-1, 0]$ \\ \hline
-    8 & $\F_4$ & $[0, 1, X, X + 1] \mapsto [-1, 0, \phi, \psi]$ \\ \hline
-    9 & $\F_2[X]/\langle X^2 \rangle$ & $[0, 1, X, X + 1] \mapsto [-1, 0, 1, 0]$ \\ \hline
+    3 & $S$ & $x \mapsto x^2 - 1$ \\ \hline
+    4 & $\F_2$ & $[0, 1] \mapsto [-1, 0]$ \\ \hline
+    5 & $\F_3$ & $[0, 1, 2] \mapsto [-1, 0, 1]$ \\ \hline
+    6 & $\F_3$ & $[0, 1, 2] \mapsto [-1, 0, 0]$ \\ \hline
+    7 & $\Z/4\Z$ & $[0, 1, 2, 3] \mapsto [-1, 0, 1, 0]$ \\ \hline
+    8 & $\F_2[X]/\langle X^2 \rangle$ & $[0, 1, X, X + 1] \mapsto [-1, 0, 1, 0]$ \\ \hline
+    9 & $\F_4$ & $[0, 1, X, X + 1] \mapsto [-1, 0, \phi, \psi]$ \\ \hline
 \end{tabular}
 \end{table}
 
@@ -333,7 +334,7 @@ For any $x, y \in R$,
 
 Here, we consider the subcase where $f(-1) = 1 \neq -2$.
 This also means that $\rchar(S) \neq 3$.
-The solution in this subcase corresponds to class 3 solutions.
+The solution in this subcase corresponds to class 5 solutions.
 That is, we claim that $f$ factors through a ring homomorphism $R \to \F_3$.
 
 Recall the definition of the set $I$ as in~\eqref{2012a5-eq2-2}:
@@ -433,7 +434,7 @@ Since $f(1) = 0$, applying~\eqref{2012a5-eq0} with $y = 2$ and applying~\eqref{2
 
 Here, we consider the subcase where $f(2) = 0 \neq 3$.
 This also means that $\rchar(S) \neq 3$.
-The solution in this subcase corresponds to class 4 solutions.
+The solution in this subcase corresponds to class 6 solutions.
 That is, we claim that $f$ factors through a ring homomorphism $R \to \F_3$.
 Note we already know that $f(0) = -1$ and $f(-1) = f(1) = 0$.
 
@@ -508,7 +509,7 @@ The two equations yields $f(x + 1) = f(x - 1) = 0$, as desired.
 
 Here, we consider the subcase where $f(2) = 1 \neq -1$.
 This also means that $\rchar(S) \neq 2$.
-The solution in this subcase corresponds to class 5 solutions.
+The solution in this subcase corresponds to class 7 solutions.
 That is, we claim that $f$ factors through a ring homomorphism $R \to \Z/4\Z$.
 Note we already know that $f(0) = -1$, $f(-1) = f(1) = 0$, and $f(2) = 1$.
 
@@ -541,7 +542,7 @@ This shows that $2 \in J$.
 
 Here, we consider the subcase where $f(2) = 3 \neq 1$.
 This also means that $\rchar(S) \neq 2$.
-The solution in this subcase corresponds to class 6 solutions.
+The solution in this subcase corresponds to class 3 solutions.
 That is, we claim that there exists a ring homomorphism $\phi : R \to S$ such that $f = \phi^2 - 1$.
 
 The solution in this subsection requires at least that $2$ is invertible in $S$.
@@ -663,7 +664,7 @@ The formula~\eqref{2012a5-eq9-4} now proves that $f$ can be written as $g^2 - 1$
 \subsection*{Step 10: Subcase 2.4: $f(2) = -1$}
 
 Finally, we consider the subcase where $f(2) = -1$.
-The solution in this subcase corresponds to four class of solutions: 2, 7, 8, 9.
+The solution in this subcase corresponds to four class of solutions: 2, 4, 8, 9.
 More precisely, class 2 solutions occur when $\rchar(S) = 2$, so that $1 = -1$ in $S$.
 The other three classes occur in the case $\rchar(S) \neq 2$.
 
