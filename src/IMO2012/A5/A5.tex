@@ -199,15 +199,12 @@ This would prove the lemma.
 We now prove the claim.
 Fix $d \notin J$; our goal is to show that $dc \notin I$.
 Since $d \notin J$, we can choose $x \in R$ such that $f(dx + 1) \neq 0$.
-Since $c \in J \setminus I$, we have $f(c) = 1$ and thus
-\[ f(d(c + x) + 1) = f(d + c + x) + f(d) f(c + x) = -(f(d + x) + f(d) f(x)) = -f(dx + 1). \]
-On the other hand, since $J$ is an ideal, we have $dc \in J$.
-This means $f(d(c + x) + 1) = -f(dc) f(dx + 1)$, and thus either $f(dc) = 1$ or $f(dx + 1) = 0$.
-By the choice of $x$, the former must hold, so $f(dc) = 1$.
+By definition of $I$, it suffices to show that $f(dc + dx + 1) \neq f(dx + 1)$.
 
-To show that $dc \notin I$, we still need to show that $-1 \neq 1$ in $S$.
-However, $-1 = 1$ in $S$ would imply $f(c) = 1 = -1$, which implies $c \in I$ by Lemma~\ref{2012a5-2-2} since $c \in J$.
-A contradiction!
+Since $c \in J \setminus I$, we have $f(c) = 1 \neq -1$ and thus
+\[ f(d(c + x) + 1) = f(d + c + x) + f(d) f(c + x) = -(f(d + x) + f(d) f(x)) = -f(dx + 1). \]
+But $1 \neq -1$ in $S$ and $f(dx + 1) \neq 0$ yields $-f(dx + 1) \neq f(dx + 1)$.
+THis proves that $f(dc + dx + 1) \neq f(dx + 1)$.
 \end{proof}
 
 
@@ -235,20 +232,19 @@ Then~\eqref{2012a5-eq1-3} again yields
 This is sufficient to compute $f(-1)$.
 
 \begin{claim}
-We have \[ f(-1) \in \{-2, 1\}. \]
+We have $f(-1) \in \{-2, 1\}$.
 \end{claim}
 \begin{proof}
-Let $C = -f(-1)$.
-Note that $f(3) = C$ by~\eqref{2012a5-eq3-1}.
-The claim is equivalent to $C \in \{-1, 2\}$.
-
-By~\eqref{2012a5-eq3-5}, $f(5) = C^2$.
-On the other hand, recall that $f(2) = 1$ from~\eqref{2012a5-eq3-2}.
-Thus, by~\eqref{2012a5-eq3-3}, we have $f(4) = C^2 - 1$ and then $f(5) = C (C^2 - 2)$.
-That is, we get $C^2 = C(C^2 - 2)$.
-Since $C \neq 0$ by the case assumption, we get
-\[ C^2 - C - 2 = 0 \iff C \in \{-1, 2\}, \]
-    as desired.
+For convenience, let $C = f(-1)$.
+By~\eqref{2012a5-eq3-1}, we get $f(3) = -C$.
+Now, by~\eqref{2012a5-eq3-5}, we have $f(5) = C^2$.
+On the other hand, by~\eqref{2012a5-eq3-3} and $f(2) = 1$ (from~\eqref{2012a5-eq3-2}), we get
+\[ C^2 = f(5) = -f(4) C - f(3) = -f(4) C + C = (1 - f(4)) C. \]
+Since the case's hypothesis implies $C \neq 0$, this implies $C = 1 - f(4)$.
+Computing $f(4)$ using~\eqref{2012a5-eq3-3} again gives
+\[ f(4) = -f(3) C - f(2) = C^2 - 1 \implies C = 1 - (C^2 - 1) \iff C^2 - 1 = 1 - C. \]
+Since $C^2 - 1 = (C + 1)(C - 1)$, this yields either $C + 1 = -1$ or $C - 1 = 0$.
+Respectively, they give $C = -2$ and $C = 1$.
 \end{proof}
 
 Before continuing with the subcases, we have some more useful observations.
@@ -262,7 +258,7 @@ Plugging $x = y$ and applying~\eqref{2012a5-eq3-5} again into the above equation
 By~\eqref{2012a5-eq1-3}, we get
 \[ f(x + 1) f(-1)^2 = f(x + 1) f(-1) (f(-x) + f(x)). \]
 Since $f(-1) \neq 0$, we get that for any $x \in R$,
-\[ f(x + 1) = 0 \text{ implies } f(-x) + f(x) = f(-1). \tag{3.8}\label{2012a5-eq3-8} \]
+\[ f(x + 1) \neq 0 \text{ implies } f(-x) + f(x) = f(-1). \tag{3.8}\label{2012a5-eq3-8} \]
 
 Finally, before we move on to the two subcases, we prove that for any $x \in R$,
 \[ f(x + 1) = 0 \text{ implies } f(-x) = f(x) = -1. \tag{3.9}\label{2012a5-eq3-9} \]

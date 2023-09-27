@@ -53,10 +53,10 @@ def 𝔽₄_map (φ : R) : 𝔽₄ → R
 | 𝔽₄.Y := 1 - φ
 
 def ℤ₄_map : ℤ₄ → R
-| ℤ₄.ℤ₄0 := -1
-| ℤ₄.ℤ₄1 := 0
-| ℤ₄.ℤ₄2 := 1
-| ℤ₄.ℤ₄3 := 0
+| 0 := -1
+| 1 := 0
+| 2 := 1
+| 3 := 0
 
 end extra_maps
 
@@ -100,71 +100,73 @@ lemma sub_one_is_good : good (λ x : R, x - 1) :=
 
 /-- The map `x ↦ x^2 - 1` is good if `R` is commutative. -/
 theorem sq_sub_one_is_good {R : Type*} [comm_ring R] : good (λ x : R, x ^ 2 - 1) :=
-λ x y, suffices (x * y + 1) ^ 2 - (x + y) ^ 2 = (x ^ 2 - 1) * (y ^ 2 - 1),
-  from (sub_sub_sub_cancel_right _ _ _).trans this,
-by ring
+have h : ∀ x y : R, (x * y + 1) + (x + y) = (x + 1) * (y + 1) :=
+  λ x y, (add_right_comm _ _ _).trans $ add_assoc (x * y) x y ▸
+    (add_one_mul x (y + 1)).symm ▸ (mul_add_one x y).symm ▸ add_assoc _ _ _,
+suffices ∀ x : R, (x + 1) * (-x + 1) = -(x ^ 2 - 1),
+from λ x y, (sub_sub_sub_cancel_right _ _ _).trans $ (sq_sub_sq _ _).trans $ (h x y).symm ▸
+  (sub_eq_add_neg (x * y + 1) (x + y)).symm ▸ (neg_add x y).symm ▸ neg_mul_neg x y ▸
+  (h (-x) (-y)).symm ▸ mul_mul_mul_comm (x + 1) (-x + 1) (y + 1) (-y + 1) ▸
+  (neg_mul_neg (x ^ 2 - 1) (y ^ 2 - 1)) ▸ congr_arg2 _ (this x) (this y),
+λ x, (neg_sub (x ^ 2) 1).symm ▸ sub_eq_neg_add 1 x ▸ add_comm 1 x ▸
+  (sq_sub_sq _ _).symm.trans (congr_arg2 _ (one_pow 2) rfl)  
 
 /-- The map `𝔽₂_map` is good. -/
 theorem 𝔽₂_map_is_good : good (𝔽₂_map R)
-| 𝔽₂.O x := (zero_sub (𝔽₂_map R x)).trans (neg_one_mul (𝔽₂_map R x)).symm
-| 𝔽₂.I x := (zero_mul (𝔽₂_map R x)).symm ▸ add_comm x 1 ▸ sub_self _
+| 0 x := (zero_sub (𝔽₂_map R x)).trans (neg_one_mul (𝔽₂_map R x)).symm
+| 1 x := (zero_mul (𝔽₂_map R x)).symm ▸ add_comm x 1 ▸ sub_self _
 
 /-- The map `𝔽₃_map1` is good. -/
 theorem 𝔽₃_map1_is_good : good (𝔽₃_map1 R)
-| 𝔽₃.𝔽₃0 x := (zero_sub (𝔽₃_map1 R x)).trans (neg_one_mul (𝔽₃_map1 R x)).symm
-| 𝔽₃.𝔽₃1 x := (zero_mul (𝔽₃_map1 R x)).symm ▸ add_comm x 1 ▸ sub_self _
-| 𝔽₃.𝔽₃2 𝔽₃.𝔽₃0 := (zero_sub 1).trans (mul_neg_one 1).symm
-| 𝔽₃.𝔽₃2 𝔽₃.𝔽₃1 := (sub_self (-1)).trans (mul_zero 1).symm 
-| 𝔽₃.𝔽₃2 𝔽₃.𝔽₃2 := (sub_zero 1).trans (mul_one 1).symm
+| 0 x := (zero_sub (𝔽₃_map1 R x)).trans (neg_one_mul (𝔽₃_map1 R x)).symm
+| 1 x := (zero_mul (𝔽₃_map1 R x)).symm ▸ add_comm x 1 ▸ sub_self _
+| 2 0 := (zero_sub 1).trans (mul_neg_one 1).symm
+| 2 1 := (sub_self (-1)).trans (mul_zero 1).symm 
+| 2 2 := (sub_zero 1).trans (mul_one 1).symm
 
 /-- The map `𝔽₃_map2` is good. -/
 theorem 𝔽₃_map2_is_good : good (𝔽₃_map2 R)
-| 𝔽₃.𝔽₃0 x := (zero_sub (𝔽₃_map2 R x)).trans (neg_one_mul (𝔽₃_map2 R x)).symm
-| 𝔽₃.𝔽₃1 x := (zero_mul (𝔽₃_map2 R x)).symm ▸ add_comm x 1 ▸ sub_self _
-| 𝔽₃.𝔽₃2 𝔽₃.𝔽₃0 := (sub_self 0).trans (zero_mul (-1)).symm
-| 𝔽₃.𝔽₃2 𝔽₃.𝔽₃1 := (sub_self (-1)).trans (mul_zero 0).symm 
-| 𝔽₃.𝔽₃2 𝔽₃.𝔽₃2 := (sub_zero 0).trans (mul_zero 0).symm
+| 0 x := (zero_sub _).trans (neg_one_mul _).symm
+| 1 x := (zero_mul (𝔽₃_map2 R x)).symm ▸ add_comm x 1 ▸ sub_self _
+| 2 0 := (sub_self 0).trans (zero_mul (-1)).symm
+| 2 1 := (sub_self (-1)).trans (mul_zero 0).symm 
+| 2 2 := (sub_zero 0).trans (mul_zero 0).symm
 
 /-- The map `ℤ₄_map` is good. -/
 theorem ℤ₄_map_is_good : good (ℤ₄_map R)
-| ℤ₄.ℤ₄0 x := (zero_sub (ℤ₄_map R x)).trans (neg_one_mul (ℤ₄_map R x)).symm
-| ℤ₄.ℤ₄1 x := (zero_mul (ℤ₄_map R x)).symm ▸ add_comm x 1 ▸ sub_self _
-| ℤ₄.ℤ₄2 ℤ₄.ℤ₄0 := (zero_sub 1).trans (one_mul (-1)).symm
-| ℤ₄.ℤ₄2 ℤ₄.ℤ₄1 := (sub_self 0).trans (mul_zero 1).symm
-| ℤ₄.ℤ₄2 ℤ₄.ℤ₄2 := (zero_sub (-1)).trans $ (neg_neg 1).trans (mul_one 1).symm
-| ℤ₄.ℤ₄2 ℤ₄.ℤ₄3 := (sub_self 0).trans (mul_zero 1).symm
-| ℤ₄.ℤ₄3 ℤ₄.ℤ₄0 := (sub_self 0).trans (zero_mul (-1)).symm
-| ℤ₄.ℤ₄3 ℤ₄.ℤ₄1 := (sub_self (-1)).trans (zero_mul 0).symm
-| ℤ₄.ℤ₄3 ℤ₄.ℤ₄2 := (sub_self 0).trans (zero_mul 1).symm
-| ℤ₄.ℤ₄3 ℤ₄.ℤ₄3 := (sub_self 1).trans (zero_mul 0).symm
+| 0 x := (zero_sub _).trans (neg_one_mul _).symm
+| 1 x := (zero_mul (ℤ₄_map R x)).symm ▸ add_comm x 1 ▸ sub_self _
+| x 0 := (mul_zero x).symm ▸ (add_zero x).symm ▸ (zero_sub _).trans (mul_neg_one _).symm
+| x 1 := (mul_one x).symm ▸ (sub_self _).trans (mul_zero _).symm
+| 2 2 := (zero_sub (-1)).trans $ (neg_neg 1).trans (mul_one 1).symm
+| 2 3 := (sub_self 0).trans (mul_zero 1).symm
+| 3 2 := (sub_self 0).trans (zero_mul 1).symm
+| 3 3 := (sub_self 1).trans (zero_mul 0).symm
 
 /-- The map `𝔽₂ε_map` is good. -/
 theorem 𝔽₂ε_map_is_good : good (𝔽₂ε_map R)
-| 𝔽₂ε.O x := (zero_sub (𝔽₂ε_map R x)).trans (neg_one_mul (𝔽₂ε_map R x)).symm
-| 𝔽₂ε.I x := (zero_mul (𝔽₂ε_map R x)).symm ▸ add_comm x 1 ▸ sub_self _
-| 𝔽₂ε.X 𝔽₂ε.O := (zero_sub 1).trans (one_mul (-1)).symm
-| 𝔽₂ε.X 𝔽₂ε.I := (sub_self 0).trans (one_mul 0).symm
+| 0 x := (zero_sub (𝔽₂ε_map R x)).trans (neg_one_mul (𝔽₂ε_map R x)).symm
+| 1 x := (zero_mul (𝔽₂ε_map R x)).symm ▸ add_comm x 1 ▸ sub_self _
+| x 0 := (mul_zero x).symm ▸ (add_zero x).symm ▸ (zero_sub _).trans (mul_neg_one _).symm
+| x 1 := (mul_one x).symm ▸ (sub_self _).trans (mul_zero _).symm
 | 𝔽₂ε.X 𝔽₂ε.X := (zero_sub (-1)).trans $ (neg_neg 1).trans (one_mul 1).symm
 | 𝔽₂ε.X 𝔽₂ε.Y := (sub_self 0).trans (one_mul 0).symm
-| 𝔽₂ε.Y 𝔽₂ε.O := (sub_self 0).trans (zero_mul (-1)).symm
-| 𝔽₂ε.Y 𝔽₂ε.I := (sub_self 1).trans (zero_mul 0).symm
 | 𝔽₂ε.Y 𝔽₂ε.X := (sub_self 0).trans (zero_mul 1).symm
 | 𝔽₂ε.Y 𝔽₂ε.Y := (sub_self (-1)).trans (zero_mul 0).symm
 
-/-- The map `𝔽₄_map` is good. -/
-theorem 𝔽₄_map_is_good {φ : R} (h : φ * (1 - φ) = -1) : good (𝔽₄_map R φ)
-| 𝔽₄.O x := (zero_sub (𝔽₄_map R φ x)).trans (neg_one_mul (𝔽₄_map R φ x)).symm
-| 𝔽₄.I x := (zero_mul (𝔽₄_map R φ x)).symm ▸ add_comm x 1 ▸ sub_self _
-| 𝔽₄.X 𝔽₄.O := (zero_sub φ).trans (mul_neg_one φ).symm
-| 𝔽₄.X 𝔽₄.I := (sub_self (1 - φ)).trans (mul_zero φ).symm
-| 𝔽₄.X 𝔽₄.X := sub_eq_of_eq_add $ eq_add_of_sub_eq' $ (mul_one_sub φ φ).symm.trans h
+/-- The map `𝔽₄_map` is good assuming `R` is commutative.
+  Commutativity is not actually necessary, but it is simply more convenient. -/
+theorem 𝔽₄_map_is_good {c : R} (h : c * (1 - c) = -1) : good (𝔽₄_map R c)
+| 0 x := (zero_sub _).trans (neg_one_mul _).symm
+| 1 x := (zero_mul (𝔽₄_map R c x)).symm ▸ add_comm x 1 ▸ sub_self _
+| x 0 := (mul_zero x).symm ▸ (add_zero x).symm ▸ (zero_sub _).trans (mul_neg_one _).symm
+| x 1 := (mul_one x).symm ▸ (sub_self _).trans (mul_zero _).symm
+| 𝔽₄.X 𝔽₄.X := sub_eq_of_eq_add $ eq_add_of_sub_eq' $ (mul_one_sub c c).symm.trans h
 | 𝔽₄.X 𝔽₄.Y := (sub_zero (-1)).trans h.symm
-| 𝔽₄.Y 𝔽₄.O := (zero_sub (1 - φ)).trans (mul_neg_one (1 - φ)).symm
-| 𝔽₄.Y 𝔽₄.I := (sub_self φ).trans (mul_zero (1 - φ)).symm
 | 𝔽₄.Y 𝔽₄.X := (sub_zero (-1)).trans $ h.symm.trans $
-    (commute.one_right φ).sub_right (commute.refl φ)
+    (commute.one_right c).sub_right (commute.refl c)
 | 𝔽₄.Y 𝔽₄.Y := sub_eq_of_eq_add $ eq_add_of_sub_eq' $
-    (one_sub_mul _ _).symm.trans $ (congr_arg (* (1 - φ)) (sub_sub_cancel 1 φ)).trans h
+    (one_sub_mul _ _).symm.trans $ (congr_arg (* (1 - c)) (sub_sub_cancel 1 c)).trans h
 
 end answer_checking
 
@@ -246,14 +248,14 @@ lemma map_neg_sub_map2 (x : R) : f (-x) - f x = f (x + 1) * f (-1) :=
 theorem eq_hom_sub_one_of (h0 : f 0 = -1) (h1 : ∀ x y, f (x + y) = f x + f y + 1) :
   ∃ φ : R →+* S, f = λ x, φ x - 1 :=
 ⟨⟨λ x, f x + 1,
-  add_left_eq_self.mpr $ good_map_one h,
-  λ x y, let h2 : f (x * y + 1) = f (x * y) + 1 :=
-    (h1 _ _).trans $ (good_map_one h).symm ▸ (add_zero $ f (x * y)).symm ▸ rfl in
-    by rw [← h2, eq_add_of_sub_eq (h x y), h1,
-      add_assoc, ← add_assoc, ← mul_add_one, ← add_one_mul],
-  add_eq_zero_iff_eq_neg.mpr h0,
+  (good_map_one h).symm ▸ zero_add 1,
+  λ x y, (add_one_mul (f x) (f y + 1)).symm ▸ (mul_add_one (f x) (f y)).symm ▸
+    (add_assoc (f x * f y) (f x) (f y + 1)).symm ▸ add_assoc (f x) (f y) 1 ▸
+    h1 x y ▸ eq_add_of_sub_eq (h x y) ▸ (h1 (x * y) 1).symm ▸
+    (good_map_one h).symm ▸ congr_arg2 _ (add_zero _).symm rfl,
+  h0.symm ▸ neg_add_self 1,
   λ x y, (h1 x y).symm ▸ (add_assoc _ _ _).trans (add_add_add_comm _ _ _ _)⟩,
-funext (λ x, (add_sub_cancel (f x) 1).symm)⟩
+funext $ λ x, (add_sub_cancel (f x) 1).symm⟩
 
 end noncomm
 
@@ -287,8 +289,8 @@ lemma map_quasi_period (h0 : f 0 = -1) {c : R} (h1 : ∀ x, f (c + x) = -f c * f
 suffices f (-c) = f c, from mul_self_eq_one_iff.mp $ neg_injective $
   (neg_mul (f c) (f c)).symm.trans $ (congr_arg2 _ rfl this.symm).trans $
   (h1 (-c)).symm.trans $ (add_neg_self c).symm ▸ h0,
-  let h2 := h (c + 1) (-1) in by rwa [h1, good_map_one h, mul_zero, zero_mul,
-    sub_eq_zero, add_one_mul, neg_add_cancel_right, add_neg_cancel_right, mul_neg_one] at h2
+eq_of_sub_eq_zero $ (map_neg_sub_map2 h c).trans $
+  mul_eq_zero_of_left ((h1 1).trans $ mul_eq_zero_of_right _ $ good_map_one h) _
 
 lemma map_quasi_period_ne_zero (h0 : f 0 = -1) {c : R} (h1 : ∀ x, f (c + x) = -f c * f x) :
   f c ≠ 0 :=
@@ -299,9 +301,9 @@ lemma map_quasi_period_ne_zero (h0 : f 0 = -1) {c : R} (h1 : ∀ x, f (c + x) = 
 def quasi_period_ideal : ideal R :=
 { carrier := {c | ∀ x, f (c * x + 1) = 0},
   add_mem' := λ a b, quasi_period_add h,
-  zero_mem' := λ x, (congr_arg f $ add_left_eq_self.mpr $ zero_mul x).trans (good_map_one h),
-  smul_mem' := λ a b h1 x, (congr_arg (λ x, f (x + 1)) $
-    by rw [smul_eq_mul, mul_comm a b, mul_assoc]).trans (h1 $ a * x) }
+  zero_mem' := λ x, (zero_mul x).symm ▸ (zero_add (1 : R)).symm ▸ good_map_one h,
+  smul_mem' := λ a b h1 x, h1 (a * x) ▸ mul_left_comm a b x ▸
+    mul_assoc a b x ▸ congr_arg f (congr_arg2 _ (smul_eq_mul R) rfl) }
 
 lemma mem_quasi_period_ideal_iff {c : R} :
   c ∈ quasi_period_ideal h ↔ ∀ x, f (c + x) = -f c * f x :=
@@ -320,32 +322,29 @@ lemma period_mul {c : R} (h0 : ∀ x, f (c + x) = f x) : ∀ d x, f (d * c + x) 
   (ne_or_eq (f 0) (-1)).elim (λ h1 d x, (eq_zero_of_map_zero_ne_neg_one h h1).symm ▸ rfl) $
 λ h1, suffices ∀ d, (∃ x, f (d * x + 1) ≠ 0) → ∀ x, f (d * c + x) = f x,
 ---- First prove the lemma assuming that it holds whenever `d ∉ quasi_period_ideal`
-from λ d, (em' $ ∀ x, f (d * x + 1) = 0).elim (λ h2, this d $ not_forall.mp h2) $
-  λ h2 x, this (d - 1) (⟨1, map_quasi_period_ne_zero h h1 $ (quasi_period_iff h).mpr $
-      by rwa [mul_one, sub_add_cancel]⟩) x ▸ h0 ((d - 1) * c + x) ▸
-    congr_arg f (by rw [← add_assoc, ← one_add_mul, add_sub_cancel'_right]),
+from λ d, (em' $ ∀ x, f (d * x + 1) = 0).elim (λ h2, this d $ not_forall.mp h2) $ λ h2,
+suffices h3 : f (d - 1 + 1) ≠ 0, from λ x, sub_add_cancel d 1 ▸ (add_one_mul (d - 1) c).symm ▸
+  h0 x ▸ (add_assoc ((d - 1) * c) c x).symm ▸ this (d - 1) ⟨1, (mul_one (d - 1)).symm ▸ h3⟩ _,
+(sub_add_cancel d 1).symm ▸ map_quasi_period_ne_zero h h1 ((quasi_period_iff h).mpr h2),
 ---- Now prove the lemma for `d ∉ quasi_period_ideal`
-λ d h2, begin
-  cases h2 with x h2,
-  have h3 := h d (c + x),
-  rw [h0, add_left_comm, h0, ← h, sub_left_inj, mul_add, add_assoc] at h3,
-  rw [period_iff h, quasi_period_iff h] at h0 ⊢,
-  refine ⟨λ x, h0.1 (d * x) ▸ congr_arg f (congr_arg2 _ (by rw [mul_comm d c, mul_assoc]) rfl), _⟩,
-  rwa [(mem_quasi_period_ideal_iff h).mp (ideal.mul_mem_left _ d h0.1),
-       mul_left_eq_self₀, or_iff_left h2, neg_eq_iff_eq_neg, ← h1] at h3
-end
+λ d h2, let h3 := period_imp_quasi_period h h0 in (period_iff h).mpr $
+⟨(quasi_period_iff h).mpr $ λ x, mul_comm c d ▸ (mul_assoc c d x).symm ▸ h3 (d * x),
+exists.elim h2 $ λ x h2, suffices -f (d * c) * f (d * x + 1) = f (d * x + 1),
+  from h1.symm ▸ neg_eq_iff_eq_neg.mp $ (mul_left_eq_self₀.mp this).resolve_right h2,
+((mem_quasi_period_ideal_iff h).mp (ideal.mul_mem_left _ d h3) _).symm.trans $
+  (eq_add_of_sub_eq $ h d x).symm ▸ add_assoc (d * c) (d * x) 1 ▸ mul_add d c x ▸
+  h0 x ▸ h0 (d + x) ▸ add_left_comm d c x ▸ eq_add_of_sub_eq (h d (c + x))⟩
 
 /-- (2.2) The ideal of periods -/
 def period_ideal : ideal R :=
 { carrier := {c | ∀ x, f (c + x) = f x},
-  add_mem' := λ a b h1 h2 x, (congr_arg f $ add_assoc a b x).trans $ (h1 (b + x)).trans (h2 x),
+  add_mem' := λ a b h1 h2 x, (add_assoc a b x).symm ▸ (h1 (b + x)).trans (h2 x),
   zero_mem' := λ x, congr_arg f $ zero_add x,
   smul_mem' := λ d c h0, period_mul h h0 d }
 
 lemma period_equiv_imp_f_eq {a b : R} (h0 : ideal.quotient.ring_con (period_ideal h) a b) :
   f a = f b :=
-  (congr_arg f (sub_add_cancel a b).symm).trans $
-    ideal.quotient.eq.mp ((ring_con.eq _).mpr h0) b
+  sub_add_cancel a b ▸ ideal.quotient.eq.mp ((ring_con.eq _).mpr h0) b
 
 /-- Lifting of `f` along the ideal of periods. -/
 def period_lift : R ⧸ period_ideal h → S :=
@@ -354,10 +353,9 @@ def period_lift : R ⧸ period_ideal h → S :=
 lemma period_lift_is_good : good (period_lift h) :=
   good_of_comp_hom_good_surjective ideal.quotient.mk_surjective h
 
-lemma zero_of_periodic_period_lift :
-  ∀ c : R ⧸ period_ideal h, (∀ x, period_lift h (c + x) = period_lift h x) → c = 0 :=
-  quot.ind $ by intros c h0;
-    exact ideal.quotient.eq_zero_iff_mem.mpr (λ y, h0 $ quot.mk _ y)
+lemma zero_of_periodic_period_lift (c : R ⧸ period_ideal h) :
+  (∀ x, period_lift h (c + x) = period_lift h x) → c = 0 :=
+  quot.ind (λ c h0, ideal.quotient.eq_zero_iff_mem.mpr (λ y, h0 $ quot.mk _ y)) c
 
 
 
@@ -389,16 +387,14 @@ lemma is_period_or_eq_quasi_nonperiod {d : R} (h3 : d ∈ quasi_period_ideal h) 
 
 lemma mul_nonquasi_period_is_nonperiod {d : R} (h3 : d ∉ quasi_period_ideal h) :
   d * c ∉ period_ideal h :=
+have h4 : (-1 : S) ≠ 1 := λ h4, false.elim $ h2 $ (period_iff h).mpr
+  ⟨(quasi_period_iff h).mpr h1, (map_nonperiod_quasi_period h h0 h1 h2).trans (h0.trans h4).symm⟩,
 exists.elim (not_forall.mp h3) $ λ x h3, not_forall.mpr
-⟨d * x + 1, (eq_or_ne (-1 : S) 1).elim
----- First get rid of the case `-1 = 1 ∈ S`
-(λ h4, false.elim $ h2 $ (period_iff h).mpr ⟨(quasi_period_iff h).mpr h1,
-  (map_nonperiod_quasi_period h h0 h1 h2).trans (h0.trans h4).symm⟩) $
----- Now the main case
-(λ h4, let h5 := map_quasi_period_add h h0 h1 h2 in
-  by rw [← add_assoc, ← mul_add, eq_add_of_sub_eq (h d _), h5, add_left_comm, h5, mul_neg,
-    ← neg_add, ← eq_add_of_sub_eq (h d x), ← neg_one_mul, mul_left_eq_self₀, not_or_distrib];
-  exact ⟨h4, h3⟩)⟩
+⟨d * x + 1, suffices f (d * c + (d * x + 1)) = -f (d * x + 1), from λ h5, h4 $
+  (mul_left_eq_self₀.mp $ (neg_one_mul _).trans $ this.symm.trans h5).resolve_right h3,
+let h5 := map_quasi_period_add h h0 h1 h2 in add_assoc (d * c) (d * x) 1 ▸ mul_add d c x ▸
+  (eq_add_of_sub_eq $ h d (c + x)).trans ((h5 x).symm ▸ add_left_comm c d x ▸ (h5 (d + x)).symm ▸
+    (mul_neg (f d) (f x)).symm ▸ (eq_add_of_sub_eq $ h d x).symm ▸ (neg_add _ _).symm)⟩
   
 lemma equiv_mod_quasi_period_ideal (x : R) :
   x ∈ quasi_period_ideal h ∨ x - 1 ∈ quasi_period_ideal h :=
@@ -440,19 +436,16 @@ section step3
 variables {R S : Type*} [comm_ring R] [comm_ring S] [is_domain S] {f : R → S} (h : good f)
 include h
 
-/-- (3.6) While this lemma does not depend on `f(-1) ≠ 0`,
-  it is useless in the case `f(-1) = 0`. -/
+/-- (3.6) The lemma is useless in the case `f(-1) = 0` despite only depending of `good f`. -/
 lemma case1_map_add_main_eq1 (x y : R) :
   f (x + y) - f (-(x + y)) = f (-x) * f (-y) - f x * f y :=
-  (sub_sub_sub_cancel_left _ _ (f (x * y + 1))).symm.trans $ congr_arg2 _
-    (h (-x) (-y) ▸ congr_arg2 _ (neg_mul_neg x y ▸ rfl) (congr_arg f $ neg_add x y)) (h x y)
+  h (-x) (-y) ▸ h x y ▸ neg_mul_neg x y ▸ neg_add x y ▸
+    (sub_sub_sub_cancel_left _ _ _).symm  
 
-/-- (3.7) While this lemma does not depend on `f(-1) ≠ 0`,
-  it is useless in the case `f(-1) = 0`. -/
+/-- (3.7) The lemma is useless in the case `f(-1) = 0` despite only depending of `good f`. -/
 lemma case1_map_add_main_eq2 (x y : R) :
   -(f (x + y + 1) * f (-1)) = f (-x) * f (-y) - f x * f y :=
-  (congr_arg _ (map_neg_sub_map2 h _).symm).trans $
-    (neg_sub _ _).trans $ case1_map_add_main_eq1 h x y
+  map_neg_sub_map2 h (x + y) ▸ (neg_sub _ _).trans (case1_map_add_main_eq1 h x y)
 
 
 variables (h0 : f (-1) ≠ 0)
@@ -460,9 +453,8 @@ include h0
 
 /-- (3.1) -/
 lemma case1_map_neg_add_one (x : R) : f (-x + 1) = -f (x + 1) :=
-  let h1 := map_neg_sub_map2 h in
-  mul_right_cancel₀ h0 $ (h1 (-x)).symm.trans $ (neg_neg x).symm ▸
-    (neg_sub _ _).symm.trans $ (congr_arg _ $ h1 x).trans (neg_mul _ _).symm
+  mul_right_cancel₀ h0 $ let h1 := map_neg_sub_map2 h in (h1 (-x)).symm.trans $
+    (neg_mul (f (x + 1)) (f (-1))).symm ▸ h1 x ▸ (neg_neg x).symm ▸ (neg_sub _ _).symm
 
 lemma case1_map_zero : f 0 = -1 :=
   by_contra $ λ h1, h0 $ congr_fun (eq_zero_of_map_zero_ne_neg_one h h1) _
@@ -480,55 +472,56 @@ lemma case1_map_add_one_add_map_sub_one (x : R) :
 
 /-- (3.4) -/
 lemma case1_map_two_mul_add_one1 (x : R) : f (2 * x + 1) = f x - f (-x) :=
-suffices f (2 + x) = -f (-x),
-  from (eq_add_of_sub_eq $ h 2 x).trans $ (sub_eq_add_neg (f x) (f (-x))).symm ▸
-    congr_arg2 _ ((case1_map_two h h0).symm ▸ one_mul (f x)) this,
-neg_eq_iff_eq_neg.mp $ add_right_comm 1 x 1 ▸ (case1_map_neg_add_one h h0 _).symm.trans $
-  congr_arg f $ (neg_add_eq_sub (1 + x) 1).trans (sub_add_cancel' 1 x)
+suffices f (-x) = -f (x + 2),
+  from this.symm ▸ (sub_neg_eq_add (f x) (f (x + 2))).symm ▸ mul_comm x 2 ▸
+    mul_one (f x) ▸ case1_map_two h h0 ▸ eq_add_of_sub_eq (h x 2),
+add_assoc x 1 1 ▸ case1_map_neg_add_one h h0 (x + 1) ▸ 
+  sub_eq_neg_add 1 (x + 1) ▸ sub_add_cancel'' 1 x ▸ rfl  
 
 /-- (3.5) -/
 lemma case1_map_two_mul_add_one2 (x : R) : f (2 * x + 1) = -(f (x + 1) * f (-1)) :=
-  (case1_map_two_mul_add_one1 h h0 x).trans $
-    (neg_sub _ _).symm.trans $ congr_arg _ $ map_neg_sub_map2 h x
+  map_neg_sub_map2 h x ▸ (neg_sub (f (-x)) (f x)).symm ▸ case1_map_two_mul_add_one1 h h0 x
 
 /-- Main claim -/
 lemma case1_map_neg_one_cases : f (-1) = -2 ∨ f (-1) = 1 :=
-begin
-  have h1 := case1_map_neg_add_one h h0 (1 + 1 : R),
-  rw [neg_add_eq_sub, sub_add_cancel'] at h1,
-  have h2 := case1_map_add_one_add_map_sub_one h h0,
-  have h3 := h2 (2 * (1 + 1) : R),
-  rw [case1_map_two_mul_add_one2 h h0, two_mul, add_sub_assoc, add_sub_cancel,
-      ← add_assoc, eq_sub_of_add_eq (h2 (1 + 1 + 1 : R)), add_sub_cancel, ← neg_mul, ← h1,
-      ← neg_eq_iff_eq_neg.mpr h1, ← bit0, case1_map_two h h0, eq_neg_iff_add_eq_zero] at h3,
-  suffices : (f (-1) + 2) * (f (-1) - 1) * f (-1) = 0,
-    rwa [mul_eq_zero, mul_eq_zero, add_eq_zero_iff_eq_neg, sub_eq_zero, or_iff_left h0] at this,
-  rw ← h3; ring
-end
+have h1 : f (-1) = -f 3 := case1_map_neg_add_one h h0 (1 + 1 : R) ▸
+  sub_eq_neg_add (1 : R) (1 + 1) ▸ sub_add_cancel'' (1 : R) 1 ▸ rfl,
+have h2 : f 2 = 1 := case1_map_two h h0,
+have h3 : _ := case1_map_add_one_add_map_sub_one h h0,
+have h4 : _ := (neg_eq_iff_eq_neg.mpr h1).symm,
+have h5 : f (2 + 2) = -f (-1) + 1 := mul_right_cancel₀ h0 $
+  (neg_eq_iff_eq_neg.mpr $ h3 (2 + 2)).symm.trans $ (neg_add _ _).trans $
+  (add_sub_assoc (2 : R) 2 1).symm ▸ (add_sub_cancel (1 : R) 1).symm ▸
+  two_mul (2 : R) ▸ h4 ▸ (add_one_mul (f 3) (f (-1))).symm ▸
+  congr_arg2 _ (neg_eq_iff_eq_neg.mpr $ case1_map_two_mul_add_one2 h h0 2) h1.symm,
+suffices f (2 + (1 + 1)) = (-f (-1) + 1) * (-f (-1) - 1),
+  from (mul_right_eq_self₀.mp $ this.symm.trans h5).imp
+    (λ h6, neg_eq_iff_eq_neg.mp $ eq_add_of_sub_eq h6) neg_add_eq_zero.mp,
+mul_self_sub_mul_self (-f (-1)) 1 ▸ (mul_neg (-f (-1)) (f (-1))).symm ▸ h4 ▸ h3 3 ▸
+  eq_sub_of_add_eq (congr_arg2 _ (add_assoc (2 : R) 1 1 ▸ rfl)
+    ((mul_one _).trans $ (add_sub_cancel (2 : R) 1).symm ▸ h2.symm))
 
 /-- (3.8) -/
 lemma case1_map_add_one_ne_zero_imp {x : R} (h1 : f (x + 1) ≠ 0) : f (-x) + f x = f (-1) :=
-begin
-  have h2 := (case1_map_add_main_eq2 h x x).symm,
-  rw [mul_self_sub_mul_self, ← two_mul, case1_map_two_mul_add_one2 h h0,
-      map_neg_sub_map2 h, neg_mul, neg_neg, mul_comm, mul_eq_mul_left_iff] at h2,
-  exact h2.resolve_right (mul_ne_zero h1 h0)
-end
+have h2 : _ := map_neg_sub_map2 h x,
+mul_right_cancel₀ (h2.trans_ne $ mul_ne_zero h1 h0) $ (mul_self_sub_mul_self _ _).symm.trans $
+  (case1_map_add_main_eq2 h x x).symm.trans $ two_mul x ▸ neg_mul (f (2 * x + 1)) (f (-1)) ▸
+  h2.symm ▸ (neg_eq_iff_eq_neg.mpr $ case1_map_two_mul_add_one2 h h0 x).symm ▸ mul_comm _ _ 
 
 /-- (3.9) -/
-lemma case1_map_add_one_eq_zero_imp {x : R} (h1 : f (x + 1) = 0) : f x = -1 ∧ f (-x) = -1 := 
+lemma case1_map_add_one_eq_zero_imp {x : R} (h1 : f (x + 1) = 0) : f x = -1 ∧ f (-x) = -1 :=
+have h2 : f (-x) = f x := eq_of_sub_eq_zero $
+  (map_neg_sub_map2 h x).trans (mul_eq_zero_of_left h1 _),
+suffices f x = -1, from ⟨this, h2.trans this⟩,
 begin
-  have h2 := map_neg_sub_map2 h x,
-  rw [h1, zero_mul, sub_eq_zero] at h2,
   have h3 := case1_map_two_mul_add_one2 h h0,
   have h4 := case1_map_add_main_eq1 h x (x + 1),
   rw [h1, mul_zero, sub_zero, ← add_assoc, ← two_mul, h3, h1, zero_mul, neg_zero, zero_sub,
       ← sub_add_cancel'' (1 : R), add_assoc, ← bit0, ← mul_add_one, ← neg_add_eq_sub,
       ← mul_neg, h3, neg_neg, neg_add_eq_sub, sub_add_cancel'', h2] at h4,
   have h5 := case1_map_add_main_eq2 h x (-(x + 1)),
-  rw [neg_neg, h1, mul_zero, zero_sub, neg_inj, add_right_comm, add_neg_self, ← h4,
-      mul_eq_mul_right_iff, case1_map_zero h h0, or_iff_left h0, eq_comm] at h5,
-  exact ⟨h5, h2.trans h5⟩
+  rwa [neg_neg, h1, mul_zero, zero_sub, neg_inj, add_right_comm, add_neg_self, ← h4,
+      mul_eq_mul_right_iff, case1_map_zero h h0, or_iff_left h0, eq_comm] at h5
 end
 
 end step3
@@ -557,7 +550,7 @@ include h h0 h1
 /-- (4.1) -/
 lemma case1_1_lem1 (x : R) : f (-x) + f x = -2 :=
   (ne_or_eq (f (x + 1)) 0).elim
-    (λ h2, (case1_map_add_one_ne_zero_imp h h0 h2).trans h1)
+    (λ h2, h1 ▸ case1_map_add_one_ne_zero_imp h h0 h2)
     (λ h2, let h3 := case1_map_add_one_eq_zero_imp h h0 h2 in
       (congr_arg2 _ h3.2 h3.1).trans (neg_add _ _).symm)
 
@@ -992,8 +985,8 @@ lemma case2_2_ℤ₄_hom_bijective (h3 : ∀ c, (∀ x, f (c + x) = f x) → c =
   bijective (ℤ₄.cast_hom $ h3 4 $ case2_2_lem2 h h0 h1) :=
   ⟨ℤ₄.cast_hom_injective _ (λ h4, h2 $ (congr_arg f h4).trans $ case2_2_lem4 h h0 h1 h2),
   λ x, (case2_2_lem5 h h0 h1 h2 h3 x).elim
-    (λ h5, h5.elim (λ h5, ⟨ℤ₄.ℤ₄0, h5.symm⟩) (λ h5, ⟨ℤ₄.ℤ₄2, h5.symm⟩))
-    (λ h5, h5.elim (λ h5, ⟨ℤ₄.ℤ₄1, h5.symm⟩) (λ h5, ⟨ℤ₄.ℤ₄3, h5.symm⟩))⟩
+    (λ h5, h5.elim (λ h5, ⟨0, h5.symm⟩) (λ h5, ⟨2, h5.symm⟩))
+    (λ h5, h5.elim (λ h5, ⟨1, h5.symm⟩) (λ h5, ⟨3, h5.symm⟩))⟩
 
 lemma case2_2_quotient_sol (h3 : ∀ c, (∀ x, f (c + x) = f x) → c = 0) :
   f = ℤ₄_map S ∘
