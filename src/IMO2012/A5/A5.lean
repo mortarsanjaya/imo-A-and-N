@@ -215,7 +215,7 @@ lemma good_of_comp_hom_good_surjective {φ : R₀ →+* R} (h : surjective φ)
 /-- Given an "answer" `f : R → S` and `φ : R₀ →+* R` surjective, `f ∘ φ` is also an answer. -/
 lemma is_answer_comp_hom {φ : R₀ →+* R} (h : surjective φ)
   {f : R → S} (h0 : is_answer f) : is_answer (f ∘ φ) :=
-is_answer.rec is_answer.zero
+is_answer.rec_on h0 is_answer.zero
   (λ ρ, is_answer.hom_sub_one (ρ.comp φ))
   (λ ρ, is_answer.hom_sq_sub_one (ρ.comp φ))
   (λ ρ h1, is_answer.𝔽₂_map_comp (ρ.comp φ) (h1.comp h))
@@ -224,7 +224,6 @@ is_answer.rec is_answer.zero
   (λ ρ h1, is_answer.ℤ₄_map_comp (ρ.comp φ) (h1.comp h))
   (λ ρ h1, is_answer.𝔽₂ε_map_comp (ρ.comp φ) (h1.comp h))
   (λ ρ h1 s h2, is_answer.𝔽₄_map_comp (ρ.comp φ) (h1.comp h) s h2)
-  h0
 
 end hom
 
@@ -589,7 +588,7 @@ lemma case1_1_lem2 (x : R) : f (x + 1) = f x + 1 :=
     case1_1_lem1 h h0 h1 x ▸ sub_sub (f (-x) - f x) (f (-x)) (f x) ▸
     (sub_sub_cancel_left (f (-x)) (f x)).symm ▸ (neg_add' (f x) (f x)).symm
 
-/-- Solution for the current subcase -/
+/-- Solution for the current subcase (`hom_sub_one: x ↦ φ(x) - 1`) -/
 theorem case1_1_is_answer : is_answer f :=
 is_answer_of_add_one_additive h (case1_map_zero h h0) $ λ x y, begin
   have h2 := λ t, eq_sub_of_add_eq (case1_1_lem1 h h0 h1 t),
@@ -662,7 +661,7 @@ begin
   exact h1 (h2.trans $ neg_eq_iff_eq_neg.mp h6)
 end
 
-/-- Solution for the current subcase -/
+/-- Solution for the current subcase (`𝔽₃_map1`) -/
 lemma case1_2_quot_is_answer : is_answer f :=
 have X : bijective (𝔽₃.cast_hom $ case1_2_lem3 h h0 h1 h2 h3) :=
   ⟨𝔽₃.cast_hom_injective _ (one_ne_zero_of_map_zero h $ case1_map_zero h h0),
@@ -895,7 +894,7 @@ lemma case2_1_lem9 (x : R) : x = 0 ∨ x = 1 ∨ x = -1 :=
         (neg_eq_of_add_eq_zero_right h7).symm ▸ h9))
     (λ h9, eq_neg_of_add_eq_zero_left $ h6 (x + 1) h9)
 
-/-- Solution for the current subcase -/
+/-- Solution for the current subcase (`𝔽₃_map2`) -/
 lemma case2_1_quot_is_answer : is_answer f :=
 have X : bijective (𝔽₃.cast_hom $ h2 3 $ case2_1_lem1 h h0 h1) :=
   ⟨𝔽₃.cast_hom_injective _ (one_ne_zero_of_map_zero h h3),
@@ -975,7 +974,7 @@ let h4 : f 0 = -1 := case2_2_lem4 h h0 h1 h2 in
 cases_of_nonperiod_quasi_period h h3 h4 (case2_2_lem3 h h0 h1 h2)
   (λ h5, h2 $ (congr_arg f h5).trans h4) x
 
-/-- Solution for the current subcase -/
+/-- Solution for the current subcase (`ℤ₄_map`) -/
 theorem case2_2_quot_is_answer (h3 : ∀ c, (∀ x, f (c + x) = f x) → c = 0) : is_answer f :=
 have X : bijective (ℤ₄.cast_hom $ h3 4 $ case2_2_lem2 h h0 h1) :=
   ⟨ℤ₄.cast_hom_injective _ (λ h4, h2 $ (congr_arg f h4).trans $ case2_2_lem4 h h0 h1 h2),
@@ -1261,7 +1260,7 @@ theorem case2_3_sol : ∃ φ : R →+* S, f = λ x, φ x ^ 2 - 1 :=
   case2_3_lem_g_add h h0 h1 h2 h3⟩,
 funext $ case2_3_lem_g4 h h0 h1 h2 h3⟩
 
-/-- Solution for the current subcase -/
+/-- Solution for the current subcase (`hom_sq_sub_one: x ↦ φ(x)^2 - 1`) -/
 theorem case2_3_is_answer : is_answer f :=
   exists.elim (case2_3_sol h h0 h1 h2 h3) $ λ φ h4, h4.symm ▸ is_answer.hom_sq_sub_one φ
 
@@ -1398,6 +1397,9 @@ begin
   rw ← sub_eq_zero_of_eq h6, ring
 end
 
+
+
+/-- Solution for the current sub-subcase (`hom_sub_one: x ↦ φ(x) - 1`) -/
 lemma case2_4_Schar2_quot_is_answer (h3 : (2 : S) = 0) : is_answer f :=
   is_answer_of_add_one_additive h h1 $ λ x y,
 ---- (10.L2.1)
@@ -1565,6 +1567,7 @@ suffices ∀ x, f (c * x + 1) = 0, from cases_of_nonperiod_quasi_period h h2 h1 
 λ x, let h6 := (case2_4_lem5 h h0 h1 $ c * x).symm in
   by rwa [mul_pow, sq c, h5, zero_mul, h1, sub_eq_neg_self, sq_eq_zero_iff] at h6
 
+/-- Solution for the current sub-subcase (`𝔽₂ε_map`) -/
 lemma case2_4_𝔽₂ε_quot_is_answer {c : R} (h4 : c ≠ 0) (h5 : c * c = 0) : is_answer f :=
 have X : bijective (𝔽₂ε.cast'_hom h0 h5) :=
   ⟨𝔽₂ε.cast'_hom_injective _ _ h4,
@@ -1599,6 +1602,7 @@ lemma case2_4_𝔽₄_main_lemma (h4 : ∀ x : R, x ^ 2 = 0 → x = 0)
   by rw [mul_add_one, ← sq, char2.add_sq h0,
     add_add_add_comm, sq, sq, h6, ← mul_add_one, h8.2])
 
+/-- Solution for the current sub-subcase (`𝔽₄_map`) -/
 lemma case2_4_𝔽₄_quot_is_answer (h4 : ∀ x : R, x ^ 2 = 0 → x = 0)
   {c : R} (h5 : f c + f (c + 1) = 1) (h6 : c * c + c = 1) : is_answer f :=
 have X : bijective (𝔽₄.cast'_hom h0 h6) :=
@@ -1626,6 +1630,7 @@ lemma case2_4_𝔽₂_main_lemma (h4 : ∀ x : R, x ^ 2 = 0 → x = 0)
 (case2_4_lem10 h h0 h1 h2 h3 h4 x).resolve_right $
   λ h6, h5 ⟨x, h6.1, (mul_add_one x x).symm.trans $ (char2.add_eq_zero_iff_eq h0).mp h6.2⟩
 
+/-- Solution for the current sub-subcase (`𝔽₂_map`) -/
 lemma case2_4_𝔽₂_quot_is_answer (h4 : ∀ x : R, x ^ 2 = 0 → x = 0)
   (h5 : ¬∃ c, f c + f (c + 1) = 1 ∧ c * c + c = 1) : is_answer f :=
 have X : bijective (𝔽₂.cast_hom h0) :=
@@ -1641,7 +1646,7 @@ end Rchar2
 
 
 
-/-- Solution for the current subcase -/
+/-- Solution for the current subcase (`hom_sub_one`, `𝔽₂ε_map`, `𝔽₄_map`, `𝔽₂_map`) -/
 theorem case2_4_quot_is_answer (h0 : f (-1) = 0) (h1 : f 2 = -1)
   (h2 : ∀ c, (∀ x, f (c + x) = f x) → c = 0) : is_answer f :=
 let h3 : (2 : R) = 0 := h2 _ (case2_4_lem1 h h0 h1), h4 : f 0 = -1 := h3 ▸ h1 in
