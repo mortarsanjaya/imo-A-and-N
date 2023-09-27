@@ -584,15 +584,14 @@ lemma case1_1_lem1 (x : R) : f (-x) + f x = -2 :=
 
 /-- (4.2) -/
 lemma case1_1_lem2 (x : R) : f (x + 1) = f x + 1 :=
-  let h2 := congr_arg2 has_sub.sub (case1_1_lem1 h h0 h1 x) (map_neg_sub_map2 h x) in
-  by rw [add_sub_sub_cancel, h1, mul_neg, ← neg_sub', neg_sub,
-    ← sub_one_mul, ← mul_two, mul_eq_mul_right_iff] at h2;
-  exact h2.elim (λ h2, (add_eq_of_eq_sub h2).symm)
-  (λ h2, absurd h2 $ case1_1_S_two_ne_zero h0 h1)
+  eq_add_of_sub_eq $ mul_right_cancel₀ h0 $ (sub_one_mul _ _).trans $
+    map_neg_sub_map2 h x ▸ h1.symm ▸ (mul_neg (f x) 2).symm ▸ (mul_two (f x)).symm ▸ 
+    case1_1_lem1 h h0 h1 x ▸ sub_sub (f (-x) - f x) (f (-x)) (f x) ▸
+    (sub_sub_cancel_left (f (-x)) (f x)).symm ▸ (neg_add' (f x) (f x)).symm
 
 /-- Solution for the current subcase -/
 theorem case1_1_is_answer : is_answer f :=
-  is_answer_of_add_one_additive h (case1_map_zero h h0) $ λ x y, begin
+is_answer_of_add_one_additive h (case1_map_zero h h0) $ λ x y, begin
   have h2 := λ t, eq_sub_of_add_eq (case1_1_lem1 h h0 h1 t),
   have h3 := case1_map_add_main_eq2 h x y,
   rw [h1, h2, h2, case1_1_lem2 h h0 h1, mul_neg, neg_neg, add_one_mul] at h3,
@@ -637,15 +636,14 @@ include h3
 
 /-- (5.2) -/
 lemma case1_2_lem2 (x : R) : f (x + 1) + f (x - 1) + f x = 0 :=
-  add_eq_zero_iff_eq_neg.mpr $ (case1_map_add_one_add_map_sub_one h h0 x).trans $
-    congr_arg _ $ h2.symm ▸ mul_one (f x)
+  add_eq_zero_iff_eq_neg.mpr $ mul_one (f x) ▸ h2 ▸ case1_map_add_one_add_map_sub_one h h0 x
 
 /-- `3 = 0` in `R` -/
 lemma case1_2_lem3 : (3 : R) = 0 := 
-  h3 (3 : R) $ let h4 := case1_2_lem2 h h0 h1 h2 h3 in λ x,
-    let h5 := h4 (x + 1 + 1) in by rwa [add_sub_cancel, add_right_comm,
-      ← h4 (x + 1), add_left_inj, add_sub_cancel, add_comm, add_right_inj,
-      add_assoc x 1 1, ← bit0, add_rotate, ← bit1] at h5
+h3 (3 : R) $ let h4 := λ x, eq_neg_of_add_eq_zero_left (case1_2_lem2 h h0 h1 h2 h3 x) in λ x,
+  add_comm x 3 ▸ add_assoc x 2 1 ▸ (eq_add_neg_of_add_eq $ h4 _).trans
+  (add_assoc x 1 1 ▸ (add_sub_cancel (x + 1) 1).symm ▸ h4 (x + 1) ▸
+    (add_sub_cancel x 1).symm ▸ neg_add_cancel_left _ _)
 
 /-- (5.3) -/
 lemma case1_2_lem4 (x : R) (h4 : x ≠ 0) : f (-x) + f x = 1 :=
@@ -720,7 +718,7 @@ lemma case2_map_sq_sub_one (h3 : f 0 = -1) (x : R) : f (x ^ 2 - 1) = f x ^ 2 - 1
 /-- (6.4) -/
 lemma case2_map_self_mul_add_one_sub_one (x : R) : f (x * (x + 1) - 1) = f x * f (x + 1) :=
   (eq_add_of_sub_eq $ case2_good_alt h h0 x (x + 1)).trans $
-    add_right_eq_self.mpr $ h0 ▸ congr_arg f $ sub_add_cancel' x 1 
+    add_right_eq_self.mpr $ h0 ▸ congr_arg f $ sub_add_cancel' x 1
 
 /-- (6.5) -/
 lemma case2_map_add_two_eq (x : R) : f (x + 2) = f 2 * (f (x + 1) - f x) + f (x - 1) :=
