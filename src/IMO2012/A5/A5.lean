@@ -200,13 +200,33 @@ h.rec_on zero_is_good
 
 /-! ## Step 1: Small observations -/
 
+section hom
+
+variables {R R₀ S : Type*} [ring R] [ring R₀] [ring S]
+
 /-- Given `f : R → S` and `φ : R₀ →+* R`, `f` is good if `φ` is surjective and `f ∘ φ` is good. -/
-lemma good_of_comp_hom_good_surjective {R R₀ S : Type*} [ring R] [ring R₀] [ring S]
-  {φ : R₀ →+* R} (h : surjective φ) {f : R → S} (h0 : good (f ∘ φ)) : good f :=
+lemma good_of_comp_hom_good_surjective {φ : R₀ →+* R} (h : surjective φ)
+  {f : R → S} (h0 : good (f ∘ φ)) : good f :=
   λ x y, exists.elim (h x) $ λ a h1, exists.elim (h y) $ λ b h2,
   h1 ▸ h2 ▸ h0 a b ▸ congr_arg2 _
     (congr_arg f $ (φ.map_add (a * b) 1).symm ▸ congr_arg2 _ (φ.map_mul a b).symm φ.map_one.symm)
     (congr_arg f (φ.map_add a b).symm)
+
+/-- Given an "answer" `f : R → S` and `φ : R₀ →+* R` surjective, `f ∘ φ` is also an answer. -/
+lemma is_answer_comp_hom {φ : R₀ →+* R} (h : surjective φ)
+  {f : R → S} (h0 : is_answer f) : is_answer (f ∘ φ) :=
+is_answer.rec is_answer.zero
+  (λ ρ, is_answer.hom_sub_one (ρ.comp φ))
+  (λ ρ, is_answer.hom_sq_sub_one (ρ.comp φ))
+  (λ ρ h1, is_answer.𝔽₂_map_comp (ρ.comp φ) (h1.comp h))
+  (λ ρ h1, is_answer.𝔽₃_map1_comp (ρ.comp φ) (h1.comp h))
+  (λ ρ h1, is_answer.𝔽₃_map2_comp (ρ.comp φ) (h1.comp h))
+  (λ ρ h1, is_answer.ℤ₄_map_comp (ρ.comp φ) (h1.comp h))
+  (λ ρ h1, is_answer.𝔽₂ε_map_comp (ρ.comp φ) (h1.comp h))
+  (λ ρ h1 s h2, is_answer.𝔽₄_map_comp (ρ.comp φ) (h1.comp h) s h2)
+  h0
+
+end hom
 
 
 section noncomm
@@ -256,6 +276,11 @@ theorem eq_hom_sub_one_of (h0 : f 0 = -1) (h1 : ∀ x y, f (x + y) = f x + f y +
   h0.symm ▸ neg_add_self 1,
   λ x y, (h1 x y).symm ▸ (add_assoc _ _ _).trans (add_add_add_comm _ _ _ _)⟩,
 funext $ λ x, (add_sub_cancel (f x) 1).symm⟩
+
+/-- Corollary of the previous result -/
+theorem is_answer_of_add_one_additive (h0 : f 0 = -1) (h1 : ∀ x y, f (x + y) = f x + f y + 1) :
+  is_answer f :=
+  exists.elim (eq_hom_sub_one_of h h0 h1) $ λ φ h2, h2.symm ▸ is_answer.hom_sub_one φ
 
 end noncomm
 
@@ -356,6 +381,9 @@ lemma period_lift_is_good : good (period_lift h) :=
 lemma zero_of_periodic_period_lift (c : R ⧸ period_ideal h) :
   (∀ x, period_lift h (c + x) = period_lift h x) → c = 0 :=
   quot.ind (λ c h0, ideal.quotient.eq_zero_iff_mem.mpr (λ y, h0 $ quot.mk _ y)) c
+
+lemma is_answer_of_period_lift (h0 : is_answer (period_lift h)) : is_answer f :=
+  is_answer_comp_hom ideal.quotient.mk_surjective h0
 
 
 
@@ -521,7 +549,7 @@ begin
       ← mul_neg, h3, neg_neg, neg_add_eq_sub, sub_add_cancel'', h2] at h4,
   have h5 := case1_map_add_main_eq2 h x (-(x + 1)),
   rwa [neg_neg, h1, mul_zero, zero_sub, neg_inj, add_right_comm, add_neg_self, ← h4,
-      mul_eq_mul_right_iff, case1_map_zero h h0, or_iff_left h0, eq_comm] at h5
+       mul_eq_mul_right_iff, case1_map_zero h h0, or_iff_left h0, eq_comm] at h5
 end
 
 end step3
@@ -562,18 +590,15 @@ lemma case1_1_lem2 (x : R) : f (x + 1) = f x + 1 :=
   exact h2.elim (λ h2, (add_eq_of_eq_sub h2).symm)
   (λ h2, absurd h2 $ case1_1_S_two_ne_zero h0 h1)
 
-theorem case1_1_sol : ∃ φ : R →+* S, f = λ x, φ x - 1 :=
-eq_hom_sub_one_of h (case1_map_zero h h0) $ λ x y, begin
+/-- Solution for the current subcase -/
+theorem case1_1_is_answer : is_answer f :=
+  is_answer_of_add_one_additive h (case1_map_zero h h0) $ λ x y, begin
   have h2 := λ t, eq_sub_of_add_eq (case1_1_lem1 h h0 h1 t),
   have h3 := case1_map_add_main_eq2 h x y,
   rw [h1, h2, h2, case1_1_lem2 h h0 h1, mul_neg, neg_neg, add_one_mul] at h3,
   refine mul_right_cancel₀ (case1_1_S_two_ne_zero h0 h1) ((eq_sub_of_add_eq h3).trans _),
   ring
 end
-
-/-- Solution for the current subcase -/
-theorem case1_1_is_answer : is_answer f :=
-  exists.elim (case1_1_sol h h0 h1) $ λ φ h2, h2.symm ▸ is_answer.hom_sub_one φ
 
 end step4
 
@@ -639,35 +664,22 @@ begin
   exact h1 (h2.trans $ neg_eq_iff_eq_neg.mp h6)
 end
 
-
-lemma case1_2_𝔽₃_hom_bijective :
-  bijective (𝔽₃.cast_hom $ case1_2_lem3 h h0 h1 h2 h3) :=
+/-- Solution for the current subcase -/
+lemma case1_2_quot_is_answer : is_answer f :=
+have X : bijective (𝔽₃.cast_hom $ case1_2_lem3 h h0 h1 h2 h3) :=
   ⟨𝔽₃.cast_hom_injective _ (one_ne_zero_of_map_zero h $ case1_map_zero h h0),
   λ x, (case1_2_lem5 h h0 h1 h2 h3 x).elim (λ h4, ⟨𝔽₃.𝔽₃0, h4.symm⟩) $
-    λ h4, h4.elim (λ h4, ⟨𝔽₃.𝔽₃1, h4.symm⟩) (λ h4, ⟨𝔽₃.𝔽₃2, h4.symm⟩)⟩
-
-lemma case1_2_quotient_sol :
-  f = 𝔽₃_map1 S ∘
-    (ring_equiv.of_bijective _ $ case1_2_𝔽₃_hom_bijective h h0 h1 h2 h3).symm :=
-  (mul_equiv.eq_comp_symm _ _ _).mpr $ funext $ λ x,
-  match x with
-  | 𝔽₃.𝔽₃0 := case1_map_zero h h0
-  | 𝔽₃.𝔽₃1 := good_map_one h
-  | 𝔽₃.𝔽₃2 := h2
-  end
+    λ h4, h4.elim (λ h4, ⟨𝔽₃.𝔽₃1, h4.symm⟩) (λ h4, ⟨𝔽₃.𝔽₃2, h4.symm⟩)⟩,
+let π := (ring_equiv.of_bijective _ X).symm in suffices f = 𝔽₃_map1 S ∘ π,
+  from this.symm ▸ is_answer.𝔽₃_map1_comp π.to_ring_hom π.surjective,
+(mul_equiv.eq_comp_symm _ _ _).mpr $ funext $ λ x,
+match x with
+| 𝔽₃.𝔽₃0 := case1_map_zero h h0
+| 𝔽₃.𝔽₃1 := good_map_one h
+| 𝔽₃.𝔽₃2 := h2
+end
 
 end quotient
-
-
-lemma case1_2_lift_decomp : ∃ φ : R ⧸ period_ideal h ≃+* 𝔽₃, period_lift h = 𝔽₃_map1 S ∘ φ :=
-  ⟨_, case1_2_quotient_sol (period_lift_is_good h) h0 h1 h2 (zero_of_periodic_period_lift h)⟩
-
-/-- Solution for the current subcase -/
-theorem case1_2_is_answer : is_answer f :=
-  exists.elim (case1_2_lift_decomp h h0 h1 h2) $
-    λ ψ h2, let π := ideal.quotient.mk (period_ideal h),
-      h3 : 𝔽₃_map1 S ∘ (ψ.to_ring_hom.comp π) = f := congr_arg (∘ π) h2.symm in
-    h3 ▸ is_answer.𝔽₃_map1_comp _ (ψ.surjective.comp π.is_surjective)
 
 end step5
 
@@ -885,15 +897,14 @@ lemma case2_1_lem9 (x : R) : x = 0 ∨ x = 1 ∨ x = -1 :=
         (neg_eq_of_add_eq_zero_right h7).symm ▸ h9))
     (λ h9, eq_neg_of_add_eq_zero_left $ h6 (x + 1) h9)
 
-lemma case2_1_𝔽₃_hom_bijective :
-  bijective (𝔽₃.cast_hom $ h2 3 $ case2_1_lem1 h h0 h1) :=
+/-- Solution for the current subcase -/
+lemma case2_1_quot_is_answer : is_answer f :=
+have X : bijective (𝔽₃.cast_hom $ h2 3 $ case2_1_lem1 h h0 h1) :=
   ⟨𝔽₃.cast_hom_injective _ (one_ne_zero_of_map_zero h h3),
   λ x, (case2_1_lem9 h h0 h1 h2 h3 h4 x).elim (λ h5, ⟨𝔽₃.𝔽₃0, h5.symm⟩) $
-    λ h5, h5.elim (λ h5, ⟨𝔽₃.𝔽₃1, h5.symm⟩) (λ h5, ⟨𝔽₃.𝔽₃2, h5.symm⟩)⟩
-
-lemma case2_1_quotient_sol :
-  f = 𝔽₃_map2 S ∘
-    (ring_equiv.of_bijective _ $ case2_1_𝔽₃_hom_bijective h h0 h1 h2 h3 h4).symm :=
+    λ h5, h5.elim (λ h5, ⟨𝔽₃.𝔽₃1, h5.symm⟩) (λ h5, ⟨𝔽₃.𝔽₃2, h5.symm⟩)⟩,
+let π := (ring_equiv.of_bijective _ X).symm in suffices f = 𝔽₃_map2 S ∘ π,
+  from this.symm ▸ is_answer.𝔽₃_map2_comp π.to_ring_hom π.surjective,
 (mul_equiv.eq_comp_symm _ _ _).mpr $ funext $ λ x,
 match x with
 | 𝔽₃.𝔽₃0 := h3
@@ -902,20 +913,6 @@ match x with
 end
 
 end quotient
-
-
-variables (h1 : f 0 = -1) (h2 : f 2 = 0) (h3 : f 2 ≠ 3)
-include h1 h2 h3
-
-lemma case2_1_lift_decomp : ∃ φ : R ⧸ period_ideal h ≃+* 𝔽₃, period_lift h = 𝔽₃_map2 S ∘ φ :=
-  ⟨_, case2_1_quotient_sol (period_lift_is_good h) h0 h2 (zero_of_periodic_period_lift h) h1 h3⟩
-
-/-- Solution for the current subcase -/
-theorem case2_1_is_answer : is_answer f :=
-  exists.elim (case2_1_lift_decomp h h0 h1 h2 h3) $
-   λ ψ h4, let π := ideal.quotient.mk (period_ideal h),
-      h5 : 𝔽₃_map2 S ∘ (ψ.to_ring_hom.comp π) = f := congr_arg (∘ π) h4.symm in
-    h5 ▸ is_answer.𝔽₃_map2_comp _ (ψ.surjective.comp π.is_surjective)
 
 end step7
 
@@ -980,17 +977,15 @@ let h4 : f 0 = -1 := case2_2_lem4 h h0 h1 h2 in
 cases_of_nonperiod_quasi_period h h3 h4 (case2_2_lem3 h h0 h1 h2)
   (λ h5, h2 $ (congr_arg f h5).trans h4) x
 
-
-lemma case2_2_ℤ₄_hom_bijective (h3 : ∀ c, (∀ x, f (c + x) = f x) → c = 0) :
-  bijective (ℤ₄.cast_hom $ h3 4 $ case2_2_lem2 h h0 h1) :=
+/-- Solution for the current subcase -/
+theorem case2_2_quot_is_answer (h3 : ∀ c, (∀ x, f (c + x) = f x) → c = 0) : is_answer f :=
+have X : bijective (ℤ₄.cast_hom $ h3 4 $ case2_2_lem2 h h0 h1) :=
   ⟨ℤ₄.cast_hom_injective _ (λ h4, h2 $ (congr_arg f h4).trans $ case2_2_lem4 h h0 h1 h2),
   λ x, (case2_2_lem5 h h0 h1 h2 h3 x).elim
     (λ h5, h5.elim (λ h5, ⟨0, h5.symm⟩) (λ h5, ⟨2, h5.symm⟩))
-    (λ h5, h5.elim (λ h5, ⟨1, h5.symm⟩) (λ h5, ⟨3, h5.symm⟩))⟩
-
-lemma case2_2_quotient_sol (h3 : ∀ c, (∀ x, f (c + x) = f x) → c = 0) :
-  f = ℤ₄_map S ∘
-    (ring_equiv.of_bijective _ $ case2_2_ℤ₄_hom_bijective h h0 h1 h2 h3).symm :=
+    (λ h5, h5.elim (λ h5, ⟨1, h5.symm⟩) (λ h5, ⟨3, h5.symm⟩))⟩,
+let π := (ring_equiv.of_bijective _ X).symm in suffices f = ℤ₄_map S ∘ π,
+  from this.symm ▸ is_answer.ℤ₄_map_comp π.to_ring_hom π.surjective,
 (mul_equiv.eq_comp_symm _ _ _).mpr $ funext $ λ x,
 match x with
 | ℤ₄.ℤ₄0 := case2_2_lem4 h h0 h1 h2
@@ -998,17 +993,6 @@ match x with
 | ℤ₄.ℤ₄2 := h1
 | ℤ₄.ℤ₄3 := h0
 end
-
-lemma case2_2_lift_decomp :
-  ∃ φ : R ⧸ period_ideal h ≃+* ℤ₄, period_lift h = ℤ₄_map S ∘ φ :=
-  ⟨_, case2_2_quotient_sol (period_lift_is_good h) h0 h1 h2 (zero_of_periodic_period_lift h)⟩
-
-/-- Solution for the current subcase -/
-theorem case2_2_is_answer : is_answer f :=
-  exists.elim (case2_2_lift_decomp h h0 h1 h2) $
-    λ ψ h2, let π := ideal.quotient.mk (period_ideal h),
-      h3 : ℤ₄_map S ∘ (ψ.to_ring_hom.comp π) = f := congr_arg (∘ π) h2.symm in
-    h3 ▸ is_answer.ℤ₄_map_comp _ (ψ.surjective.comp π.is_surjective)
 
 end step8
 
@@ -1416,22 +1400,19 @@ begin
   rw ← sub_eq_zero_of_eq h6, ring
 end
 
-
-
-lemma case2_4_quotient_sol1 (h3 : (2 : S) = 0) :
-  ∃ φ : R →+* S, f = λ x, φ x - 1 :=
-  eq_hom_sub_one_of h h1 $ λ x y,
+lemma case2_4_Schar2_quot_is_answer (h3 : (2 : S) = 0) : is_answer f :=
+  is_answer_of_add_one_additive h h1 $ λ x y,
+---- (10.L2.1)
+have h4 : ∀ x, f (x + 1) = f x + 1 :=
+λ x, (char2.add_eq_iff_eq_add' h3).mp $ (add_comm _ _).trans $
+  (case2_4_lem6 h h0 h1 x).symm.elim id $
+  λ h4, (sq_eq_one_iff.mp $ (char2.add_sq h3 _ _).trans h4).elim id $
+  λ h5, h5.trans $ neg_eq_of_add_eq_zero_left h3,
+---- (10.L2.2)
+have h5 : ∀ x y, f (x * y) = f x * f y + f (x + y) + 1 :=
+  λ x y, (char2.add_eq_iff_eq_add h3).mp
+    ((h4 _).symm.trans $ eq_add_of_sub_eq $ h x y),
 begin
-  ---- (10.L2.1)
-  have h4 : ∀ x, f (x + 1) = f x + 1 :=
-  λ x, (char2.add_eq_iff_eq_add' h3).mp $ (add_comm _ _).trans $
-    (case2_4_lem6 h h0 h1 x).symm.elim id $
-    λ h4, (sq_eq_one_iff.mp $ (char2.add_sq h3 _ _).trans h4).elim id $
-    λ h5, h5.trans $ neg_eq_of_add_eq_zero_left h3,
-  ---- (10.L2.2)
-  have h5 : ∀ x y, f (x * y) = f x * f y + f (x + y) + 1 :=
-    λ x y, (char2.add_eq_iff_eq_add h3).mp
-      ((h4 _).symm.trans $ eq_add_of_sub_eq $ h x y),
   ---- Back to the main equality
   let a := f x, let b := f y, let c := f (x + y),
   have h6 := h5 (x * y) ((y + 1) * (x + 1)),
@@ -1586,16 +1567,14 @@ suffices ∀ x, f (c * x + 1) = 0, from cases_of_nonperiod_quasi_period h h2 h1 
 λ x, let h6 := (case2_4_lem5 h h0 h1 $ c * x).symm in
   by rwa [mul_pow, sq c, h5, zero_mul, h1, sub_eq_neg_self, sq_eq_zero_iff] at h6
 
-lemma case2_4_𝔽₂ε_hom_bijective {c : R} (h4 : c ≠ 0) (h5 : c * c = 0) :
-  bijective (𝔽₂ε.cast'_hom h0 h5) :=
+lemma case2_4_𝔽₂ε_quot_is_answer {c : R} (h4 : c ≠ 0) (h5 : c * c = 0) : is_answer f :=
+have X : bijective (𝔽₂ε.cast'_hom h0 h5) :=
   ⟨𝔽₂ε.cast'_hom_injective _ _ h4,
   λ x, (case2_4_𝔽₂ε_main_lemma h h0 h1 h2 h3 h4 h5 x).elim
     (λ h5, h5.elim (λ h5, ⟨𝔽₂ε.O, h5.symm⟩) (λ h5, ⟨𝔽₂ε.X, h5.symm⟩))
-    (λ h5, h5.elim (λ h5, ⟨𝔽₂ε.I, h5.symm⟩) (λ h5, ⟨𝔽₂ε.Y, h5.symm⟩))⟩
-
-lemma case2_4_𝔽₂ε_quotient_sol {c : R} (h4 : c ≠ 0) (h5 : c * c = 0) :
-  f = 𝔽₂ε_map S ∘
-    (ring_equiv.of_bijective _ $ case2_4_𝔽₂ε_hom_bijective h h0 h1 h2 h3 h4 h5).symm :=
+    (λ h5, h5.elim (λ h5, ⟨𝔽₂ε.I, h5.symm⟩) (λ h5, ⟨𝔽₂ε.Y, h5.symm⟩))⟩,
+let π := (ring_equiv.of_bijective _ X).symm in suffices f = 𝔽₂ε_map S ∘ π,
+  from this.symm ▸ is_answer.𝔽₂ε_map_comp π.to_ring_hom π.surjective,
 (mul_equiv.eq_comp_symm _ _ _).mpr $ funext $ λ x, let h6 := good_map_one h in
 match x with
 | 𝔽₂ε.O := h1
@@ -1622,18 +1601,17 @@ lemma case2_4_𝔽₄_main_lemma (h4 : ∀ x : R, x ^ 2 = 0 → x = 0)
   by rw [mul_add_one, ← sq, char2.add_sq h0,
     add_add_add_comm, sq, sq, h6, ← mul_add_one, h8.2])
 
-lemma case2_4_𝔽₄_hom_bijective (h4 : ∀ x : R, x ^ 2 = 0 → x = 0)
-  {c : R} (h5 : f c + f (c + 1) = 1) (h6 : c * c + c = 1) :
-  bijective (𝔽₄.cast'_hom h0 h6) :=
+lemma case2_4_𝔽₄_quot_is_answer (h4 : ∀ x : R, x ^ 2 = 0 → x = 0)
+  {c : R} (h5 : f c + f (c + 1) = 1) (h6 : c * c + c = 1) : is_answer f :=
+have X : bijective (𝔽₄.cast'_hom h0 h6) :=
   ⟨𝔽₄.cast'_hom_injective _ _ (one_ne_zero_of_map_zero h h1),
   λ x, (case2_4_𝔽₄_main_lemma h h0 h1 h2 h3 h4 h5 h6 x).elim
     (λ h5, h5.elim (λ h5, ⟨𝔽₄.O, h5.symm⟩) (λ h5, ⟨𝔽₄.X, h5.symm⟩))
-    (λ h5, h5.elim (λ h5, ⟨𝔽₄.I, h5.symm⟩) (λ h5, ⟨𝔽₄.Y, h5.symm⟩))⟩
-
-lemma case2_4_𝔽₄_quotient_sol (h4 : ∀ x : R, x ^ 2 = 0 → x = 0)
-  {c : R} (h5 : f c + f (c + 1) = 1) (h6 : c * c + c = 1) :
-  f = 𝔽₄_map S (f c) ∘
-    (ring_equiv.of_bijective _ $ case2_4_𝔽₄_hom_bijective h h0 h1 h2 h3 h4 h5 h6).symm :=
+    (λ h5, h5.elim (λ h5, ⟨𝔽₄.I, h5.symm⟩) (λ h5, ⟨𝔽₄.Y, h5.symm⟩))⟩,
+let π := (ring_equiv.of_bijective _ X).symm in suffices f = 𝔽₄_map S (f c) ∘ π,
+  from this.symm ▸ is_answer.𝔽₄_map_comp π.to_ring_hom π.surjective (f c)
+    (eq_sub_of_add_eq' h5 ▸ case2_4_lem3 h h0 c ▸
+      (mul_add_one c c).symm ▸ h6.symm ▸ h1 ▸ congr_arg f h0),
 (mul_equiv.eq_comp_symm _ _ _).mpr $ funext $ λ x,
 match x with
 | 𝔽₄.O := h1
@@ -1644,74 +1622,43 @@ end
 
 
 
-lemma case2_4_quotient_sol2 :
-  (∃ φ : R ≃+* 𝔽₂ε, f = 𝔽₂ε_map S ∘ φ) ∨
-  (∃ (φ : R ≃+* 𝔽₄) (s : S), s * (1 - s) = -1 ∧ f = 𝔽₄_map S s ∘ φ) ∨
-  (∃ φ : R ≃+* 𝔽₂, f = 𝔽₂_map S ∘ φ) :=
-  (em' $ ∀ x : R, x ^ 2 = 0 → x = 0).imp
----- `𝔽₂ε`
-(λ h4, exists.elim (not_forall.mp h4) $ λ c h4, let h4 := not_imp.mp h4 in
-  ⟨_, case2_4_𝔽₂ε_quotient_sol h h0 h1 h2 h3 h4.2 ((sq c).symm.trans h4.1)⟩) $
-  λ h4, (em $ ∃ c, f c + f (c + 1) = 1 ∧ c * c + c = 1).imp
----- `𝔽₄`
-(λ h5, exists.elim h5 $ λ c h5, ⟨_, (f c),
-  eq_sub_of_add_eq' h5.1 ▸ case2_4_lem3 h h0 c ▸
-    (mul_add_one c c).symm ▸ h5.2.symm ▸ (congr_arg f h0).trans h1,
-  case2_4_𝔽₄_quotient_sol h h0 h1 h2 h3 h4 h5.1 h5.2⟩)
----- `𝔽₂`
-(λ h5, let h5 : ∀ x : R, x = 0 ∨ x = 1 :=
-  λ x, (case2_4_lem10 h h0 h1 h2 h3 h4 x).resolve_right
-    (λ h6, h5 ⟨x, h6.1, (mul_add_one x x).symm.trans $
-      (char2.add_eq_zero_iff_eq h0).mp h6.2⟩) in
-suffices bijective (𝔽₂.cast_hom h0), from ⟨(ring_equiv.of_bijective _ this).symm,
-  (mul_equiv.eq_comp_symm _ _ _).mpr $ funext $ λ x,
-    match x with | 𝔽₂.O := h1 | 𝔽₂.I := good_map_one h end⟩,
-⟨𝔽₂.cast_hom_injective _ (one_ne_zero_of_map_zero h h1),
-  λ x, (h5 x).elim (λ h5, ⟨𝔽₂.O, h5.symm⟩) (λ h5, ⟨𝔽₂.I, h5.symm⟩)⟩)
+/-- The main lemma for the `𝔽₂` subcase -/
+lemma case2_4_𝔽₂_main_lemma (h4 : ∀ x : R, x ^ 2 = 0 → x = 0)
+  (h5 : ¬∃ c, f c + f (c + 1) = 1 ∧ c * c + c = 1) (x : R) : x = 0 ∨ x = 1 :=
+(case2_4_lem10 h h0 h1 h2 h3 h4 x).resolve_right $
+  λ h6, h5 ⟨x, h6.1, (mul_add_one x x).symm.trans $ (char2.add_eq_zero_iff_eq h0).mp h6.2⟩
+
+lemma case2_4_𝔽₂_quot_is_answer (h4 : ∀ x : R, x ^ 2 = 0 → x = 0)
+  (h5 : ¬∃ c, f c + f (c + 1) = 1 ∧ c * c + c = 1) : is_answer f :=
+have X : bijective (𝔽₂.cast_hom h0) :=
+  ⟨𝔽₂.cast_hom_injective _ (one_ne_zero_of_map_zero h h1),
+  λ x, (case2_4_𝔽₂_main_lemma h h0 h1 h2 h3 h4 h5 x).elim
+    (λ h5, ⟨𝔽₂.O, h5.symm⟩) (λ h5, ⟨𝔽₂.I, h5.symm⟩)⟩,
+let π := (ring_equiv.of_bijective _ X).symm in suffices f = 𝔽₂_map S ∘ π,
+  from this.symm ▸ is_answer.𝔽₂_map_comp π.to_ring_hom π.surjective,
+(mul_equiv.eq_comp_symm _ _ _).mpr $ funext $ λ x,
+match x with | 𝔽₂.O := h1 | 𝔽₂.I := good_map_one h end
 
 end Rchar2
 
 
 
-lemma case2_4_lift_decomp1 (h0 : f (-1) = 0) (h1 : f 2 = -1) (h2 : (2 : S) = 0) :
-  ∃ φ : R ⧸ period_ideal h →+* S, period_lift h = λ x, φ x - 1 :=
-  let h3 := period_lift_is_good h,
-    h4 := zero_of_periodic_period_lift h 2 $ case2_4_lem1 h3 h0 h1 in
-  case2_4_quotient_sol1 h3 h4 ((congr_arg _ h4.symm).trans h1) h2
-
-lemma case2_4_lift_decomp2 (h0 : f (-1) = 0) (h1 : f 2 = -1) (h2 : (2 : S) ≠ 0) :
-  (∃ φ : R ⧸ period_ideal h ≃+* 𝔽₂ε, period_lift h = 𝔽₂ε_map S ∘ φ) ∨
-  (∃ (φ : R ⧸ period_ideal h ≃+* 𝔽₄) (s : S),
-    s * (1 - s) = -1 ∧ period_lift h = 𝔽₄_map S s ∘ φ) ∨
-  (∃ φ : R ⧸ period_ideal h ≃+* 𝔽₂, period_lift h = 𝔽₂_map S ∘ φ) :=
-  let h3 := period_lift_is_good h, h4 := zero_of_periodic_period_lift h,
-    h5 := h4 2 $ case2_4_lem1 h3 h0 h1 in
-  case2_4_quotient_sol2 h3 h5 ((congr_arg _ h5.symm).trans h1) h4 h2
-
-
-
 /-- Solution for the current subcase -/
-theorem case2_4_is_answer (h0 : f (-1) = 0) (h1 : f 2 = -1) : is_answer f :=
-  (em $ (2 : S) = 0).elim
----- Map 1
-(λ h2, exists.elim (case2_4_lift_decomp1 h h0 h1 h2) $ λ ψ h3,
-  let π := ideal.quotient.mk (period_ideal h),
-    h4 : (λ x : R, ψ (π x) - 1) = f := congr_arg (∘ π) h3.symm in
-  h4 ▸ is_answer.hom_sub_one (ψ.comp π)) $
-  λ h2, (case2_4_lift_decomp2 h h0 h1 h2).elim
----- Map 2
-(λ h3, exists.elim h3 $ λ ψ h3, let π := ideal.quotient.mk (period_ideal h),
-    h4 : 𝔽₂ε_map S ∘ (ψ.to_ring_hom.comp π) = f := congr_arg (∘ π) h3.symm in
-  h4 ▸ is_answer.𝔽₂ε_map_comp _ (ψ.surjective.comp π.is_surjective)) $ λ h3, h3.elim
----- Map 3
-(λ h3, exists.elim h3 $ λ ψ h3, exists.elim h3 $ λ c h3,
-  let π := ideal.quotient.mk (period_ideal h),
-    h4 : 𝔽₄_map S c ∘ (ψ.to_ring_hom.comp π) = f := congr_arg (∘ π) h3.2.symm in
-  h4 ▸ is_answer.𝔽₄_map_comp _ (ψ.surjective.comp π.is_surjective) c h3.1)
----- Map 4
-(λ h3, exists.elim h3 $ λ ψ h3, let π := ideal.quotient.mk (period_ideal h),
-    h4 : 𝔽₂_map S ∘ (ψ.to_ring_hom.comp π) = f := congr_arg (∘ π) h3.symm in
-  h4 ▸ is_answer.𝔽₂_map_comp _ (ψ.surjective.comp π.is_surjective))
+theorem case2_4_quot_is_answer (h0 : f (-1) = 0) (h1 : f 2 = -1)
+  (h2 : ∀ c, (∀ x, f (c + x) = f x) → c = 0) : is_answer f :=
+let h3 : (2 : R) = 0 := h2 _ (case2_4_lem1 h h0 h1), h4 : f 0 = -1 := h3 ▸ h1 in
+(em $ (2 : S) = 0).elim
+  ---- Map 1
+  (λ h5, case2_4_Schar2_quot_is_answer h h3 h4 h5) $
+λ h5, (em' $ ∀ x : R, x ^ 2 = 0 → x = 0).elim
+  ---- Map 2
+  (λ h6, exists.elim (not_forall.mp h6) $ λ c h6, let h6 := not_imp.mp h6 in
+    case2_4_𝔽₂ε_quot_is_answer h h3 h4 h2 h5 h6.2 ((sq c).symm.trans h6.1)) $
+λ h6, (em $ ∃ c, f c + f (c + 1) = 1 ∧ c * c + c = 1).elim
+  ---- Map 3
+  (λ h7, exists.elim h7 $ λ c h7, case2_4_𝔽₄_quot_is_answer h h3 h4 h2 h5 h6 h7.1 h7.2)
+  ---- Map 4
+  (λ h7, case2_4_𝔽₂_quot_is_answer h h3 h4 h2 h5 h6 h7)
 
 end step10
 
@@ -1725,21 +1672,35 @@ end step10
 
 /-! ## Summary: Final solution -/
 
+section final_solution
+
+variables {R S : Type*} [comm_ring R] [field S] {f : R → S}
+
+theorem quot_is_answer_of_good (h : good f) (h0 : ∀ c, (∀ x, f (c + x) = f x) → c = 0) :
+  is_answer f :=
+(ne_or_eq (f 0) (-1)).elim
+  ---- `f(0) ≠ -1`
+  (λ h1, (eq_zero_of_map_zero_ne_neg_one h h1).symm ▸ is_answer.zero) $
+λ h1, (ne_or_eq (f (-1)) 0).elim
+---- Case 1: `f(0) = -1`, `f(-1) ≠ 0`
+(λ h2, (eq_or_ne (f (-1)) (-2)).elim (case1_1_is_answer h h2) $
+  λ h3, case1_2_quot_is_answer h h2 h3 ((case1_map_neg_one_cases h h2).resolve_left h3) h0)
+---- Case 2: `f(0) = -1`, `f(-1) = 0`
+(λ h2, (eq_or_ne (f 2) (-1)).elim (λ h3, case2_4_quot_is_answer h h2 h3 h0) $
+  λ h3, (eq_or_ne (f 2) 1).elim (λ h4, case2_2_quot_is_answer h h2 h4 h3 h0) $
+  λ h4, (eq_or_ne (f 2) 3).elim (λ h5, case2_3_is_answer h h2 h5 h4 h1) $ 
+  λ h5, suffices f 2 = 0, from case2_1_quot_is_answer h h2 this h0 h1 h5,
+    (((case2_map_two_cases h h2 h1).resolve_left h3).resolve_left h4).resolve_left h5)
+
+theorem is_answer_of_good (h : good f) : is_answer f :=
+  is_answer_of_period_lift h $ quot_is_answer_of_good
+    (period_lift_is_good h) (zero_of_periodic_period_lift h)
+
 /-- Final solution -/
-theorem final_solution {R S : Type*} [comm_ring R] [field S] {f : R → S} :
-  good f ↔ is_answer f :=
-⟨λ h, (ne_or_eq (f 0) (-1)).elim
-  (λ h0, (eq_zero_of_map_zero_ne_neg_one h h0).symm ▸ is_answer.zero) $
-  λ h0, (ne_or_eq (f (-1)) 0).elim
-  (λ h1, (eq_or_ne (f (-1)) (-2)).elim (case1_1_is_answer h h1) $
-    λ h2, case1_2_is_answer h h1 h2 $ (case1_map_neg_one_cases h h1).resolve_left h2)
-  (λ h1, (eq_or_ne (f 2) (-1)).elim
-    (case2_4_is_answer h h1)
-    (λ h2, (eq_or_ne (f 2) 1).elim (λ h3, case2_2_is_answer h h1 h3 h2) $
-      λ h3, (eq_or_ne (f 2) 3).elim (λ h4, case2_3_is_answer h h1 h4 h3 h0) $ 
-        λ h4, suffices f 2 = 0, from case2_1_is_answer h h1 h0 this h4,
-          (((case2_map_two_cases h h1 h0).resolve_left h2).resolve_left h3).resolve_left h4)),
-good_of_is_answer⟩
+theorem final_solution : good f ↔ is_answer f :=
+⟨is_answer_of_good, good_of_is_answer⟩
+
+end final_solution
 
 end IMO2012A5
 end IMOSL
