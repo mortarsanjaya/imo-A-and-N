@@ -794,14 +794,15 @@ include h1
 
 /-- (7.1) -/
 lemma case2_1_lem2 (x : R) : f x * f (x + 1) - f (x - 1) ^ 2 = f (x - 1) :=
-  let h2 := case2_special_identity h h0 x in
-  by rwa [eq_neg_of_add_eq_zero_left h1, h0,
-    mul_zero, zero_add, ← sub_eq_add_neg, ← sq] at h2
+  sub_eq_of_eq_add $ (eq_add_of_sub_eq $ case2_special_identity h h0 x).symm ▸
+    (eq_neg_of_add_eq_zero_left h1).symm ▸ sub_eq_add_neg x 1 ▸ h0.symm ▸
+    (mul_zero (f x)).symm ▸ sq (f (x - 1)) ▸ (zero_add (f (x - 1))).symm ▸ rfl 
 
 /-- (7.1) with `x` replaced by `x + 1` -/
 lemma case2_1_lem3 (x : R) : f (x + 1) * f (x - 1) - f x ^ 2 = f x :=
-  let h2 := case2_1_lem2 h h0 h1 (x + 1) in by rwa [add_sub_cancel, add_assoc,
-  ← bit0, eq_neg_of_add_eq_zero_left h1, ← sub_eq_add_neg] at h2
+  sub_eq_of_eq_add $ (sub_eq_add_neg x 1).symm ▸ eq_neg_of_add_eq_zero_left h1 ▸
+    add_assoc x 1 1 ▸ (eq_add_of_sub_eq $ case2_1_lem2 h h0 h1 (x + 1)).trans
+    ((add_sub_cancel x 1).symm ▸ rfl)
 
 /-- (7.2) -/
 lemma case2_1_lem4 (x : R) : f (x - 1) + f x + f (x + 1) = -1 ∨ f x = f (x - 1) :=
