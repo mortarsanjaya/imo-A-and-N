@@ -5,9 +5,6 @@ import algebra.order.archimedean
 namespace IMOSL
 namespace IMO2006A1
 
-set_option profiler true
-set_option profiler.threshold 0.03
-
 open function
 
 lemma int_seq_not_bdd_above_of_partial_strict_mono
