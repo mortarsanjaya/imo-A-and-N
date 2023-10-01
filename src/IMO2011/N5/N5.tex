@@ -1,5 +1,6 @@
 \documentclass{article}
 
+\usepackage{fullpage}
 \usepackage{amsmath, amsfonts, amssymb, amsthm}
 \usepackage{hyperref}
 
@@ -22,13 +23,16 @@
 
 \subsection*{Problem}
 
-Let $G$ be an abelian group.
-We say that $f : G \to \N^+$ is \emph{good} if $f(x - y) \mid f(x) - f(y)$ for any $x, y \in G$.
-Find all good functions.
+Let $G$ be an additive (not necessarily abelian) group.
+A function $f : G \to \N^+$ is said to be \emph{good} if
+\[ f(x - y) \mid f(x) - f(y) \quad \text{for any } x, y \in G. \tag{*}\label{2011n5-eq0} \]
+Prove that for any $f : G \to \N^+$ good and $x, y \in G$, if $f(x) \leq f(y)$, then $f(x) \mid f(y)$.
+
+Extra: Find all good functions.
 
 
 
-\subsection*{Answer}
+\subsection*{Answer for the extra part}
 
 Let $G = G_0 > G_1 > \ldots > G_k$ be an arbitrary strict chain of subgroups, $k \geq 0$.
 Let $n_0 < n_1 < \ldots < n_k$ be a sequence of positive integers such that $n_i \mid n_{i + 1}$ for each $0 \leq i < k$.
@@ -41,54 +45,45 @@ Futhermore, all good functions can be described as above.
 
 Official solution: \url{https://www.imo-official.org/problems/IMO2011SL.pdf}
 
-While our problem is a generalization of the original problem, the original problem is still useful here.
-We state it as a lemma, and use it to classify all good functions.
-To solve this problem, we proceed with lemmas.
+The official solution almost works in the general (possibly non-abelian) group settings.
+One extra result that we need to be able to modify the official solution is that $f$ is even.
+Setting $y = 0$ in~\eqref{2011n5-eq0} yields $f(x) \mid f(0)$ for any $x \in G$.
+Then setting $x = 0$ instead yields $f(-y) \mid f(0) - f(y)$ and thus $f(-y) \mid f(y)$ for any $y \in G$.
+Since $f(-y)$ and $f(y)$ divides each other and are positive integers, we get $f(-y) = f(y)$ for all $y \in G$.
 
-\begin{lemma}\label{2011n5-1}
-Let $f : G \to \N^+$ be a good function and $x, y \in G$.
-If $f(x) \leq f(y)$, then $f(x) \mid f(y)$.
-\end{lemma}
-\begin{proof}
-The divisibility is clear if $f(x) = f(y)$, so now suppose that $f(x) < f(y)$.
-Since $f$ is good, $f(x - y) \mid f(x) - f(y)$, so $f(x - y) \mid f(y) - f(x)$.
-Since $f(y) > f(x)$, this implies $f(y) \geq f(x) + f(x - y) > f(x - y)$.
-Now, $f(y) \mid f(x) - f(x - y)$, but both $f(x)$ and $f(x - y)$ are between $0$ and $f(y)$.
-This necessarily implies $f(x) = f(x - y)$.
-Finally, $f(x) = f(x - y) \mid f(x) - f(y)$ implies $f(x) \mid f(y)$.
-\end{proof}
+Now, we prove that $f(x) \leq f(y)$ implies $f(x) \mid f(y)$.
+Clearly, we can assume that $f(x) < f(y)$.
+By~\eqref{2011n5-eq0}, we have $f(y - x) \mid f(y) - f(x)$.
+Thus, it suffices to prove that $f(y - x) = f(x)$.
 
-\begin{lemma}\label{2011n5-2}
-Let $f : G \to \N^+$ be a good function.
-Then $f(x) \mid f(0)$ for all $x \in G$.
-\end{lemma}
-\begin{proof}
-Plugging $y = 0$ gives us $f(x) \mid f(x) - f(0)$ and thus $f(x) \mid f(0)$.
-\end{proof}
+First note that $f(x) < f(y)$ and $f(y - x) \mid f(y) - f(x)$ implies $f(y) - f(x) \geq f(y - x)$.
+That is, $f(y) \geq f(y - x) + f(x) > |f(y - x) - f(x)|$.
+It remains to show that $f(y) \mid f(y - x) - f(x)$.
 
-\begin{lemma}\label{2011n5-3}
-Let $f : G \to \N^+$ be a good function.
-For any $n \in \Z$ such that $n \mid f(0)$, the set $H_n = \{x \in G | n \mid f(x)\}$ is a subgroup of $G$.
-\end{lemma}
-\begin{proof}
-First, Lemma~\ref{2011n5-2} implies that $0 \in H_n$.
-Second, for any $x \in G$, we have $f(x) \mid f(0) - f(-x)$, so $f(x) \mid f(-x)$ since $f(x) \mid f(0)$.
-This implies that $H_n$ is closed under additive inverse.
-Finally, for any $x, y \in H_n$, we have $n \mid f(x) \mid f(x + y) - f(y) \implies n \mid f(x + y)$.
-So, $x + y \in H_n$, which proves that $H_n$ is closed under addition.
-\end{proof}
+Now~\eqref{2011n5-eq0} yields $f(y - x - (-x)) \mid f(y - x) - f(-x)$.
+Note that, even for $G$ non-abelian, we have $y - x - (-x) = y$.
+The fact that $f$ is even yields $f(y) \mid f(y - x) - f(x)$, as desired.
 
-Now, Lemma~\ref{2011n5-2} shows that $f(G)$ is finite.
-We can enumerate the elements of $f(G)$ as $n_0 < n_1 < \ldots n_k$ for some $k \geq 0$.
-Lemma~\ref{2011n5-1} shows a stronger property: we have $n_i \mid n_{i + 1}$ for all $i < k$.
-Now let $G_i = H_{n_i}$ for each $i \leq k$.
-It is easy to see that $G_0 = G$, and Lemma~\ref{2011n5-3} tells us that $G_{i + 1} \leq G_i$ for each $i < k$.
-It remains to show that $f$ matches the description in the answer section.
 
-Fix an arbitrary $x \in G$, and let $i(x) = \max\{i : x \in G_i\}$.
-Then $x \in G_{i(x)} = H_{n_{i(x)}}$, so $n_{i(x)} \mid f(x)$.
-But also, we have $n_i \nmid f(x)$ for all $i > i(x)$.
-Since $f(G) = \{n_0 < n_1 < \ldots < n_k\}$, this forces $f(x) = n_{i(x)}$, as desired.
+\subsubsection*{Extra}
+
+While the extra problem is a generalization of the original problem, the original problem is still useful as a step.
+
+We now find all good functions $f : G \to \N^+$.
+Recall that $f(x) \mid f(0)$ for any $x \in G$ and that $f$ is even.
+
+Now, for each integer $n$ dividing $f(0)$, let $H_n = \{x \in G : n \mid f(x)\}$.
+By assumption, we get $0 \in H_n$.
+Since $f$ is even, it is easy to check that $H_n$ is closed under negation.
+Finally,~\eqref{2011n5-eq0} yields $f(x) \mid f(x + y) - f(y)$ for any $x, y \in G$.
+That means if $x, y \in G$, then $n \mid f(x + y)$ as well, implying $x + y \in G$.
+Thus $H_n$ is in fact a subgroup of $G$.
+
+Given the above informations, we now describe $f$ as in the answer section.
+Since any element of $f(G)$ divides $f(0)$, $f(G)$ is in fact finite.
+Enumerate its elements as $n_0 < n_1 < n_2 < \ldots < n_k$ in increasing order, where $k \geq 0$.
+The original problem yields $n_i \mid n_j$ for each $i \leq j$.
+Now we can check by hand that $f$ matches the description in the answer section, with $G_i = H_{n_i}$ for each $i \leq k$.
 
 We now prove the converse.
 Fix $x, y \in G$, and for convenience, write $H = G_{i(x - y)}$.
@@ -97,6 +92,12 @@ If $x, y \in H$, then $f(x - y)$ divides both $f(x)$ and $f(y)$, so we are done.
 If $x, y \notin H$, then $i(x), i(y) < i(x - y)$, so $x - y \in G_{i(x)}$ and $x - y \in G_{i(y)}$.
 Since $x - y, x \in G_{i(x)}$, we have $y \in G_{i(x)}$, so $i(x) \leq i(y)$.
 Similarly, $i(y) \leq i(x)$, so $i(x) = i(y)$ and thus $f(x) = f(y)$.
+
+
+
+\subsection*{Extra notes}
+
+The extra part has only been partially implemented.
 
 
 
