@@ -1,0 +1,67 @@
+\documentclass{article}
+
+\usepackage{fullpage}
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+
+\title{IMO 2018 A2 (P2)}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $R$ be a totally ordered commutative ring.
+A sequence $(a_i)_{i \in \N}$ of elements of $R$ is called \emph{good} if
+\[ a_i a_{i + 1} + 1 = a_{i + 2} \quad \text{for all } i \in \N. \tag{*}\label{2018a2-eq0} \]
+Find all positive integer $n$ for which there exists a good, $n$-periodic sequence.
+
+
+
+\subsection*{Answer}
+
+Multiples of $3$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2018SL.pdf}
+
+We follow the rather "magical" Solution 2 of the official solution.
+Furthermore, we prove that the only good periodic sequence is $-1, -1, 2, -1, -1, 2, \ldots$ and its cyclic shifts. 
+
+One can check that $-1, -1, 2, -1, -1, 2, \ldots$ is indeed a good sequence.
+We now show that it is the only good sequence.
+We do not actually need to classify all good periodic sequences to show that the only possible periods are multiples of $3$.
+
+Given a good sequence $(a_i)_{i \in \N}$, one notices that for any $i \in \N$
+\begin{align*}
+    a_{i + 2}^2 &= a_i a_{i + 1} a_{i + 2} + a_{i + 2}, \\
+    a_i a_{i + 3} &= a_i a_{i + 1} a_{i + 2} + a_i.
+\end{align*}
+Thus, we get
+\begin{align*}
+    a_{i + 2}^2 - a_i a_{i + 3} &= a_{i + 2} - a_i \\
+    2 a_{i + 2}^2 - (a_i^2 + a_{i + 3}^2) + (a_i - a_{i + 3})^2 &= 2 (a_{i + 2} - a_i).
+\end{align*}
+For any $n, k \in \N$, by summing over $i = k, k + 1, \ldots, k + n - 1$, we get
+\[ (-a_{k + n + 2}^2 + a_{k + n + 1}^2 + a_{k + n}^2 + a_{k + 2}^2 - a_{k + 1}^2 - a_k^2) + \sum_{i = k}^{k + n - 1} (a_i - a_{i + 3})^2 = 2 (a_{k + n + 1} + a_{k + n} - a_{k + 1} - a_k). \]
+Thus, if $(a_i)_{i \in \N}$ is $n$-periodic, we would get
+\[ \sum_{i = k}^{k + n - 1} (a_i - a_{i + 3})^2 = 0, \]
+    which in particular forces $a_k = a_{k + 3}$ for any $k \in \N$.
+Thus, $(a_i)_{i \in \N}$ must be $3$-periodic.
+
+
+
+\end{document}
