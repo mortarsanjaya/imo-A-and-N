@@ -18,21 +18,20 @@ def good (n : ℕ) := {S : multiset ℚ | S.card = n ∧ nice S}.infinite
 
 open multiset
 
-/- ### Preliminaries -/
+/-! ## Preliminaries -/
 
 lemma nice_one_cons {S : multiset ℚ} (h : nice S) : nice (1 ::ₘ S) :=
 { pos := λ q h0, (mem_cons.mp h0).elim (λ h0, one_pos.trans_eq h0.symm) (h.pos q),
   sum_eq_int := exists.elim h.sum_eq_int $ λ k h0,
-    ⟨k + 1, by rw [sum_cons, h0, int.cast_add, int.cast_one, add_comm]⟩,
+    ⟨k + 1, (S.sum_cons 1).trans $ (add_comm _ _).trans $ h0.symm ▸ (int.cast_add k 1).symm⟩,
   sum_inv_eq_int := exists.elim h.sum_inv_eq_int $ λ k h0,
-    ⟨k + 1, by rw [map_cons, inv_one, sum_cons, h0, int.cast_add, int.cast_one, add_comm]⟩ }
+    ⟨k + 1, (S.map_cons has_inv.inv 1).symm ▸ (sum_cons _ _).trans
+      ((add_comm _ _).trans $ h0.symm ▸ (int.cast_add k 1).symm) ⟩ }
 
 lemma good_succ {n : ℕ} (h : good n) : good n.succ :=
-begin
-  refine set.infinite_of_inj_on_maps_to (λ S h0 T h1, (cons_inj_right (1 : ℚ)).mp) _ h,
-  intros S; rw [set.mem_set_of_eq, set.mem_set_of_eq],
-  exact and.imp (λ h0, (card_cons 1 S).trans $ congr_arg nat.succ h0) nice_one_cons
-end
+  set.infinite_of_inj_on_maps_to (λ S h0 T h1, (cons_inj_right (1 : ℚ)).mp)
+    (λ S h0, let h0 : S.card = n ∧ nice S := h0 in
+      h0.imp (λ h0, h0 ▸ S.card_cons 1) nice_one_cons) h
 
 lemma good_of_good_le {n : ℕ} (h : good n) : ∀ k : ℕ, n ≤ k → good k :=
   nat.le_induction h (λ k h0, good_succ)
@@ -46,30 +45,22 @@ lemma good_succ_not_good_imp {n : ℕ} (h : good n.succ) (h0 : ¬good n) (k : �
 
 
 
-/- ### `2` is not good -/
+/-! ## `2` is not good -/
 
 lemma rat_inv_denom {q : ℚ} (h : 0 < q) : (q⁻¹.denom : ℤ) = q.num :=
-  (congr_arg (λ r : ℚ, (r.denom : ℤ)) rat.inv_def').trans $
-    rat.denom_div_eq_of_coprime (rat.num_pos_iff_pos.mpr h) q.cop.symm
+  (@rat.inv_def' q).symm ▸ rat.denom_div_eq_of_coprime (rat.num_pos_iff_pos.mpr h) q.cop.symm
 
-lemma denom_dvd_of_add_eq_int {q r : ℚ} {k : ℤ} (h : q + r = k) : q.denom ∣ r.denom :=
-begin
-  rw [eq_sub_iff_add_eq.mpr h, sub_eq_add_neg],
-  refine (rat.add_denom_dvd _ _).trans (dvd_of_eq _),
-  rw [rat.coe_int_denom, one_mul, rat.denom_neg_eq_denom]
-end
-
-lemma denom_eq_of_add_eq_int {q r : ℚ} {k : ℤ} (h : q + r = k) : q.denom = r.denom :=
-  (denom_dvd_of_add_eq_int h).antisymm (denom_dvd_of_add_eq_int $ (add_comm r q).trans h)
+lemma denom_eq_of_add_eq_int : ∀ {q r : ℚ} {k : ℤ}, q + r = k → q.denom = r.denom :=
+suffices ∀ {q r : ℚ} {k : ℤ}, q + r = k → q.denom ∣ r.denom,
+  from λ q r k h, (this h).antisymm $ this ((add_comm r q).trans h),
+λ q r k h, (eq_add_neg_of_add_eq h).symm ▸ (rat.add_denom_dvd _ _).trans
+  (dvd_of_eq $ (rat.coe_int_denom k).symm ▸ (one_mul _).trans r.denom_neg_eq_denom)
 
 lemma eq_of_add_and_inv_add_eq_int {q r : ℚ} {k m : ℤ}
   (h : 0 < q) (h0 : 0 < r) (h1 : q + r = k) (h2 : q⁻¹ + r⁻¹ = m) : q = r :=
-begin
-  rw [← @rat.num_denom q, ← @rat.num_denom r],
-  refine congr_arg2 rat.mk _ (congr_arg _ $ denom_eq_of_add_eq_int h1),
-  have h3 := denom_eq_of_add_eq_int h2,
-  rwa [← int.coe_nat_inj', rat_inv_denom h, rat_inv_denom h0] at h3
-end
+  @rat.num_denom q ▸ @rat.num_denom r ▸ congr_arg2 rat.mk
+    (rat_inv_denom h ▸ rat_inv_denom h0 ▸ denom_eq_of_add_eq_int h2 ▸ rfl)
+    (congr_arg _ $ denom_eq_of_add_eq_int h1)
  
 lemma nice_card_two_imp {S : multiset ℚ} (h : S.card = 2) (h0 : nice S) :
   ∃ q : ℚ, S = replicate 2 q :=
@@ -137,7 +128,7 @@ lemma not_good_two : ¬good 2 :=
 
 
 
-/- ### `3` is good -/
+/-! ## `3` is good -/
 
 lemma fib_formula1 : ∀ n : ℕ, (2 * n + 2).fib ^ 2 + 1 = (2 * n + 1).fib * (2 * n + 3).fib
 | 0 := rfl
@@ -239,7 +230,7 @@ lemma good_three : good 3 :=
 
 
 
-/- ### Final solution -/
+/-! ## Final solution -/
 
 /-- Final solution -/
 theorem final_solution {n : ℕ} : good n ↔ 3 ≤ n :=
