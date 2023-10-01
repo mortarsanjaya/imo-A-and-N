@@ -42,7 +42,7 @@ If $f(-1) = 0$ is allowed, then the difficulty level would only rise to A6 in th
 Note that Cauchy's functional equation ($f(x + y) = f(x) + f(y)$) becomes well-known nowadays.
 
 However, I believe that the difficulty level of this problem is way beyond the IMO.
-Perhaps, the difficulty, mainly coming from its technicality, could be as high as A20.
+The official solution and the simplest solution for the case $f(-1) = 0$ does not work in general since it relies on the properties of $\R$.
 
 
 
@@ -225,10 +225,9 @@ In particular, since $f(0) = -1$, we have
 \[ f(2) = 1. \tag{3.2}\label{2012a5-eq3-2} \]
 Plugging~\eqref{2012a5-eq3-1} back into~\eqref{2012a5-eq1-2} yields
 \[ f(x + 1) + f(x - 1) = -f(x) f(-1) \quad \text{for all } x \in R. \tag{3.3}\label{2012a5-eq3-3} \]
-Plugging $x = 2$ into~\eqref{2012a5-eq0} and using~\eqref{2012a5-eq3-1} yields
-\[ f(2y + 1) = f(y) - f(-y). \tag{3.4}\label{2012a5-eq3-4} \]
-Then~\eqref{2012a5-eq1-3} again yields
-\[ f(2y + 1) = -f(y + 1) f(-1). \tag{3.5}\label{2012a5-eq3-5} \]
+For any $y \in R$, plugging $x = 2$ into~\eqref{2012a5-eq0} yields $f(2y + 1) = f(y) + f(y + 2)$.
+Applying~\eqref{2012a5-eq3-1} and~\eqref{2012a5-eq1-3} then yields
+\[ f(2y + 1) = -f(y + 1) f(-1) \quad \text{for all } y \in R. \tag{3.4}\label{2012a5-eq3-4} \]
 This is sufficient to compute $f(-1)$.
 
 \begin{claim}
@@ -237,7 +236,7 @@ We have $f(-1) \in \{-2, 1\}$.
 \begin{proof}
 For convenience, let $C = f(-1)$.
 By~\eqref{2012a5-eq3-1}, we get $f(3) = -C$.
-Now, by~\eqref{2012a5-eq3-5}, we have $f(5) = C^2$.
+Now, by~\eqref{2012a5-eq3-4}, we have $f(5) = C^2$.
 On the other hand, by~\eqref{2012a5-eq3-3} and $f(2) = 1$ (from~\eqref{2012a5-eq3-2}), we get
 \[ C^2 = f(5) = -f(4) C - f(3) = -f(4) C + C = (1 - f(4)) C. \]
 Since the case's hypothesis implies $C \neq 0$, this implies $C = 1 - f(4)$.
@@ -250,29 +249,29 @@ Respectively, they give $C = -2$ and $C = 1$.
 Before continuing with the subcases, we have some more useful observations.
 Compare the~\eqref{2012a5-eq0} with the same equality but with $(x, y)$ replaced by $(-x, -y)$.
 Subtracting yields
-\[ f(x + y) - f(-x - y) = f(-x) f(-y) - f(x) f(y). \tag{3.6}\label{2012a5-eq3-6} \]
+\[ f(x + y) - f(-x - y) = f(-x) f(-y) - f(x) f(y) \quad \text{for all } x, y \in R. \tag{3.5}\label{2012a5-eq3-5} \]
 Applying~\eqref{2012a5-eq1-3} yields
-\[ -f(x + y + 1) f(-1) = f(-x) f(-y) - f(x) f(y). \tag{3.7}\label{2012a5-eq3-7} \]
-Plugging $x = y$ and applying~\eqref{2012a5-eq3-5} again into the above equation yields
+\[ -f(x + y + 1) f(-1) = f(-x) f(-y) - f(x) f(y) \quad \text{for all } x, y \in R. \tag{3.6}\label{2012a5-eq3-6} \]
+Plugging $x = y$ and applying~\eqref{2012a5-eq3-4} again into the above equation yields
 \[ f(x + 1) f(-1)^2 = f(-x)^2 - f(x)^2 = (f(-x) - f(x)) (f(-x) + f(x)). \]
 By~\eqref{2012a5-eq1-3}, we get
 \[ f(x + 1) f(-1)^2 = f(x + 1) f(-1) (f(-x) + f(x)). \]
 Since $f(-1) \neq 0$, we get that for any $x \in R$,
-\[ f(x + 1) \neq 0 \text{ implies } f(-x) + f(x) = f(-1). \tag{3.8}\label{2012a5-eq3-8} \]
+\[ f(x + 1) \neq 0 \text{ implies } f(-x) + f(x) = f(-1) \quad \text{for any } x \in R. \tag{3.7}\label{2012a5-eq3-7} \]
 
-Finally, before we move on to the two subcases, we prove that for any $x \in R$,
-\[ f(x + 1) = 0 \text{ implies } f(-x) = f(x) = -1. \tag{3.9}\label{2012a5-eq3-9} \]
+Finally, before we move on to the two subcases, we prove that
+\[ f(x + 1) = 0 \text{ implies } f(-x) = f(x) = -1 \quad \text{for any } x \in R. \tag{3.8}\label{2012a5-eq3-8} \]
 Suppose that $f(x + 1) = 0$.
-Plugging $y = x + 1$ into~\eqref{2012a5-eq3-6} gives us
+Plugging $y = x + 1$ into~\eqref{2012a5-eq3-5} gives us
 \[ f(2x + 1) - f(-2x - 1) = f(-x) f(-x - 1). \]
-By~\eqref{2012a5-eq3-5}, we get
+By~\eqref{2012a5-eq3-4}, we get
 \[ f(2x + 1) - f(-2x - 1) = -f(x + 1) f(-1) + f(-x) f(-1) = f(-x) f(-1). \]
-On the other hand, plugging $y = -x - 1$ into~\eqref{2012a5-eq3-6} (or~\eqref{2012a5-eq3-7}) gives us
+On the other hand, plugging $y = -x - 1$ into~\eqref{2012a5-eq3-5} (or~\eqref{2012a5-eq3-6}) gives us
 \[ f(-1) = -f(x) f(-x - 1). \]
 Since $f(x + 1) = 0$,~\eqref{2012a5-eq1-3} yields $f(-x) = f(x)$, so
 \[ f(-1) = -f(-x) f(-x - 1) = -f(-x) f(-1). \]
 Finally, since $f(-1) \neq 0$, this yields $f(-x) = 1$.
-Since we already have $f(-x) = f(x)$, we have proved~\eqref{2012a5-eq3-9}.
+Since we already have $f(-x) = f(x)$, we have proved~\eqref{2012a5-eq3-8}.
 
 We now split into two subcases.
 
@@ -292,16 +291,16 @@ We claim that $f + 1$ is a ring homomorphism from $R$ to $S$.
 That is, $f + 1$ is both additive and multiplicative.
 This corresponds to the class 2 solutions.
 
-Combining~\eqref{2012a5-eq3-8} and~\eqref{2012a5-eq3-9} yields
+Combining~\eqref{2012a5-eq3-7} and~\eqref{2012a5-eq3-8} yields
 \[ f(-x) + f(x) = -2 \quad \text{for all } x \in R. \tag{4.1}\label{2012a5-eq4-1} \]
-On the otehr hand~\eqref{2012a5-eq1-3} gives us $f(-x) - f(x) = -2 f(x + 1)$ for all $x \in R$.
+On the other hand,~\eqref{2012a5-eq1-3} gives us $f(-x) - f(x) = -2 f(x + 1)$ for all $x \in R$.
 Subtracting the second equation from the first equation yields $2 f(x) = 2 f(x + 1) - 2$.
 Since $2 \neq 0$ in $S$, this gives us
 \[ f(x + 1) = f(x) + 1. \tag{4.2}\label{2012a5-eq4-2} \]
 
 We first show that $f + 1$ is additive.
 That is, $f(x + y) = f(x) + f(y) + 1$ for all $x, y \in R$.
-Indeed, recall~\eqref{2012a5-eq3-7}:
+Indeed, recall~\eqref{2012a5-eq3-6}:
 \[ 2 f(x + y + 1) = -f(x + y + 1) f(-1) = f(-x) f(-y) - f(x) f(y). \]
 Applying~\eqref{2012a5-eq4-2} on the left hand side and~\eqref{2012a5-eq4-1} on the right hand side gives
 \[ 2 (f(x + y) + 1) = (-f(x) - 2)(f(y) - 2) - f(x) f(y) = 2 (f(x) + f(y) + 2). \]
@@ -333,7 +332,7 @@ This also means that $\rchar(S) \neq 3$.
 The solution in this subcase corresponds to class 5 solutions.
 That is, we claim that $f$ factors through a ring homomorphism $R \to \F_3$.
 
-Recall the definition of the set $I$ as in~\eqref{2012a5-eq2-2}:
+Recall the definition of the ideal $I$ as in~\eqref{2012a5-eq2-2}:
 \[ I = \{c \in R : \forall x \in R, f(c + x) = f(x)\}. \]
 By our work in Step 2 (mainly Lemma~\ref{2012a5-2-2}), we can assume WLOG that $I = 0$.
 With this assumption, it suffices to show that $R \cong \F_3$.
@@ -341,7 +340,7 @@ Note that the values $f(-1) = 1$, $f(0) = -1$, and $f(1) = 0$ are already known 
 
 First we prove that for any $c \in R$,
 \[ f(c + 1) = 0 \text{ implies } c \in I \text{ implies } c = 0. \tag{5.1}\label{2012a5-eq5-1} \]
-Indeed,~\eqref{2012a5-eq3-9} yields $f(-c) = f(c) = -1$, and thus plugging $x = c$ into~\eqref{2012a5-eq3-7} yields
+Indeed,~\eqref{2012a5-eq3-8} yields $f(-c) = f(c) = -1$, and thus plugging $x = c$ into~\eqref{2012a5-eq3-6} yields
 \[ -f(c + y + 1) = -f(c + y + 1) f(-1) = -(f(-y) - f(y)) \quad \text{for all } y \in R. \]
 But~\eqref{2012a5-eq1-3} yields $f(-y) - f(y) = f(y + 1) f(-1) = f(y + 1)$.
 Replacing $y$ with $x - 1$ yields $f(c + x) = f(x)$ for all $x \in R$, i.e., $c \in I$.
@@ -353,7 +352,7 @@ In particular, it is easy to see that $f(x + 2) = f(x - 1)$ for any $x \in R$.
 Thus $3 \in I$, and so $\rchar(R) = 3$; note that $R$ cannot be trivial since $f(0) = -1 \neq 0 = f(1)$.
 
 Finally, we show that $x \in \{-1, 0, 1\}$ for any $x \in R$.
-Note that by~\eqref{2012a5-eq5-1},~\eqref{2012a5-eq3-8} now reads as
+Note that by~\eqref{2012a5-eq5-1},~\eqref{2012a5-eq3-7} now reads as
 \[ x \neq 0 \text{ implies } f(-x) + f(x) = 1. \tag{5.3}\label{2012a5-eq5-3} \]
 Suppose for the sake of contradiction that $x \notin \{-1, 0, 1\}$.
 Then $x, x + 1, x - 1 \neq 0$, so we get
