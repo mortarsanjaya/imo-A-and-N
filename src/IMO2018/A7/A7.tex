@@ -1,0 +1,80 @@
+\documentclass{article}
+
+\usepackage{fullpage}
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\newcommand{\R}{\mathbb{R}}
+
+\title{IMO 2018 A7}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $n$ be a positive integer, and fix some $p, q \in \R^+$.
+Find the maximal value of
+\[ S = \sum_{k = 1}^{2n} \sqrt[3]{\frac{a_k}{a_{k + 1} + q}} \]
+    across all $a_1, a_2, \ldots, a_{2n} \in \R_{\geq 0}$ satisfying
+\[ a_1 + a_2 + \ldots + a_{2n} = 2np. \]
+Here, we denote $a_{2n + 1} = a_1$.
+
+
+
+\subsection*{Answer}
+
+\[ S_{\max} = \begin{cases}
+    n \sqrt[3]{\dfrac{2(p + q)}{q}}, & \text{if } p \geq q, \\
+    2n \sqrt[3]{\dfrac{p}{p + q}}, & \text{if } p < q.
+\end{cases} \]
+
+
+
+\subsection*{Solution}
+
+Reference: \url{https://artofproblemsolving.com/community/c6h1876747p12752777}
+
+The reference links to the AoPS thread for IMO 2018 A7.
+The idea we will use is H\"{o}lder's inequality with three sums, as demonstrated in the referenced AoPS thread by \textbf{arqady} (\# 9) and \textbf{teddy8732} (\# 11).
+
+By H\"{o}lder's inequality,
+\[ S^3 \leq \left(\sum_{k = 1}^{2n} (a_k + q)\right) \left(\sum_{k = 1}^{2n} \frac{a_k}{a_k + q}\right) \left(\sum_{k = 1}^{2n} \frac{1}{a_{k + 1} + q}\right). \]
+The first sum is clearly equal to $2n (p + q)$.
+Since $a_{2n + 1} = a_1$, we have
+\[ S^3 \leq 2n (p + q) XY, \]
+    where
+\[ X = \sum_{k = 1}^{2n} \frac{a_k}{a_k + q} \text{ and } Y = \sum_{k = 1}^{2n} \frac{1}{a_k + q}. \]
+It is clear that $X + qY = 2n$, so AM-GM inequality gives
+\[ XY \leq \frac{n^2}{q} \implies S^3 \leq 2n^3 \cdot \frac{p + q}{q}. \]
+
+For the case $p \geq q$, this is the best bound.
+Indeed, let
+\[ u = p + \sqrt{p^2 + q^2} \text{ and } v = p - \sqrt{p^2 - q^2}. \]
+Then $u + v = 2p$ and $uv = q^2$.
+The equality $S = n \sqrt[3]{\dfrac{2(p + q)}{q}}$ follows from
+\[ \sqrt[3]{\frac{u}{v + q}} + \sqrt[3]{\frac{v}{u + q}} = \sqrt[3]{\frac{2(p + q)}{q}}. \]
+
+For the case $p < q$, the inequality is not strong enough.
+To strengthen the bound, note that in this case, by Cauchy-Schwarz inequality,
+\[ Y \geq \frac{(2n)^2 q}{2n(p + q)} = \frac{2n}{p + q} \implies X = 2n - qY \leq \frac{2np}{p + q} < n. \]
+Then it is easy to see that we have the stronger bound
+\[ XY \leq \frac{2np}{p + q} \cdot \frac{2n}{p + q} = (2n)^2 \cdot \frac{p}{(p + q)^2}. \]
+As a result, we would have
+\[ S^3 \leq 2n (p + q) XY \leq (2n)^3 \cdot \frac{p}{p + q}. \]
+The equality case is easily attained when $a_k = p$ for all $k \leq 2n$.
+
+
+
+\subsection*{Extra notes}
+
+The bound for the case $p < q$ holds even when we are considering odd number of terms (i.e. replacing $2n$ by an odd number).
+
+
+
+\end{document}
