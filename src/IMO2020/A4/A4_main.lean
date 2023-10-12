@@ -9,31 +9,23 @@ open multiset
 
 /- ### General extra lemmas -/
 
-/-- The specialized multiset version of AM-GM: `∏ x^x ≤ ∑ x * x` -/
-lemma multiset_weighted_AM_GM_specialized_mul_self {S : multiset ℝ}
-  (h : ∀ x : ℝ, x ∈ S → 0 ≤ x) (h0 : S.sum = 1) :
-  (S.map $ λ x : ℝ, x ^ x).prod ≤ (S.map $ λ x : ℝ, x * x).sum :=
-  (congr_arg multiset.prod (S.map_univ _).symm).trans_le $
-  (congr_arg multiset.sum $ S.map_univ _).le.trans' $
-  real.geom_mean_le_arith_mean_weighted (finset.univ : finset ↥S) coe coe
-    (λ x _, h _ coe_mem) (S.sum_eq_sum_coe.symm.trans h0) (λ x _, h _ coe_mem)
-
 /-- The specialized multiset version of AM-GM: `∏ x^x ≤ ∑ x^2` -/
-lemma multiset_weighted_AM_GM_specialized_sq {S : multiset ℝ}
+lemma multiset_weighted_AM_GM_specialized {S : multiset ℝ}
   (h : ∀ x : ℝ, x ∈ S → 0 ≤ x) (h0 : S.sum = 1) :
-  (S.map $ λ x : ℝ, x ^ x).prod ≤ (S.map $ λ x : ℝ, x ^ 2).sum :=
-  (multiset_weighted_AM_GM_specialized_mul_self h h0).trans_eq $
-    congr_arg sum $ map_congr rfl $ λ x _, (sq x).symm
+  (S.map (λ x : ℝ, x ^ x)).prod ≤ (S.map (λ x : ℝ, x ^ 2)).sum :=
+funext (λ x : ℝ, (sq x).symm) ▸ S.map_univ (λ x : ℝ, x ^ x) ▸ S.map_univ (λ x : ℝ, x * x) ▸
+  real.geom_mean_le_arith_mean_weighted _ coe coe (λ x _, h _ coe_mem)
+    (S.sum_eq_sum_coe.symm.trans h0) (λ x _, h _ coe_mem)
 
 /-- Specialized multiset version of AM-GM but with a stronger hypothesis -/
 lemma multiset_weighted_AM_GM_specialized' {S : multiset ℝ}
   (h : ∀ x : ℝ, x ∈ S → 0 < x) (h0 : S.sum = 1) :
-  (S.map $ λ x : ℝ, x ^ x).prod ≤ (S.map $ λ x : ℝ, x ^ 2).sum :=
-  multiset_weighted_AM_GM_specialized_sq (λ x, all_le_of_all_lt h) h0
+  (S.map (λ x : ℝ, x ^ x)).prod ≤ (S.map (λ x : ℝ, x ^ 2)).sum :=
+  multiset_weighted_AM_GM_specialized (λ x, all_le_of_all_lt h) h0
 
 /-- Power of sum equals product of power, `multiset ℝ` version -/
 lemma multiset_rpow_sum_of_pos {a : ℝ} (h : 0 < a) (S : multiset ℝ) :
-  (S.map $ pow a).prod = a ^ S.sum :=
+  (S.map (pow a)).prod = a ^ S.sum :=
   multiset.induction_on S a.rpow_zero.symm $
     λ x S h0, by rw [map_cons, prod_cons, h0, sum_cons, real.rpow_add h]
 
@@ -53,8 +45,8 @@ private lemma two_mul_lt_three (h1 : a + S.sum = 1) : 2 * a < 3 :=
 variables (h1 : ∀ x : ℝ, x ∈ S → x ≤ a) (h2 : a + S.sum = 1)
 include h h0 h1 h2
 
-lemma power_bound : ((a ::ₘ S).map $ λ x : ℝ, x ^ x).prod ≤ a :=
-suffices ((a ::ₘ S).map $ λ x : ℝ, x ^ x).prod ≤ ((a ::ₘ S).map $ pow a).prod,
+lemma power_bound : ((a ::ₘ S).map (λ x : ℝ, x ^ x)).prod ≤ a :=
+suffices ((a ::ₘ S).map (λ x : ℝ, x ^ x)).prod ≤ ((a ::ₘ S).map (pow a)).prod,
   from this.trans_eq $ (multiset_rpow_sum_of_pos h _).trans $
     h2.symm.trans (S.sum_cons a).symm ▸ a.rpow_one,
 multiset_ring_prod_map_le_prod_map _ _
@@ -63,7 +55,7 @@ multiset_ring_prod_map_le_prod_map _ _
   (forall_mem_cons.mpr ⟨le_refl _, λ x h3,
     let h4 : 0 ≤ x := (h0 x h3).le in real.rpow_le_rpow h4 (h1 x h3) h4⟩)
 
-lemma AM_GM_bound : ((a ::ₘ S).map $ λ x : ℝ, x ^ x).prod ≤ a ^ 2 + (1 - a) ^ 2 :=
+lemma AM_GM_bound : ((a ::ₘ S).map (λ x : ℝ, x ^ x)).prod ≤ a ^ 2 + (1 - a) ^ 2 :=
   (multiset_weighted_AM_GM_specialized'
     (forall_mem_cons.mpr ⟨h, h0⟩) ((S.sum_cons a).trans h2)).trans $
   (S.map_cons (λ x : ℝ, x ^ 2) a).symm ▸ (sum_cons _ _).trans_le $
@@ -71,7 +63,7 @@ lemma AM_GM_bound : ((a ::ₘ S).map $ λ x : ℝ, x ^ x).prod ≤ a ^ 2 + (1 - 
     congr_arg2 _ (eq_sub_of_add_eq' h2) rfl) (a ^ 2)
 
 lemma AM_GM_bound_strict (h3 : 1 < S.card) :
-  ((a ::ₘ S).map $ λ x : ℝ, x ^ x).prod < a ^ 2 + (1 - a) ^ 2 :=
+  ((a ::ₘ S).map (λ x : ℝ, x ^ x)).prod < a ^ 2 + (1 - a) ^ 2 :=
   (multiset_weighted_AM_GM_specialized'
     (forall_mem_cons.mpr ⟨h, h0⟩) ((S.sum_cons a).trans h2)).trans_lt $
   (S.map_cons (λ x : ℝ, x ^ 2) a).symm ▸ (sum_cons _ _).trans_lt $
@@ -79,18 +71,18 @@ lemma AM_GM_bound_strict (h3 : 1 < S.card) :
     congr_arg2 _ (eq_sub_of_add_eq' h2) rfl) (a ^ 2)
 
 lemma case_a_lt_half (h3 : 2 * a < 1) :
-  (3 - 2 * a) * ((a ::ₘ S).map $ λ x : ℝ, x ^ x).prod < 1 :=
+  (3 - 2 * a) * ((a ::ₘ S).map (λ x : ℝ, x ^ x)).prod < 1 :=
   (ring_ineq1 h3).trans_le' $ mul_le_mul_of_nonneg_left (power_bound h h0 h1 h2) $
     sub_nonneg_of_le (two_mul_lt_three h0 h2).le
 
 lemma case_a_ne_half_ne_one (h3 : 2 * a ≠ 1) (h4 : a ≠ 1) :
-  (3 - 2 * a) * ((a ::ₘ S).map $ λ x : ℝ, x ^ x).prod < 1 :=
+  (3 - 2 * a) * ((a ::ₘ S).map (λ x : ℝ, x ^ x)).prod < 1 :=
   h3.lt_or_lt.elim (case_a_lt_half h h0 h1 h2) $ λ h3,
   (ring_ineq3 h3 h4).trans_le' $ mul_le_mul_of_nonneg_left (AM_GM_bound h h0 h1 h2) $
     sub_nonneg_of_le (two_mul_lt_three h0 h2).le
 
 lemma case_S_card_big (h3 : 1 < S.card) :
-  (3 - 2 * a) * ((a ::ₘ S).map $ λ x : ℝ, x ^ x).prod < 1 :=
+  (3 - 2 * a) * ((a ::ₘ S).map (λ x : ℝ, x ^ x)).prod < 1 :=
   (lt_or_le (2 * a) 1).elim (case_a_lt_half h h0 h1 h2) $ λ h4,
     (ring_ineq2 h4).trans_lt' $ mul_lt_mul_of_pos_left (AM_GM_bound_strict h h0 h1 h2 h3) $
     sub_pos_of_lt $ two_mul_lt_three h0 h2
@@ -103,7 +95,7 @@ lemma case_S_card_big (h3 : 1 < S.card) :
 
 /-- Final solution, main inequality -/
 theorem final_solution_main_ineq :
-  (3 - 2 * a) * ((a ::ₘ S).map $ λ x : ℝ, x ^ x).prod ≤ 1 :=
+  (3 - 2 * a) * ((a ::ₘ S).map (λ x : ℝ, x ^ x)).prod ≤ 1 :=
 (lt_or_le (2 * a) 1).elim
 ---- Case 1: `2a < 1`
 (λ h3, (case_a_lt_half h h0 h1 h2 h3).le)
@@ -115,7 +107,7 @@ theorem final_solution_main_ineq :
 
 /-- Final solution, equality case -/
 theorem final_solution_eq_case :
-  (3 - 2 * a) * ((a ::ₘ S).map $ λ x : ℝ, x ^ x).prod = 1 ↔ 
+  (3 - 2 * a) * ((a ::ₘ S).map (λ x : ℝ, x ^ x)).prod = 1 ↔ 
     (a = 1 ∧ S = 0) ∨ (a = 2⁻¹ ∧ S = {2⁻¹}) :=
 ---- `→` direction
 ⟨λ h3, S.card.eq_zero_or_pos.imp
@@ -130,7 +122,7 @@ theorem final_solution_eq_case :
     cases ne_or_eq (2 * a) 1 with h4 h4,
     { refine absurd h3 (case_a_ne_half_ne_one h h0 h1 h2 h4 $ λ h5, _).ne,
       rw [h5, sum_singleton, add_right_eq_self] at h2,
-      revert h2; exact (h0 b $ mem_singleton_self b).ne.symm },
+      exact (h0 b $ mem_singleton_self b).ne.symm h2 },
     { have h5 : a = (2 : ℝ)⁻¹ := eq_inv_of_mul_eq_one_right h4,
       refine ⟨h5, congr_arg _ _⟩,
       rwa [sum_singleton, ← h4, two_mul, add_right_inj, h5] at h2 }
