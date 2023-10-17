@@ -1,5 +1,6 @@
 \documentclass{article}
 
+\usepackage{fullpage}
 \usepackage{amsmath, amsfonts, amssymb, amsthm}
 \usepackage{hyperref}
 
@@ -32,8 +33,6 @@ Determine all functions $f : R \to R$ such that, for any $x, y \in R$,
 
 The identity map and $x \mapsto 2 - x$.
 
-In the case $\rchar(R) = 2$, this reduces to just the identity map.
-
 
 
 \subsection*{Solution}
@@ -48,25 +47,21 @@ First, it is easy to see that the identity map and $x \mapsto 2 - x$ satisfies~\
 \subsubsection*{Case 1: $\rchar(R) \neq 2$.}
 
 Substituting $(x, y) = (t, 1)$ into~\eqref{2015a4-eq0} yields
-\[ f(t + f(t + 1)) = t + f(t + 1). \tag{1}\label{2015a4-eq1} \]
+\[ f(t + f(t + 1)) = t + f(t + 1) \quad \forall t \in R. \tag{1}\label{2015a4-eq1} \]
 Substituting $(x, y) = (0, t + f(t + 1))$ into~\eqref{2015a4-eq0} and using~\eqref{2015a4-eq1} yields $f(0) = f(0) (t + f(t + 1))$ for all $t \in R$.
 In particular, if $f(0) \neq 0$, since $R$ is a domain, we get $t + f(t + 1) = 1$ for all $t \in R$.
 Replacing $t$ with $t - 1$ gives us $f(t) = 2 - t$ for all $t \in R$.
-Thus, from now on, assume that $f(0) = 0$.
+Thus, from now on, we assume that $f(0) = 0$ and prove that $f$ is the identity map.
 
 First, plugging $t = -1$ into~\eqref{2015a4-eq1} gives us $f(-1) = -1$.
 Plugging $(x, y) = (1, -1)$ into~\eqref{2015a4-eq0} now gives us $f(1) = 1$.
-We now do a reduction with the following claim.
+We now claim that we are done if $f$ is odd.
 
-\begin{claim}
-If $f$ is odd, then $f$ must be the identity map.
-\end{claim}
-\begin{proof}
 Consider the equation~\eqref{2015a4-eq0} with $(x, y) = (1, t)$ and $(x, y) = (-1, -t)$.
-Since $f$ is odd, adding the two equations yield $2 f(t) = 2t$.
+If $f$ is odd, adding the two equations yield $2 f(t) = 2t$.
 But $R$ is a domain and $\rchar(R) \neq 2$.
 This implies $f(t) = t$ for any $t \in R$.
-\end{proof}
+It now remains to show that $f$ is odd.
 
 If we set $y = -1$ into~\eqref{2015a4-eq0}, we get $f(x + f(x - 1)) + f(-x) = x + f(x - 1) - f(x)$ for any $x \in R$.
 Thus, to prove that $f$ is odd, it suffices to prove that $x + f(x - 1)$ is a fixed point of $f$.
@@ -83,7 +78,7 @@ Finally,~\eqref{2015a4-eq0} with $(x, y) = (1, t)$ gives us $f(t + 2) = t + 2$.
 Substituting $f(x) = g(x) + x$ for some $g : R \to R$, it suffices to show that $g = 0$.
 Equation~\eqref{2015a4-eq0} now reads as
 \[ g(y + g(x + y)) + g(xy) = g(x) y \; \forall x, y \in R. \tag{2}\label{2015a4-eq2} \]
-Our aim is to obtain thw two following equalities: for any $y \in R$,
+Our aim is to obtain the two following equalities: for any $y \in R$,
 \[ g(t + 1) (t + 1) = g(t) t, \tag{3}\label{2015a4-eq3} \]
 \[ g(g(t) t) = g(t). \tag{4}\label{2015a4-eq4} \]
 The two equalities suffice to show that $g = 0$.
@@ -102,13 +97,6 @@ Then we have $g(t + 1) + g(t) (t + 1) = g(t) + g(t + 1) t$, implying~\eqref{2015
 To prove~\eqref{2015a4-eq4}, first plug $(x, y) = (t, 0)$ into~\eqref{2015a4-eq2} to get $g(g(t)) = 0$.
 Next, plugging $(x, y) = (0, t)$ into~\eqref{2015a4-eq2} yields $g(g(t) + t) = 0$.
 Then plugging $(x, y) = (g(t), t)$ into~\eqref{2015a4-eq2} yields~\eqref{2015a4-eq4}.
-
-
-
-\subsubsection*{Implementation details}
-
-We implement the two cases as a separate theorem.
-Then, we also implement a wrapper theorem that covers both cases.
 
 
 
