@@ -5,9 +5,6 @@ import ring_theory.int.basic data.nat.parity
 namespace IMOSL
 namespace IMO2007N2
 
-set_option profiler true
-set_option profiler.threshold 0.05
-
 /-- Final solution with explicit `k` -/
 theorem final_solution' {b n : ℕ} (h : 0 < b) (h0 : ∃ c : ℤ, (b ^ 2 : ℤ) ∣ b - c ^ n) :
   ∃ a : ℤ, (b : ℤ) = a ^ n :=
