@@ -1,0 +1,57 @@
+\documentclass{article}
+
+\usepackage{fullpage}
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\title{IMO 2009 N3}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $f : \N \to \Z$ be a function such that $a - b \mid f(a) - f(b)$ for any $a, b \in \N$.
+Suppose that there exists only finitely many primes $p$ dividing $f(c)$ for some $c \in \N$.
+Prove that $f$ is constant.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2009SL.pdf}
+
+We follow Solution 1 of the official solution in a simplified manner.
+
+First we prove that there exists a positive integer $N$ with $f(kN) = f(0)$ for all $k \in \N$.
+Indeed, choose a positive integer $K$ such that every prime greater than $K$ does not divide $f(c)$ for any $c \in \N$.
+In particular, choosing any one such prime also guarantees $f(0) \neq 0$.
+We claim that $N = 4K! \cdot |f(0)|$ works.
+
+Indeed, we have $N \mid kN \mid f(kN) - f(0)$ for any positive integer $k$.
+Since $f(0) \mid N$, we have $f(0) \mid f(kN)$ and $4K! \mid \frac{f(kN)}{f(0)} - 1$.
+By the problem's initial condition, any prime greater than $K$ does not divide $\frac{f(kN)}{f(0)}$.
+On the other hand, the above divisibility also means that the primes less than or equal to $K$ divide $\frac{f(kN)}{f(0)} - 1$.
+Thus, they do not divide $\frac{f(kN)}{f(0)}$ either; this forces $\frac{f(kN)}{f(0)} = \pm 1$.
+If $f(kN) = -f(0)$, then $4K!$ divides $-2$; a contradiction.
+Thus, we necessarily have $f(kN) = f(0)$, as desired.
+
+Now plugging back into the original condition yields $kN - b \mid f(0) - f(b)$ for any $k, b \in \N$.
+For any fixed $b$, we can choose $k$ large enough such that $|kN - b| > |f(0) - f(b)|$.
+The divisibility then forces $f(b) = f(0)$.
+This shows that $f$ is constant.
+
+
+
+\end{document}
