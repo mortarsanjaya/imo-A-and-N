@@ -1,0 +1,71 @@
+\documentclass{article}
+
+\usepackage{fullpage}
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\title{IMO 2007 A4}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Problem}
+
+Let $G$ be a totally ordered abelian group.
+Let $G^+ = \{x \in G : x > 0\}$.
+Find all functions $f : G^+ \to G^+$ such that, for any $x, y \in G^+$,
+\[ f(x + f(y)) = f(x + y) + f(y). \tag{*}\label{2007a4-eq0} \]
+
+
+
+\subsection*{Answer}
+
+$x \mapsto 2x$.
+
+
+
+\subsection*{Solution}
+
+Official solution: \url{https://www.imo-official.org/problems/IMO2007SL.pdf}
+
+We follow Solution 1 of the official solution.
+
+We first show that $f(y) > y$ for any $y \in G^+$.
+Indeed, by~\eqref{2007a4-eq0}, $f(y) = y$ yields $f(y) = 0$; impossible.
+Meanwhile, if $f(y) < y$, then there exists $x \in G^+$ such that $x + f(y) = y$.
+Then~\eqref{2007a4-eq0} yields $f(x + y) = 0$; again, impossible.
+
+As a result, there exists a function $g : G^+ \to G^+$ such that $g(y) = f(y) - y$ for any $y \in G^+$.
+Plugging into~\eqref{2007a4-eq0}, we get $g(x + y + g(y)) = y + g(x + y)$ for all $x, y \in G^+$.
+That is, we have
+\[ g(t + g(y)) = g(t) + y \quad \forall t, y \in G^+, y < t. \tag{1}\label{2007a4-eq1} \]
+
+We now focus solely on~\eqref{2007a4-eq1}; our goal reduces to showing that $g$ is the identity.
+We start by proving that $g$ is injective.
+Indeed, for any $a, b \in G^+$ such that $g(a) = g(b)$, we have
+\[ g(a + b) + a = g(a + b + g(a)) = g(a + b + g(b)) = g(a + b) + b. \]
+
+Next, we prove that $g$ is additive, i.e., $g(x) + g(y) = g(x + y)$ for any $x, y \in G^+$.
+Indeed, take any $t > x + y$, say $t = 2(x + y)$.
+We get
+\[ g(t + g(x) + g(y)) = g(t + g(x)) + y = g(t) + x + y = g(t + g(x + y)). \]
+By injectivity, we get $g(x) + g(y) = g(x + y)$ for any $x, y \in G^+$.
+Thus,~\eqref{2007a4-eq1} simplifies to $g(g(y)) = y$ for any $y \in G^+$.
+
+Finally, we show that $g(y) = y$ for any $y \in G^+$.
+Additivity yields that $g$ is strictly increasing.
+So now, suppose for the sake of contradiction that $g(y) \neq y$ for some $y \in G^+$.
+Then we have either $y > g(y) > g(g(y)) = y$, or $y < g(y) < g(g(y)) = y$.
+In either cases, we get a contradiction.
+
+
+
+\end{document}
