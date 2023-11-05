@@ -1,4 +1,4 @@
-import extra.AM_GM_induction.multiset_AM_GM algebra.group_power.lemmas tactic.nth_rewrite
+import extra.general_ineq.AM_GM algebra.group_power.lemmas tactic.nth_rewrite
 
 /-! # IMO 2014 C2 -/
 
@@ -76,7 +76,7 @@ lemma good_chain_le_sum {C : list (multiset R)} {S : multiset R}
   (S.card : R) ^ S.card * ((2 * 2) ^ C.length * S.prod)
     ≤ ((list.cons S C).last (list.cons_ne_nil S C)).sum ^ S.card :=
   (mul_le_mul_of_nonneg_left (good_chain_prod_le h0 h) $ pow_nonneg S.card.cast_nonneg _).trans $
-    by rw ← good_chain_card_eq h; exact extra.multiset_AM_GM (good_chain_nonneg h0 h)
+    good_chain_card_eq h ▸ extra.AM_GM_ordered_ring_multiset (good_chain_nonneg h0 h)
 
 
 
