@@ -145,13 +145,15 @@ private lemma lem2_1 {t x : ℝ} (h : f (x * t) = f x) (d : ℝ) :
 begin
   replace feq := feq (x * t) x (x * d),
   rwa [h, sub_self, zero_mul, zero_mul, eq_comm, sub_eq_zero] at feq,
-  convert feq; ring
+  refine (congr_arg f _).trans (feq.trans $ congr_arg f _),
+  ring,
+  ring
 end
 
 private lemma lem2_2 (h : ∃ c : ℝ, f c = f 0 ∧ c ≠ 0) (x : ℝ) : f (-x) = f x :=
 begin
   rcases h with ⟨c, h, h0⟩,
-  replace h := lem2_1 feq (by rw [mul_zero, h] : f (c * 0) = f c),
+  replace h := lem2_1 feq ((congr_arg f $ mul_zero c).trans h.symm),
   ring_nf at h,
   have h1 := h (-(x / c ^ 3)),
   rwa [neg_sq, h, neg_mul, div_mul_cancel x (pow_ne_zero 3 h0), eq_comm] at h1
@@ -168,14 +170,11 @@ begin
 end
 
 private lemma lem2_4 {t : ℝ} (h : t ≠ 0) (h0 : good f t) : good f (t ^ 4) :=
-begin
-  rcases h0 with ⟨c, h1, h2⟩,
-  use c ^ 3 * t; split,
-  exact mul_ne_zero (pow_ne_zero 3 h1) h,
-  convert (lem2_1 feq h2 (-t ^ 2)).symm using 2,
+exists.elim h0 $ λ c h0, ⟨c ^ 3 * t, mul_ne_zero (pow_ne_zero 3 h0.1) h, begin
+  convert (lem2_1 feq h0.2 (-t ^ 2)).symm using 2,
   rw [add_neg_self, zero_add, mul_assoc, neg_sq, bit0, ← two_mul, pow_mul],
   rw [neg_sq, neg_mul, ← sq, add_neg_cancel_right]
-end
+end⟩
 
 private lemma lem2_5 (h : ∃ t : ℝ, t < 2⁻¹ ∧ good f t) : ∃ c : ℝ, f c = f 0 ∧ c ≠ 0 :=
 begin
@@ -183,7 +182,7 @@ begin
   rcases eq_or_ne t 0 with rfl | h2,
   use c; rw [and_iff_left h0, ← h1, mul_zero],
   rcases lem1_3 h with ⟨x, h3⟩,
-  use c ^ 3 * (t + x ^ 2 + x * t ^ 2); split,
+  refine ⟨c ^ 3 * (t + x ^ 2 + x * t ^ 2), _, _⟩,
   replace feq := lem2_1 feq h1 x,
   rwa [add_right_comm (t ^ 2), h3, mul_zero] at feq,
   refine mul_ne_zero (pow_ne_zero 3 h0) _,
@@ -191,7 +190,7 @@ begin
   rw [sq, ← mul_add, h4, mul_neg, neg_add_eq_zero, mul_left_comm,
       mul_right_eq_self₀, ← pow_succ, bit0, pow_bit1_eq_one_iff 1 t] at h3,
   rcases h3 with rfl | rfl,
-  exact not_lt_of_le (by norm_num) h,
+  exact h.not_le (inv_le_one one_le_two),
   rw [sq, zero_mul, zero_mul, add_zero, neg_zero] at h4,
   exact h2 h4
 end
@@ -204,23 +203,21 @@ begin
     rw ne_iff_lt_or_gt at h,
     cases h with h h,
     exact ⟨t, h, h0⟩,
-    use t⁻¹; split,
-    exact inv_lt_one h,
+    refine ⟨t⁻¹, inv_lt_one h, _⟩,
     rcases h0 with ⟨c, h0, h1⟩,
-    replace h := ne_of_gt (gt_trans h one_pos),
-    use c * t; split,
-    exact mul_ne_zero h0 h,
+    replace h := (one_pos.trans h).ne.symm,
+    refine ⟨c * t, mul_ne_zero h0 h, _⟩,
     rw [h1, mul_assoc, mul_inv_cancel h, mul_one]
   end,
   rcases h with ⟨t, h, h0⟩,
   cases lt_or_le t 2⁻¹ with h1 h1,
   exact lem2_5 feq ⟨t, h1, h0⟩,
-  replace h1 : 0 < t := lt_of_lt_of_le (by norm_num) h1,
+  replace h1 : 0 < t := h1.trans_lt' (inv_pos.mpr two_pos),
   obtain ⟨n, h2⟩ : ∃ n : ℕ, t ^ n < 2⁻¹ := exists_pow_lt_of_lt_one (inv_pos.mpr zero_lt_two) h,
   refine lem2_5 feq ⟨t ^ (4 ^ n), _, _⟩,
   { refine lt_trans _ h2,
     rw pow_lt_pow_iff_of_lt_one h1 h,
-    exact nat.lt_pow_self (by norm_num) n },
+    exact nat.lt_pow_self (nat.one_lt_bit0 $ nat.succ_ne_zero 1) n },
   { clear h2; induction n with n n_ih,
     rwa [pow_zero, pow_one],
     rw [pow_succ', pow_mul],
@@ -231,14 +228,12 @@ end
 private lemma thm2 (h : ¬injective f) : f = const ℝ (f 0) :=
 begin
   refine lem2_3 feq (lem2_2 feq _),
-  simp only [injective, not_forall] at h,
+  simp_rw [injective, not_forall] at h,
   rcases h with ⟨a, b, h, h0⟩,
   rcases eq_or_ne b 0 with rfl | h1,
   exact ⟨a, h, h0⟩,
-  apply lem2_6 feq,
-  use a / b; split,
-  intros h2; exact h0 (eq_of_div_eq_one h2),
-  use b; rw [and_iff_right h1, mul_div_cancel' a h1, h]
+  refine lem2_6 feq ⟨a / b, λ h2, h0 (eq_of_div_eq_one h2), b, h1, _⟩,
+  rwa mul_div_cancel' a h1
 end
 
 end f_not_inj
@@ -279,8 +274,8 @@ end
 private lemma lem3_3 (a : ℝ) : f (-a) = -f a :=
 begin
   obtain ⟨C, h⟩ : ∃ C : R, ∀ b : ℝ, b ≠ 0 → f (-b) = C - f b :=
+    ⟨f 1 + f (-1), λ b h, 
   begin
-    use f 1 + f (-1); intros b h,
     rw eq_sub_iff_add_eq',
     replace h := lem3_2 feq f_inj f0_eq_0 h,
     have h0 := lem3_2 feq f_inj f0_eq_0 one_ne_zero,
@@ -289,7 +284,7 @@ begin
     intros h,
     rw [h, mul_zero] at h0,
     exact zero_ne_one h0
-  end,
+  end⟩,
   revert a; suffices : C = 0,
   { intros a,
     rcases eq_or_ne a 0 with rfl | h0,
@@ -438,12 +433,11 @@ begin
   rw [← fpow (nat_root 3 2) 3, pow_nat_root_self_bit1, neg_pow_bit1, one_pow, fneg1,
       mul_comm, bit0, ← sub_eq_add_neg, add_sub_cancel, f1_eq_1, ← sub_eq_zero] at h,
   set D := f (nat_root 3 2),
-  replace h : (f 2 - 2) * (D - 2) * (D + 1) = 0 := by rw ← h; ring,
+  replace h : (f 2 - 2) * (D - 2) * (D + 1) = 0 := h ▸ by ring,
   rw [mul_eq_zero, add_eq_zero_iff_eq_neg] at h,
   cases h with h h,
   rwa [mul_eq_zero, sub_eq_zero, sub_eq_zero] at h,
-  replace h := congr_arg (λ x, x ^ 3) h,
-  dsimp only [D] at h,
+  replace h : D ^ 3 = (-1) ^ 3 := congr_arg (λ x, x ^ 3) h,
   rw [← fpow, pow_nat_root_self_bit1, neg_pow_bit1, one_pow, ← fneg1] at h,
   replace h := f_inj h,
   exfalso; revert h; norm_num
