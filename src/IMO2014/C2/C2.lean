@@ -1,4 +1,4 @@
-import extra.general_ineq.AM_GM algebra.group_power.lemmas tactic.nth_rewrite
+import extra.general_ineq.AM_GM
 
 /-! # IMO 2014 C2 -/
 
