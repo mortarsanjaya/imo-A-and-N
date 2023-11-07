@@ -16,12 +16,12 @@ lemma self_diff_singleton {G : Type*} [add_group G] [decidable_eq G]
 variables {R : Type*} [ring R]
 
 lemma good_any_singleton_zero (q : R) : good q 0 :=
-  λ u v h1 h0, cast (congr_arg _ $ eq.symm $ mul_eq_zero_of_right q $ mul_eq_zero_of_right u $
-    mem_singleton.mp h0) $ zero_is_sq_add_diff_of_mem (mem_singleton_self 0)
+  λ u v h1 h0, (mem_singleton.mp h0).symm ▸ (mul_zero u).symm ▸ (mul_zero q).symm ▸
+    zero_is_sq_add_diff_of_mem (mem_singleton_self 0)
 
 /-- Final solution, `k = 1` -/
 theorem final_solution_k_eq_1 {R : Type*} [ring R] [decidable_eq R] (q : R) : excellent 1 q :=
-  λ T h, cast (congr_arg _ (self_diff_singleton h).symm) (good_any_singleton_zero q)
+  λ T h, (self_diff_singleton h).symm ▸ good_any_singleton_zero q
 
 end IMO2017A2
 end IMOSL
