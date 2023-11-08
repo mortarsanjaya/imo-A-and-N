@@ -18,9 +18,10 @@ def good {R : Type*} [ring R] (f : R → R) :=
 
 lemma good_zero {R : Type*} [ring R] : good (0 : R → R) :=
   λ _ _, add_zero 0
-  
-lemma good_one_sub {R : Type*} [comm_ring R] : good (has_sub.sub (1 : R)) :=
-  λ x y, by ring
+
+lemma good_one_sub {R : Type*} [ring R] : good (has_sub.sub (1 : R)) :=
+  λ x y, (sub_add _ _ _).trans $ congr_arg2 _ rfl $ sub_eq_of_eq_add' $ sub_sub 1 x y ▸
+    (sub_add (1 - x) y (x * y)).symm ▸ one_sub_mul x y ▸ mul_one_sub _ _
 
 
 
@@ -64,10 +65,10 @@ end ring
 
 section division_ring
 
-variables {R : Type*} [division_ring R] {f : R → R} (h : good f)
+variables {D : Type*} [division_ring D] {f : D → D} (h : good f)
 include h
 
-lemma good_map_eq_zero (h0 : f ≠ 0) {c : R} (h1 : f c = 0) : c = 1 :=
+lemma good_map_eq_zero (h0 : f ≠ 0) {c : D} (h1 : f c = 0) : c = 1 :=
 ---- Reduce to `f(0) = 0`
 h0.imp_symm $ λ h2, suffices f 0 = 0, from funext $ λ x,
   (add_left_eq_self.mpr this).symm.trans $ (congr_arg2 (λ u v, f u + f v)
@@ -89,37 +90,31 @@ lemma good_map_one : f 1 = 0 :=
     (λ h0, good_map_zero_sq h h0 ▸ good_map_map_zero_sq h)
 
 /-- (2) -/
-lemma good_map_eq_zero_iff (h0 : f 0 = 1) (c : R) : f c = 0 ↔ c = 1 :=
+lemma good_map_eq_zero_iff (h0 : f 0 = 1) (c : D) : f c = 0 ↔ c = 1 :=
   ⟨good_map_eq_zero h $ λ h1, absurd ((congr_fun h1 0).symm.trans h0) zero_ne_one,
   λ h1, (congr_arg f h1).trans (good_map_one h)⟩
 
 /-- (3) -/
-lemma good_shift (h0 : f 0 = 1) (x : R) : f (x + 1) + 1 = f x :=
+lemma good_shift (h0 : f 0 = 1) (x : D) : f (x + 1) + 1 = f x :=
   (add_comm _ _).trans $ (congr_arg (+ f (x + 1)) $ h0.symm.trans $
     congr_arg f (mul_eq_zero_of_right (f x) (good_map_one h)).symm).trans $
     (h x 1).trans $ congr_arg f (mul_one x)
 
-lemma good_shift2 (h0 : f 0 = 1) (x : R) : f (x - 1) = f x + 1 :=
+lemma good_shift2 (h0 : f 0 = 1) (x : D) : f (x - 1) = f x + 1 :=
   (good_shift h h0 _).symm.trans $ congr_arg (λ x, f x + 1) (sub_add_cancel x 1)
 
-lemma good_map_add_one_inv (h0 : f ≠ 0) (x : R) : f (x⁻¹ + 1) = (f (x + 1))⁻¹ :=
+lemma good_map_add_one_inv (h0 : f ≠ 0) (x : D) : f (x⁻¹ + 1) = (f (x + 1))⁻¹ :=
 (eq_or_ne x 0).elim
-  (λ h1, let h2 : (0 : R) = 0⁻¹ := inv_zero.symm in
-    h1.symm ▸ h2 ▸ (zero_add (1 : R)).symm ▸ (good_map_one h).symm ▸ h2)
+  (λ h1, let h2 : (0 : D) = 0⁻¹ := inv_zero.symm in
+    h1.symm ▸ h2 ▸ (zero_add (1 : D)).symm ▸ (good_map_one h).symm ▸ h2)
   (λ h1, eq_inv_of_mul_eq_one_left $ good_map_eq_zero h h0 $
     good_special_equality h $ inv_mul_cancel h1)
 
-end division_ring
 
-
-
-section field
-
-variables {F : Type*} [field F]
 
 /-- The general framework; reducing to injectivity. -/
 lemma solution_of_map_zero_eq_one_imp_injective
-  (h : ∀ f : F → F, good f → f 0 = 1 → injective f) {f : F → F} :
+  (h : ∀ f : D → D, good f → f 0 = 1 → injective f) {f : D → D} :
   good f ↔ (f = 0 ∨ f = has_sub.sub 1 ∨ (f = λ x, -(1 - x))) :=
 ⟨λ h0, or_iff_not_imp_left.mpr $ λ h1, (good_map_zero h0 h1).imp
     (λ h1, good_eq_of_inj h0 h1 $ h f h0 h1)
@@ -128,7 +123,13 @@ lemma solution_of_map_zero_eq_one_imp_injective
 λ h0, h0.elim (λ h1, h1.symm ▸ good_zero) $
   λ h1, h1.elim (λ h2, h2.symm ▸ good_one_sub) (λ h2, h2.symm ▸ good_neg good_one_sub)⟩
 
+end division_ring
 
+
+
+section field
+
+variables {F : Type*} [field F]
 
 /-- Injectivity for `char(F) ≠ 2` -/
 lemma case1_injective (h : (2 : F) ≠ 0) {f : F → F} (h0 : good f) (h1 : f 0 = 1) :
